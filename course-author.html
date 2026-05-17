@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Course Author</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,500;1,300&family=Nunito:wght@400;500;600;700&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --ink:#18181b;
+  --ink2:#52525b;
+  --ink3:#a1a1aa;
+  --line:#e4e4e7;
+  --surface:#fff;
+  --bg:#f4f4f5;
+  --bg2:#fafafa;
+  --blue:#2563eb;
+  --blue-l:#eff6ff;
+  --green:#16a34a;
+  --green-l:#f0fdf4;
+  --red:#dc2626;
+  --red-l:#fef2f2;
+  --amber:#d97706;
+  --amber-l:#fffbeb;
+  --violet:#7c3aed;
+  --violet-l:#f5f3ff;
+  --r:8px;
+  --r2:12px;
+  --sh:0 1px 4px rgba(0,0,0,.08);
+  --sh2:0 4px 20px rgba(0,0,0,.10);
+}
+
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.55;min-height:100vh}
+
+/* ── Topbar ── */
+#topbar{
+  position:sticky;top:0;z-index:200;
+  background:var(--surface);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:0;
+  height:54px;padding:0 20px;
+}
+#topbar .logo{font-family:'Fraunces',serif;font-size:20px;font-weight:300;color:var(--ink);letter-spacing:-.01em;margin-right:auto}
+#topbar .logo span{color:var(--blue)}
+.topbar-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:99px;font-size:13px;font-weight:600;font-family:'Nunito',sans-serif;
+  cursor:pointer;border:none;transition:all .15s;
+}
+.topbar-btn-ghost{background:none;color:var(--ink2)}
+.topbar-btn-ghost:hover{background:var(--bg)}
+.topbar-btn-primary{background:var(--blue);color:#fff;margin-left:8px}
+.topbar-btn-primary:hover{background:#1d4ed8}
+.topbar-btn-green{background:var(--green);color:#fff;margin-left:8px}
+.topbar-btn-green:hover{background:#15803d}
+
+/* ── Layout ── */
+#layout{display:flex;min-height:calc(100vh - 54px)}
+
+/* ── Sidebar (step nav) ── */
+#stepnav{
+  width:220px;min-width:220px;
+  background:var(--surface);border-right:1px solid var(--line);
+  padding:20px 0;position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto;
+}
+.stepnav-section{padding:8px 16px 4px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+.step-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 16px;cursor:pointer;border-radius:0;
+  font-size:13px;font-weight:500;color:var(--ink2);
+  transition:background .12s,color .12s;position:relative;
+}
+.step-item:hover{background:var(--bg);color:var(--ink)}
+.step-item.active{background:var(--blue-l);color:var(--blue);font-weight:700}
+.step-item.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--blue);border-radius:0 2px 2px 0}
+.step-dot{
+  width:20px;height:20px;min-width:20px;border-radius:50%;
+  border:2px solid var(--line);display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;color:var(--ink3);transition:all .2s;
+}
+.step-item.active .step-dot{border-color:var(--blue);background:var(--blue);color:#fff}
+.step-item.done .step-dot{border-color:var(--green);background:var(--green);color:#fff}
+.step-item.done{color:var(--ink2)}
+
+.section-steps{padding:4px 0}
+.section-step-item{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 16px 6px 36px;cursor:pointer;
+  font-size:12px;font-weight:500;color:var(--ink3);
+  transition:background .12s,color .12s;
+}
+.section-step-item:hover{background:var(--bg);color:var(--ink2)}
+.section-step-item.active{color:var(--blue);font-weight:700}
+.add-section-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 16px;font-size:12px;font-weight:600;color:var(--blue);
+  cursor:pointer;background:none;border:none;font-family:'Nunito',sans-serif;width:100%;
+}
+.add-section-btn:hover{background:var(--blue-l)}
+
+/* ── Editor ── */
+#editor{flex:1;padding:32px;max-width:820px;margin:0 auto}
+
+.editor-panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);margin-bottom:24px;overflow:hidden;box-shadow:var(--sh)}
+.panel-header{
+  padding:16px 20px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.panel-title{font-family:'Fraunces',serif;font-size:18px;font-weight:300;color:var(--ink)}
+.panel-subtitle{font-size:12px;color:var(--ink3);margin-top:2px}
+.panel-body{padding:20px}
+
+/* ── Fields ── */
+.field-row{margin-bottom:18px}
+.field-row:last-child{margin-bottom:0}
+label{display:block;font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:5px;letter-spacing:.02em}
+.field-hint{font-size:11px;color:var(--ink3);margin-bottom:5px}
+input[type=text],input[type=url],input[type=number],select,textarea{
+  width:100%;padding:9px 12px;
+  border:1.5px solid var(--line);border-radius:var(--r);
+  font-size:13.5px;font-family:'Nunito',sans-serif;color:var(--ink);
+  background:var(--surface);transition:border .15s;
+  outline:none;
+}
+input[type=text]:focus,input[type=url]:focus,input[type=number]:focus,select:focus,textarea:focus{border-color:var(--blue)}
+textarea{resize:vertical;min-height:72px;line-height:1.5}
+select{cursor:pointer}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+
+/* ── Tags / list inputs ── */
+.tag-input-wrap{border:1.5px solid var(--line);border-radius:var(--r);padding:6px 8px;display:flex;flex-wrap:wrap;gap:5px;background:var(--surface);transition:border .15s;cursor:text}
+.tag-input-wrap:focus-within{border-color:var(--blue)}
+.tag-chip{
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--blue-l);color:var(--blue);border-radius:99px;
+  padding:3px 10px 3px 10px;font-size:12px;font-weight:600;
+}
+.tag-chip-remove{background:none;border:none;cursor:pointer;color:var(--blue);font-size:14px;line-height:1;padding:0;margin-left:2px}
+.tag-input{border:none;outline:none;font-size:13px;font-family:'Nunito',sans-serif;background:transparent;color:var(--ink);min-width:120px;flex:1}
+
+/* ── Accordion items (lectures, topics, questions) ── */
+.accordion{border:1.5px solid var(--line);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
+.accordion-header{
+  padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;
+  background:var(--bg2);user-select:none;transition:background .15s;
+}
+.accordion-header:hover{background:var(--bg)}
+.accordion-arrow{font-size:11px;color:var(--ink3);transition:transform .2s;margin-left:auto}
+.accordion.open .accordion-arrow{transform:rotate(90deg)}
+.accordion-title{font-size:13px;font-weight:700;flex:1}
+.accordion-badge{font-size:11px;color:var(--ink3);padding:2px 8px;background:var(--bg);border-radius:99px;border:1px solid var(--line)}
+.accordion-body{padding:16px;display:none;border-top:1px solid var(--line)}
+.accordion.open .accordion-body{display:block}
+
+/* drag handle */
+.drag-handle{cursor:grab;color:var(--ink3);font-size:14px;padding:2px 4px}
+.drag-handle:active{cursor:grabbing}
+
+/* delete btn */
+.btn-icon{
+  background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:6px;
+  font-size:15px;color:var(--ink3);transition:all .15s;
+}
+.btn-icon:hover{background:var(--red-l);color:var(--red)}
+.btn-icon.blue:hover{background:var(--blue-l);color:var(--blue)}
+
+/* add buttons */
+.add-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:99px;
+  font-size:12px;font-weight:700;font-family:'Nunito',sans-serif;
+  cursor:pointer;border:1.5px dashed var(--line);
+  background:transparent;color:var(--ink2);transition:all .15s;margin-top:8px;
+}
+.add-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-l)}
+
+/* ── Media items ── */
+.media-item{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:8px 12px;margin-bottom:6px}
+.media-type-badge{padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.media-type-image{background:#fce7f3;color:#be185d}
+.media-type-video{background:#fef3c7;color:#92400e}
+.media-type-text{background:#f0fdf4;color:#166534}
+
+/* ── Quiz question ── */
+.question-type-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border-radius:99px}
+.qt-mc{background:var(--violet-l);color:var(--violet)}
+.qt-tf{background:var(--amber-l);color:var(--amber)}
+.qt-sa{background:var(--green-l);color:var(--green)}
+
+.option-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px}
+.option-row .opt-letter{
+  width:26px;height:26px;min-width:26px;border-radius:50%;background:var(--bg);
+  border:2px solid var(--line);display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:var(--ink2);margin-top:7px;
+}
+.correct-radio{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--green);font-weight:600;white-space:nowrap;margin-top:9px}
+.correct-radio input{accent-color:var(--green);cursor:pointer}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:20px}
+.tab{
+  padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;
+  border-bottom:2px solid transparent;color:var(--ink2);transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;
+  font-family:'Nunito',sans-serif;
+}
+.tab.active{border-bottom-color:var(--blue);color:var(--blue)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ── Export modal ── */
+#export-modal{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,.45);display:none;
+  align-items:center;justify-content:center;
+}
+#export-modal.open{display:flex}
+.modal-box{
+  background:var(--surface);border-radius:var(--r2);
+  width:560px;max-width:95vw;box-shadow:var(--sh2);overflow:hidden;
+}
+.modal-header{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.modal-header h3{font-family:'Fraunces',serif;font-size:20px;font-weight:300}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--ink3)}
+.modal-body{padding:22px}
+.modal-footer{padding:16px 22px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end}
+
+.export-option{
+  border:2px solid var(--line);border-radius:var(--r);padding:16px;cursor:pointer;
+  transition:all .15s;display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;
+}
+.export-option:hover{border-color:var(--blue);background:var(--blue-l)}
+.export-option-icon{font-size:24px}
+.export-option-text strong{display:block;font-size:14px;margin-bottom:2px}
+.export-option-text span{font-size:12px;color:var(--ink2)}
+
+/* ── Toast ── */
+#toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--ink);color:#fff;padding:10px 20px;border-radius:99px;
+  font-size:13px;font-weight:600;z-index:600;transition:transform .3s;white-space:nowrap;
+}
+#toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ── Empty state ── */
+.empty-state{text-align:center;padding:40px 20px;color:var(--ink3)}
+.empty-state .icon{font-size:40px;margin-bottom:12px}
+.empty-state p{font-size:13px}
+
+/* ── Section header pills ── */
+.section-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--blue-l);color:var(--blue);
+  border-radius:99px;padding:4px 12px;font-size:12px;font-weight:700;margin-bottom:16px;
+}
+
+/* scrollbar */
+#stepnav::-webkit-scrollbar{width:3px}
+#stepnav::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
+
+/* ── JSON Preview Panel ── */
+#json-preview{
+  width:340px;min-width:340px;
+  background:#1e1e2e;
+  border-left:1px solid #2a2a3e;
+  position:sticky;top:54px;height:calc(100vh - 54px);
+  display:none;flex-direction:column;
+  font-family:'Menlo','Consolas','Monaco',monospace;
+}
+#json-preview.open{display:flex}
+#json-preview-header{
+  padding:10px 14px;border-bottom:1px solid #2a2a3e;
+  display:flex;align-items:center;justify-content:space-between;
+  background:#16162a;flex-shrink:0;
+}
+#json-preview-header span{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#7c7cad}
+#json-preview-header .json-copy-btn{
+  background:#2a2a3e;border:none;color:#a0a0cc;font-size:11px;font-weight:700;
+  padding:4px 10px;border-radius:6px;cursor:pointer;font-family:'Nunito',sans-serif;
+  transition:background .15s;
+}
+#json-preview-header .json-copy-btn:hover{background:#3a3a5e;color:#fff}
+#json-body{
+  flex:1;overflow-y:auto;padding:16px;
+  font-size:11.5px;line-height:1.65;color:#cdd6f4;
+  white-space:pre;word-break:break-all;overflow-x:auto;
+}
+#json-body::-webkit-scrollbar{width:4px;height:4px}
+#json-body::-webkit-scrollbar-thumb{background:#3a3a5e;border-radius:99px}
+/* JSON syntax highlight */
+.jk{color:#89b4fa} /* key */
+.js{color:#a6e3a1} /* string */
+.jn{color:#fab387} /* number */
+.jb{color:#cba6f7} /* bool/null */
+
+/* topbar preview toggle */
+.topbar-btn-preview{background:var(--bg);color:var(--ink2);border:1px solid var(--line);margin-left:8px}
+.topbar-btn-preview.on{background:#1e1e2e;color:#89b4fa;border-color:#2a2a3e}
+
+/* animations */
+@keyframes fadeSlide{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.editor-panel{animation:fadeSlide .2s ease}
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div id="topbar">
+  <div class="logo">Course <span>Author</span></div>
+  <button class="topbar-btn topbar-btn-ghost" onclick="importJSON()">⬆ Import JSON</button>
+  <button class="topbar-btn topbar-btn-preview" id="preview-toggle-btn" onclick="togglePreview()" title="Toggle JSON preview">{ } Preview</button>
+  <button class="topbar-btn topbar-btn-primary" onclick="openExport()">⬇ Export Course</button>
+</div>
+
+<div id="layout">
+  <!-- Step nav -->
+  <nav id="stepnav">
+    <div class="stepnav-section">Course</div>
+    <div class="step-item active" onclick="showPanel('basics')" id="nav-basics">
+      <span class="step-dot">1</span> Basics
+    </div>
+    <div class="step-item" onclick="showPanel('outcomes')" id="nav-outcomes">
+      <span class="step-dot">2</span> Outcomes
+    </div>
+    <div class="step-item" onclick="showPanel('glossary')" id="nav-glossary">
+      <span class="step-dot">3</span> Glossary
+    </div>
+    <div class="stepnav-section" style="margin-top:12px">Sections</div>
+    <div id="section-nav-items"></div>
+    <button class="add-section-btn" onclick="addSection()">＋ Add Section</button>
+  </nav>
+
+  <!-- Editor -->
+  <div id="editor">
+    <!-- BASICS -->
+    <div id="panel-basics" class="editor-panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Course Basics</div>
+          <div class="panel-subtitle">The essentials that appear on the course intro screen</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="field-row">
+          <label>Course Title</label>
+          <input type="text" id="f-title" placeholder="e.g. Foundations of Product Thinking" oninput="sync()">
+        </div>
+        <div class="field-row">
+          <label>Course Description</label>
+          <div class="field-hint">2–3 sentences. Who is it for? What will they achieve?</div>
+          <textarea id="f-desc" placeholder="Describe the course…" oninput="sync()"></textarea>
+        </div>
+        <div class="grid-3">
+          <div class="field-row">
+            <label>Difficulty Level</label>
+            <select id="f-diff" onchange="sync()">
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+            </select>
+          </div>
+          <div class="field-row">
+            <label>Estimated Duration</label>
+            <input type="text" id="f-dur" placeholder="e.g. 3 hours" oninput="sync()">
+          </div>
+          <div class="field-row">
+            <label>Version</label>
+            <input type="text" id="f-ver" placeholder="1.0" oninput="sync()">
+          </div>
+        </div>
+        <div class="field-row">
+          <label>Course Image URL</label>
+          <input type="url" id="f-img" placeholder="https://…" oninput="sync()">
+        </div>
+        <div class="field-row">
+          <label>Prerequisites</label>
+          <div class="field-hint">Press Enter after each prerequisite</div>
+          <div class="tag-input-wrap" id="prereq-wrap" onclick="document.getElementById('prereq-input').focus()">
+            <input class="tag-input" id="prereq-input" placeholder="Add prerequisite…" onkeydown="tagKeydown(event,'prereqs')">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OUTCOMES -->
+    <div id="panel-outcomes" class="editor-panel" style="display:none">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Learning Outcomes</div>
+          <div class="panel-subtitle">What will learners be able to DO after completing the course?</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="field-hint" style="margin-bottom:12px">Use action verbs: "Explain…", "Apply…", "Analyse…", "Build…". Press Enter after each one.</div>
+        <div class="tag-input-wrap" id="outcomes-wrap" onclick="document.getElementById('outcomes-input').focus()" style="flex-direction:column;align-items:stretch">
+          <div id="outcomes-chips" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px"></div>
+          <input class="tag-input" id="outcomes-input" placeholder="Add learning outcome…" onkeydown="tagKeydown(event,'learningOutcomes')">
+        </div>
+      </div>
+    </div>
+
+    <!-- GLOSSARY -->
+    <div id="panel-glossary" class="editor-panel" style="display:none">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Glossary</div>
+          <div class="panel-subtitle">Key terms and definitions accessible to learners throughout the course</div>
+        </div>
+        <button class="add-btn" onclick="addGlossaryTerm()">＋ Add Term</button>
+      </div>
+      <div class="panel-body" id="glossary-list">
+        <div class="empty-state"><div class="icon">📖</div><p>No glossary terms yet.<br>Add your first term above.</p></div>
+      </div>
+    </div>
+
+    <!-- SECTION PANELS injected dynamically -->
+    <div id="section-panels"></div>
+  </div>
+  <!-- JSON Preview Panel -->
+  <div id="json-preview">
+    <div id="json-preview-header">
+      <span>📄 JSON Preview</span>
+      <button class="json-copy-btn" onclick="copyJSONDirect()">Copy</button>
+    </div>
+    <div id="json-body"></div>
+  </div>
+</div>
+<div id="export-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Export Course</h3>
+      <button class="modal-close" onclick="closeExport()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--ink2);margin-bottom:16px">Choose how to export your course JSON. This file can be loaded directly into the Course Player.</p>
+      <div class="export-option" onclick="downloadJSON()">
+        <div class="export-option-icon">💾</div>
+        <div class="export-option-text">
+          <strong>Download as JSON file</strong>
+          <span>Saves a .json file to your computer</span>
+        </div>
+      </div>
+      <div class="export-option" onclick="copyJSON()">
+        <div class="export-option-icon">📋</div>
+        <div class="export-option-text">
+          <strong>Copy JSON to clipboard</strong>
+          <span>Paste directly into the Course Player's COURSE variable</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="topbar-btn topbar-btn-ghost" onclick="closeExport()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden import input -->
+<input type="file" id="import-input" accept=".json" style="display:none" onchange="handleImport(event)">
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ── DATA MODEL ───────────────────────────────────────────────────────────────
+let course = {
+  courseTitle:'',courseDescription:'',courseImage:'',
+  estimatedDuration:'',lastUpdated:'',version:'1.0',
+  prerequisites:[],difficultyLevel:'Beginner',learningOutcomes:[],
+  glossary:[],sections:[]
+};
+
+let activePanel = 'basics';
+let openAccordions = new Set();
+
+// ── SYNC: read all fields into course object ──────────────────────────────────
+function sync(){
+  course.courseTitle      = v('f-title');
+  course.courseDescription= v('f-desc');
+  course.difficultyLevel  = v('f-diff');
+  course.estimatedDuration= v('f-dur');
+  course.version          = v('f-ver') || '1.0';
+  course.courseImage      = v('f-img');
+  course.lastUpdated      = new Date().toISOString().split('T')[0];
+  updateSectionNav();
+  refreshPreview();
+}
+function v(id){const el=document.getElementById(id);return el?el.value.trim():''}
+
+// ── PANELS ───────────────────────────────────────────────────────────────────
+function showPanel(id){
+  activePanel=id;
+  document.querySelectorAll('.editor-panel').forEach(p=>p.style.display='none');
+  const target=document.getElementById('panel-'+id);
+  if(target) target.style.display='';
+  document.querySelectorAll('.step-item,.section-step-item').forEach(el=>el.classList.remove('active'));
+  const navEl=document.getElementById('nav-'+id);
+  if(navEl) navEl.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── TAGS ─────────────────────────────────────────────────────────────────────
+function tagKeydown(e, field){
+  if(e.key!=='Enter'&&e.key!==',') return;
+  e.preventDefault();
+  const val=e.target.value.trim();
+  if(!val) return;
+  course[field]=course[field]||[];
+  course[field].push(val);
+  e.target.value='';
+  renderTags(field);
+  refreshPreview();
+}
+function removeTag(field,idx){
+  course[field].splice(idx,1);
+  renderTags(field);
+  refreshPreview();
+}
+function renderTags(field){
+  const wrapId=field==='prereqs'?'prereq-wrap':(field==='learningOutcomes'?'outcomes-wrap':null);
+  const chipsId=field==='learningOutcomes'?'outcomes-chips':null;
+  const arr=course[field]||[];
+
+  if(field==='prereqs'){
+    // render inline in prereq-wrap
+    const wrap=document.getElementById('prereq-wrap');
+    if(!wrap) return;
+    const existing=wrap.querySelectorAll('.tag-chip');
+    existing.forEach(el=>el.remove());
+    const inp=wrap.querySelector('.tag-input');
+    arr.forEach((t,i)=>{
+      const chip=document.createElement('span');
+      chip.className='tag-chip';
+      chip.innerHTML=`${t}<button class="tag-chip-remove" onclick="removeTag('prereqs',${i})">×</button>`;
+      wrap.insertBefore(chip,inp);
+    });
+  } else if(field==='learningOutcomes'){
+    const chips=document.getElementById('outcomes-chips');
+    if(!chips) return;
+    chips.innerHTML=arr.map((t,i)=>`<span class="tag-chip">${t}<button class="tag-chip-remove" onclick="removeTag('learningOutcomes',${i})">×</button></span>`).join('');
+  }
+}
+
+// ── GLOSSARY ─────────────────────────────────────────────────────────────────
+function addGlossaryTerm(){
+  course.glossary.push({term:'',definition:''});
+  renderGlossary();
+  refreshPreview();
+}
+function removeGlossaryTerm(i){
+  course.glossary.splice(i,1);
+  renderGlossary();
+  refreshPreview();
+}
+function renderGlossary(){
+  const el=document.getElementById('glossary-list');
+  if(!course.glossary.length){
+    el.innerHTML='<div class="empty-state"><div class="icon">📖</div><p>No glossary terms yet.<br>Add your first term above.</p></div>';
+    return;
+  }
+  el.innerHTML=course.glossary.map((g,i)=>`
+    <div class="accordion open" id="glos-${i}">
+      <div class="accordion-header" onclick="toggleAcc('glos-${i}')">
+        <span class="accordion-title">${g.term||'New Term'}</span>
+        <button class="btn-icon" onclick="event.stopPropagation();removeGlossaryTerm(${i})">🗑</button>
+        <span class="accordion-arrow">›</span>
+      </div>
+      <div class="accordion-body">
+        <div class="field-row">
+          <label>Term</label>
+          <input type="text" value="${esc(g.term)}" placeholder="e.g. Problem Statement" oninput="course.glossary[${i}].term=this.value;updateGlosTitle(${i})">
+        </div>
+        <div class="field-row" style="margin-bottom:0">
+          <label>Definition</label>
+          <textarea placeholder="Plain-language definition…" oninput="course.glossary[${i}].definition=this.value">${esc(g.definition)}</textarea>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function updateGlosTitle(i){
+  const h=document.querySelector(`#glos-${i} .accordion-title`);
+  if(h) h.textContent=course.glossary[i].term||'New Term';
+}
+
+// ── SECTIONS ─────────────────────────────────────────────────────────────────
+function addSection(){
+  course.sections.push({
+    sectionTitle:'',sectionDescription:'',estimatedDuration:'',
+    whyThisMatters:'',learningObjectives:[],reviewContent:[],
+    lectures:[],
+    quiz:{passingScore:75,attemptsAllowed:3,interleaved:false,questions:[]},
+    practicalActivity:{title:'',description:'',scenario:'',steps:[],successCriteria:[],downloadableTemplate:''},
+    summary:[]
+  });
+  const idx=course.sections.length-1;
+  updateSectionNav();
+  renderSectionPanels();
+  showSectionPanel(idx,'info');
+  refreshPreview();
+}
+
+function updateSectionNav(){
+  const el=document.getElementById('section-nav-items');
+  el.innerHTML=course.sections.map((s,i)=>`
+    <div class="section-steps">
+      <div class="section-step-item ${activePanel===('s'+i+'-info')?'active':''}" onclick="showSectionPanel(${i},'info')" id="nav-s${i}-info">
+        § ${i+1} · ${s.sectionTitle||'New Section'}
+      </div>
+      <div class="section-step-item ${activePanel===('s'+i+'-lectures')?'active':''}" onclick="showSectionPanel(${i},'lectures')" id="nav-s${i}-lectures" style="padding-left:48px;font-size:11px">Lectures</div>
+      <div class="section-step-item ${activePanel===('s'+i+'-quiz')?'active':''}" onclick="showSectionPanel(${i},'quiz')" id="nav-s${i}-quiz" style="padding-left:48px;font-size:11px">Quiz</div>
+      <div class="section-step-item ${activePanel===('s'+i+'-activity')?'active':''}" onclick="showSectionPanel(${i},'activity')" id="nav-s${i}-activity" style="padding-left:48px;font-size:11px">Activity</div>
+      <div class="section-step-item ${activePanel===('s'+i+'-summary')?'active':''}" onclick="showSectionPanel(${i},'summary')" id="nav-s${i}-summary" style="padding-left:48px;font-size:11px">Summary</div>
+    </div>`).join('');
+}
+
+function showSectionPanel(sIdx,sub){
+  activePanel='s'+sIdx+'-'+sub;
+  document.querySelectorAll('.editor-panel').forEach(p=>p.style.display='none');
+  const target=document.getElementById('panel-s'+sIdx+'-'+sub);
+  if(target) target.style.display='';
+  document.querySelectorAll('.step-item,.section-step-item').forEach(el=>el.classList.remove('active'));
+  const navEl=document.getElementById('nav-s'+sIdx+'-'+sub);
+  if(navEl) navEl.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function renderSectionPanels(){
+  const container=document.getElementById('section-panels');
+  container.innerHTML=course.sections.map((s,sIdx)=>`
+    ${renderSectionInfo(s,sIdx)}
+    ${renderSectionLectures(s,sIdx)}
+    ${renderSectionQuiz(s,sIdx)}
+    ${renderSectionActivity(s,sIdx)}
+    ${renderSectionSummary(s,sIdx)}
+  `).join('');
+  // re-bind all section input events
+  bindSectionEvents();
+}
+
+function renderSectionInfo(s,sIdx){
+  return `<div id="panel-s${sIdx}-info" class="editor-panel" style="display:none">
+    <div class="panel-header">
+      <div>
+        <div class="section-pill">Section ${sIdx+1}</div>
+        <div class="panel-title">Section Info</div>
+        <div class="panel-subtitle">Overview, objectives, and spaced-review prompts</div>
+      </div>
+      <button class="topbar-btn topbar-btn-ghost" style="color:var(--red);font-size:12px" onclick="deleteSection(${sIdx})">🗑 Delete Section</button>
+    </div>
+    <div class="panel-body">
+      <div class="grid-2">
+        <div class="field-row">
+          <label>Section Title</label>
+          <input type="text" value="${esc(s.sectionTitle)}" placeholder="e.g. Understanding User Needs" oninput="course.sections[${sIdx}].sectionTitle=this.value;updateSectionNav()">
+        </div>
+        <div class="field-row">
+          <label>Estimated Duration</label>
+          <input type="text" value="${esc(s.estimatedDuration)}" placeholder="e.g. 45 minutes" oninput="course.sections[${sIdx}].estimatedDuration=this.value">
+        </div>
+      </div>
+      <div class="field-row">
+        <label>Section Description</label>
+        <textarea placeholder="What does this section cover? Who is it for?" oninput="course.sections[${sIdx}].sectionDescription=this.value">${esc(s.sectionDescription)}</textarea>
+      </div>
+      <div class="field-row">
+        <label>Why This Matters</label>
+        <div class="field-hint">Shown as a highlighted motivational callout at the start of the section. Explain the real-world relevance.</div>
+        <textarea placeholder="e.g. Products fail not because they are built badly — but because they solve the wrong problem…" oninput="course.sections[${sIdx}].whyThisMatters=this.value">${esc(s.whyThisMatters)}</textarea>
+      </div>
+      <div class="field-row">
+        <label>Learning Objectives</label>
+        <div class="field-hint">What will learners be able to do after this section? Press Enter after each one.</div>
+        <div class="tag-input-wrap" id="obj-wrap-${sIdx}" onclick="document.getElementById('obj-input-${sIdx}').focus()" style="flex-direction:column;align-items:stretch">
+          <div id="obj-chips-${sIdx}" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px">
+            ${(s.learningObjectives||[]).map((o,i)=>`<span class="tag-chip">${esc(o)}<button class="tag-chip-remove" onclick="removeSectionObj(${sIdx},${i})">×</button></span>`).join('')}
+          </div>
+          <input class="tag-input" id="obj-input-${sIdx}" placeholder="Add objective…" onkeydown="sectionTagKeydown(event,${sIdx},'learningObjectives','obj-chips-${sIdx}')">
+        </div>
+      </div>
+      <div class="field-row">
+        <label>Spaced Review Prompts</label>
+        <div class="field-hint">Optional: brief recall prompts from previous sections shown at the start of this one. Press Enter after each.</div>
+        <div class="tag-input-wrap" id="rev-wrap-${sIdx}" onclick="document.getElementById('rev-input-${sIdx}').focus()" style="flex-direction:column;align-items:stretch">
+          <div id="rev-chips-${sIdx}" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px">
+            ${(s.reviewContent||[]).map((r,i)=>`<span class="tag-chip" style="background:var(--amber-l);color:var(--amber)">${esc(r)}<button class="tag-chip-remove" onclick="removeSectionRev(${sIdx},${i})" style="color:var(--amber)">×</button></span>`).join('')}
+          </div>
+          <input class="tag-input" id="rev-input-${sIdx}" placeholder="Add review prompt…" onkeydown="sectionTagKeydown(event,${sIdx},'reviewContent','rev-chips-${sIdx}')">
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderSectionLectures(s,sIdx){
+  const lecturesHTML=(s.lectures||[]).map((l,lIdx)=>renderLecture(l,sIdx,lIdx)).join('');
+  return `<div id="panel-s${sIdx}-lectures" class="editor-panel" style="display:none">
+    <div class="panel-header">
+      <div>
+        <div class="section-pill">Section ${sIdx+1} · ${s.sectionTitle||'Section'}</div>
+        <div class="panel-title">Lectures</div>
+        <div class="panel-subtitle">Each lecture covers one focused idea with topics, media, and examples</div>
+      </div>
+      <button class="add-btn" onclick="addLecture(${sIdx})">＋ Add Lecture</button>
+    </div>
+    <div class="panel-body" id="lectures-list-${sIdx}">
+      ${lecturesHTML||`<div class="empty-state"><div class="icon">📹</div><p>No lectures yet.<br>Add your first lecture above.</p></div>`}
+    </div>
+  </div>`;
+}
+
+function renderLecture(l,sIdx,lIdx){
+  const topicsHTML=(l.lectureTopics||[]).map((t,tIdx)=>renderTopic(t,sIdx,lIdx,tIdx)).join('');
+  return `<div class="accordion open" id="lec-${sIdx}-${lIdx}">
+    <div class="accordion-header" onclick="toggleAcc('lec-${sIdx}-${lIdx}')">
+      <span class="drag-handle">⠿</span>
+      <span class="accordion-title">${esc(l.lectureTitle)||'New Lecture'}</span>
+      <span class="accordion-badge">${(l.lectureTopics||[]).length} topics</span>
+      <button class="btn-icon" onclick="event.stopPropagation();deleteLecture(${sIdx},${lIdx})">🗑</button>
+      <span class="accordion-arrow">›</span>
+    </div>
+    <div class="accordion-body">
+      <div class="grid-2">
+        <div class="field-row">
+          <label>Lecture Title</label>
+          <input type="text" value="${esc(l.lectureTitle)}" placeholder="e.g. Needs vs Features" oninput="course.sections[${sIdx}].lectures[${lIdx}].lectureTitle=this.value;updateLecTitle(${sIdx},${lIdx})">
+        </div>
+        <div class="field-row">
+          <label>Estimated Duration</label>
+          <input type="text" value="${esc(l.estimatedDuration)}" placeholder="e.g. 12 minutes" oninput="course.sections[${sIdx}].lectures[${lIdx}].estimatedDuration=this.value">
+        </div>
+      </div>
+      <div class="field-row">
+        <label>Lecture Description</label>
+        <textarea placeholder="One sentence: what will learners understand after this?" oninput="course.sections[${sIdx}].lectures[${lIdx}].lectureDescription=this.value">${esc(l.lectureDescription)}</textarea>
+      </div>
+      <div class="field-row">
+        <label>Learning Objectives</label>
+        <div class="field-hint">Press Enter after each</div>
+        <div class="tag-input-wrap" onclick="this.querySelector('.tag-input').focus()" style="flex-direction:column;align-items:stretch">
+          <div id="lec-obj-chips-${sIdx}-${lIdx}" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px">
+            ${(l.learningObjectives||[]).map((o,i)=>`<span class="tag-chip">${esc(o)}<button class="tag-chip-remove" onclick="removeLecObj(${sIdx},${lIdx},${i})">×</button></span>`).join('')}
+          </div>
+          <input class="tag-input" id="lec-obj-input-${sIdx}-${lIdx}" placeholder="Add objective…" onkeydown="lecTagKeydown(event,${sIdx},${lIdx},'learningObjectives','lec-obj-chips-${sIdx}-${lIdx}')">
+        </div>
+      </div>
+
+      <!-- Worked Example -->
+      <details style="margin-bottom:16px">
+        <summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--ink2);padding:8px 0;user-select:none">▸ Worked Example (optional)</summary>
+        <div style="padding:12px;background:var(--bg2);border-radius:var(--r);margin-top:8px">
+          <div class="field-row">
+            <label>Problem</label>
+            <input type="text" value="${esc((l.workedExample||{}).problem)}" placeholder="e.g. A user says: 'I want a dark mode'." oninput="setWorkedEx(${sIdx},${lIdx},'problem',this.value)">
+          </div>
+          <div class="field-row">
+            <label>Steps</label>
+            <div class="field-hint">Press Enter after each step</div>
+            <div class="tag-input-wrap" onclick="this.querySelector('.tag-input').focus()" style="flex-direction:column;align-items:stretch">
+              <div id="we-steps-${sIdx}-${lIdx}" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px">
+                ${((l.workedExample||{}).steps||[]).map((s,i)=>`<span class="tag-chip" style="background:var(--green-l);color:var(--green)">${esc(s)}<button class="tag-chip-remove" onclick="removeWeStep(${sIdx},${lIdx},${i})" style="color:var(--green)">×</button></span>`).join('')}
+              </div>
+              <input class="tag-input" placeholder="Add step…" onkeydown="weStepKeydown(event,${sIdx},${lIdx})">
+            </div>
+          </div>
+          <div class="field-row" style="margin-bottom:0">
+            <label>Conclusion</label>
+            <input type="text" value="${esc((l.workedExample||{}).conclusion)}" placeholder="What does this example demonstrate?" oninput="setWorkedEx(${sIdx},${lIdx},'conclusion',this.value)">
+          </div>
+        </div>
+      </details>
+
+      <!-- Topics -->
+      <div style="margin-bottom:8px">
+        <label>Topics</label>
+        <div class="field-hint">Each topic is one focused chunk of content within this lecture</div>
+      </div>
+      <div id="topics-list-${sIdx}-${lIdx}">${topicsHTML}</div>
+      <button class="add-btn" onclick="addTopic(${sIdx},${lIdx})">＋ Add Topic</button>
+
+      <!-- Lecture Summary -->
+      <div class="field-row" style="margin-top:16px">
+        <label>Lecture Summary Points</label>
+        <div class="field-hint">Shown at the end of the lecture. Press Enter after each.</div>
+        <div class="tag-input-wrap" onclick="this.querySelector('.tag-input').focus()" style="flex-direction:column;align-items:stretch">
+          <div id="lec-sum-chips-${sIdx}-${lIdx}" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px">
+            ${(l.summary||[]).map((s,i)=>`<span class="tag-chip" style="background:var(--green-l);color:var(--green)">${esc(s)}<button class="tag-chip-remove" onclick="removeLecSum(${sIdx},${lIdx},${i})" style="color:var(--green)">×</button></span>`).join('')}
+          </div>
+          <input class="tag-input" id="lec-sum-input-${sIdx}-${lIdx}" placeholder="Add summary point…" onkeydown="lecSumKeydown(event,${sIdx},${lIdx})">
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderTopic(t,sIdx,lIdx,tIdx){
+  const mediaHTML=(t.media||[]).map((m,mIdx)=>renderMedia(m,sIdx,lIdx,tIdx,mIdx)).join('');
+  return `<div class="accordion open" id="topic-${sIdx}-${lIdx}-${tIdx}" style="margin-bottom:8px">
+    <div class="accordion-header" onclick="toggleAcc('topic-${sIdx}-${lIdx}-${tIdx}')">
+      <span class="drag-handle">⠿</span>
+      <span class="accordion-title">Topic ${tIdx+1}: ${(t.text||'').substring(0,40)+(t.text&&t.text.length>40?'…':'')|| 'New Topic'}</span>
+      <button class="btn-icon" onclick="event.stopPropagation();deleteTopic(${sIdx},${lIdx},${tIdx})">🗑</button>
+      <span class="accordion-arrow">›</span>
+    </div>
+    <div class="accordion-body">
+      <div class="field-row">
+        <label>Topic Content</label>
+        <textarea placeholder="Write the full topic text here. This is the core educational content." style="min-height:100px" oninput="course.sections[${sIdx}].lectures[${lIdx}].lectureTopics[${tIdx}].text=this.value">${esc(t.text)}</textarea>
+      </div>
+      <div class="field-row">
+        <label>Key Takeaway Summary</label>
+        <input type="text" value="${esc(t.summary)}" placeholder="One sentence recap shown below the topic" oninput="course.sections[${sIdx}].lectures[${lIdx}].lectureTopics[${tIdx}].summary=this.value">
+      </div>
+      <div style="margin-bottom:8px"><label>Media</label></div>
+      <div id="media-list-${sIdx}-${lIdx}-${tIdx}">${mediaHTML}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="add-btn" onclick="addMedia(${sIdx},${lIdx},${tIdx},'image')">＋ Image</button>
+        <button class="add-btn" onclick="addMedia(${sIdx},${lIdx},${tIdx},'video')">＋ Video</button>
+        <button class="add-btn" onclick="addMedia(${sIdx},${lIdx},${tIdx},'text')">＋ Text block</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderMedia(m,sIdx,lIdx,tIdx,mIdx){
+  const badge=`<span class="media-type-badge media-type-${m.type}">${m.type}</span>`;
+  let fields='';
+  if(m.type==='image'){
+    fields=`<input type="url" value="${esc(m.url)}" placeholder="Image URL" style="flex:1" oninput="course.sections[${sIdx}].lectures[${lIdx}].lectureTopics[${tIdx}].media[${mIdx}].url=this.value">
+    <input type="text" value="${esc(m.label)}" placeholder="Caption" style="flex:1" oninput="course.sections[${sIdx}].lectures[${lIdx}].lectureTopics[${tIdx}].media[${mIdx}].label=this.value">`;
+  } else if(m.type==='video'){
+    fields=`<input type="url" value="${esc(m.url)}" placeholder="Video URL" style="flex:1" oninput="course.sections[${sIdx}].lectures[${lIdx}].lectureTopics[${tIdx}].media[${mIdx}].url=this.value">
+    <input type="url" value="${esc(m.transcript)}" placeholder="Transcript URL (optional)" style="flex:1" oninput="course.sections[${sIdx}].lectures[${lIdx}].lectureTopics[${tIdx}].media[${mIdx}].transcript=this.value">`;
+  } else {
+    fields=`<textarea placeholder="Supplementary text content…" style="flex:1;min-height:60px" oninput="course.sections[${sIdx}].lectures[${lIdx}].lectureTopics[${tIdx}].media[${mIdx}].content=this.value">${esc(m.content)}</textarea>`;
+  }
+  return `<div class="media-item" style="align-items:flex-start;flex-wrap:wrap;gap:8px">
+    ${badge}
+    <div style="display:flex;flex:1;gap:8px;flex-wrap:wrap;align-items:flex-start">${fields}</div>
+    <button class="btn-icon" onclick="deleteMedia(${sIdx},${lIdx},${tIdx},${mIdx})">🗑</button>
+  </div>`;
+}
+
+function renderSectionQuiz(s,sIdx){
+  const q=s.quiz||{passingScore:75,attemptsAllowed:3,interleaved:false,questions:[]};
+  const questionsHTML=(q.questions||[]).map((qu,qIdx)=>renderQuestion(qu,sIdx,qIdx)).join('');
+  return `<div id="panel-s${sIdx}-quiz" class="editor-panel" style="display:none">
+    <div class="panel-header">
+      <div>
+        <div class="section-pill">Section ${sIdx+1} · ${s.sectionTitle||'Section'}</div>
+        <div class="panel-title">Section Quiz</div>
+        <div class="panel-subtitle">Test comprehension. Include multiple-choice, true/false, and short-answer questions.</div>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="grid-3" style="margin-bottom:20px">
+        <div class="field-row">
+          <label>Passing Score (%)</label>
+          <input type="number" value="${q.passingScore||75}" min="0" max="100" oninput="course.sections[${sIdx}].quiz.passingScore=+this.value">
+        </div>
+        <div class="field-row">
+          <label>Attempts Allowed</label>
+          <input type="number" value="${q.attemptsAllowed||3}" min="1" oninput="course.sections[${sIdx}].quiz.attemptsAllowed=+this.value">
+        </div>
+        <div class="field-row">
+          <label>Interleaved?</label>
+          <select onchange="course.sections[${sIdx}].quiz.interleaved=this.value==='true'">
+            <option value="false" ${!q.interleaved?'selected':''}>No — section only</option>
+            <option value="true" ${q.interleaved?'selected':''}>Yes — mix prior sections</option>
+          </select>
+        </div>
+      </div>
+      <div id="questions-list-${sIdx}">${questionsHTML||`<div class="empty-state"><div class="icon">❓</div><p>No questions yet.</p></div>`}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+        <button class="add-btn" onclick="addQuestion(${sIdx},'multiple-choice')">＋ Multiple Choice</button>
+        <button class="add-btn" onclick="addQuestion(${sIdx},'true-false')">＋ True / False</button>
+        <button class="add-btn" onclick="addQuestion(${sIdx},'short-answer')">＋ Short Answer</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderQuestion(q,sIdx,qIdx){
+  const typeClass={'multiple-choice':'qt-mc','true-false':'qt-tf','short-answer':'qt-sa'}[q.questionType]||'qt-mc';
+  let optionsHTML='';
+  if(q.questionType==='multiple-choice'){
+    optionsHTML=`<label style="margin-top:12px">Options & Explanations</label>
+    <div class="field-hint">Write each option and explain why it's correct or incorrect. Mark the correct answer.</div>
+    <div id="opts-${sIdx}-${qIdx}">
+      ${(q.options||[]).map((o,oIdx)=>`
+        <div class="option-row">
+          <span class="opt-letter">${['A','B','C','D'][oIdx]||oIdx+1}</span>
+          <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+            <input type="text" value="${esc(o.text)}" placeholder="Option text" oninput="course.sections[${sIdx}].quiz.questions[${qIdx}].options[${oIdx}].text=this.value">
+            <input type="text" value="${esc(o.explanation)}" placeholder="Why is this right or wrong?" oninput="course.sections[${sIdx}].quiz.questions[${qIdx}].options[${oIdx}].explanation=this.value">
+          </div>
+          <label class="correct-radio"><input type="radio" name="correct-${sIdx}-${qIdx}" ${q.answer===o.text?'checked':''} onchange="course.sections[${sIdx}].quiz.questions[${qIdx}].answer=course.sections[${sIdx}].quiz.questions[${qIdx}].options[${oIdx}].text"> Correct</label>
+          <button class="btn-icon" onclick="deleteOption(${sIdx},${qIdx},${oIdx})">🗑</button>
+        </div>`).join('')}
+    </div>
+    ${(q.options||[]).length<4?`<button class="add-btn" onclick="addOption(${sIdx},${qIdx})">＋ Add Option</button>`:''}`;
+  } else if(q.questionType==='true-false'){
+    optionsHTML=`<label style="margin-top:12px">Correct Answer</label>
+    <div style="display:flex;gap:12px;margin-top:6px">
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px">
+        <input type="radio" name="tf-${sIdx}-${qIdx}" value="True" ${q.answer==='True'?'checked':''} onchange="course.sections[${sIdx}].quiz.questions[${qIdx}].answer='True'"> True
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px">
+        <input type="radio" name="tf-${sIdx}-${qIdx}" value="False" ${q.answer==='False'?'checked':''} onchange="course.sections[${sIdx}].quiz.questions[${qIdx}].answer='False'"> False
+      </label>
+    </div>
+    <div class="field-row" style="margin-top:12px">
+      <label>Explanation for True</label>
+      <input type="text" value="${esc((q.options&&q.options[0]&&q.options[0].explanation)||'')}" placeholder="Explain why True is or isn't correct" oninput="ensureTFOptions(${sIdx},${qIdx});course.sections[${sIdx}].quiz.questions[${qIdx}].options[0].explanation=this.value">
+    </div>
+    <div class="field-row">
+      <label>Explanation for False</label>
+      <input type="text" value="${esc((q.options&&q.options[1]&&q.options[1].explanation)||'')}" placeholder="Explain why False is or isn't correct" oninput="ensureTFOptions(${sIdx},${qIdx});course.sections[${sIdx}].quiz.questions[${qIdx}].options[1].explanation=this.value">
+    </div>`;
+  }
+  return `<div class="accordion open" id="q-${sIdx}-${qIdx}">
+    <div class="accordion-header" onclick="toggleAcc('q-${sIdx}-${qIdx}')">
+      <span class="question-type-badge ${typeClass}">${q.questionType}</span>
+      <span class="accordion-title" style="margin-left:8px">Q${qIdx+1}: ${(q.question||'').substring(0,50)||(q.question||'New Question')}</span>
+      <button class="btn-icon" onclick="event.stopPropagation();deleteQuestion(${sIdx},${qIdx})">🗑</button>
+      <span class="accordion-arrow">›</span>
+    </div>
+    <div class="accordion-body">
+      <div class="field-row">
+        <label>Question</label>
+        <textarea placeholder="Write the question…" oninput="course.sections[${sIdx}].quiz.questions[${qIdx}].question=this.value;updateQTitle(${sIdx},${qIdx})">${esc(q.question)}</textarea>
+      </div>
+      ${optionsHTML}
+      <div class="field-row" style="margin-top:12px">
+        <label>${q.questionType==='short-answer'?'Model Answer / Guidance':'Overall Explanation'}</label>
+        <div class="field-hint">${q.questionType==='short-answer'?'Shown after submission as guidance. No single correct answer required.':'Shown after submission to explain the correct answer.'}</div>
+        <textarea placeholder="${q.questionType==='short-answer'?'Describe what a strong answer would include…':'Explain why the correct answer is correct…'}" oninput="course.sections[${sIdx}].quiz.questions[${qIdx}].explanation=this.value">${esc(q.explanation)}</textarea>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderSectionActivity(s,sIdx){
+  const a=s.practicalActivity||{title:'',description:'',scenario:'',steps:[],successCriteria:[],downloadableTemplate:''};
+  return `<div id="panel-s${sIdx}-activity" class="editor-panel" style="display:none">
+    <div class="panel-header">
+      <div>
+        <div class="section-pill">Section ${sIdx+1} · ${s.sectionTitle||'Section'}</div>
+        <div class="panel-title">Practical Activity</div>
+        <div class="panel-subtitle">An open-ended application task that bridges theory and real-world use</div>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="field-row">
+        <label>Activity Title</label>
+        <input type="text" value="${esc(a.title)}" placeholder="e.g. Write Your Own Problem Statement" oninput="course.sections[${sIdx}].practicalActivity.title=this.value">
+      </div>
+      <div class="field-row">
+        <label>Description</label>
+        <div class="field-hint">Tell learners what they'll do and why it matters</div>
+        <textarea placeholder="Apply the problem statement formula to a real product you use daily…" oninput="course.sections[${sIdx}].practicalActivity.description=this.value">${esc(a.description)}</textarea>
+      </div>
+      <div class="field-row">
+        <label>Scenario</label>
+        <div class="field-hint">Set the real-world context that frames the task</div>
+        <textarea placeholder="Think of a frustration you've personally experienced with a digital product…" oninput="course.sections[${sIdx}].practicalActivity.scenario=this.value">${esc(a.scenario)}</textarea>
+      </div>
+      <div class="field-row">
+        <label>Steps</label>
+        <div class="field-hint">Press Enter after each step</div>
+        <div class="tag-input-wrap" onclick="this.querySelector('.tag-input').focus()" style="flex-direction:column;align-items:stretch">
+          <div id="act-steps-${sIdx}" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px">
+            ${(a.steps||[]).map((step,i)=>`<span class="tag-chip" style="background:var(--violet-l);color:var(--violet)">${esc(step)}<button class="tag-chip-remove" onclick="removeActStep(${sIdx},${i})" style="color:var(--violet)">×</button></span>`).join('')}
+          </div>
+          <input class="tag-input" id="act-step-input-${sIdx}" placeholder="Add step…" onkeydown="actStepKeydown(event,${sIdx})">
+        </div>
+      </div>
+      <div class="field-row">
+        <label>Success Criteria</label>
+        <div class="field-hint">What does a good completion look like? Press Enter after each.</div>
+        <div class="tag-input-wrap" onclick="this.querySelector('.tag-input').focus()" style="flex-direction:column;align-items:stretch">
+          <div id="act-crit-${sIdx}" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px">
+            ${(a.successCriteria||[]).map((c,i)=>`<span class="tag-chip" style="background:var(--green-l);color:var(--green)">${esc(c)}<button class="tag-chip-remove" onclick="removeActCrit(${sIdx},${i})" style="color:var(--green)">×</button></span>`).join('')}
+          </div>
+          <input class="tag-input" id="act-crit-input-${sIdx}" placeholder="Add criterion…" onkeydown="actCritKeydown(event,${sIdx})">
+        </div>
+      </div>
+      <div class="field-row">
+        <label>Downloadable Template URL (optional)</label>
+        <input type="url" value="${esc(a.downloadableTemplate)}" placeholder="https://…" oninput="course.sections[${sIdx}].practicalActivity.downloadableTemplate=this.value">
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderSectionSummary(s,sIdx){
+  return `<div id="panel-s${sIdx}-summary" class="editor-panel" style="display:none">
+    <div class="panel-header">
+      <div>
+        <div class="section-pill">Section ${sIdx+1} · ${s.sectionTitle||'Section'}</div>
+        <div class="panel-title">Section Summary</div>
+        <div class="panel-subtitle">Key takeaways shown at the end of the section to consolidate learning</div>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="field-hint" style="margin-bottom:12px">Aim for 4–6 concise points. Each should begin with a verb or key noun. Press Enter after each.</div>
+      <div class="tag-input-wrap" onclick="this.querySelector('.tag-input').focus()" style="flex-direction:column;align-items:stretch">
+        <div id="sec-sum-chips-${sIdx}" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px">
+          ${(s.summary||[]).map((pt,i)=>`<span class="tag-chip" style="background:var(--green-l);color:var(--green)">${esc(pt)}<button class="tag-chip-remove" onclick="removeSecSum(${sIdx},${i})" style="color:var(--green)">×</button></span>`).join('')}
+        </div>
+        <input class="tag-input" id="sec-sum-input-${sIdx}" placeholder="Add summary point…" onkeydown="secSumKeydown(event,${sIdx})">
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── ACCORDION ─────────────────────────────────────────────────────────────────
+function toggleAcc(id){
+  document.getElementById(id)?.classList.toggle('open');
+}
+
+// ── MUTATIONS ─────────────────────────────────────────────────────────────────
+function deleteSection(sIdx){
+  if(!confirm('Delete this section and all its content?')) return;
+  course.sections.splice(sIdx,1);
+  activePanel='basics';
+  updateSectionNav();
+  renderSectionPanels();
+  showPanel('basics');
+  refreshPreview();
+}
+
+function addLecture(sIdx){
+  course.sections[sIdx].lectures.push({
+    lectureTitle:'',lectureDescription:'',estimatedDuration:'',
+    learningObjectives:[],workedExample:{problem:'',steps:[],conclusion:''},
+    lectureTopics:[],summary:[]
+  });
+  rerenderLectures(sIdx);
+}
+function deleteLecture(sIdx,lIdx){
+  course.sections[sIdx].lectures.splice(lIdx,1);
+  rerenderLectures(sIdx);
+}
+function rerenderLectures(sIdx){
+  const s=course.sections[sIdx];
+  const container=document.getElementById('lectures-list-'+sIdx);
+  if(!container) return;
+  const html=(s.lectures||[]).map((l,lIdx)=>renderLecture(l,sIdx,lIdx)).join('');
+  container.innerHTML=html||`<div class="empty-state"><div class="icon">📹</div><p>No lectures yet.<br>Add your first lecture above.</p></div>`;
+  refreshPreview();
+}
+
+function updateLecTitle(sIdx,lIdx){
+  const el=document.querySelector(`#lec-${sIdx}-${lIdx} .accordion-title`);
+  if(el) el.textContent=course.sections[sIdx].lectures[lIdx].lectureTitle||'New Lecture';
+}
+
+function addTopic(sIdx,lIdx){
+  course.sections[sIdx].lectures[lIdx].lectureTopics.push({text:'',summary:'',media:[]});
+  rerenderTopics(sIdx,lIdx);
+}
+function deleteTopic(sIdx,lIdx,tIdx){
+  course.sections[sIdx].lectures[lIdx].lectureTopics.splice(tIdx,1);
+  rerenderTopics(sIdx,lIdx);
+}
+function rerenderTopics(sIdx,lIdx){
+  const topics=course.sections[sIdx].lectures[lIdx].lectureTopics;
+  const container=document.getElementById(`topics-list-${sIdx}-${lIdx}`);
+  if(!container) return;
+  container.innerHTML=topics.map((t,tIdx)=>renderTopic(t,sIdx,lIdx,tIdx)).join('');
+  // update badge
+  const badge=document.querySelector(`#lec-${sIdx}-${lIdx} .accordion-badge`);
+  if(badge) badge.textContent=`${topics.length} topics`;
+  refreshPreview();
+}
+
+function addMedia(sIdx,lIdx,tIdx,type){
+  const base={type};
+  if(type==='image') Object.assign(base,{url:'',label:'',altText:''});
+  else if(type==='video') Object.assign(base,{url:'',transcript:''});
+  else Object.assign(base,{content:''});
+  course.sections[sIdx].lectures[lIdx].lectureTopics[tIdx].media.push(base);
+  rerenderMedia(sIdx,lIdx,tIdx);
+}
+function deleteMedia(sIdx,lIdx,tIdx,mIdx){
+  course.sections[sIdx].lectures[lIdx].lectureTopics[tIdx].media.splice(mIdx,1);
+  rerenderMedia(sIdx,lIdx,tIdx);
+}
+function rerenderMedia(sIdx,lIdx,tIdx){
+  const media=course.sections[sIdx].lectures[lIdx].lectureTopics[tIdx].media;
+  const container=document.getElementById(`media-list-${sIdx}-${lIdx}-${tIdx}`);
+  if(!container) return;
+  container.innerHTML=media.map((m,mIdx)=>renderMedia(m,sIdx,lIdx,tIdx,mIdx)).join('');
+  refreshPreview();
+}
+
+function addQuestion(sIdx,type){
+  const q={question:'',questionType:type,options:[],answer:'',explanation:''};
+  if(type==='multiple-choice') q.options=[{text:'',explanation:''},{text:'',explanation:''}];
+  if(type==='true-false') q.options=[{text:'True',explanation:''},{text:'False',explanation:''}];
+  course.sections[sIdx].quiz.questions.push(q);
+  rerenderQuestions(sIdx);
+}
+function deleteQuestion(sIdx,qIdx){
+  course.sections[sIdx].quiz.questions.splice(qIdx,1);
+  rerenderQuestions(sIdx);
+}
+function addOption(sIdx,qIdx){
+  course.sections[sIdx].quiz.questions[qIdx].options.push({text:'',explanation:''});
+  rerenderQuestions(sIdx);
+}
+function deleteOption(sIdx,qIdx,oIdx){
+  course.sections[sIdx].quiz.questions[qIdx].options.splice(oIdx,1);
+  rerenderQuestions(sIdx);
+}
+function rerenderQuestions(sIdx){
+  const container=document.getElementById(`questions-list-${sIdx}`);
+  if(!container) return;
+  const questions=course.sections[sIdx].quiz.questions;
+  container.innerHTML=questions.map((q,qIdx)=>renderQuestion(q,sIdx,qIdx)).join('')
+    ||`<div class="empty-state"><div class="icon">❓</div><p>No questions yet.</p></div>`;
+  refreshPreview();
+}
+function updateQTitle(sIdx,qIdx){
+  const el=document.querySelector(`#q-${sIdx}-${qIdx} .accordion-title`);
+  if(el) el.textContent=`Q${qIdx+1}: `+(course.sections[sIdx].quiz.questions[qIdx].question||'').substring(0,50);
+}
+function ensureTFOptions(sIdx,qIdx){
+  const q=course.sections[sIdx].quiz.questions[qIdx];
+  if(!q.options||q.options.length<2) q.options=[{text:'True',explanation:''},{text:'False',explanation:''}];
+}
+
+// worked example
+function setWorkedEx(sIdx,lIdx,field,val){
+  if(!course.sections[sIdx].lectures[lIdx].workedExample)
+    course.sections[sIdx].lectures[lIdx].workedExample={problem:'',steps:[],conclusion:''};
+  course.sections[sIdx].lectures[lIdx].workedExample[field]=val;
+}
+function weStepKeydown(e,sIdx,lIdx){
+  if(e.key!=='Enter') return;
+  e.preventDefault();
+  const val=e.target.value.trim();
+  if(!val) return;
+  if(!course.sections[sIdx].lectures[lIdx].workedExample)
+    course.sections[sIdx].lectures[lIdx].workedExample={problem:'',steps:[],conclusion:''};
+  course.sections[sIdx].lectures[lIdx].workedExample.steps.push(val);
+  e.target.value='';
+  const chips=document.getElementById(`we-steps-${sIdx}-${lIdx}`);
+  if(chips){
+    const steps=course.sections[sIdx].lectures[lIdx].workedExample.steps;
+    chips.innerHTML=steps.map((s,i)=>`<span class="tag-chip" style="background:var(--green-l);color:var(--green)">${esc(s)}<button class="tag-chip-remove" onclick="removeWeStep(${sIdx},${lIdx},${i})" style="color:var(--green)">×</button></span>`).join('');
+  }
+}
+function removeWeStep(sIdx,lIdx,i){
+  course.sections[sIdx].lectures[lIdx].workedExample.steps.splice(i,1);
+  const chips=document.getElementById(`we-steps-${sIdx}-${lIdx}`);
+  if(chips){
+    const steps=course.sections[sIdx].lectures[lIdx].workedExample.steps;
+    chips.innerHTML=steps.map((s,idx)=>`<span class="tag-chip" style="background:var(--green-l);color:var(--green)">${esc(s)}<button class="tag-chip-remove" onclick="removeWeStep(${sIdx},${lIdx},${idx})" style="color:var(--green)">×</button></span>`).join('');
+  }
+}
+
+// tag helpers for sections
+function sectionTagKeydown(e,sIdx,field,chipsId){
+  if(e.key!=='Enter') return;
+  e.preventDefault();
+  const val=e.target.value.trim();
+  if(!val) return;
+  course.sections[sIdx][field]=course.sections[sIdx][field]||[];
+  course.sections[sIdx][field].push(val);
+  e.target.value='';
+  renderSectionChips(sIdx,field,chipsId);
+  refreshPreview();
+}
+function renderSectionChips(sIdx,field,chipsId){
+  const chips=document.getElementById(chipsId);
+  if(!chips) return;
+  const arr=course.sections[sIdx][field]||[];
+  const color=field==='reviewContent'?'var(--amber-l)':'var(--blue-l)';
+  const tc=field==='reviewContent'?'var(--amber)':'var(--blue)';
+  chips.innerHTML=arr.map((t,i)=>`<span class="tag-chip" style="background:${color};color:${tc}">${esc(t)}<button class="tag-chip-remove" onclick="removeSectionTag(${sIdx},'${field}','${chipsId}',${i})" style="color:${tc}">×</button></span>`).join('');
+}
+function removeSectionTag(sIdx,field,chipsId,i){
+  course.sections[sIdx][field].splice(i,1);
+  renderSectionChips(sIdx,field,chipsId);
+  refreshPreview();
+}
+function removeSectionObj(sIdx,i){ course.sections[sIdx].learningObjectives.splice(i,1); renderSectionChips(sIdx,'learningObjectives','obj-chips-'+sIdx); }
+function removeSectionRev(sIdx,i){ course.sections[sIdx].reviewContent.splice(i,1); renderSectionChips(sIdx,'reviewContent','rev-chips-'+sIdx); }
+
+function lecTagKeydown(e,sIdx,lIdx,field,chipsId){
+  if(e.key!=='Enter') return;
+  e.preventDefault();
+  const val=e.target.value.trim();
+  if(!val) return;
+  course.sections[sIdx].lectures[lIdx][field]=course.sections[sIdx].lectures[lIdx][field]||[];
+  course.sections[sIdx].lectures[lIdx][field].push(val);
+  e.target.value='';
+  const chips=document.getElementById(chipsId);
+  if(chips) chips.innerHTML=course.sections[sIdx].lectures[lIdx][field].map((t,i)=>`<span class="tag-chip">${esc(t)}<button class="tag-chip-remove" onclick="removeLecObj(${sIdx},${lIdx},${i})">×</button></span>`).join('');
+}
+function removeLecObj(sIdx,lIdx,i){
+  course.sections[sIdx].lectures[lIdx].learningObjectives.splice(i,1);
+  const chips=document.getElementById(`lec-obj-chips-${sIdx}-${lIdx}`);
+  if(chips) chips.innerHTML=course.sections[sIdx].lectures[lIdx].learningObjectives.map((t,i)=>`<span class="tag-chip">${esc(t)}<button class="tag-chip-remove" onclick="removeLecObj(${sIdx},${lIdx},${i})">×</button></span>`).join('');
+}
+function lecSumKeydown(e,sIdx,lIdx){
+  if(e.key!=='Enter') return;
+  e.preventDefault();
+  const val=e.target.value.trim();
+  if(!val) return;
+  course.sections[sIdx].lectures[lIdx].summary=course.sections[sIdx].lectures[lIdx].summary||[];
+  course.sections[sIdx].lectures[lIdx].summary.push(val);
+  e.target.value='';
+  const chips=document.getElementById(`lec-sum-chips-${sIdx}-${lIdx}`);
+  if(chips) chips.innerHTML=course.sections[sIdx].lectures[lIdx].summary.map((t,i)=>`<span class="tag-chip" style="background:var(--green-l);color:var(--green)">${esc(t)}<button class="tag-chip-remove" onclick="removeLecSum(${sIdx},${lIdx},${i})" style="color:var(--green)">×</button></span>`).join('');
+}
+function removeLecSum(sIdx,lIdx,i){
+  course.sections[sIdx].lectures[lIdx].summary.splice(i,1);
+  const chips=document.getElementById(`lec-sum-chips-${sIdx}-${lIdx}`);
+  if(chips) chips.innerHTML=course.sections[sIdx].lectures[lIdx].summary.map((t,idx)=>`<span class="tag-chip" style="background:var(--green-l);color:var(--green)">${esc(t)}<button class="tag-chip-remove" onclick="removeLecSum(${sIdx},${lIdx},${idx})" style="color:var(--green)">×</button></span>`).join('');
+}
+function actStepKeydown(e,sIdx){
+  if(e.key!=='Enter') return;
+  e.preventDefault();
+  const val=e.target.value.trim();
+  if(!val) return;
+  course.sections[sIdx].practicalActivity.steps.push(val);
+  e.target.value='';
+  renderActChips(sIdx,'steps','act-steps-'+sIdx,'var(--violet-l)','var(--violet)');
+  refreshPreview();
+}
+function removeActStep(sIdx,i){
+  course.sections[sIdx].practicalActivity.steps.splice(i,1);
+  renderActChips(sIdx,'steps','act-steps-'+sIdx,'var(--violet-l)','var(--violet)');
+  refreshPreview();
+}
+function actCritKeydown(e,sIdx){
+  if(e.key!=='Enter') return;
+  e.preventDefault();
+  const val=e.target.value.trim();
+  if(!val) return;
+  course.sections[sIdx].practicalActivity.successCriteria.push(val);
+  e.target.value='';
+  renderActChips(sIdx,'successCriteria','act-crit-'+sIdx,'var(--green-l)','var(--green)');
+  refreshPreview();
+}
+function removeActCrit(sIdx,i){
+  course.sections[sIdx].practicalActivity.successCriteria.splice(i,1);
+  renderActChips(sIdx,'successCriteria','act-crit-'+sIdx,'var(--green-l)','var(--green)');
+  refreshPreview();
+}
+function renderActChips(sIdx,field,chipsId,bg,tc){
+  const chips=document.getElementById(chipsId);
+  if(!chips) return;
+  const arr=course.sections[sIdx].practicalActivity[field]||[];
+  const remFn=field==='steps'?'removeActStep':'removeActCrit';
+  chips.innerHTML=arr.map((t,i)=>`<span class="tag-chip" style="background:${bg};color:${tc}">${esc(t)}<button class="tag-chip-remove" onclick="${remFn}(${sIdx},${i})" style="color:${tc}">×</button></span>`).join('');
+}
+function secSumKeydown(e,sIdx){
+  if(e.key!=='Enter') return;
+  e.preventDefault();
+  const val=e.target.value.trim();
+  if(!val) return;
+  course.sections[sIdx].summary=course.sections[sIdx].summary||[];
+  course.sections[sIdx].summary.push(val);
+  e.target.value='';
+  renderSecSumChips(sIdx);
+  refreshPreview();
+}
+function removeSecSum(sIdx,i){
+  course.sections[sIdx].summary.splice(i,1);
+  renderSecSumChips(sIdx);
+  refreshPreview();
+}
+function renderSecSumChips(sIdx){
+  const chips=document.getElementById(`sec-sum-chips-${sIdx}`);
+  if(!chips) return;
+  chips.innerHTML=(course.sections[sIdx].summary||[]).map((t,i)=>`<span class="tag-chip" style="background:var(--green-l);color:var(--green)">${esc(t)}<button class="tag-chip-remove" onclick="removeSecSum(${sIdx},${i})" style="color:var(--green)">×</button></span>`).join('');
+}
+
+function bindSectionEvents(){}
+
+// ── JSON PREVIEW ─────────────────────────────────────────────────────────────
+let previewOpen = false;
+
+function togglePreview(){
+  previewOpen = !previewOpen;
+  const panel = document.getElementById('json-preview');
+  const btn = document.getElementById('preview-toggle-btn');
+  panel.classList.toggle('open', previewOpen);
+  btn.classList.toggle('on', previewOpen);
+  if(previewOpen) refreshPreview();
+}
+
+function refreshPreview(){
+  if(!previewOpen) return;
+  const data = buildCourse();
+  const raw = JSON.stringify(data, null, 2);
+  document.getElementById('json-body').innerHTML = syntaxHighlight(raw);
+}
+
+function syntaxHighlight(json){
+  return json
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, match => {
+      if(/^"/.test(match)){
+        if(/:$/.test(match)) return `<span class="jk">${match}</span>`;
+        return `<span class="js">${match}</span>`;
+      }
+      if(/true|false|null/.test(match)) return `<span class="jb">${match}</span>`;
+      return `<span class="jn">${match}</span>`;
+    });
+}
+
+function copyJSONDirect(){
+  const data = JSON.stringify(buildCourse(), null, 2);
+  navigator.clipboard.writeText(data).then(()=>toast('JSON copied ✓')).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=data;document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);
+    toast('JSON copied ✓');
+  });
+}
+function buildCourse(){
+  sync();
+  return JSON.parse(JSON.stringify(course));
+}
+function openExport(){ document.getElementById('export-modal').classList.add('open'); }
+function closeExport(){ document.getElementById('export-modal').classList.remove('open'); }
+
+function downloadJSON(){
+  const data=JSON.stringify(buildCourse(),null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=(course.courseTitle||'course').replace(/\s+/g,'-').toLowerCase()+'.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  closeExport();
+  toast('Course downloaded ✓');
+}
+function copyJSON(){
+  const data=JSON.stringify(buildCourse(),null,2);
+  navigator.clipboard.writeText(data).then(()=>{
+    closeExport();
+    toast('JSON copied to clipboard ✓');
+  }).catch(()=>{
+    // fallback
+    const ta=document.createElement('textarea');
+    ta.value=data;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    closeExport();
+    toast('JSON copied to clipboard ✓');
+  });
+}
+
+// ── IMPORT ───────────────────────────────────────────────────────────────────
+function importJSON(){ document.getElementById('import-input').click(); }
+function handleImport(e){
+  const file=e.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=(ev)=>{
+    try{
+      const imported=JSON.parse(ev.target.result);
+      Object.assign(course,imported);
+      loadCourseIntoUI();
+      toast('Course imported ✓');
+    }catch{toast('Invalid JSON file');}
+  };
+  reader.readAsText(file);
+}
+function loadCourseIntoUI(){
+  setVal('f-title',course.courseTitle);
+  setVal('f-desc',course.courseDescription);
+  setVal('f-diff',course.difficultyLevel);
+  setVal('f-dur',course.estimatedDuration);
+  setVal('f-ver',course.version);
+  setVal('f-img',course.courseImage);
+  renderTags('prereqs');
+  renderTags('learningOutcomes');
+  renderGlossary();
+  updateSectionNav();
+  renderSectionPanels();
+  showPanel('basics');
+  refreshPreview();
+}
+function setVal(id,val){const el=document.getElementById(id);if(el) el.value=val||''}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2400);
+}
+
+// close modal on backdrop click
+document.getElementById('export-modal').addEventListener('click',function(e){
+  if(e.target===this) closeExport();
+});
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+showPanel('basics');
+</script>
+</body>
+</html>

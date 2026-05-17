@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Course Player</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f5f2;
+    --surface: #ffffff;
+    --border: #e8e4de;
+    --text: #1a1917;
+    --text-secondary: #6b6760;
+    --accent: #2d5a3d;
+    --accent-light: #eaf2ec;
+    --accent-muted: #4a7c5f;
+    --warn: #8b3a2a;
+    --warn-light: #fdf0ee;
+    --gold: #c9973a;
+    --gold-light: #fdf6e8;
+    --radius: 10px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4 { font-family: 'DM Serif Display', serif; font-weight: 400; line-height: 1.25; }
+
+  /* ── Layout ── */
+  #app { display: flex; min-height: 100vh; }
+
+  /* ── Sidebar ── */
+  #sidebar {
+    width: 300px;
+    min-width: 300px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  #sidebar-header {
+    padding: 24px 20px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  #sidebar-header .course-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  #sidebar-header h2 { font-size: 18px; color: var(--text); }
+
+  #progress-bar-wrap {
+    margin-top: 14px;
+    background: var(--border);
+    border-radius: 99px;
+    height: 5px;
+    overflow: hidden;
+  }
+  #progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  #progress-label {
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  /* Section nav */
+  .section-nav-item { border-bottom: 1px solid var(--border); }
+
+  .section-nav-header {
+    padding: 12px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .section-nav-header:hover { background: var(--bg); }
+  .section-nav-header.active { color: var(--text); }
+
+  .section-check {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 9px;
+    transition: all 0.2s;
+  }
+  .section-check.done { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .section-check.active { border-color: var(--accent); }
+
+  .section-nav-title { flex: 1; }
+  .section-nav-arrow { font-size: 10px; transition: transform 0.2s; }
+  .section-nav-item.open .section-nav-arrow { transform: rotate(90deg); }
+
+  .section-nav-lectures { display: none; }
+  .section-nav-item.open .section-nav-lectures { display: block; }
+
+  .lecture-nav-item {
+    padding: 8px 20px 8px 48px;
+    cursor: pointer;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    display: flex; align-items: center; gap: 8px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .lecture-nav-item:hover { background: var(--bg); color: var(--text); }
+  .lecture-nav-item.active { color: var(--accent); font-weight: 500; }
+  .lecture-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .lecture-nav-item.active .lecture-dot { background: var(--accent); }
+  .lecture-nav-item.done .lecture-dot { background: var(--accent-muted); }
+
+  /* Quiz & activity in sidebar */
+  .quiz-nav-item {
+    padding: 8px 20px 8px 48px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex; align-items: center; gap: 8px;
+    transition: background 0.15s;
+  }
+  .quiz-nav-item:hover { background: var(--bg); }
+  .quiz-nav-item.active { color: var(--gold); font-weight: 500; }
+  .quiz-nav-item .lecture-dot { background: var(--gold); opacity: 0.4; }
+  .quiz-nav-item.active .lecture-dot { opacity: 1; }
+
+  /* ── Main Content ── */
+  #main {
+    flex: 1;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 40px;
+  }
+
+  /* ── Screens ── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Course intro */
+  #screen-intro .course-image {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    margin-bottom: 32px;
+    background: linear-gradient(135deg, var(--accent-light), var(--border));
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+    font-size: 48px;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .tag-green { background: var(--accent-light); color: var(--accent); }
+  .tag-gray { background: var(--border); color: var(--text-secondary); }
+
+  #screen-intro h1 { font-size: 36px; margin: 12px 0 16px; }
+  #screen-intro .desc { color: var(--text-secondary); font-size: 15px; margin-bottom: 28px; }
+
+  .meta-row {
+    display: flex; flex-wrap: wrap; gap: 20px;
+    padding: 20px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+  }
+  .meta-item { font-size: 13px; color: var(--text-secondary); }
+  .meta-item strong { color: var(--text); display: block; font-weight: 600; font-size: 14px; }
+
+  .outcomes-list, .prereq-list {
+    list-style: none;
+    margin: 12px 0 24px;
+  }
+  .outcomes-list li, .prereq-list li {
+    padding: 6px 0 6px 20px;
+    position: relative;
+    font-size: 14px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+  }
+  .outcomes-list li::before {
+    content: '✓';
+    position: absolute; left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .prereq-list li::before {
+    content: '·';
+    position: absolute; left: 6px;
+    color: var(--text-secondary);
+    font-size: 18px;
+    line-height: 1.2;
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 28px;
+    border-radius: 99px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-muted); }
+  .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--bg); }
+  .btn-sm { padding: 8px 18px; font-size: 13px; }
+
+  /* Section intro */
+  .section-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .why-box {
+    background: var(--accent-light);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 14px 18px;
+    margin: 20px 0;
+    font-size: 14px;
+    color: var(--accent);
+  }
+
+  .objectives-list {
+    list-style: none;
+    margin: 12px 0 24px;
+  }
+  .objectives-list li {
+    padding: 8px 12px 8px 36px;
+    position: relative;
+    font-size: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 6px;
+  }
+  .objectives-list li::before {
+    content: '→';
+    position: absolute; left: 12px;
+    color: var(--accent);
+  }
+
+  /* Review box */
+  .review-box {
+    background: var(--gold-light);
+    border: 1px solid #e8d5a8;
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 28px;
+  }
+  .review-box h4 { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+  .review-box ul { list-style: none; }
+  .review-box li { font-size: 13.5px; color: var(--text-secondary); padding: 4px 0; padding-left: 16px; position: relative; }
+  .review-box li::before { content: '↩'; position: absolute; left: 0; color: var(--gold); font-size: 11px; }
+
+  /* Lecture */
+  .lecture-header { margin-bottom: 28px; }
+  .lecture-header h2 { font-size: 28px; margin: 8px 0 10px; }
+  .lecture-meta { font-size: 12px; color: var(--text-secondary); display: flex; gap: 16px; }
+
+  .worked-example {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 28px;
+  }
+  .worked-example-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--accent-muted); margin-bottom: 10px;
+  }
+  .worked-example h4 { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .worked-example ol { padding-left: 18px; }
+  .worked-example ol li { font-size: 13.5px; color: var(--text-secondary); margin-bottom: 4px; }
+  .worked-example .conclusion { margin-top: 12px; font-size: 13px; color: var(--accent); font-style: italic; }
+
+  /* Topic */
+  .topic-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .topic-text { font-size: 15px; line-height: 1.75; color: var(--text); margin-bottom: 16px; }
+  .topic-summary {
+    background: var(--accent-light);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--accent);
+    margin-top: 14px;
+  }
+  .topic-summary strong { font-weight: 600; }
+
+  .media-block { margin-top: 16px; }
+  .media-block img {
+    width: 100%; border-radius: 6px;
+    border: 1px solid var(--border);
+    margin-bottom: 6px;
+  }
+  .media-caption { font-size: 12px; color: var(--text-secondary); text-align: center; }
+  .media-text-block {
+    background: var(--bg);
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 12px;
+  }
+  .video-placeholder {
+    background: #1a1917;
+    border-radius: 6px;
+    height: 200px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-size: 13px;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .play-btn {
+    width: 40px; height: 40px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  /* Lecture summary */
+  .lecture-summary {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-top: 28px;
+  }
+  .lecture-summary h4 { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 10px; }
+  .lecture-summary ul { list-style: none; }
+  .lecture-summary li { padding: 5px 0 5px 18px; position: relative; font-size: 14px; color: var(--text-secondary); }
+  .lecture-summary li::before { content: '✓'; position: absolute; left: 0; color: var(--accent); font-weight: 700; font-size: 12px; }
+
+  /* Nav buttons */
+  .nav-buttons {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 36px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Quiz */
+  .quiz-header { margin-bottom: 28px; }
+  .quiz-header h2 { font-size: 28px; margin: 8px 0 10px; }
+  .quiz-meta { font-size: 13px; color: var(--text-secondary); display: flex; gap: 16px; }
+
+  .question-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .question-number { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 8px; }
+  .question-text { font-size: 16px; font-weight: 500; margin-bottom: 18px; line-height: 1.5; }
+
+  .options-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .option-item {
+    padding: 12px 16px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex; align-items: flex-start; gap: 12px;
+    transition: all 0.15s;
+    background: var(--surface);
+  }
+  .option-item:hover { border-color: var(--accent); background: var(--accent-light); }
+  .option-item.selected { border-color: var(--accent); background: var(--accent-light); }
+  .option-item.correct { border-color: var(--accent); background: var(--accent-light); }
+  .option-item.incorrect { border-color: var(--warn); background: var(--warn-light); }
+  .option-item.disabled { cursor: default; pointer-events: none; }
+  .option-letter {
+    width: 22px; height: 22px; min-width: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 1px;
+    transition: all 0.15s;
+  }
+  .option-item.selected .option-letter { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .option-item.correct .option-letter { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .option-item.incorrect .option-letter { background: var(--warn); border-color: var(--warn); color: #fff; }
+
+  .feedback-box {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 13.5px;
+    display: none;
+  }
+  .feedback-box.show { display: block; }
+  .feedback-box.correct { background: var(--accent-light); color: var(--accent); }
+  .feedback-box.incorrect { background: var(--warn-light); color: var(--warn); }
+  .feedback-box strong { display: block; margin-bottom: 4px; font-weight: 600; }
+
+  /* True/false */
+  .tf-options { display: flex; gap: 12px; }
+  .tf-options .option-item { flex: 1; justify-content: center; text-align: center; }
+
+  /* Short answer */
+  .short-answer-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    resize: vertical;
+    min-height: 80px;
+    transition: border 0.15s;
+    background: var(--surface);
+    color: var(--text);
+  }
+  .short-answer-input:focus { outline: none; border-color: var(--accent); }
+  .short-answer-hint { font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
+
+  .check-btn {
+    margin-top: 14px;
+    padding: 10px 22px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .check-btn:hover { background: var(--accent-muted); }
+  .check-btn:disabled { opacity: 0.4; cursor: default; }
+
+  .quiz-overall-feedback {
+    background: var(--accent-light);
+    border: 1px solid #b8d9c2;
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-top: 24px;
+    display: none;
+  }
+  .quiz-overall-feedback.show { display: block; }
+  .quiz-overall-feedback h3 { font-size: 20px; margin-bottom: 6px; }
+  .quiz-overall-feedback p { font-size: 14px; color: var(--text-secondary); }
+  .quiz-score { font-size: 36px; font-family: 'DM Serif Display', serif; color: var(--accent); }
+
+  /* Practical activity */
+  .activity-header { margin-bottom: 28px; }
+  .activity-header h2 { font-size: 28px; margin: 8px 0 10px; }
+
+  .scenario-box {
+    background: var(--gold-light);
+    border: 1px solid #e8d5a8;
+    border-left: 3px solid var(--gold);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 24px;
+  }
+  .scenario-box h4 { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+  .scenario-box p { font-size: 14px; color: var(--text-secondary); }
+
+  .steps-list { list-style: none; counter-reset: steps; margin-bottom: 24px; }
+  .steps-list li {
+    counter-increment: steps;
+    padding: 12px 16px 12px 52px;
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  .steps-list li::before {
+    content: counter(steps);
+    position: absolute; left: 16px;
+    width: 22px; height: 22px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    top: 12px;
+  }
+
+  .criteria-list { list-style: none; margin-bottom: 24px; }
+  .criteria-list li {
+    padding: 8px 12px 8px 32px;
+    position: relative;
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+  .criteria-list li::before { content: '◇'; position: absolute; left: 8px; color: var(--accent); font-size: 12px; }
+
+  .activity-response {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    resize: vertical;
+    min-height: 140px;
+    transition: border 0.15s;
+    background: var(--surface);
+    color: var(--text);
+  }
+  .activity-response:focus { outline: none; border-color: var(--accent); }
+
+  /* Section summary */
+  .section-summary {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .section-summary h4 { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 14px; }
+  .summary-grid { display: grid; gap: 8px; }
+  .summary-item {
+    padding: 10px 14px 10px 36px;
+    position: relative;
+    background: var(--accent-light);
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--accent);
+  }
+  .summary-item::before { content: '✓'; position: absolute; left: 12px; font-weight: 700; }
+
+  /* Glossary drawer */
+  #glossary-btn {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 99px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(45,90,61,0.3);
+    z-index: 100;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  #glossary-drawer {
+    position: fixed; bottom: 0; right: 0;
+    width: 320px;
+    max-height: 50vh;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius) var(--radius) 0 0;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.1);
+    z-index: 200;
+    display: none;
+    flex-direction: column;
+  }
+  #glossary-drawer.open { display: flex; }
+  #glossary-drawer-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  #glossary-drawer-header h4 { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); }
+  #glossary-close { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--text-secondary); }
+  #glossary-body { overflow-y: auto; padding: 10px 0; }
+  .glossary-term { padding: 10px 18px; border-bottom: 1px solid var(--border); }
+  .glossary-term dt { font-size: 13px; font-weight: 600; color: var(--accent); }
+  .glossary-term dd { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+  /* Completion */
+  #screen-complete {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .complete-badge {
+    width: 80px; height: 80px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    margin: 0 auto 28px;
+  }
+  #screen-complete h1 { font-size: 40px; margin-bottom: 12px; }
+  #screen-complete p { color: var(--text-secondary); font-size: 16px; max-width: 480px; margin: 0 auto 32px; }
+
+  /* Transitions */
+  .screen { animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Scrollbar */
+  #sidebar::-webkit-scrollbar { width: 4px; }
+  #sidebar::-webkit-scrollbar-track { background: transparent; }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  @media (max-width: 700px) {
+    #sidebar { display: none; }
+    #main { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <nav id="sidebar">
+    <div id="sidebar-header">
+      <div class="course-label">Course</div>
+      <h2 id="sidebar-title"></h2>
+      <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+      <div id="progress-label"></div>
+    </div>
+    <div id="sidebar-nav"></div>
+  </nav>
+
+  <main id="main">
+    <div id="screen-intro" class="screen active"></div>
+    <div id="screen-section-intro" class="screen"></div>
+    <div id="screen-lecture" class="screen"></div>
+    <div id="screen-quiz" class="screen"></div>
+    <div id="screen-activity" class="screen"></div>
+    <div id="screen-section-summary" class="screen"></div>
+    <div id="screen-complete" class="screen">
+      <div class="complete-badge">🎓</div>
+      <h1>Course Complete!</h1>
+      <p>Congratulations — you've completed the course. Review any section using the sidebar, or restart from the beginning.</p>
+      <button class="btn btn-primary" onclick="goToScreen('intro')">Back to Start</button>
+    </div>
+  </main>
+</div>
+
+<button id="glossary-btn" onclick="toggleGlossary()">📖 Glossary</button>
+<div id="glossary-drawer">
+  <div id="glossary-drawer-header">
+    <h4>Glossary</h4>
+    <button id="glossary-close" onclick="toggleGlossary()">✕</button>
+  </div>
+  <div id="glossary-body"></div>
+</div>
+
+<script>
+// ── COURSE DATA ─────────────────────────────────────────────────────────────
+// Replace this object with your own course JSON to use the player with different content.
+const COURSE = {
+  courseTitle: "Foundations of Product Thinking",
+  courseDescription: "Learn how to identify real user problems, define clear product opportunities, and make decisions that create genuine value. This course is built for aspiring product managers, designers, and founders.",
+  courseImage: "",
+  estimatedDuration: "3 hours",
+  lastUpdated: "2025-01-01",
+  version: "1.0",
+  prerequisites: [
+    "Basic familiarity with software products",
+    "Curiosity about how decisions get made in tech"
+  ],
+  difficultyLevel: "Beginner",
+  learningOutcomes: [
+    "Distinguish between user needs and product features",
+    "Write clear problem statements and opportunity briefs",
+    "Apply prioritisation frameworks to real decisions",
+    "Conduct and synthesise basic user interviews"
+  ],
+  glossary: [
+    { term: "Problem Statement", definition: "A concise description of a user need or pain point that a product aims to solve, without prescribing a solution." },
+    { term: "Opportunity Brief", definition: "A short document that frames a problem, its scope, its impact, and the hypotheses for solving it." },
+    { term: "Jobs to Be Done", definition: "A framework for understanding why customers hire a product — focusing on the job they want done, not the product itself." },
+    { term: "Prioritisation", definition: "The process of ranking features, problems, or initiatives by their expected impact relative to effort." },
+    { term: "User Interview", definition: "A structured conversation with a real or prospective user to understand their behaviours, goals, and frustrations." },
+    { term: "Insight", definition: "A non-obvious finding about user behaviour or motivation that can meaningfully shape product decisions." }
+  ],
+  sections: [
+    {
+      sectionTitle: "Understanding User Needs",
+      sectionDescription: "Before building anything, great product thinkers obsess over the problem — not the solution. This section teaches you to uncover what users actually need.",
+      estimatedDuration: "45 minutes",
+      whyThisMatters: "Products fail not because they are built badly — but because they solve the wrong problem. Every minute you invest in truly understanding users saves hours of wasted development.",
+      learningObjectives: [
+        "Explain the difference between a user need and a feature request",
+        "Write a well-formed problem statement",
+        "Identify the 'job to be done' behind a user complaint"
+      ],
+      reviewContent: [],
+      lectures: [
+        {
+          lectureTitle: "Needs vs Features",
+          lectureDescription: "Users rarely tell you what they need — they tell you what they want. Learn to hear the difference.",
+          estimatedDuration: "12 minutes",
+          learningObjectives: [
+            "Define user need vs feature request",
+            "Translate a feature request into an underlying need"
+          ],
+          workedExample: {
+            problem: "A user says: 'I want a dark mode'.",
+            steps: [
+              "Ask why: 'Why do you want dark mode?'",
+              "They say: 'My eyes hurt when I use the app at night.'",
+              "Underlying need: reduce eye strain during low-light use",
+              "Possible solutions: dark mode, reduced brightness setting, auto-dim based on time"
+            ],
+            conclusion: "Dark mode is one solution to the real need — eye comfort. By identifying the need, we can evaluate multiple solutions."
+          },
+          lectureTopics: [
+            {
+              text: "A feature request is what a user asks for. A user need is why they're asking. When a user says 'I want a search bar', the need might be 'I can't find my old files quickly'. The search bar is just one possible solution. Product thinkers always ask: what outcome does the user actually want?",
+              summary: "Features are solutions. Needs are the goals behind them. Always find the goal first.",
+              media: [
+                { type: "text", content: "Think of it this way: people don't want a quarter-inch drill bit — they want a quarter-inch hole. The drill bit is the feature. The hole is the need. Your job is to find the best way to make the hole." }
+              ]
+            },
+            {
+              text: "The Jobs to Be Done (JTBD) framework helps you articulate needs clearly. Every user 'hires' your product to do a job. Commuters don't hire a podcast app — they hire it to make their commute feel shorter and more stimulating. When you understand the job, you can design for it precisely.",
+              summary: "JTBD shifts focus from what users do to why they do it — the real context driving behaviour.",
+              media: []
+            }
+          ],
+          summary: [
+            "Features are proposed solutions; needs are underlying goals",
+            "Always ask 'why' at least twice before accepting a feature request at face value",
+            "Jobs to Be Done is a powerful lens for articulating what users are really trying to accomplish"
+          ]
+        },
+        {
+          lectureTitle: "Writing Problem Statements",
+          lectureDescription: "A sharp problem statement focuses the entire team on the same target. Learn the formula and practise writing them.",
+          estimatedDuration: "14 minutes",
+          learningObjectives: [
+            "Use the standard problem statement structure",
+            "Avoid the common mistake of including solutions in problem statements"
+          ],
+          workedExample: {
+            problem: "Team feedback: 'Users churn after 3 days because onboarding is confusing.'",
+            steps: [
+              "Identify the user: new sign-ups in their first week",
+              "Identify the need: understand how to get value from the product quickly",
+              "Identify the barrier: onboarding steps are unclear or too long",
+              "Draft: 'New users need to reach their first 'aha moment' within 10 minutes of signing up, but currently struggle to understand which action to take first, leading to early abandonment.'"
+            ],
+            conclusion: "A good problem statement names the user, the need, the barrier, and the impact — with no mention of a specific solution."
+          },
+          lectureTopics: [
+            {
+              text: "The standard problem statement formula is: [User] needs [outcome] because [insight about their situation], but [barrier standing in the way]. This keeps the team focused on the problem space, not prematurely locked into a solution. A well-written problem statement can be handed to three different teams and produce three different valid solutions.",
+              summary: "A good problem statement names the user, their need, and the barrier — never the solution.",
+              media: []
+            }
+          ],
+          summary: [
+            "Problem statements name the user, the need, the barrier, and the impact",
+            "Never include a solution in a problem statement",
+            "A strong problem statement enables multiple solution paths to coexist"
+          ]
+        }
+      ],
+      quiz: {
+        passingScore: 75,
+        attemptsAllowed: 3,
+        interleaved: false,
+        questions: [
+          {
+            question: "A user requests that you add a 'favourites' button to your app. What is the most important next step for a product thinker?",
+            questionType: "multiple-choice",
+            options: [
+              { text: "Design the favourites button immediately", explanation: "Jumping to the solution skips understanding the need. There may be better ways to solve the underlying problem." },
+              { text: "Ask why the user wants to save favourites and what they're trying to accomplish", explanation: "Correct. Understanding the underlying need reveals whether a favourites button is truly the best solution." },
+              { text: "Look at competitor apps to see how they handle favourites", explanation: "Competitive research has its place, but it comes after understanding your user's specific need — not before." },
+              { text: "Reject the request since features come from the roadmap", explanation: "User requests are valuable signals regardless of where they appear. The issue is how you interpret them, not whether to listen." }
+            ],
+            answer: "Ask why the user wants to save favourites and what they're trying to accomplish",
+            explanation: "The core product thinking habit is moving from 'what users ask for' to 'why they're asking'. Only then can you evaluate whether the requested feature is the best solution."
+          },
+          {
+            question: "Which of these is a well-formed problem statement?",
+            questionType: "multiple-choice",
+            options: [
+              { text: "We need to build a better search feature for power users", explanation: "This includes a specific solution (search feature) rather than describing the problem." },
+              { text: "Power users need to locate specific historical records in under 30 seconds, but currently spend 5+ minutes manually scrolling, causing frustration and task abandonment", explanation: "Correct. This names the user, the need, the barrier, and the impact — with no prescribed solution." },
+              { text: "Users don't like how slow the app is", explanation: "This is too vague. It doesn't specify which users, what they're trying to do, or what the impact is." },
+              { text: "The engineering team should optimise database queries to speed up load times", explanation: "This is a technical solution, not a problem statement. It skips over the user need entirely." }
+            ],
+            answer: "Power users need to locate specific historical records in under 30 seconds, but currently spend 5+ minutes manually scrolling, causing frustration and task abandonment",
+            explanation: "A well-formed problem statement follows the formula: user + need + barrier + impact. It never prescribes a solution — that comes later."
+          },
+          {
+            question: "True or False: The Jobs to Be Done framework focuses primarily on the features users request.",
+            questionType: "true-false",
+            options: [
+              { text: "True", explanation: "Incorrect. JTBD deliberately moves away from features, focusing instead on the deeper goal or 'job' the user is trying to accomplish." },
+              { text: "False", explanation: "Correct. JTBD focuses on the underlying goal — the 'job' someone is trying to get done — not on features or product attributes." }
+            ],
+            answer: "False",
+            explanation: "JTBD explicitly reframes product thinking away from features and toward user motivation. Users 'hire' products to accomplish outcomes, not to interact with specific features."
+          },
+          {
+            question: "In your own words, explain what it means to 'find the need behind the feature'. Give an example.",
+            questionType: "short-answer",
+            options: [],
+            answer: "",
+            explanation: "A strong answer would explain that users often express a specific solution when they have a deeper goal. For example: 'A user asking for email notifications might really need to stay informed about status changes — push notifications or a dashboard feed could serve that need equally well.'"
+          }
+        ]
+      },
+      practicalActivity: {
+        title: "Write Your Own Problem Statement",
+        description: "Apply the problem statement formula to a real product you use daily. This exercise anchors the lecture concepts to something concrete in your own experience.",
+        scenario: "Think of a frustration you've personally experienced with a digital product — an app, a website, a tool. Perhaps something that made you close the tab in frustration, or a workaround you've invented because the product doesn't do what you need.",
+        steps: [
+          "Choose a real product and a specific moment of friction you've experienced",
+          "Identify: who were you (what kind of user, in what context)?",
+          "Identify: what were you ultimately trying to accomplish?",
+          "Identify: what barrier got in your way?",
+          "Draft your problem statement using the formula: [User] needs [outcome], but [barrier], which causes [impact]",
+          "Review: does your statement mention a specific solution? If yes, remove it"
+        ],
+        successCriteria: [
+          "The statement names a specific type of user (not just 'users')",
+          "The outcome is described in terms of what the user wants to achieve, not what they want the product to do",
+          "No specific solution or feature is mentioned",
+          "The impact (why it matters) is included"
+        ],
+        downloadableTemplate: ""
+      },
+      summary: [
+        "User needs are the outcomes people want — features are just one possible way to deliver them",
+        "Always ask 'why' to move from surface-level requests to genuine needs",
+        "The Jobs to Be Done lens frames needs as goals users are trying to accomplish in context",
+        "A problem statement names: user, need, barrier, and impact — never the solution",
+        "Strong problem statements open up the solution space rather than narrowing it prematurely"
+      ]
+    }
+  ]
+};
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let state = {
+  currentScreen: 'intro',
+  currentSectionIndex: 0,
+  currentLectureIndex: 0,
+  completedLectures: new Set(),
+  completedQuizzes: new Set(),
+  completedActivities: new Set(),
+  quizAnswers: {},     // sectionIndex -> { qIndex -> answer }
+  quizSubmitted: {},   // sectionIndex -> bool
+};
+
+// ── NAVIGATION ───────────────────────────────────────────────────────────────
+function goToScreen(screen, sIdx, lIdx) {
+  if (sIdx !== undefined) state.currentSectionIndex = sIdx;
+  if (lIdx !== undefined) state.currentLectureIndex = lIdx;
+  state.currentScreen = screen;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('screen-' + screen);
+  if (el) el.classList.add('active');
+  renderScreen(screen);
+  updateSidebar();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── SIDEBAR ──────────────────────────────────────────────────────────────────
+function buildSidebar() {
+  document.getElementById('sidebar-title').textContent = COURSE.courseTitle;
+  renderGlossary();
+  updateSidebar();
+}
+
+function updateSidebar() {
+  const nav = document.getElementById('sidebar-nav');
+  nav.innerHTML = '';
+
+  COURSE.sections.forEach((section, sIdx) => {
+    const sectionDone = isSectionDone(sIdx);
+    const isOpen = sIdx === state.currentSectionIndex;
+
+    const item = document.createElement('div');
+    item.className = 'section-nav-item' + (isOpen ? ' open' : '');
+
+    const header = document.createElement('div');
+    header.className = 'section-nav-header' + (isOpen ? ' active' : '');
+    header.innerHTML = `
+      <span class="section-check ${sectionDone ? 'done' : (isOpen ? 'active' : '')}">${sectionDone ? '✓' : (sIdx + 1)}</span>
+      <span class="section-nav-title">${section.sectionTitle}</span>
+      <span class="section-nav-arrow">›</span>
+    `;
+    header.onclick = () => {
+      goToScreen('section-intro', sIdx, 0);
+    };
+
+    const lectures = document.createElement('div');
+    lectures.className = 'section-nav-lectures';
+
+    section.lectures.forEach((lec, lIdx) => {
+      const lecDone = state.completedLectures.has(`${sIdx}-${lIdx}`);
+      const isActiveLec = state.currentScreen === 'lecture' && sIdx === state.currentSectionIndex && lIdx === state.currentLectureIndex;
+      const lecItem = document.createElement('div');
+      lecItem.className = `lecture-nav-item ${isActiveLec ? 'active' : ''} ${lecDone ? 'done' : ''}`;
+      lecItem.innerHTML = `<span class="lecture-dot"></span>${lec.lectureTitle}`;
+      lecItem.onclick = () => goToScreen('lecture', sIdx, lIdx);
+      lectures.appendChild(lecItem);
+    });
+
+    // Quiz link
+    const quizItem = document.createElement('div');
+    const quizDone = state.completedQuizzes.has(sIdx);
+    const isActiveQuiz = state.currentScreen === 'quiz' && sIdx === state.currentSectionIndex;
+    quizItem.className = `quiz-nav-item ${isActiveQuiz ? 'active' : ''}`;
+    quizItem.innerHTML = `<span class="lecture-dot" style="background:var(--gold)"></span>Section Quiz ${quizDone ? '✓' : ''}`;
+    quizItem.onclick = () => goToScreen('quiz', sIdx);
+    lectures.appendChild(quizItem);
+
+    // Activity link
+    const actItem = document.createElement('div');
+    const actDone = state.completedActivities.has(sIdx);
+    const isActiveAct = state.currentScreen === 'activity' && sIdx === state.currentSectionIndex;
+    actItem.className = `quiz-nav-item ${isActiveAct ? 'active' : ''}`;
+    actItem.innerHTML = `<span class="lecture-dot" style="background:#c9973a88"></span>Practical Activity ${actDone ? '✓' : ''}`;
+    actItem.onclick = () => goToScreen('activity', sIdx);
+    lectures.appendChild(actItem);
+
+    item.appendChild(header);
+    item.appendChild(lectures);
+    nav.appendChild(item);
+  });
+
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = COURSE.sections.reduce((acc, s) => acc + s.lectures.length + 2, 0); // lectures + quiz + activity
+  const done = state.completedLectures.size + state.completedQuizzes.size + state.completedActivities.size;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${pct}% complete`;
+}
+
+function isSectionDone(sIdx) {
+  const s = COURSE.sections[sIdx];
+  const allLecs = s.lectures.every((_, lIdx) => state.completedLectures.has(`${sIdx}-${lIdx}`));
+  return allLecs && state.completedQuizzes.has(sIdx) && state.completedActivities.has(sIdx);
+}
+
+// ── RENDER SCREENS ───────────────────────────────────────────────────────────
+function renderScreen(screen) {
+  if (screen === 'intro') renderIntro();
+  else if (screen === 'section-intro') renderSectionIntro();
+  else if (screen === 'lecture') renderLecture();
+  else if (screen === 'quiz') renderQuiz();
+  else if (screen === 'activity') renderActivity();
+  else if (screen === 'section-summary') renderSectionSummary();
+}
+
+// INTRO
+function renderIntro() {
+  const c = COURSE;
+  document.getElementById('screen-intro').innerHTML = `
+    <div style="margin-bottom:8px">
+      <span class="tag tag-green">${c.difficultyLevel}</span>
+      <span class="tag tag-gray" style="margin-left:6px">⏱ ${c.estimatedDuration}</span>
+    </div>
+    <h1>${c.courseTitle}</h1>
+    <p class="desc">${c.courseDescription}</p>
+    <div class="meta-row">
+      <div class="meta-item"><strong>${c.sections.length}</strong>Sections</div>
+      <div class="meta-item"><strong>${c.sections.reduce((a,s)=>a+s.lectures.length,0)}</strong>Lectures</div>
+      <div class="meta-item"><strong>${c.estimatedDuration}</strong>Total time</div>
+      <div class="meta-item"><strong>v${c.version}</strong>Version</div>
+    </div>
+    ${c.learningOutcomes.length ? `
+      <h3 style="font-size:18px;margin-bottom:8px">What you'll be able to do</h3>
+      <ul class="outcomes-list">${c.learningOutcomes.map(o=>`<li>${o}</li>`).join('')}</ul>
+    ` : ''}
+    ${c.prerequisites.length ? `
+      <h3 style="font-size:18px;margin-bottom:8px">Prerequisites</h3>
+      <ul class="prereq-list">${c.prerequisites.map(p=>`<li>${p}</li>`).join('')}</ul>
+    ` : ''}
+    <button class="btn btn-primary" onclick="goToScreen('section-intro', 0, 0)">Start Course →</button>
+  `;
+}
+
+// SECTION INTRO
+function renderSectionIntro() {
+  const sIdx = state.currentSectionIndex;
+  const section = COURSE.sections[sIdx];
+  const el = document.getElementById('screen-section-intro');
+  el.innerHTML = `
+    <div class="section-eyebrow">Section ${sIdx + 1} of ${COURSE.sections.length}</div>
+    <h1 style="font-size:32px;margin-bottom:12px">${section.sectionTitle}</h1>
+    <p style="color:var(--text-secondary);margin-bottom:20px;font-size:15px">${section.sectionDescription}</p>
+    ${section.whyThisMatters ? `<div class="why-box">💡 <strong>Why this matters:</strong> ${section.whyThisMatters}</div>` : ''}
+    ${section.reviewContent && section.reviewContent.length ? `
+      <div class="review-box">
+        <h4>↩ Spaced Review — Recall from before</h4>
+        <ul>${section.reviewContent.map(r=>`<li>${r}</li>`).join('')}</ul>
+      </div>
+    ` : ''}
+    <h3 style="font-size:16px;margin-bottom:10px">In this section you'll learn to</h3>
+    <ul class="objectives-list">${section.learningObjectives.map(o=>`<li>${o}</li>`).join('')}</ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="${sIdx > 0 ? `goToScreen('section-summary', ${sIdx-1})` : `goToScreen('intro')`}">← Back</button>
+      <button class="btn btn-primary" onclick="goToScreen('lecture', ${sIdx}, 0)">Begin Section →</button>
+    </div>
+  `;
+}
+
+// LECTURE
+function renderLecture() {
+  const sIdx = state.currentSectionIndex;
+  const lIdx = state.currentLectureIndex;
+  const lecture = COURSE.sections[sIdx].lectures[lIdx];
+  const section = COURSE.sections[sIdx];
+  const totalLectures = section.lectures.length;
+  const el = document.getElementById('screen-lecture');
+
+  let topicsHTML = lecture.lectureTopics.map(topic => {
+    let mediaHTML = '';
+    if (topic.media && topic.media.length) {
+      topic.media.forEach(m => {
+        if (m.type === 'image') {
+          mediaHTML += `
+            <div class="media-block">
+              <img src="${m.url}" alt="${m.altText || m.label || ''}" onerror="this.style.display='none'">
+              ${m.label ? `<p class="media-caption">${m.label}</p>` : ''}
+            </div>`;
+        } else if (m.type === 'video') {
+          mediaHTML += `
+            <div class="media-block">
+              <div class="video-placeholder">
+                <div class="play-btn">▶</div>
+                <span>Video: ${m.url || 'Unavailable in preview'}</span>
+              </div>
+            </div>`;
+        } else if (m.type === 'text') {
+          mediaHTML += `<div class="media-text-block">${m.content}</div>`;
+        }
+      });
+    }
+    return `
+      <div class="topic-block">
+        <p class="topic-text">${topic.text}</p>
+        ${mediaHTML}
+        ${topic.summary ? `<div class="topic-summary"><strong>Key takeaway:</strong> ${topic.summary}</div>` : ''}
+      </div>`;
+  }).join('');
+
+  let workedHTML = '';
+  if (lecture.workedExample) {
+    const we = lecture.workedExample;
+    workedHTML = `
+      <div class="worked-example">
+        <div class="worked-example-label">Worked Example</div>
+        <h4>${we.problem}</h4>
+        <ol>${we.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+        ${we.conclusion ? `<p class="conclusion">${we.conclusion}</p>` : ''}
+      </div>`;
+  }
+
+  let objHTML = '';
+  if (lecture.learningObjectives && lecture.learningObjectives.length) {
+    objHTML = `<ul class="objectives-list" style="margin-bottom:20px">${lecture.learningObjectives.map(o=>`<li>${o}</li>`).join('')}</ul>`;
+  }
+
+  let summaryHTML = '';
+  if (lecture.summary && lecture.summary.length) {
+    summaryHTML = `
+      <div class="lecture-summary">
+        <h4>Lecture Summary</h4>
+        <ul>${lecture.summary.map(s=>`<li>${s}</li>`).join('')}</ul>
+      </div>`;
+  }
+
+  // determine next destination
+  const isLastLecture = lIdx === totalLectures - 1;
+  const nextLabel = isLastLecture ? 'Section Quiz →' : 'Next Lecture →';
+  const nextAction = isLastLecture
+    ? `markLectureDone(${sIdx},${lIdx}); goToScreen('quiz', ${sIdx})`
+    : `markLectureDone(${sIdx},${lIdx}); goToScreen('lecture', ${sIdx}, ${lIdx+1})`;
+
+  const prevAction = lIdx === 0
+    ? `goToScreen('section-intro', ${sIdx})`
+    : `goToScreen('lecture', ${sIdx}, ${lIdx-1})`;
+
+  el.innerHTML = `
+    <div class="lecture-header">
+      <div class="section-eyebrow">${section.sectionTitle} · Lecture ${lIdx + 1} of ${totalLectures}</div>
+      <h2>${lecture.lectureTitle}</h2>
+      <div class="lecture-meta">
+        ${lecture.estimatedDuration ? `<span>⏱ ${lecture.estimatedDuration}</span>` : ''}
+      </div>
+      <p style="color:var(--text-secondary);margin-top:10px;font-size:14px">${lecture.lectureDescription}</p>
+    </div>
+    ${objHTML}
+    ${workedHTML}
+    ${topicsHTML}
+    ${summaryHTML}
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="${prevAction}">← Back</button>
+      <button class="btn btn-primary" onclick="${nextAction}">${nextLabel}</button>
+    </div>
+  `;
+}
+
+function markLectureDone(sIdx, lIdx) {
+  state.completedLectures.add(`${sIdx}-${lIdx}`);
+}
+
+// QUIZ
+function renderQuiz() {
+  const sIdx = state.currentSectionIndex;
+  const section = COURSE.sections[sIdx];
+  const quiz = section.quiz;
+  const submitted = !!state.quizSubmitted[sIdx];
+  const answers = state.quizAnswers[sIdx] || {};
+  const el = document.getElementById('screen-quiz');
+
+  let questionsHTML = quiz.questions.map((q, qIdx) => {
+    const selectedAnswer = answers[qIdx];
+    const isCorrect = selectedAnswer === q.answer;
+
+    if (q.questionType === 'multiple-choice') {
+      const optionsHTML = q.options.map((opt, oIdx) => {
+        const letter = ['A','B','C','D'][oIdx];
+        let cls = 'option-item';
+        if (submitted) {
+          cls += ' disabled';
+          if (opt.text === q.answer) cls += ' correct';
+          else if (opt.text === selectedAnswer && opt.text !== q.answer) cls += ' incorrect';
+        } else if (selectedAnswer === opt.text) cls += ' selected';
+        return `
+          <li class="${cls}" onclick="${submitted ? '' : `selectAnswer(${sIdx},${qIdx},'${escapeQ(opt.text)}')`}">
+            <span class="option-letter">${letter}</span>
+            <span>${opt.text}</span>
+          </li>`;
+      }).join('');
+
+      let feedbackHTML = '';
+      if (submitted && selectedAnswer !== undefined) {
+        const chosen = q.options.find(o => o.text === selectedAnswer);
+        feedbackHTML = `
+          <div class="feedback-box ${isCorrect ? 'correct' : 'incorrect'} show">
+            <strong>${isCorrect ? '✓ Correct' : '✗ Incorrect'}</strong>
+            ${chosen ? chosen.explanation : ''}
+          </div>
+          ${!isCorrect ? `<div class="feedback-box correct show" style="margin-top:6px"><strong>Overall:</strong> ${q.explanation}</div>` : ''}`;
+      }
+
+      return `
+        <div class="question-block">
+          <div class="question-number">Question ${qIdx + 1} · Multiple Choice</div>
+          <div class="question-text">${q.question}</div>
+          <ul class="options-list">${optionsHTML}</ul>
+          ${feedbackHTML}
+        </div>`;
+
+    } else if (q.questionType === 'true-false') {
+      const optionsHTML = q.options.map(opt => {
+        let cls = 'option-item';
+        if (submitted) {
+          cls += ' disabled';
+          if (opt.text === q.answer) cls += ' correct';
+          else if (opt.text === selectedAnswer) cls += ' incorrect';
+        } else if (selectedAnswer === opt.text) cls += ' selected';
+        return `<li class="${cls}" onclick="${submitted ? '' : `selectAnswer(${sIdx},${qIdx},'${escapeQ(opt.text)}')`}" style="justify-content:center">${opt.text}</li>`;
+      }).join('');
+
+      let feedbackHTML = '';
+      if (submitted) {
+        feedbackHTML = `
+          <div class="feedback-box ${isCorrect ? 'correct' : 'incorrect'} show">
+            <strong>${isCorrect ? '✓ Correct' : '✗ Incorrect'}</strong>
+            ${q.explanation}
+          </div>`;
+      }
+
+      return `
+        <div class="question-block">
+          <div class="question-number">Question ${qIdx + 1} · True or False</div>
+          <div class="question-text">${q.question}</div>
+          <ul class="options-list tf-options">${optionsHTML}</ul>
+          ${feedbackHTML}
+        </div>`;
+
+    } else if (q.questionType === 'short-answer') {
+      const val = answers[qIdx] || '';
+      return `
+        <div class="question-block">
+          <div class="question-number">Question ${qIdx + 1} · Short Answer</div>
+          <div class="question-text">${q.question}</div>
+          <textarea class="short-answer-input" placeholder="Write your answer here…" id="sa-${sIdx}-${qIdx}" ${submitted ? 'disabled' : ''}>${val}</textarea>
+          <p class="short-answer-hint">There's no single correct answer — focus on applying the concepts from this section.</p>
+          ${submitted ? `<div class="feedback-box correct show"><strong>Model answer:</strong> ${q.explanation}</div>` : ''}
+        </div>`;
+    }
+    return '';
+  }).join('');
+
+  // score
+  let scoreHTML = '';
+  if (submitted) {
+    const gradeable = quiz.questions.filter(q => q.questionType !== 'short-answer');
+    const correct = gradeable.filter((q, qIdx) => answers[qIdx] === q.answer).length;
+    const pct = gradeable.length > 0 ? Math.round((correct / gradeable.length) * 100) : 100;
+    const passed = pct >= quiz.passingScore;
+    scoreHTML = `
+      <div class="quiz-overall-feedback show">
+        <div class="quiz-score">${pct}%</div>
+        <h3>${passed ? '🎉 Well done!' : '📚 Keep going'}</h3>
+        <p>${passed ? `You scored ${pct}% — above the passing mark of ${quiz.passingScore}%. Move on to the practical activity.`
+          : `You scored ${pct}%. The passing mark is ${quiz.passingScore}%. Review the lectures and try the quiz again.`}</p>
+        ${passed ? `<button class="btn btn-primary" style="margin-top:14px" onclick="goToScreen('activity',${sIdx})">Practical Activity →</button>` : ''}
+      </div>`;
+  }
+
+  const allAnswered = quiz.questions.every((q, qIdx) => {
+    if (q.questionType === 'short-answer') return true;
+    return answers[qIdx] !== undefined;
+  });
+
+  el.innerHTML = `
+    <div class="quiz-header">
+      <div class="section-eyebrow">${section.sectionTitle}</div>
+      <h2>Section Quiz</h2>
+      <div class="quiz-meta">
+        <span>📝 ${quiz.questions.length} questions</span>
+        <span>Passing: ${quiz.passingScore}%</span>
+        <span>Attempts: ${quiz.attemptsAllowed}</span>
+      </div>
+    </div>
+    ${questionsHTML}
+    ${!submitted ? `
+      <button class="btn btn-primary" style="margin-top:4px" id="submit-quiz-btn" onclick="submitQuiz(${sIdx})" ${allAnswered ? '' : 'disabled'}>
+        Submit Quiz
+      </button>` : ''}
+    ${scoreHTML}
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goToScreen('lecture', ${sIdx}, ${section.lectures.length - 1})">← Back to Lectures</button>
+      ${submitted ? `<button class="btn btn-primary" onclick="goToScreen('activity', ${sIdx})">Practical Activity →</button>` : ''}
+    </div>
+  `;
+
+  // attach short-answer live listeners
+  if (!submitted) {
+    quiz.questions.forEach((q, qIdx) => {
+      if (q.questionType === 'short-answer') {
+        const ta = document.getElementById(`sa-${sIdx}-${qIdx}`);
+        if (ta) ta.addEventListener('input', () => {
+          if (!state.quizAnswers[sIdx]) state.quizAnswers[sIdx] = {};
+          state.quizAnswers[sIdx][qIdx] = ta.value;
+        });
+      }
+    });
+  }
+}
+
+function escapeQ(s) { return s.replace(/'/g, "\\'"); }
+
+function selectAnswer(sIdx, qIdx, answer) {
+  if (!state.quizAnswers[sIdx]) state.quizAnswers[sIdx] = {};
+  state.quizAnswers[sIdx][qIdx] = answer;
+  renderQuiz();
+}
+
+function submitQuiz(sIdx) {
+  // capture short answers
+  const quiz = COURSE.sections[sIdx].quiz;
+  quiz.questions.forEach((q, qIdx) => {
+    if (q.questionType === 'short-answer') {
+      const ta = document.getElementById(`sa-${sIdx}-${qIdx}`);
+      if (ta) {
+        if (!state.quizAnswers[sIdx]) state.quizAnswers[sIdx] = {};
+        state.quizAnswers[sIdx][qIdx] = ta.value;
+      }
+    }
+  });
+  state.quizSubmitted[sIdx] = true;
+  state.completedQuizzes.add(sIdx);
+  renderQuiz();
+  updateSidebar();
+}
+
+// ACTIVITY
+function renderActivity() {
+  const sIdx = state.currentSectionIndex;
+  const section = COURSE.sections[sIdx];
+  const act = section.practicalActivity;
+  const el = document.getElementById('screen-activity');
+
+  el.innerHTML = `
+    <div class="activity-header">
+      <div class="section-eyebrow">${section.sectionTitle} · Practical Activity</div>
+      <h2>${act.title}</h2>
+      <p style="color:var(--text-secondary);font-size:14px;margin-top:8px">${act.description}</p>
+    </div>
+    <div class="scenario-box">
+      <h4>Your Scenario</h4>
+      <p>${act.scenario}</p>
+    </div>
+    <h3 style="font-size:17px;margin-bottom:12px">Steps</h3>
+    <ol class="steps-list">${act.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+    <h3 style="font-size:17px;margin-bottom:10px">Success Criteria</h3>
+    <ul class="criteria-list">${act.successCriteria.map(c=>`<li>${c}</li>`).join('')}</ul>
+    <h3 style="font-size:17px;margin-bottom:10px">Your Response</h3>
+    <textarea class="activity-response" placeholder="Write your response here — you can refer back to this at any time…" id="activity-response-${sIdx}"></textarea>
+    <div style="margin-top:14px;display:flex;gap:10px;align-items:center">
+      <button class="btn btn-primary btn-sm" onclick="completeActivity(${sIdx})">Mark as Complete</button>
+      <span id="activity-done-${sIdx}" style="font-size:13px;color:var(--accent);display:none">✓ Completed</span>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goToScreen('quiz', ${sIdx})">← Back to Quiz</button>
+      <button class="btn btn-primary" onclick="goToScreen('section-summary', ${sIdx})">Section Summary →</button>
+    </div>
+  `;
+
+  if (state.completedActivities.has(sIdx)) {
+    const doneEl = document.getElementById(`activity-done-${sIdx}`);
+    if (doneEl) doneEl.style.display = 'inline';
+  }
+}
+
+function completeActivity(sIdx) {
+  state.completedActivities.add(sIdx);
+  const doneEl = document.getElementById(`activity-done-${sIdx}`);
+  if (doneEl) doneEl.style.display = 'inline';
+  updateSidebar();
+}
+
+// SECTION SUMMARY
+function renderSectionSummary() {
+  const sIdx = state.currentSectionIndex;
+  const section = COURSE.sections[sIdx];
+  const isLast = sIdx === COURSE.sections.length - 1;
+  const el = document.getElementById('screen-section-summary');
+
+  el.innerHTML = `
+    <div class="section-eyebrow">Section ${sIdx + 1} Complete</div>
+    <h1 style="font-size:32px;margin-bottom:16px">${section.sectionTitle}</h1>
+    <div class="section-summary">
+      <h4>What you covered</h4>
+      <div class="summary-grid">
+        ${section.summary.map(s=>`<div class="summary-item">${s}</div>`).join('')}
+      </div>
+    </div>
+    <p style="color:var(--text-secondary);font-size:14px;margin-bottom:28px">
+      Take a moment to reflect: can you explain each of these points in your own words? That's the true test of understanding.
+    </p>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goToScreen('activity', ${sIdx})">← Back to Activity</button>
+      ${isLast
+        ? `<button class="btn btn-primary" onclick="goToScreen('complete')">Finish Course 🎓</button>`
+        : `<button class="btn btn-primary" onclick="goToScreen('section-intro', ${sIdx + 1}, 0)">Next Section →</button>`
+      }
+    </div>
+  `;
+}
+
+// GLOSSARY
+function renderGlossary() {
+  const body = document.getElementById('glossary-body');
+  if (!COURSE.glossary || !COURSE.glossary.length) {
+    body.innerHTML = '<p style="padding:16px;font-size:13px;color:var(--text-secondary)">No glossary terms defined.</p>';
+    return;
+  }
+  body.innerHTML = COURSE.glossary.map(g => `
+    <dl class="glossary-term">
+      <dt>${g.term}</dt>
+      <dd>${g.definition}</dd>
+    </dl>`).join('');
+}
+
+function toggleGlossary() {
+  document.getElementById('glossary-drawer').classList.toggle('open');
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+buildSidebar();
+renderScreen('intro');
+</script>
+</body>
+</html>

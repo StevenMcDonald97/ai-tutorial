@@ -1,0 +1,2302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Course Player</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f5f2;
+    --surface: #ffffff;
+    --border: #e8e4de;
+    --text: #1a1917;
+    --text-secondary: #6b6760;
+    --accent: #2d5a3d;
+    --accent-light: #eaf2ec;
+    --accent-muted: #4a7c5f;
+    --warn: #8b3a2a;
+    --warn-light: #fdf0ee;
+    --gold: #c9973a;
+    --gold-light: #fdf6e8;
+    --radius: 10px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4 { font-family: 'DM Serif Display', serif; font-weight: 400; line-height: 1.25; }
+
+  /* ── Layout ── */
+  #app { display: flex; min-height: 100vh; }
+
+  /* ── Sidebar ── */
+  #sidebar {
+    width: 300px;
+    min-width: 300px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  #sidebar-header {
+    padding: 24px 20px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  #sidebar-header .course-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  #sidebar-header h2 { font-size: 18px; color: var(--text); }
+
+  #progress-bar-wrap {
+    margin-top: 14px;
+    background: var(--border);
+    border-radius: 99px;
+    height: 5px;
+    overflow: hidden;
+  }
+  #progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  #progress-label {
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  /* Section nav */
+  .section-nav-item { border-bottom: 1px solid var(--border); }
+
+  .section-nav-header {
+    padding: 12px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .section-nav-header:hover { background: var(--bg); }
+  .section-nav-header.active { color: var(--text); }
+
+  .section-check {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 9px;
+    transition: all 0.2s;
+  }
+  .section-check.done { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .section-check.active { border-color: var(--accent); }
+
+  .section-nav-title { flex: 1; }
+  .section-nav-arrow { font-size: 10px; transition: transform 0.2s; }
+  .section-nav-item.open .section-nav-arrow { transform: rotate(90deg); }
+
+  .section-nav-lectures { display: none; }
+  .section-nav-item.open .section-nav-lectures { display: block; }
+
+  .lecture-nav-item {
+    padding: 8px 20px 8px 48px;
+    cursor: pointer;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    display: flex; align-items: center; gap: 8px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .lecture-nav-item:hover { background: var(--bg); color: var(--text); }
+  .lecture-nav-item.active { color: var(--accent); font-weight: 500; }
+  .lecture-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .lecture-nav-item.active .lecture-dot { background: var(--accent); }
+  .lecture-nav-item.done .lecture-dot { background: var(--accent-muted); }
+
+  /* Quiz & activity in sidebar */
+  .quiz-nav-item {
+    padding: 8px 20px 8px 48px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex; align-items: center; gap: 8px;
+    transition: background 0.15s;
+  }
+  .quiz-nav-item:hover { background: var(--bg); }
+  .quiz-nav-item.active { color: var(--gold); font-weight: 500; }
+  .quiz-nav-item .lecture-dot { background: var(--gold); opacity: 0.4; }
+  .quiz-nav-item.active .lecture-dot { opacity: 1; }
+
+  /* ── Main Content ── */
+  #main {
+    flex: 1;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 40px;
+  }
+
+  /* ── Screens ── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Course intro */
+  #screen-intro .course-image {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    margin-bottom: 32px;
+    background: linear-gradient(135deg, var(--accent-light), var(--border));
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+    font-size: 48px;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .tag-green { background: var(--accent-light); color: var(--accent); }
+  .tag-gray { background: var(--border); color: var(--text-secondary); }
+
+  #screen-intro h1 { font-size: 36px; margin: 12px 0 16px; }
+  #screen-intro .desc { color: var(--text-secondary); font-size: 15px; margin-bottom: 28px; }
+
+  .meta-row {
+    display: flex; flex-wrap: wrap; gap: 20px;
+    padding: 20px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+  }
+  .meta-item { font-size: 13px; color: var(--text-secondary); }
+  .meta-item strong { color: var(--text); display: block; font-weight: 600; font-size: 14px; }
+
+  .outcomes-list, .prereq-list {
+    list-style: none;
+    margin: 12px 0 24px;
+  }
+  .outcomes-list li, .prereq-list li {
+    padding: 6px 0 6px 20px;
+    position: relative;
+    font-size: 14px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+  }
+  .outcomes-list li::before {
+    content: '✓';
+    position: absolute; left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .prereq-list li::before {
+    content: '·';
+    position: absolute; left: 6px;
+    color: var(--text-secondary);
+    font-size: 18px;
+    line-height: 1.2;
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 28px;
+    border-radius: 99px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-muted); }
+  .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--bg); }
+  .btn-sm { padding: 8px 18px; font-size: 13px; }
+
+  /* Section intro */
+  .section-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .why-box {
+    background: var(--accent-light);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 14px 18px;
+    margin: 20px 0;
+    font-size: 14px;
+    color: var(--accent);
+  }
+
+  .objectives-list {
+    list-style: none;
+    margin: 12px 0 24px;
+  }
+  .objectives-list li {
+    padding: 8px 12px 8px 36px;
+    position: relative;
+    font-size: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 6px;
+  }
+  .objectives-list li::before {
+    content: '→';
+    position: absolute; left: 12px;
+    color: var(--accent);
+  }
+
+  /* Review box */
+  .review-box {
+    background: var(--gold-light);
+    border: 1px solid #e8d5a8;
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 28px;
+  }
+  .review-box h4 { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+  .review-box ul { list-style: none; }
+  .review-box li { font-size: 13.5px; color: var(--text-secondary); padding: 4px 0; padding-left: 16px; position: relative; }
+  .review-box li::before { content: '↩'; position: absolute; left: 0; color: var(--gold); font-size: 11px; }
+
+  /* Lecture */
+  .lecture-header { margin-bottom: 28px; }
+  .lecture-header h2 { font-size: 28px; margin: 8px 0 10px; }
+  .lecture-meta { font-size: 12px; color: var(--text-secondary); display: flex; gap: 16px; }
+
+  .worked-example {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 28px;
+  }
+  .worked-example-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--accent-muted); margin-bottom: 10px;
+  }
+  .worked-example h4 { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .worked-example ol { padding-left: 18px; }
+  .worked-example ol li { font-size: 13.5px; color: var(--text-secondary); margin-bottom: 4px; }
+  .worked-example .conclusion { margin-top: 12px; font-size: 13px; color: var(--accent); font-style: italic; }
+
+  /* Topic */
+  .topic-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .topic-text { font-size: 15px; line-height: 1.75; color: var(--text); margin-bottom: 16px; }
+  .topic-summary {
+    background: var(--accent-light);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--accent);
+    margin-top: 14px;
+  }
+  .topic-summary strong { font-weight: 600; }
+
+  .media-block { margin-top: 16px; }
+  .media-block img {
+    width: 100%; border-radius: 6px;
+    border: 1px solid var(--border);
+    margin-bottom: 6px;
+  }
+  .media-caption { font-size: 12px; color: var(--text-secondary); text-align: center; }
+  .media-text-block {
+    background: var(--bg);
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 12px;
+  }
+  .video-placeholder {
+    background: #1a1917;
+    border-radius: 6px;
+    height: 200px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-size: 13px;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .play-btn {
+    width: 40px; height: 40px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  /* Lecture summary */
+  .lecture-summary {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-top: 28px;
+  }
+  .lecture-summary h4 { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 10px; }
+  .lecture-summary ul { list-style: none; }
+  .lecture-summary li { padding: 5px 0 5px 18px; position: relative; font-size: 14px; color: var(--text-secondary); }
+  .lecture-summary li::before { content: '✓'; position: absolute; left: 0; color: var(--accent); font-weight: 700; font-size: 12px; }
+
+  /* Nav buttons */
+  .nav-buttons {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 36px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Quiz */
+  .quiz-header { margin-bottom: 28px; }
+  .quiz-header h2 { font-size: 28px; margin: 8px 0 10px; }
+  .quiz-meta { font-size: 13px; color: var(--text-secondary); display: flex; gap: 16px; }
+
+  .question-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .question-number { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 8px; }
+  .question-text { font-size: 16px; font-weight: 500; margin-bottom: 18px; line-height: 1.5; }
+
+  .options-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .option-item {
+    padding: 12px 16px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex; align-items: flex-start; gap: 12px;
+    transition: all 0.15s;
+    background: var(--surface);
+  }
+  .option-item:hover { border-color: var(--accent); background: var(--accent-light); }
+  .option-item.selected { border-color: var(--accent); background: var(--accent-light); }
+  .option-item.correct { border-color: var(--accent); background: var(--accent-light); }
+  .option-item.incorrect { border-color: var(--warn); background: var(--warn-light); }
+  .option-item.disabled { cursor: default; pointer-events: none; }
+  .option-letter {
+    width: 22px; height: 22px; min-width: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 1px;
+    transition: all 0.15s;
+  }
+  .option-item.selected .option-letter { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .option-item.correct .option-letter { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .option-item.incorrect .option-letter { background: var(--warn); border-color: var(--warn); color: #fff; }
+
+  .feedback-box {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 13.5px;
+    display: none;
+  }
+  .feedback-box.show { display: block; }
+  .feedback-box.correct { background: var(--accent-light); color: var(--accent); }
+  .feedback-box.incorrect { background: var(--warn-light); color: var(--warn); }
+  .feedback-box strong { display: block; margin-bottom: 4px; font-weight: 600; }
+
+  /* True/false */
+  .tf-options { display: flex; gap: 12px; }
+  .tf-options .option-item { flex: 1; justify-content: center; text-align: center; }
+
+  /* Short answer */
+  .short-answer-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    resize: vertical;
+    min-height: 80px;
+    transition: border 0.15s;
+    background: var(--surface);
+    color: var(--text);
+  }
+  .short-answer-input:focus { outline: none; border-color: var(--accent); }
+  .short-answer-hint { font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
+
+  .check-btn {
+    margin-top: 14px;
+    padding: 10px 22px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .check-btn:hover { background: var(--accent-muted); }
+  .check-btn:disabled { opacity: 0.4; cursor: default; }
+
+  .quiz-overall-feedback {
+    background: var(--accent-light);
+    border: 1px solid #b8d9c2;
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-top: 24px;
+    display: none;
+  }
+  .quiz-overall-feedback.show { display: block; }
+  .quiz-overall-feedback h3 { font-size: 20px; margin-bottom: 6px; }
+  .quiz-overall-feedback p { font-size: 14px; color: var(--text-secondary); }
+  .quiz-score { font-size: 36px; font-family: 'DM Serif Display', serif; color: var(--accent); }
+
+  /* Practical activity */
+  .activity-header { margin-bottom: 28px; }
+  .activity-header h2 { font-size: 28px; margin: 8px 0 10px; }
+
+  .scenario-box {
+    background: var(--gold-light);
+    border: 1px solid #e8d5a8;
+    border-left: 3px solid var(--gold);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 24px;
+  }
+  .scenario-box h4 { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+  .scenario-box p { font-size: 14px; color: var(--text-secondary); }
+
+  .steps-list { list-style: none; counter-reset: steps; margin-bottom: 24px; }
+  .steps-list li {
+    counter-increment: steps;
+    padding: 12px 16px 12px 52px;
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  .steps-list li::before {
+    content: counter(steps);
+    position: absolute; left: 16px;
+    width: 22px; height: 22px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    top: 12px;
+  }
+
+  .criteria-list { list-style: none; margin-bottom: 24px; }
+  .criteria-list li {
+    padding: 8px 12px 8px 32px;
+    position: relative;
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+  .criteria-list li::before { content: '◇'; position: absolute; left: 8px; color: var(--accent); font-size: 12px; }
+
+  .activity-response {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    resize: vertical;
+    min-height: 140px;
+    transition: border 0.15s;
+    background: var(--surface);
+    color: var(--text);
+  }
+  .activity-response:focus { outline: none; border-color: var(--accent); }
+
+  /* Section summary */
+  .section-summary {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .section-summary h4 { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 14px; }
+  .summary-grid { display: grid; gap: 8px; }
+  .summary-item {
+    padding: 10px 14px 10px 36px;
+    position: relative;
+    background: var(--accent-light);
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--accent);
+  }
+  .summary-item::before { content: '✓'; position: absolute; left: 12px; font-weight: 700; }
+
+  /* Glossary drawer */
+  #glossary-btn {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 99px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(45,90,61,0.3);
+    z-index: 100;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  #glossary-drawer {
+    position: fixed; bottom: 0; right: 0;
+    width: 320px;
+    max-height: 50vh;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius) var(--radius) 0 0;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.1);
+    z-index: 200;
+    display: none;
+    flex-direction: column;
+  }
+  #glossary-drawer.open { display: flex; }
+  #glossary-drawer-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  #glossary-drawer-header h4 { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); }
+  #glossary-close { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--text-secondary); }
+  #glossary-body { overflow-y: auto; padding: 10px 0; }
+  .glossary-term { padding: 10px 18px; border-bottom: 1px solid var(--border); }
+  .glossary-term dt { font-size: 13px; font-weight: 600; color: var(--accent); }
+  .glossary-term dd { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+  /* Completion */
+  #screen-complete {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .complete-badge {
+    width: 80px; height: 80px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    margin: 0 auto 28px;
+  }
+  #screen-complete h1 { font-size: 40px; margin-bottom: 12px; }
+  #screen-complete p { color: var(--text-secondary); font-size: 16px; max-width: 480px; margin: 0 auto 32px; }
+
+  /* Transitions */
+  .screen { animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Scrollbar */
+  #sidebar::-webkit-scrollbar { width: 4px; }
+  #sidebar::-webkit-scrollbar-track { background: transparent; }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  @media (max-width: 700px) {
+    #sidebar { display: none; }
+    #main { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <nav id="sidebar">
+    <div id="sidebar-header">
+      <div class="course-label">Course</div>
+      <h2 id="sidebar-title"></h2>
+      <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+      <div id="progress-label"></div>
+    </div>
+    <div id="sidebar-nav"></div>
+  </nav>
+
+  <main id="main">
+    <div id="screen-intro" class="screen active"></div>
+    <div id="screen-section-intro" class="screen"></div>
+    <div id="screen-lecture" class="screen"></div>
+    <div id="screen-quiz" class="screen"></div>
+    <div id="screen-activity" class="screen"></div>
+    <div id="screen-section-summary" class="screen"></div>
+    <div id="screen-complete" class="screen">
+      <div class="complete-badge">🎓</div>
+      <h1>Course Complete!</h1>
+      <p>Congratulations — you've completed the course. Review any section using the sidebar, or restart from the beginning.</p>
+      <button class="btn btn-primary" onclick="goToScreen('intro')">Back to Start</button>
+    </div>
+  </main>
+</div>
+
+<button id="glossary-btn" onclick="toggleGlossary()">📖 Glossary</button>
+<div id="glossary-drawer">
+  <div id="glossary-drawer-header">
+    <h4>Glossary</h4>
+    <button id="glossary-close" onclick="toggleGlossary()">✕</button>
+  </div>
+  <div id="glossary-body"></div>
+</div>
+
+<script>
+// ── COURSE DATA ─────────────────────────────────────────────────────────────
+// Replace this object with your own course JSON to use the player with different content.
+const COURSE = {
+  "courseTitle": "Practicing Joy and Happiness: A Cultural and Scientific Guide",
+  "courseDescription": "A practical, research-grounded, and culturally rich course on building lasting happiness. Drawing from positive psychology, Buddhism, Stoicism, Christianity, Islam, Judaism, Hinduism, Ubuntu philosophy, Confucianism, and Japanese wisdom traditions, this course teaches you not just what joy is but how to practice it — daily, deliberately, and in a way that is authentically yours.",
+  "courseImage": "",
+  "estimatedDuration": "2 weeks at 20 minutes per day",
+  "lastUpdated": "2026-05-17",
+  "version": "1.0",
+  "prerequisites": [
+    "No formal prerequisites — some prior reflection on what makes life meaningful is helpful but not required",
+    "Willingness to examine your own assumptions about what happiness is and where it comes from",
+    "A notebook and pen for daily written practice"
+  ],
+  "difficultyLevel": "intermediate",
+  "learningOutcomes": [
+    "Understand the five foundational insights about happiness that science and cross-cultural wisdom independently confirm",
+    "Apply the three-good-things practice daily with genuine specificity and causal attribution",
+    "Identify your top character strengths using the VIA survey and deploy them in new contexts",
+    "Explain how at least four major cultural traditions conceptualize happiness and identify where they converge",
+    "Complete a gratitude letter and deliver it in person or by phone",
+    "Perform loving-kindness meditation and negative visualization as standalone practices",
+    "Articulate a personal philosophy of joy that draws from the traditions and science that resonate most with your own values"
+  ],
+  "glossary": [
+    { "term": "Hedonic adaptation", "definition": "The brain's tendency to rapidly normalize positive (and negative) circumstances, returning to a baseline level of happiness regardless of what changes externally." },
+    { "term": "Eudaimonia", "definition": "The Greek concept of human flourishing — living well and doing well — as distinct from merely feeling pleasant. Associated with virtue, purpose, and the full use of one's capacities." },
+    { "term": "Hedonia", "definition": "Pleasure-based happiness — the experience of positive emotions and the absence of negative ones. One dimension of wellbeing, but insufficient on its own for lasting flourishing." },
+    { "term": "PERMA", "definition": "Martin Seligman's five-element model of wellbeing: Positive emotions, Engagement, Relationships, Meaning, and Accomplishment." },
+    { "term": "Dukkha", "definition": "A Buddhist term often translated as 'suffering' but more precisely meaning unsatisfactoriness, unease, or the inherent instability of conditioned existence. The first noble truth of Buddhism." },
+    { "term": "Metta", "definition": "The Buddhist practice of loving-kindness — systematically extending goodwill toward oneself and progressively wider circles of others, including difficult people and all beings." },
+    { "term": "Mudita", "definition": "The Buddhist concept of sympathetic joy — the capacity to feel genuinely happy at the happiness and success of others. One of the four brahmaviharas (divine abodes)." },
+    { "term": "Savoring", "definition": "The practice of deliberately attending to and appreciating positive experiences as they occur, or in reflection — a research-backed method for counteracting hedonic adaptation." },
+    { "term": "Flow", "definition": "Mihaly Csikszentmihalyi's term for the state of optimal experience: complete absorption in a challenging task that stretches but does not exceed one's abilities, producing effortless concentration and deep satisfaction." },
+    { "term": "Shukr", "definition": "The Islamic concept of gratitude — understood not merely as a feeling but as active worship, the acknowledgment that all good originates with God." },
+    { "term": "Ubuntu", "definition": "A Nguni Bantu philosophy meaning 'I am because we are' — the idea that personhood and flourishing are constituted by one's relationships and community, not individual achievement." },
+    { "term": "Ikigai", "definition": "A Japanese concept meaning 'reason for being' — the intersection of what you love, what you are good at, what the world needs, and what you can sustain economically." },
+    { "term": "Wabi-sabi", "definition": "A Japanese aesthetic worldview centered on the beauty of impermanence, imperfection, and incompleteness — finding joy in the transient and the flawed." },
+    { "term": "Hygge", "definition": "A Danish concept describing a quality of coziness, conviviality, and unhurried togetherness — the deliberate creation of conditions in which warmth and connection can arise without performance." },
+    { "term": "Simcha", "definition": "The Hebrew/Jewish concept of joy — understood not as spontaneous emotion but as an active state cultivated through fulfillment of mitzvot (commandments), celebration, and communal life." },
+    { "term": "Premeditatio malorum", "definition": "The Stoic practice of negative visualization — deliberately imagining the loss of things one values in order to cultivate present gratitude and resilience." },
+    { "term": "Falah", "definition": "The Islamic concept of comprehensive flourishing in this life and the next, achieved through submission to divine will, gratitude, and right action in community." },
+    { "term": "Ananda", "definition": "A Sanskrit term meaning bliss — in Advaita Vedanta, one of the three fundamental characteristics of ultimate reality (sat-chit-ananda: being, consciousness, bliss)." },
+    { "term": "Ren", "definition": "The Confucian concept of benevolence or humaneness — the highest virtue, achieved through right relationship with others, through which one becomes fully human." },
+    { "term": "Svadharma", "definition": "A Sanskrit term meaning one's own duty or path — the individual's unique role and purpose, the fulfillment of which constitutes a life of meaning and right action in Hindu thought." },
+    { "term": "Nishkama karma", "definition": "A concept from the Bhagavad Gita meaning action without attachment to its fruits — acting fully and excellently without making one's happiness hostage to the outcome." },
+    { "term": "Tanha", "definition": "The Buddhist concept of craving or thirst — the cause of dukkha according to the second noble truth. Includes craving for pleasant experience, craving for existence, and craving for non-existence." },
+    { "term": "Sati", "definition": "The Pali word for mindfulness — the practice of placing awareness precisely on present experience and returning it when it wanders. The foundation of Buddhist meditation practice." },
+    { "term": "Bodhicitta", "definition": "In Mahayana Buddhism, the motivation to attain enlightenment for the benefit of all sentient beings — placing meaning entirely beyond the self as the deepest source of purpose." }
+  ],
+  "sections": [
+    {
+      "sectionTitle": "Foundational concepts — what happiness actually is",
+      "sectionDescription": "Five core insights about happiness that modern science and cross-cultural wisdom independently confirm. Understanding these reframes the question before any practice begins.",
+      "estimatedDuration": "3 days",
+      "whyThisMatters": "Most people approach happiness backwards — pursuing circumstances rather than practices, pleasure rather than meaning, individual achievement rather than connection. These five concepts correct that misalignment before any habits are formed.",
+      "learningObjectives": [
+        "Explain the 50/10/40 model of happiness and identify which component is most actionable",
+        "Define hedonic adaptation and explain why gratitude is its evidence-based antidote",
+        "Describe the Harvard Study's central finding and explain its cross-cultural resonance",
+        "Distinguish hedonia from eudaimonia and explain why meaning produces more durable happiness",
+        "Connect each scientific finding to at least one parallel insight from a non-Western tradition"
+      ],
+      "reviewContent": [
+        "What percentage of lasting happiness does research attribute to intentional daily practice — and what does this mean for how you spend your time?",
+        "What is hedonic adaptation? Give an example from your own life and name the traditional concept that addresses it.",
+        "The Harvard Study of Adult Development ran for 80+ years. What was its single most important finding?",
+        "What is the difference between hedonia and eudaimonia? Which produces more durable happiness and why?",
+        "Name three traditions that independently arrived at the insight that present-moment attention is central to happiness.",
+        "What does the convergence across traditions on the same insights suggest about their validity?"
+      ],
+      "lectures": [
+        {
+          "lectureTitle": "Happiness is a practice, not a destination",
+          "lectureDescription": "The 50/10/40 model establishes that circumstances — the thing most people chase — account for only 10% of lasting happiness. Intentional practice is where the real leverage lives.",
+          "estimatedDuration": "15 minutes",
+          "learningObjectives": [
+            "State the 50/10/40 breakdown and explain what each component means practically",
+            "Identify at least two traditions that independently framed happiness as practice rather than outcome"
+          ],
+          "workedExample": {
+            "problem": "Someone believes that getting a significant salary increase will make them lastingly happier. How does the research — and cross-cultural wisdom — evaluate this belief?",
+            "steps": [
+              "Apply the 50/10/40 model: the salary increase is a circumstance change, accounting for only about 10% of lasting happiness. The initial boost will be real but temporary.",
+              "Apply hedonic adaptation: within months, the new salary becomes the new normal. The brain normalizes it and returns to baseline.",
+              "Apply the Buddhist lens: craving the salary as a source of happiness is itself a form of tanha — and the eventual adaptation is dukkha in slow motion.",
+              "Apply the Stoic lens: the salary is 'not up to us' — it depends on others' decisions. Basing happiness on it is basing happiness on something outside one's control.",
+              "Identify what would produce lasting change: intentional practices — gratitude, connection, meaning, flow — which fall in the 40% within ongoing influence."
+            ],
+            "conclusion": "Circumstance changes produce real but temporary happiness boosts. The 40% that is actionable lies in daily intentional practice — a finding every major wisdom tradition anticipated."
+          },
+          "lectureTopics": [
+            {
+              "text": "Lyubomirsky, Sheldon, and Schkade (2005) established that roughly 50% of happiness is determined by genetic set point, 10% by life circumstances, and 40% by intentional daily activity. The 40% is where practice lives. This does not mean circumstances are irrelevant — extreme poverty or violence genuinely impairs wellbeing — but within a range of adequate conditions, what you do daily matters far more than what you have. Buddhism frames this as the teaching that craving fixed outcomes produces suffering. Stoicism's entire project was to achieve eudaimonia through virtue and practice, independent of fortune. Indigenous traditions worldwide describe joy as participation, not reception.",
+              "summary": "Circumstances account for only 10% of lasting happiness; daily intentional practice accounts for 40%. Every major wisdom tradition independently framed happiness as something built through practice, not received through outcomes.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "The 50/10/40 model: 50% genetic set point (largely fixed), 10% life circumstances (highly overestimated), 40% intentional daily activity (the primary leverage point). Source: Lyubomirsky, Sheldon & Schkade (2005), Psychological Bulletin."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Circumstances — the thing most people spend their lives pursuing — account for only 10% of lasting happiness due to hedonic adaptation.",
+            "The 40% that is genuinely actionable lies in intentional daily practice: the convergent conclusion of positive psychology and every major wisdom tradition."
+          ]
+        },
+        {
+          "lectureTitle": "Hedonic adaptation and the practice of gratitude",
+          "lectureDescription": "The brain normalizes everything good that happens to you. Understanding this mechanism is the prerequisite for choosing practices that actually work.",
+          "estimatedDuration": "15 minutes",
+          "learningObjectives": [
+            "Define hedonic adaptation and describe its mechanism in concrete terms",
+            "Explain why gratitude practice is the evidence-based antidote and name its parallel in at least four traditions"
+          ],
+          "workedExample": {
+            "problem": "A person achieves a long-held dream — buying their ideal home. Map the hedonic adaptation process and identify what practice would preserve the happiness it initially produces.",
+            "steps": [
+              "Month 1: genuine elevation in happiness. The home is salient, novel, and richly noticed. Every detail is appreciated.",
+              "Month 3: the home is becoming normal. The brain has recalibrated its predictions. Fewer moments of active appreciation.",
+              "Month 12: the home is fully normalized. It is now the baseline. The same person is now thinking about a renovation or the neighbor's garden.",
+              "The antidote: deliberately and regularly noticing what the home provides — warmth, shelter, beauty, security — as if it were not guaranteed. This is the structure of gratitude practice.",
+              "Cultural parallels: Jewish dayenu (naming each gift and declaring it sufficient), Islamic shukr (gratitude as active worship), Stoic negative visualization (imagining the home's absence to restore appreciation), Buddhist anicca (meditating on impermanence to cultivate present appreciation)."
+            ],
+            "conclusion": "Hedonic adaptation is the brain's prediction engine normalizing the good. Gratitude practice — in its many cultural forms — is the deliberate intervention that counteracts this mechanism."
+          },
+          "lectureTopics": [
+            {
+              "text": "Brickman and Campbell (1971) coined the 'hedonic treadmill' — the observation that humans rapidly adapt to positive changes and return to a stable happiness baseline. Lottery winners return to near their previous happiness levels within a year. Frederick and Loewenstein (1999) mapped adaptation timelines across life events. What works is deliberately counteracting the adaptation engine through gratitude — actively noticing what is already present as if it were not guaranteed. Emmons and McCullough (2003) demonstrated that gratitude journaling measurably reverses adaptation's effect. Every major tradition arrived at this independently: dayenu in Judaism, shukr in Islam, negative visualization in Stoicism, impermanence contemplation in Buddhism.",
+              "summary": "Hedonic adaptation means every external improvement eventually becomes the new normal. Gratitude practice — in secular and sacred forms alike — is the evidence-based method for reclaiming appreciation for what is already present.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Key research: Brickman & Campbell (1971) — hedonic treadmill. Frederick & Loewenstein (1999) — adaptation timelines. Emmons & McCullough (2003) — gratitude journaling increases wellbeing. Cultural parallels: Jewish dayenu, Islamic shukr, Stoic premeditatio malorum, Buddhist anicca."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "The brain normalizes all positive circumstances — this is why external achievement produces only temporary happiness.",
+            "Gratitude practice directly counteracts hedonic adaptation and is validated by both research and independent convergence across major world traditions."
+          ]
+        },
+        {
+          "lectureTitle": "Attention, connection, and meaning — three more foundations",
+          "lectureDescription": "Three further insights — each supported by landmark research and each independently anticipated by multiple traditions.",
+          "estimatedDuration": "20 minutes",
+          "learningObjectives": [
+            "Cite the Killingsworth and Gilbert finding and explain its practical implication",
+            "State the Harvard Study's central finding and connect it to Ubuntu, Confucianism, and Islam",
+            "Distinguish hedonia from eudaimonia and explain why meaning produces more durable satisfaction"
+          ],
+          "workedExample": {
+            "problem": "Three people each have objectively similar lives. Person A spends most of their time mind-wandering. Person B spends time on pleasurable but low-meaning activities. Person C invests heavily in close relationships and meaningful work at the cost of some leisure. Research predicts different happiness outcomes. Why?",
+            "steps": [
+              "Person A: Killingsworth and Gilbert (2010) found that mind-wandering — even to pleasant topics — produces measurably lower happiness than presence. Person A's pleasant life is being experienced at a discount because attention is rarely on it.",
+              "Person B: hedonic activities adapt quickly (Brickman & Campbell). The pleasures become normalized within weeks. Without meaning, the hedonic treadmill accelerates. Person B is on a faster treadmill.",
+              "Person C: the Harvard Study found relationship quality to be the primary predictor of flourishing. Meaningful work activates strengths and produces purpose. Both resist hedonic adaptation more effectively than passive pleasure.",
+              "Apply Aristotle's eudaimonia: Person C is living the examined, purposeful, connected life that Aristotle identified as constitutive of happiness — not just a means to it.",
+              "Apply Ubuntu: Person C's investment in relationships is not a sacrifice of individual happiness but its primary source — which is exactly what Ubuntu would predict."
+            ],
+            "conclusion": "Attention, connection, and meaning each independently amplify happiness beyond what circumstances or pleasure alone can produce — and each is confirmed by both research and cross-cultural tradition."
+          },
+          "lectureTopics": [
+            {
+              "text": "Three landmark findings: (1) Killingsworth and Gilbert (2010) — people spend 47% of waking hours mind-wandering and are measurably less happy during these periods, regardless of what they are thinking about. Present-moment attention, not circumstances, is the proximate cause of moment-to-moment happiness. (2) The Harvard Study of Adult Development (80+ years) — relationship quality at midlife predicted late-life flourishing better than wealth, health, IQ, or career success. Holt-Lunstad et al. (2015): social isolation is as harmful to longevity as smoking 15 cigarettes per day. (3) Baumeister et al. (2013) — meaning and happiness are related but distinct. Meaning is associated with contributing, giving, connecting to past and future; hedonia with present ease. People who primarily pursue pleasure adapt more quickly and report lower life satisfaction. Cross-cultural resonance: attention — Buddhist sati, Stoic prosoche, Christian contemplatio. Connection — Ubuntu, Confucian ren, Christian agape, Islamic ummah. Meaning — Aristotle's eudaimonia, the Gita's nishkama karma, Frankl's logotherapy, Islamic falah.",
+              "summary": "Present-moment attention, relationship quality, and meaning each independently predict happiness — and each has been independently identified as central to the good life across multiple traditions.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Three landmark studies: Killingsworth & Gilbert (2010), Science — mind-wandering and unhappiness. Harvard Study of Adult Development (Waldinger & Schulz, 2023) — relationships as primary predictor. Baumeister et al. (2013), Journal of Positive Psychology — happiness vs. meaning. Frankl (1946), Man's Search for Meaning — meaning under extremity."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Three findings — attention produces presence, connection produces flourishing, meaning produces durable satisfaction — are among the most cross-culturally validated conclusions in the history of human thought.",
+            "The convergence of independent traditions on these same findings is itself one of the strongest arguments for their validity."
+          ]
+        }
+      ],
+      "quiz": {
+        "passingScore": 80,
+        "attemptsAllowed": 3,
+        "interleaved": true,
+        "questions": [
+          {
+            "question": "According to the 50/10/40 model, what percentage of lasting happiness is determined by life circumstances such as income or relationship status?",
+            "questionType": "multiple-choice",
+            "options": [
+              { "text": "50%", "explanation": "Incorrect. 50% is the approximate contribution of genetic set point — the temperament baseline largely established by heredity." },
+              { "text": "40%", "explanation": "Incorrect. 40% is the component attributable to intentional daily activity — the most actionable portion of the model." },
+              { "text": "10%", "explanation": "Correct. Despite being the thing most people spend their lives pursuing, life circumstances account for only about 10% of lasting happiness — primarily because of hedonic adaptation." },
+              { "text": "25%", "explanation": "Incorrect. No component of the 50/10/40 model equals 25%." }
+            ],
+            "answer": "10%",
+            "explanation": "Circumstances account for only 10% of lasting happiness due to hedonic adaptation — the brain normalizes improvements and returns to baseline. This is why chasing better circumstances as a happiness strategy consistently underdelivers."
+          },
+          {
+            "question": "True or false: the Harvard Study of Adult Development found that wealth was the strongest predictor of happiness and flourishing in later life.",
+            "questionType": "true-false",
+            "options": [
+              { "text": "True", "explanation": "Incorrect. Wealth did not emerge as the primary predictor. The Harvard Study found that relationship quality at midlife was a better predictor of late-life flourishing than wealth, physical health, IQ, or career success." },
+              { "text": "False", "explanation": "Correct. The Harvard Study found that the quality of close relationships was the strongest predictor of flourishing in later life, outperforming all material and health factors measured." }
+            ],
+            "answer": "False",
+            "explanation": "The Harvard Study of Adult Development tracked participants for over 80 years and found relationship quality to be the primary predictor of late-life health, happiness, and cognitive vitality."
+          },
+          {
+            "question": "Killingsworth and Gilbert (2010) found that people are less happy when mind-wandering. Which statement best captures their most counterintuitive finding?",
+            "questionType": "multiple-choice",
+            "options": [
+              { "text": "People were happier when mind-wandering to positive topics than when doing unpleasant tasks", "explanation": "Incorrect. The study found people were less happy when mind-wandering regardless of what they were thinking about — even when thinking about pleasant topics." },
+              { "text": "People were less happy when mind-wandering regardless of activity or thought content", "explanation": "Correct. This is the study's most counterintuitive finding: mind-wandering, not the nature of one's activities, was among the primary causes of unhappiness." },
+              { "text": "Mind-wandering had no significant effect on happiness", "explanation": "Incorrect. Mind-wandering was significantly correlated with reduced happiness across the sample." },
+              { "text": "People were happier when mind-wandering than when focused on work tasks", "explanation": "Incorrect. The study found the reverse: presence — even during work — was associated with greater happiness than mind-wandering." }
+            ],
+            "answer": "People were less happy when mind-wandering regardless of activity or thought content",
+            "explanation": "The study demonstrated that a wandering mind is an unhappy mind — and this applies regardless of what the mind wanders to. Present-moment attention, not the pleasantness of one's circumstances, is the proximate cause of felt happiness in the moment."
+          }
+        ]
+      },
+      "practicalActivity": {
+        "title": "Personal happiness audit",
+        "description": "Map your current relationship to happiness using the five foundational concepts as a diagnostic framework. Identify where the biggest gaps lie between what you are pursuing and what actually produces wellbeing.",
+        "scenario": "Before building new practices, it is useful to understand your current baseline — where your attention goes, what you are pursuing, and how your daily life maps onto the evidence of what actually produces happiness.",
+        "steps": [
+          "Write one paragraph honestly describing what you have been primarily pursuing in the past year as a source of happiness (career advancement, relationships, possessions, experiences, etc.).",
+          "For each thing you identified, estimate which component of the 50/10/40 model it falls under: genetic set point, circumstances, or intentional practice.",
+          "Describe your typical daily attention: what percentage of your day would you estimate you spend fully present versus planning, ruminating, or mentally elsewhere?",
+          "Rate the quality of your three most important relationships on a 1–10 scale. Then rate how much deliberate time and attention you invest in each of them weekly.",
+          "Identify one area where your pursuit strategy most diverges from what the evidence says produces lasting happiness. Write two sentences about what a different approach would look like."
+        ],
+        "successCriteria": [
+          "All five foundational concepts are referenced in the audit",
+          "An honest gap between current pursuit strategy and evidence-based strategy is identified",
+          "At least one specific behavioral change is named — not a general intention but a concrete action"
+        ],
+        "downloadableTemplate": ""
+      },
+      "summary": [
+        "Circumstances account for only 10% of lasting happiness; intentional daily practice accounts for 40% — this reverses most people's intuitive investment strategy.",
+        "The five foundational insights — practice over destination, gratitude over adaptation, presence over mind-wandering, connection over achievement, meaning over pleasure — are among the most cross-culturally validated conclusions in the history of human thought."
+      ]
+    },
+    {
+      "sectionTitle": "Cultural perspectives on joy and happiness",
+      "sectionDescription": "Eight traditions — philosophical, religious, and cultural — each framing happiness differently and each contributing something the others lack. Includes the striking convergence points that science has independently confirmed.",
+      "estimatedDuration": "3 days",
+      "whyThisMatters": "Understanding multiple frameworks gives you more tools and helps you identify which framing is most motivating for your particular personality, background, and values. The convergence across traditions is itself powerful evidence.",
+      "learningObjectives": [
+        "Explain the core happiness concept from at least four of the eight traditions covered",
+        "Identify the three convergence points shared by science and cross-cultural wisdom",
+        "Connect at least one traditional practice to its modern psychological parallel",
+        "Articulate which tradition's framing resonates most with your own experience and explain why"
+      ],
+      "reviewContent": [
+        "Buddhism identifies tanha as the cause of dukkha. How does this relate to hedonic adaptation?",
+        "The Stoics distinguished between what is 'up to us' and what is not. What does this have in common with modern research on the controllability of happiness?",
+        "Ubuntu says 'I am because we are.' What does the Harvard Study say that confirms this?",
+        "What is ikigai, and how does it relate to the PERMA model's meaning dimension?",
+        "What three insights do science and all major traditions agree on about happiness?",
+        "Which tradition's framing of happiness is most different from a Western psychological view — and what does it add?"
+      ],
+      "lectures": [
+        {
+          "lectureTitle": "Buddhist and Stoic traditions — non-attachment and virtue",
+          "lectureDescription": "The two most practically applicable philosophical traditions for daily happiness practice — and the remarkable degree to which they converge despite independent development across different cultures and centuries.",
+          "estimatedDuration": "20 minutes",
+          "learningObjectives": [
+            "Explain the Buddhist four noble truths as a diagnostic and treatment framework for unhappiness",
+            "Describe the Stoic dichotomy of control and its practical implication for daily emotional life"
+          ],
+          "workedExample": {
+            "problem": "You receive critical feedback on work you were proud of and feel significant distress. Apply both Buddhist and Stoic frameworks to the experience.",
+            "steps": [
+              "Buddhist diagnosis: the distress arises from craving — specifically attachment to being seen as competent and aversion to criticism. The feedback is neutral; the suffering is generated by the mind's reaction.",
+              "Buddhist response: observe the craving and aversion without acting on them. Practice upekkha (equanimity). Ask: is there truth in the feedback that can be learned from?",
+              "Stoic diagnosis: the feedback is 'not up to us.' Our judgment about it and our response are entirely within our control. Distress arises from misidentifying the feedback as bad rather than as information.",
+              "Stoic response: apply the dichotomy of control. Separate what you can control (your response, what you learn) from what you cannot (the critic's opinion).",
+              "Convergence: both traditions locate the distress in the mind's reaction, not the external event. Both prescribe non-reactivity that is not indifference but discernment."
+            ],
+            "conclusion": "Buddhism and Stoicism, developed independently across different centuries and cultures, converge remarkably on the structure of suffering and its remedy: non-attachment to outcomes, present-moment engagement, and the cultivation of equanimity."
+          },
+          "lectureTopics": [
+            {
+              "text": "Buddhism begins with the four noble truths: (1) dukkha — unsatisfactoriness is inherent to conditioned existence; (2) the cause is tanha — craving for things to be other than they are; (3) the cessation of craving is possible; (4) the Eightfold Path is the way. Joy in Buddhism is the natural state when craving and aversion are reduced through practice. Mudita (sympathetic joy) and upekkha (equanimity) are among the four brahmaviharas. The Stoics drew a sharp distinction between what is 'up to us' — judgments, intentions, desires — and what is not — health, wealth, reputation, others' behavior. Eudaimonia is achievable regardless of circumstances because it consists entirely in virtue. Epictetus, a former slave, and Marcus Aurelius, a ruling emperor, embodied the same teaching. The Stoic practical exercises — negative visualization, the view from above, voluntary discomfort — are among the most transferable daily practices in any philosophical tradition.",
+              "summary": "Buddhism and Stoicism independently converge on the insight that suffering arises from the mind's reaction to events rather than the events themselves, and that non-attachment — not indifference — is the path to equanimity.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Buddhist key concepts: dukkha, tanha, sati, upekkha, mudita, bodhicitta. Stoic key concepts: dichotomy of control, eudaimonia, virtue (wisdom/justice/courage/temperance), premeditatio malorum, amor fati. Key texts: The Dhammapada (Buddhist); Meditations — Marcus Aurelius (Stoic)."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Buddhism locates suffering in craving and aversion and offers the Eightfold Path as a systematic training in attention, ethics, and wisdom.",
+            "Stoicism locates the good life entirely in virtue and the dichotomy of control — producing practical daily exercises that science has since validated."
+          ]
+        },
+        {
+          "lectureTitle": "Religious traditions — Christianity, Islam, Judaism, and Hinduism",
+          "lectureDescription": "Four religious traditions that have thought systematically about joy for millennia, each with a distinct diagnosis and a distinct prescription.",
+          "estimatedDuration": "25 minutes",
+          "learningObjectives": [
+            "Distinguish between happiness and joy in Christian theology and explain why the distinction matters practically",
+            "Explain Islamic shukr, falah, and tawakkul as an integrated framework for wellbeing",
+            "Describe Jewish simcha and dayenu as practice structures",
+            "Connect the Bhagavad Gita's nishkama karma to the psychological paradox of hedonism"
+          ],
+          "workedExample": {
+            "problem": "Someone is experiencing difficulty and asks how four different religious traditions would advise them to relate to joy during this period.",
+            "steps": [
+              "Christian response: Christianity distinguishes happiness (contingent) from joy (a fruit of the Spirit, available regardless of circumstances). The Beatitudes are explicitly paradoxical: blessed are those who mourn. Joy is not the absence of suffering but its transformation through relationship with God and neighbor.",
+              "Islamic response: tawakkul (trust in God after one's own effort) prevents anxiety about outcomes. Shukr — naming what is good even within difficulty — is obligatory worship. The five daily salat are five daily returns to the source.",
+              "Jewish response: simcha (joy) in Judaism is commanded even during difficulty — a form of resistance and trust. Dayenu structures gratitude within hardship: name what you still have and declare it sufficient.",
+              "Hindu response: the Bhagavad Gita addresses this most directly: act without attachment to the fruit of action (nishkama karma). Do what is right and meaningful; release the outcome. This is the structure that produces deepest satisfaction precisely because it is not hostage to results."
+            ],
+            "conclusion": "All four traditions locate the capacity for joy during difficulty in something beyond circumstances — divine relationship, gratitude as worship, commanded celebration, or action without attachment. The practical structures differ; the insight is the same."
+          },
+          "lectureTopics": [
+            {
+              "text": "Christianity draws a sharp distinction between happiness (contingent on circumstances) and joy (a fruit of the Holy Spirit, available regardless). The Beatitudes are deliberately paradoxical: blessed are those who mourn, the poor in spirit, the persecuted. Thomas Aquinas located ultimate beatitudo in the beatific vision. Augustine: 'Our heart is restless until it rests in Thee.' Islam's integrated framework: shukr (gratitude as worship), tawakkul (trust after effort), falah (comprehensive flourishing). The five daily salat are a structured attention practice woven into every day. Al-Ghazali's Alchemy of Happiness (12th century) is one of the most sophisticated psychological treatments of wellbeing in medieval literature. Judaism commands simcha as obligation, not merely encouragement. Dayenu ('it would have been enough') is a systematic gratitude practice — naming each gift and declaring it sufficient. Frankl's logotherapy emerged from this tradition's understanding that meaning is the primary human need. Hinduism's Bhagavad Gita: nishkama karma — action without attachment to its fruits — solves the paradox of hedonism. Ananda (bliss) in Advaita Vedanta is the deepest nature of reality, to be uncovered rather than achieved. The four yogas offer different paths for different temperaments.",
+              "summary": "All four religious traditions locate deepest joy beyond contingent circumstances and each offers specific daily practices — agape, shukr, simcha, nishkama karma — for cultivating it regardless of external conditions.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Key texts: Christian — Beatitudes (Matthew 5), Augustine's Confessions, Philippians 4. Islamic — Al-Ghazali's Alchemy of Happiness, Quran 14:7 (gratitude and increase). Jewish — Passover Haggadah (dayenu), Frankl's Man's Search for Meaning. Hindu — Bhagavad Gita chapters 2-3 (action and duty) and 6 (meditation)."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "All four religious traditions hold that happiness pursued as a primary goal — separate from virtue, meaning, and relationship — consistently underdelivers.",
+            "Each offers a distinctive reframe of joy that directly addresses a different dimension of the problem: Christianity on suffering's transformation, Islam on non-attachment after effort, Judaism on commanded celebration, Hinduism on action without attachment to results."
+          ]
+        },
+        {
+          "lectureTitle": "Cultural frameworks — Ubuntu, Japanese concepts, Hygge, Confucianism, and PERMA",
+          "lectureDescription": "Five cultural frameworks that each contribute a concept or practice that enriches the scientific model of wellbeing.",
+          "estimatedDuration": "20 minutes",
+          "learningObjectives": [
+            "Explain Ubuntu's conception of personhood and its implication for how happiness is pursued",
+            "Define ikigai, wabi-sabi, and mono no aware and explain the worldview each encodes",
+            "Describe hygge as a designed environmental practice and Confucian ren as relational virtue",
+            "Identify the five elements of PERMA and explain what makes it a better model than single-variable happiness"
+          ],
+          "workedExample": {
+            "problem": "Someone reports feeling happy in isolated moments but experiencing a persistent low-level sense of incompleteness. Apply Ubuntu and ikigai as diagnostic frameworks.",
+            "steps": [
+              "Apply Ubuntu: 'I am because we are.' The incomplete feeling may reflect insufficient community connection. Ubuntu holds that individual flourishing pursued apart from communal wellbeing is structurally incomplete — you cannot be fully well while disconnected from the community through which selfhood is constituted.",
+              "Apply ikigai: map their life against the four circles — what they love, what they are good at, what the world needs, what sustains them economically. Incompleteness often arises when the 'what the world needs' circle is underdeveloped — meaning and contribution are missing.",
+              "Apply wabi-sabi: the happiness may be undermined by an implicit expectation that it should be permanent and unmarked by imperfection. Wabi-sabi suggests that the impermanent, imperfect moment of happiness is precisely the thing — not a diminished version of some perfect happiness elsewhere.",
+              "Apply Confucian ren: are their relationships being cultivated with genuine attention and care, or maintained at a level of functional adequacy? Ren is constituted through the quality of relational engagement, not its existence alone."
+            ],
+            "conclusion": "Non-Western cultural frameworks often diagnose happiness problems that individual-focused Western models miss — particularly around community, contribution, and the acceptance of impermanence."
+          },
+          "lectureTopics": [
+            {
+              "text": "Ubuntu philosophy — rooted in the Nguni Bantu tradition — holds that personhood is constituted relationally. 'Umuntu ngumuntu ngabantu': a person is a person through other persons. Individual happiness pursued apart from communal wellbeing is conceptually incoherent — like a hand claiming to flourish while the body is ill. This anticipated the Harvard Study's central finding. Confucian ren (benevolence, humaneness) is both the highest virtue and the deepest source of joy — one becomes fully human through relationships with others. The junzi (exemplary person) cultivates virtue through lifelong learning and the rectification of one's roles in society. Japanese concepts: ikigai (reason for being) sits at the intersection of what you love, what you are good at, what the world needs, and what sustains you economically. Wabi-sabi is the appreciation of impermanence, imperfection, incompleteness. Mono no aware is the bittersweet awareness that all things pass — simultaneously melancholic and appreciative. These challenge the assumption that happiness requires permanence. Hygge (Danish): a practiced set of conditions — warmth, presence, simplicity, equal participation, shared food — that creates environments for connection without performance. Denmark's consistent ranking among the world's happiest countries is partly explained by hygge as cultural infrastructure. PERMA: Positive emotions, Engagement, Relationships, Meaning, Accomplishment — explicitly multidimensional, acknowledging that wellbeing cannot be reduced to pleasant feeling.",
+              "summary": "Ubuntu, Confucianism, Japanese concepts, hygge, and PERMA each contribute frameworks unavailable in other traditions — especially around community, relational virtue, impermanence, designed connection environments, and the multidimensionality of wellbeing.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Ikigai map: four overlapping circles — (1) what you love, (2) what you are good at, (3) what the world needs, (4) what sustains you economically. The center is ikigai. PERMA: P — positive emotions, E — engagement/flow, R — relationships, M — meaning, A — accomplishment. Hygge conditions: warmth, no hierarchy, shared food, candlelight, present-focus, no productivity pressure."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "The cross-cultural convergence on three core insights — happiness is internal not external, attention is central, connection to something beyond the self is essential — is itself one of the strongest arguments for their validity.",
+            "Understanding multiple cultural frameworks gives you more tools — the goal is identifying which framing most motivates your actual practice."
+          ]
+        }
+      ],
+      "quiz": {
+        "passingScore": 80,
+        "attemptsAllowed": 3,
+        "interleaved": true,
+        "questions": [
+          {
+            "question": "Ubuntu philosophy holds that 'a person is a person through other persons.' What does this imply about individual happiness pursued apart from community?",
+            "questionType": "multiple-choice",
+            "options": [
+              { "text": "It is a valid path to flourishing as long as the individual is content", "explanation": "Incorrect. Ubuntu holds that individual happiness pursued apart from community is not merely incomplete but conceptually incoherent." },
+              { "text": "It is acceptable but produces less happiness than collective flourishing", "explanation": "Incorrect. Ubuntu's position is stronger than this — it holds that personhood itself is constituted relationally, making individual flourishing in isolation structurally impossible." },
+              { "text": "It is conceptually incoherent because personhood itself is constituted through relationship", "explanation": "Correct. Ubuntu does not merely prefer communal wellbeing — it holds that the self is constituted relationally, making flourishing in isolation structurally impossible." },
+              { "text": "It is a Western misconception that Ubuntu actively opposes as culturally inappropriate", "explanation": "Incorrect. Ubuntu's position is philosophical, not merely cultural — it offers a substantive account of personhood and flourishing." }
+            ],
+            "answer": "It is conceptually incoherent because personhood itself is constituted through relationship",
+            "explanation": "Ubuntu's 'Umuntu ngumuntu ngabantu' holds that the self is constituted relationally. This makes flourishing in isolation not just difficult but incoherent — you cannot be fully yourself while disconnected from the community through which your selfhood is constituted."
+          },
+          {
+            "question": "The Bhagavad Gita teaches nishkama karma — action without attachment to its fruits. What psychological problem does this directly address?",
+            "questionType": "multiple-choice",
+            "options": [
+              { "text": "The tendency to procrastinate on meaningful tasks", "explanation": "Incorrect. Nishkama karma addresses the relationship between action and its emotional outcome, not the problem of initiating action." },
+              { "text": "The paradox of hedonism — that directly pursuing happiness tends to undermine it", "explanation": "Correct. Nishkama karma is one of history's most sophisticated treatments of the paradox of hedonism: acting for the sake of a desired emotional result introduces the anxiety of outcome. Acting without attachment removes this anxiety and produces deeper satisfaction." },
+              { "text": "The Stoic problem of distinguishing what is and is not within our control", "explanation": "Incorrect. While nishkama karma and the Stoic dichotomy share structural similarities, nishkama karma specifically addresses the relationship between purposeful action and happiness." },
+              { "text": "Hedonic adaptation to achievements after they are attained", "explanation": "Incorrect. Nishkama karma addresses the relationship to outcomes before and during action, not the post-attainment adaptation." }
+            ],
+            "answer": "The paradox of hedonism — that directly pursuing happiness tends to undermine it",
+            "explanation": "Nishkama karma directly solves the paradox of hedonism: act fully and excellently without making your happiness hostage to the result. This is why the Gita is considered one of the most sophisticated treatments of the relationship between action, meaning, and joy in any philosophical literature."
+          },
+          {
+            "question": "True or false: wabi-sabi is a Japanese aesthetic that appreciates permanence and perfection as the highest forms of beauty.",
+            "questionType": "true-false",
+            "options": [
+              { "text": "True", "explanation": "Incorrect. Wabi-sabi is precisely the opposite — it centers the beauty of impermanence, imperfection, and incompleteness. The cracked tea bowl repaired with gold (kintsugi) is its visual emblem." },
+              { "text": "False", "explanation": "Correct. Wabi-sabi finds beauty in the transient, imperfect, and incomplete — directly challenging the assumption that happiness requires permanence and flawlessness." }
+            ],
+            "answer": "False",
+            "explanation": "Wabi-sabi is the appreciation of impermanence, imperfection, and incompleteness. This worldview is a direct challenge to happiness frameworks that assume positive emotion must be unmarked by loss or imperfection."
+          },
+          {
+            "question": "What three insights do Buddhism, Stoicism, Islam, and modern positive psychology all independently agree on about happiness?",
+            "questionType": "short-answer",
+            "options": [],
+            "answer": "All four converge on: (1) lasting happiness is not found primarily in external circumstances or possessions; (2) attention and present-moment engagement are central to wellbeing; (3) connection to something beyond the self — community, God, virtue, or contribution — is essential for flourishing. These were reached independently across different centuries and cultures, making their convergence among the strongest evidence available for their validity.",
+            "explanation": "The independent convergence of radically different traditions on the same practical conclusions — using entirely different metaphysical frameworks — is itself one of the most compelling arguments for taking these conclusions seriously."
+          }
+        ]
+      },
+      "practicalActivity": {
+        "title": "Tradition resonance audit",
+        "description": "Explore which cultural tradition's framing of happiness resonates most with your own values, background, and temperament — and identify one specific practice from that tradition to adopt.",
+        "scenario": "You have been exposed to eight distinct traditions' approaches to happiness. The goal is not to adopt all of them but to identify which framing is most motivating for you personally — and to translate that into a specific practice you will actually do.",
+        "steps": [
+          "Rate your resonance with each framework on a 1–5 scale: Buddhism, Stoicism, Greek philosophy, Confucianism, Christianity, Islam, Judaism, Hinduism, Ubuntu, Japanese concepts (ikigai/wabi-sabi), Hygge.",
+          "For your top two or three frameworks, write one paragraph explaining why each resonates — what it adds that the science alone did not give you.",
+          "For your top-ranked framework, identify one specific practice it prescribes that you have not yet tried. Research it enough to do it correctly.",
+          "Commit to practicing it daily for one week alongside the three-good-things practice. Write one sentence describing what you expect to notice.",
+          "At the end of the week, write a short reflection: what did this tradition's framing add to your experience of the practice?"
+        ],
+        "successCriteria": [
+          "All frameworks are rated and the reasoning for the top two is written out explicitly",
+          "One specific practice from the top framework is identified and described in enough detail to actually do it",
+          "A one-week commitment is made with a concrete schedule",
+          "A post-practice reflection is written that references the tradition's framing"
+        ],
+        "downloadableTemplate": ""
+      },
+      "summary": [
+        "Eight traditions converge independently on three core findings: happiness is internal not external, attention is central, and connection to something beyond the self is essential.",
+        "Understanding multiple frameworks gives you more tools — the goal is identifying which framing most motivates your actual practice, not comprehensive mastery of all traditions."
+      ]
+    },
+    {
+      "sectionTitle": "The minimum viable skill — three good things",
+      "sectionDescription": "The single highest-evidence happiness intervention. Rooted in positive psychology and structurally parallel to practices in Jewish, Islamic, Christian, Buddhist, and Stoic traditions.",
+      "estimatedDuration": "1 day to learn, 14 days to build the habit",
+      "whyThisMatters": "Most people who want to be happier do not know where to start. This practice is the most reliably effective entry point: low barrier, high evidence, immediately applicable, and cross-culturally validated.",
+      "learningObjectives": [
+        "Perform the three-good-things practice with full specificity and causal attribution",
+        "Explain why writing is more effective than mental reflection for this practice",
+        "Connect the practice structurally to its parallel in at least two other traditions",
+        "Complete 14 consecutive days of practice"
+      ],
+      "reviewContent": [
+        "What is the difference between 'my family' as a good thing and a specific moment with a family member? Why does specificity matter?",
+        "Why is writing the causal attribution (why it happened) the most important step — and the one most people skip?",
+        "What does the Jewish practice of dayenu have in common with the three-good-things structure?",
+        "Around what day does the practice typically stop feeling mechanical and start feeling natural?"
+      ],
+      "lectures": [
+        {
+          "lectureTitle": "Three good things — the full practice",
+          "lectureDescription": "A complete walkthrough of the practice, the research behind it, its cultural parallels, and the common ways people underdo it.",
+          "estimatedDuration": "20 minutes",
+          "learningObjectives": [
+            "Perform the practice correctly with specificity and causal attribution",
+            "Explain the attentional mechanism by which the practice produces lasting change"
+          ],
+          "workedExample": {
+            "problem": "Someone completes their first three-good-things entry and writes: (1) My family. (2) Work went okay. (3) Nice weather. Diagnose what is wrong with each entry and rewrite them correctly.",
+            "steps": [
+              "Entry 1 — 'My family' — is a category, not an event. It cannot be the subject of a causal attribution and does not train attention to specific positive moments. Rewrite: 'My daughter asked me a question at dinner that made me realize she is thinking about the world differently than six months ago. This happened because I have been asking her open questions instead of giving answers.'",
+              "Entry 2 — 'Work went okay' — is vague and slightly negative in framing. It does not identify what specifically went well. Rewrite: 'I finished the section I had been stuck on for three days. This happened because I decided to start from the middle instead of trying to fix the beginning, which unlocked the whole thing.'",
+              "Entry 3 — 'Nice weather' — is external and passive. The causal attribution should acknowledge the choice to notice it. Rewrite: 'I stood outside for five minutes this afternoon and actually let myself feel the sun instead of walking straight to my car. This happened because I remembered this practice and decided to pause.'",
+              "Note the pattern: the rewrites are specific moments, not categories; they involve the person's own choices or attention; and they have credible causal attributions."
+            ],
+            "conclusion": "Specificity and causal attribution are the mechanism by which the practice works. Vague entries produce no attention training; specific entries teach the brain what to scan for."
+          },
+          "lectureTopics": [
+            {
+              "text": "Martin Seligman developed the three-good-things practice at the University of Pennsylvania. In randomized controlled studies, participants who wrote three good things and their causes each night for one week showed increased happiness and decreased depressive symptoms — with effects persisting at one-month, three-month, and six-month follow-ups even after the practice period ended. The mechanism: the brain has a negativity bias, evolved to prioritize threat detection over pleasure noticing. This practice trains the attentional system to scan for positive experiences throughout the day — because you know you will need to write them tonight. Writing forces the specificity that converts ambient experience into explicit memory, making positive events more psychologically available. Cultural parallels: Jewish birkat hamazon (blessing after meals, naming specific gifts), Islamic shukr (naming what is good), Stoic evening review (Seneca: 'I examine my entire day'), Buddhist end-of-day reflection on skillful actions.",
+              "summary": "The three-good-things practice produces lasting happiness increases from as little as two weeks of daily practice, with effects persisting months after the practice period ends — through the mechanism of attentional training, not in-the-moment mood enhancement.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Research: Seligman et al. (2005), 'Positive Psychology Progress,' American Psychologist. Methodology: randomized controlled trial, 577 participants. Cultural parallels: Jewish birkat hamazon, Islamic shukr, Stoic evening review (Seneca, Letters), Buddhist sila review."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Specificity and causal attribution are the active ingredients — vague entries produce no attention training; specific entries teach the brain what to scan for throughout the day.",
+            "The turning point is when you notice good things during the day rather than only at night — this shift, typically around day 7–10, indicates the attentional training has transferred to daily life."
+          ]
+        }
+      ],
+      "quiz": {
+        "passingScore": 80,
+        "attemptsAllowed": 3,
+        "interleaved": true,
+        "questions": [
+          {
+            "question": "Someone writes 'My health' as one of their three good things. What is the primary problem with this entry?",
+            "questionType": "multiple-choice",
+            "options": [
+              { "text": "Health is not an appropriate topic for gratitude practice", "explanation": "Incorrect. Health is an entirely appropriate topic — the problem is the level of specificity, not the subject." },
+              { "text": "It is a category rather than a specific moment or event, making causal attribution impossible", "explanation": "Correct. 'My health' is a standing condition, not a specific experience that happened today. It cannot be causally attributed, and it does not train attention to notice specific positive moments." },
+              { "text": "It does not relate to other people, and the practice requires social content", "explanation": "Incorrect. The practice has no requirement for social content — the problem is specificity, not subject matter." },
+              { "text": "It is too significant — the practice works better with small things", "explanation": "Partially true as a useful heuristic, but the primary problem is specificity rather than the significance of the topic." }
+            ],
+            "answer": "It is a category rather than a specific moment or event, making causal attribution impossible",
+            "explanation": "The practice requires specific events because specificity is what enables causal attribution, and causal attribution is the mechanism by which the practice builds agency and attentional training. 'My health' could be rewritten as: 'I walked to the coffee shop instead of driving and noticed I wasn't out of breath — this happened because I've been consistent with my morning routine.'"
+          },
+          {
+            "question": "True or false: the three-good-things practice works primarily because it makes people feel positive emotions in the moment of writing.",
+            "questionType": "true-false",
+            "options": [
+              { "text": "True", "explanation": "Incorrect. While positive emotions during writing are a side effect, the primary mechanism is attentional — the practice trains the brain to scan for positive experiences throughout the day in anticipation of writing them." },
+              { "text": "False", "explanation": "Correct. The practice's primary mechanism is attentional training: it teaches the brain to scan for positive experiences during the day because you know you will need to write them tonight. This produces the lasting effects observed at follow-up months after the practice period ends." }
+            ],
+            "answer": "False",
+            "explanation": "The practice is attention training, not mood management. Its lasting effects — persisting months after the practice period — are explained by a durable change in attentional scanning, not by the in-the-moment positive feeling of writing."
+          }
+        ]
+      },
+      "practicalActivity": {
+        "title": "14-day three-good-things log",
+        "description": "Complete 14 consecutive nights of the three-good-things practice, with full specificity and causal attribution for each entry.",
+        "scenario": "You are building the foundational habit of the course. Everything else rests on this. The goal is not to feel inspired each night but to show up regardless — treating it as a discipline before it becomes a delight.",
+        "steps": [
+          "Place a notebook and pen beside your bed tonight. Do not use a phone.",
+          "Each night before sleep, write the date and three specific things that went well today. Each entry must be a moment or event, not a category.",
+          "For each entry, write one sentence beginning 'This happened because...' Be honest about agency — acknowledge both your own choices and the contributions of others.",
+          "If you genuinely cannot find three things, lower the threshold: a conversation that was not unpleasant, food that tasted good, a task completed. The practice works on small things.",
+          "On day 7 and day 14, write a brief reflection: has anything changed in how you notice your days? Are you catching good things in the moment now rather than only at night?"
+        ],
+        "successCriteria": [
+          "14 consecutive nightly entries, each with three specific events and causal attributions",
+          "No entry uses categories (family, health, work) as the full description — all are specific moments",
+          "Day 7 and Day 14 reflections are written and show honest self-observation",
+          "At least one entry per week includes something small that would normally go unnoticed"
+        ],
+        "downloadableTemplate": ""
+      },
+      "summary": [
+        "The three-good-things practice is the highest-evidence single happiness intervention available — and the structural parallel of gratitude practices found in Jewish, Islamic, Buddhist, and Stoic traditions.",
+        "Specificity and causal attribution are the mechanism, not decorative elements — the practice fails if entries remain at the level of categories."
+      ]
+    },
+    {
+      "sectionTitle": "Hands-on exercises — seven practices across traditions",
+      "sectionDescription": "Seven evidence-based practices drawn from both positive psychology research and wisdom traditions, each with cross-cultural context showing where the practice appears in other forms.",
+      "estimatedDuration": "7 days (one exercise per day, alongside nightly three-good-things)",
+      "whyThisMatters": "Different people respond to different practices — this section gives you a range to draw from and helps you identify which interventions are most effective for your personality and circumstances.",
+      "learningObjectives": [
+        "Complete the VIA Character Strengths survey and identify your top 5 strengths",
+        "Write and deliver a gratitude letter with full specificity",
+        "Complete a loving-kindness meditation session through all five circles",
+        "Perform a negative visualization session and articulate what it produced",
+        "Apply the best-possible-self exercise and extract three core values from the vision"
+      ],
+      "reviewContent": [
+        "What is the difference between savoring and simply enjoying something? Why does deliberate attention change the experience?",
+        "What makes the gratitude letter's in-person delivery double the happiness effect compared to writing alone?",
+        "Why does clustering five acts of kindness on one day produce a stronger effect than spreading them across the week?",
+        "What is the Buddhist structural parallel to the Stoic practice of negative visualization?",
+        "What does the best-possible-self exercise produce that a simple goal-setting exercise does not?"
+      ],
+      "lectures": [
+        {
+          "lectureTitle": "Savoring, gratitude letter, and character strengths",
+          "lectureDescription": "Three practices grounded in research and cross-cultural wisdom — each addressing a different dimension of wellbeing.",
+          "estimatedDuration": "20 minutes",
+          "learningObjectives": [
+            "Define savoring and distinguish it from passive enjoyment, connecting it to the Japanese tea ceremony and Christian contemplatio",
+            "Write a gratitude letter with the specificity required for full effect and commit to delivering it",
+            "Identify your top VIA character strengths and design a new application of your #1 strength"
+          ],
+          "workedExample": {
+            "problem": "Someone wants to write a gratitude letter to a former teacher but has written 'you were always there for me' three times in different forms. How do they break through to specificity?",
+            "steps": [
+              "Stop writing and switch to memory mode: close your eyes and locate a specific scene — a room, a time of day, a conversation. What were you wearing? What did the person say exactly?",
+              "Ask the WHAT question: what specifically did this person do — not generally but in one specific instance?",
+              "Ask the IMPACT question: what changed in your life as a direct result of this specific thing? Not 'I became more confident' but 'three months later I applied for the job I'd been avoiding.'",
+              "Ask the COUNTERFACTUAL question: what does your life look like if this person never said or did this thing? Write that version for one paragraph — then contrast with what actually happened.",
+              "The specificity comes from memory excavation, not composition effort. Write what you remember, not what you think you should feel."
+            ],
+            "conclusion": "Gratitude letter specificity comes from memory excavation, not writing effort. The more precisely you remember, the more powerful the letter becomes for both writer and recipient."
+          },
+          "lectureTopics": [
+            {
+              "text": "Savoring (Bryant & Veroff, 2007): deliberately attending to positive experiences makes them more salient and more richly encoded in memory. The Japanese tea ceremony (chado) formalizes exactly this — every gesture receives complete attention. Zen beginner's mind (shoshin) means encountering the familiar as if for the first time. Two-sentence debrief after savoring converts experience into explicit memory. Gratitude letter (Seligman et al., 2005): writing and delivering in person produced the largest positive effect of any single intervention tested — persisting one month. In-person delivery doubled the effect. Cultural universality: Jewish hakarat hatov, Confucian acknowledgment of teachers, Japanese concept of on (debt of gratitude), Indigenous formal acknowledgment of ancestors. Character Strengths (VIA survey, viacharacter.org): using top strengths in new ways each week produces significantly higher happiness after one month. Cross-cultural resonance: Aristotle's arete, Confucian de, Buddhist paramitas, Hindu svadharma, Stoic four virtues — all treat cultivation and expression of one's highest capacities as central to happiness.",
+              "summary": "Savoring, the gratitude letter, and character strength deployment each address different wellbeing dimensions — presence, expressed appreciation, and authentic self-expression — and each is deeply rooted in multiple traditions.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Research: Bryant & Veroff (2007) — savoring. Seligman et al. (2005) — gratitude letter as highest-impact single act. VIA survey — viacharacter.org (free, 15 min). Cultural parallels: savoring — chado, shoshin, lectio divina. Gratitude letter — hakarat hatov, on, acknowledgment ceremonies. Strengths — arete, de, paramitas, svadharma."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "The gratitude letter is the single highest-impact happiness intervention tested — and its in-person delivery doubles the effect. The cultural universality of expressed gratitude toward benefactors suggests this has been known across human cultures for millennia.",
+            "Savoring and character strength deployment each address different dimensions: presence with existing good, and the exercise of one's highest capacities in new contexts."
+          ]
+        },
+        {
+          "lectureTitle": "Kindness, best possible self, loving-kindness, and negative visualization",
+          "lectureDescription": "Four further practices — two from positive psychology and two sourced directly from wisdom traditions — each with strong evidence and cross-cultural grounding.",
+          "estimatedDuration": "20 minutes",
+          "learningObjectives": [
+            "Perform a clustered kindness day and document all five acts",
+            "Write a best-possible-self vision and extract three core values",
+            "Complete a loving-kindness meditation session through all five circles",
+            "Perform a negative visualization session and articulate what it produced compared to direct savoring"
+          ],
+          "workedExample": {
+            "problem": "Someone attempts loving-kindness meditation and finds it easy for themselves and their loved one but experiences resistance when reaching the difficult person. What is the practice asking of them?",
+            "steps": [
+              "Recognize what the resistance is: the feeling that extending goodwill to someone who has harmed you condones what they did or requires forgetting it.",
+              "Clarify what loving-kindness is NOT: it is not approval, reconciliation, forgetting, or suppression. It is the extension of the wish for wellbeing to a being who suffers.",
+              "Try a reframe: 'May you be free of the causes that make you difficult.' This recognizes that harmful people typically act from their own suffering — it is not endorsement.",
+              "If full loving-kindness is not available, extend it to a neutral version: 'May you have what you need.' Return to this person in a future session.",
+              "Note: the difficult-person circle is where the greatest anti-bias effects are measured — it is doing the most significant psychological work."
+            ],
+            "conclusion": "Resistance in the difficult-person circle is normal and expected. The practice does not require genuinely feeling goodwill immediately — it requires the intention, which gradually produces the feeling."
+          },
+          "lectureTopics": [
+            {
+              "text": "Kindness clustering (Lyubomirsky et al., 2005): five acts on one day produce a stronger effect than five acts spread across a week — accumulation keeps acts salient rather than habitual. The Golden Rule appears in virtually identical form across Confucianism, Judaism, Christianity, Islam, Buddhism, and Hinduism. Kindness reliably increases the giver's happiness — one of the most replicated findings in positive psychology. Best possible self (King, 2001): imagining your life 5-10 years from now, having gone as well as realistically possible. Extracts deepest values and connects daily action to meaning. Cross-cultural parallels: Stoic 'what would the sage do?', Islamic khalifah (stewardship), Hindu dharma, Indigenous vision quest. Loving-kindness meditation (metta bhavana): Fredrickson et al. (2008) — 7 weeks produced lasting wellbeing increases through positive emotion upward spiral. Kang et al. (2014) — reduced implicit bias. Five circles: self, loved one, neutral person, difficult person, all beings. Negative visualization (Stoic premeditatio malorum): Kurtz & Wilson (2010) — imagining absence of positive events increases appreciation more than direct savoring. Buddhist anicca contemplation achieves the same result through accepting impermanence rather than imagining loss.",
+              "summary": "All four practices — kindness, best possible self, loving-kindness, and negative visualization — address dimensions of wellbeing that the basic three-good-things practice does not reach: generosity, meaning, compassion, and resilience.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Research: Lyubomirsky et al. (2005) — kindness clustering. King (2001) — best possible self. Fredrickson et al. (2008) — loving-kindness meditation. Kang et al. (2014) — loving-kindness reduces bias. Kurtz & Wilson (2010) — negative visualization. Cultural parallels: Golden Rule (universal), khalifah/dharma/vision quest (best possible self), metta/intercessory prayer/du'a (loving-kindness), premeditatio malorum/anicca (negative visualization)."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Loving-kindness meditation and negative visualization are the two deepest tradition-sourced practices in this course — each addresses a dimension of wellbeing that purely secular happiness interventions do not reach.",
+            "Negative visualization counterintuitively produces more appreciation than direct savoring — imagining loss is the most reliable antidote to hedonic adaptation in the Western philosophical tradition."
+          ]
+        }
+      ],
+      "quiz": {
+        "passingScore": 80,
+        "attemptsAllowed": 3,
+        "interleaved": true,
+        "questions": [
+          {
+            "question": "Research by Lyubomirsky et al. found that performing five acts of kindness produces stronger happiness effects when:",
+            "questionType": "multiple-choice",
+            "options": [
+              { "text": "They are spread evenly across the week so the practice becomes habitual", "explanation": "Incorrect. Spreading acts across the week makes them habitual and therefore less salient — the brain adapts to them as routine." },
+              { "text": "They are all performed on one day, making them salient and accumulative", "explanation": "Correct. Clustering five acts of kindness on one day produces a stronger happiness effect — the accumulation makes them meaningful rather than invisible background behavior." },
+              { "text": "They are performed for strangers rather than people you know", "explanation": "Incorrect. The research did not find a significant difference based on the relationship to the recipient." },
+              { "text": "They require significant effort or cost to the giver", "explanation": "Partially true as a nuance, but clustering on one day is the primary variable, not effort level." }
+            ],
+            "answer": "They are all performed on one day, making them salient and accumulative",
+            "explanation": "Spreading kindness acts across a week allows them to blend into background routine. Clustering them on one day keeps them salient — the person recognizes 'this is what I am doing today' — producing stronger positive identity reinforcement."
+          },
+          {
+            "question": "Kurtz and Wilson (2010) found a counterintuitive result about the most effective way to increase appreciation for positive events. What did they find?",
+            "questionType": "multiple-choice",
+            "options": [
+              { "text": "Directly savoring a positive event produces more appreciation than any other method", "explanation": "Incorrect. This is the intuitive prediction, but the research found the opposite." },
+              { "text": "Imagining the absence of a positive event produces more appreciation than directly savoring it", "explanation": "Correct. Negative visualization — imagining the event had never happened — produces greater appreciation than direct savoring. This validates the Stoic premeditatio malorum practice." },
+              { "text": "Sharing positive events with others produces more appreciation than private reflection", "explanation": "Incorrect. While sharing positive events does increase positive affect, this is not what Kurtz and Wilson measured in this study." },
+              { "text": "Writing about positive events produces less appreciation than simply experiencing them", "explanation": "Incorrect. Writing generally increases emotional encoding — the research does not support this claim." }
+            ],
+            "answer": "Imagining the absence of a positive event produces more appreciation than directly savoring it",
+            "explanation": "This validates the Stoic premeditatio malorum: imagining you had never met your partner, or that the project had failed — produces more vivid appreciation than attending to their presence directly. The brain's contrast mechanism generates appreciation that direct attention does not."
+          }
+        ]
+      },
+      "practicalActivity": {
+        "title": "Seven-day exercise sequence",
+        "description": "Complete one exercise per day for seven days, continuing the nightly three-good-things practice throughout. Identify which two produce the strongest personal response.",
+        "scenario": "You have learned seven practices from multiple traditions. This week you will do each once, in sequence, to identify which produce the strongest response in you — this data will inform your ongoing practice design.",
+        "steps": [
+          "Day 1: Savoring — choose your morning drink or a meal, full attention for its entire duration, write two sentences afterward.",
+          "Day 2: VIA survey (viacharacter.org, 15 min). Write one sentence about each of your top 5 strengths and one idea for using your #1 strength in a new context.",
+          "Day 3: Draft the gratitude letter (30–45 min on specifics). Do not send yet.",
+          "Day 4: Kindness day — perform five acts of kindness today. Write them all down tonight.",
+          "Day 5: Deliver the gratitude letter in person or by phone. Write about the experience tonight.",
+          "Day 6: Loving-kindness meditation, 15 minutes, through all five circles. Write one sentence about what happened in the difficult person circle.",
+          "Day 7: Negative visualization, 10 minutes. Choose something you value. Imagine its absence vividly. Return to the present. Write two sentences about what shifted."
+        ],
+        "successCriteria": [
+          "All seven exercises completed, one per day",
+          "Gratitude letter delivered in person or by phone — not just written",
+          "Loving-kindness session completed through all five circles including the difficult person",
+          "A written reflection at the end of the week identifying which two exercises produced the strongest response"
+        ],
+        "downloadableTemplate": ""
+      },
+      "summary": [
+        "Seven practices cover the full range of wellbeing dimensions and draw from both research and multiple traditions — the goal of this week is identifying which two or three produce the strongest personal response.",
+        "These become the core of your ongoing practice beyond the two weeks."
+      ]
+    },
+    {
+      "sectionTitle": "Common mistakes — what traditions and science both warn against",
+      "sectionDescription": "Three mistakes that consistently undermine happiness practice — each independently diagnosed across multiple traditions and confirmed by modern research.",
+      "estimatedDuration": "1 day",
+      "whyThisMatters": "These mistakes are common precisely because they feel like good approaches. Understanding the cross-cultural diagnosis prevents the most frequent reasons people abandon effective practices.",
+      "learningObjectives": [
+        "Identify the paradox of hedonism and explain its mechanism",
+        "Distinguish consuming content about happiness from practicing happiness",
+        "Recognize the pattern of waiting for ideal conditions and understand why it guarantees failure"
+      ],
+      "reviewContent": [
+        "What is the paradox of hedonism, and which tradition addresses it most directly and elegantly?",
+        "What did Islam mean by the teaching that knowledge without action is worse than ignorance?",
+        "Viktor Frankl demonstrated that happiness practices are available even in extreme conditions. What does this imply about waiting for ideal conditions?",
+        "What is the smallest possible version of the three-good-things practice?"
+      ],
+      "lectures": [
+        {
+          "lectureTitle": "The three mistakes — with cross-cultural diagnosis",
+          "lectureDescription": "Each mistake has been identified independently across multiple traditions. The cross-cultural convergence on these diagnoses makes the warnings more credible.",
+          "estimatedDuration": "20 minutes",
+          "learningObjectives": [
+            "State the paradox of hedonism and identify its appearance in Buddhism, Stoicism, and the Bhagavad Gita",
+            "Explain why intellectual engagement with happiness content does not produce the changes that practice does",
+            "Design the smallest possible starting version of any practice to eliminate the waiting-for-conditions trap"
+          ],
+          "workedExample": {
+            "problem": "Someone has read three books on positive psychology and listened to 30 podcast episodes about happiness but has not started any practice. Diagnose and prescribe.",
+            "steps": [
+              "Diagnose: the insight-project mistake — treating understanding as the goal rather than the method. Understanding positive psychology does not produce the neural changes that practice does.",
+              "Apply the Islamic parallel: ilm (knowledge) without amal (action) is considered worse than ignorance in some Islamic scholarship, because it adds the hypocrisy of knowing without doing.",
+              "Apply the Zen parallel: intellectual understanding of enlightenment is not enlightenment. The map is not the territory.",
+              "Apply neuroscience: neuroplasticity requires repeated behavioral activation. Reading about gratitude does not activate the gratitude circuitry; practicing gratitude does.",
+              "Prescribe: no more consumption of happiness content until they have completed 14 consecutive days of three-good-things practice. The knowledge they already have is sufficient to start."
+            ],
+            "conclusion": "Understanding is preparation for practice, not a substitute for it. The minimum ratio should be one unit of practice for every unit of consumption — ideally more practice, less consumption."
+          },
+          "lectureTopics": [
+            {
+              "text": "Mistake 1 — the paradox of hedonism: directly pursuing happiness generates a gap between current and desired state that produces dissatisfaction. Buddhism identifies this as the fundamental structure of dukkha — craving happiness creates the suffering it seeks to escape. The Stoics noted that pleasure as a primary goal produces its opposite. The Gita's nishkama karma addresses precisely this: act without attachment to the emotional result. Christian mysticism: 'He who seeks to save his life will lose it.' The paradox is universal. Fix: shift your target from feeling happy to doing the practices. Mistake 2 — the insight project: every tradition insists on this distinction. Zen: the finger pointing at the moon is not the moon. Islam: ilm without amal. Christianity: 'Be doers of the word, not hearers only' (James 1:22). Confucianism: zhixing heyi — knowing virtue without practicing it means you do not yet know it. Neuroscience confirms: neuroplasticity requires repeated behavioral activation. Fix: one concept per week. Use the rest of your time practicing. Mistake 3 — waiting for ideal conditions: Frankl demonstrated in a Nazi concentration camp that meaning-making and attitude choice are available even when everything else has been stripped away. Buddhist teaching: since all conditioned existence involves some dukkha, there is no future moment free of the conditions that make practice difficult. Rumi: 'Yesterday I was clever, so I wanted to change the world. Today I am wise, so I am changing myself.' Fix: start with the smallest possible version right now.",
+              "summary": "All three mistakes feel like reasonable approaches and have been independently diagnosed across traditions spanning thousands of years. The corrective for all three is the same: do the practice, now, in whatever form is available.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Cross-cultural diagnoses: Mistake 1 — Buddhist tanha, Stoic anti-pleasure-seeking, Gita nishkama karma, Christian 'lose your life to save it.' Mistake 2 — Zen 'the finger is not the moon,' Islamic ilm without amal, Christian James 1:22, Confucian zhixing heyi. Mistake 3 — Frankl's logotherapy in extremis, Buddhist 'this moment is the only moment,' Rumi on changing oneself."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "The three most common happiness mistakes have been diagnosed independently by traditions spanning thousands of years — their universality is itself evidence of how pervasive and how avoidable they are.",
+            "The corrective for all three is identical: do the practice, in some form, beginning now."
+          ]
+        }
+      ],
+      "quiz": {
+        "passingScore": 80,
+        "attemptsAllowed": 3,
+        "interleaved": true,
+        "questions": [
+          {
+            "question": "Someone says: 'I'll start my happiness practice properly once work settles down.' Which mistake is this?",
+            "questionType": "short-answer",
+            "options": [],
+            "answer": "This is Mistake 3: waiting for ideal conditions. The response is to identify the smallest possible version of the practice that can begin today — the three-good-things practice takes 10 minutes, needs only a notebook, and is available in any life circumstance. Frankl's example establishes that meaning-making and attention practices are available even under extreme conditions. 'Less busy' is not a prerequisite for beginning.",
+            "explanation": "The waiting-for-conditions trap guarantees non-start because conditions never become ideal. The practice is for real life, including difficult real life — which is precisely when the practices are most valuable."
+          },
+          {
+            "question": "True or false: reading extensively about positive psychology produces happiness increases comparable to actually doing the practices.",
+            "questionType": "true-false",
+            "options": [
+              { "text": "True", "explanation": "Incorrect. Understanding positive psychology does not produce the neural changes that practice does. Neuroplasticity requires repeated behavioral activation." },
+              { "text": "False", "explanation": "Correct. This is Mistake 2: treating happiness as an insight project. The Islamic, Confucian, Christian, and Zen traditions all independently made this point — and neuroscience confirms it." }
+            ],
+            "answer": "False",
+            "explanation": "Neuroplasticity requires repeated behavioral activation — reading about gratitude does not strengthen the gratitude circuitry; practicing gratitude does. Understanding is preparation for practice, not a substitute for it."
+          }
+        ]
+      },
+      "practicalActivity": {
+        "title": "Mistakes self-audit",
+        "description": "Honestly assess which of the three mistakes you are most prone to and design a specific structural safeguard against it.",
+        "scenario": "Most people have one dominant pattern that most reliably undermines their practice. Identifying it specifically allows you to design against it.",
+        "steps": [
+          "Rate yourself honestly on each mistake (1–5, where 5 is most prone): pursuing happiness directly, consuming instead of practicing, waiting for ideal conditions.",
+          "For your highest-rated mistake, write a specific example from the past six months where you fell into this pattern.",
+          "Design one structural safeguard: a concrete rule or constraint that makes the mistake harder to fall into.",
+          "Share the safeguard with one other person — commitment to another person is one of the strongest behavioral constraints available.",
+          "After one week, write one sentence assessing whether the safeguard worked."
+        ],
+        "successCriteria": [
+          "The dominant mistake is identified with an honest specific example",
+          "The safeguard is concrete and structural — not a vague intention but a rule or constraint",
+          "The safeguard is shared with at least one other person",
+          "A one-sentence post-week assessment is written"
+        ],
+        "downloadableTemplate": ""
+      },
+      "summary": [
+        "The three mistakes are common because they feel like reasonable approaches — their cross-cultural diagnosis across thousands of years makes them easier to recognize and harder to excuse.",
+        "The corrective for all three is identical: do the practice, in some form, beginning now."
+      ]
+    },
+    {
+      "sectionTitle": "2-week practice plan — integrating science and tradition",
+      "sectionDescription": "A concrete daily schedule that integrates evidence-based practices with cross-cultural wisdom, building the habit before adding complexity.",
+      "estimatedDuration": "2 weeks at 20 minutes per day",
+      "whyThisMatters": "A plan without specific daily tasks is an intention, not a practice. This section converts everything learned into a concrete schedule with cultural context woven into each day.",
+      "learningObjectives": [
+        "Complete all 14 days with written outputs",
+        "Connect at least two cultural traditions to specific practices during week 1",
+        "Complete a PERMA and Ubuntu audit during week 2",
+        "Write a Day 14 reflection that identifies a genuine change and a specific ongoing commitment"
+      ],
+      "reviewContent": [
+        "Why is the nightly three-good-things practice the 'spine' of the plan — why does everything else depend on it?",
+        "What is the purpose of the Day 7 rest day, and what should the reflection on that day address?",
+        "How does the PERMA audit differ from the Ubuntu audit, and what does each reveal that the other doesn't?",
+        "What makes the Day 14 reflection the most important session of the plan?"
+      ],
+      "lectures": [
+        {
+          "lectureTitle": "Week 1 — building the foundation with cultural context",
+          "lectureDescription": "Seven days establishing the core habit and introducing cultural frameworks alongside each practice.",
+          "estimatedDuration": "7 days",
+          "learningObjectives": [
+            "Complete seven consecutive nightly three-good-things entries with full specificity",
+            "Complete the gratitude letter and deliver it by Day 6",
+            "Connect each day's practice to at least one cultural tradition"
+          ],
+          "workedExample": {
+            "problem": "On Day 4 (kindness day), someone has performed their five acts but is struggling to see how this connects to any tradition they studied. How do they make the connection meaningful?",
+            "steps": [
+              "Read the Golden Rule in five different traditions: Confucius ('Do not do to others what you do not wish for yourself'), Hillel ('That which is hateful to you, do not do to your neighbor'), Jesus ('Love your neighbor as yourself'), the Prophet Muhammad ('None of you truly believes until he loves for his brother what he loves for himself'), the Dhammapada ('Hurt not others in ways you yourself would find hurtful').",
+              "Ask: which formulation resonates most with how the kindness acts felt today? The Buddhist formulation is about not causing hurt; the Islamic about loving for others what you love for yourself; the Confucian about restraint.",
+              "Ask: did any of the five acts today feel obligatory rather than genuinely generous? The distinction between karma yoga (selfless action) and strategic kindness is worth noting.",
+              "Write one sentence connecting the day's experience to the tradition that resonated: 'The Islamic formulation — loving for my colleague what I love for myself — reframed the favor I did today from a nice thing to do into something that felt like actual brotherhood.'"
+            ],
+            "conclusion": "Connecting daily practice to tradition is not academic decoration — it deepens the meaning of what you are doing and often makes the practice more motivating to sustain."
+          },
+          "lectureTopics": [
+            {
+              "text": "Week 1 daily schedule: Every night — three good things (10 min), specific events with causal attributions, non-negotiable. Day 1 — VIA Character Strengths survey (15 min); write one sentence per top 5 strength. Day 2 — Savoring practice with morning drink or meal; read about the Japanese tea ceremony and notice the parallel. Day 3 — Draft gratitude letter (30 min minimum); read about the Confucian concept of on (debt of gratitude). Day 4 — Kindness day (five acts, all today); in the evening, read the Golden Rule in five different traditions and reflect on the universality. Day 5 — Loving-kindness meditation (15 min, all five circles); write about what happened in the difficult person circle. Day 6 — Deliver the gratitude letter in person or by phone; write about the experience from two angles: what you felt, and what Ubuntu's 'I am because we are' illuminates about why it affected both parties. Day 7 — Rest day; three good things only; read one short passage from the tradition that resonated most this week and compare it to PERMA.",
+              "summary": "Week 1 establishes the core habit through daily practice while introducing cultural parallels that deepen the meaning of each exercise — connecting secular practice to the wisdom traditions that independently arrived at the same insights.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Week 1 checklist: Night 1-7 — 3 good things (non-negotiable spine). Day 1 — VIA survey. Day 2 — Savoring + tea ceremony reading. Day 3 — Gratitude letter draft + on reading. Day 4 — Kindness day + Golden Rule comparison. Day 5 — Loving-kindness meditation. Day 6 — Letter delivery + Ubuntu reflection. Day 7 — Rest + tradition reading."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Week 1 builds the core practice through daily discipline while introducing cultural context that transforms each exercise from a technique into a tradition.",
+            "The gratitude letter delivery on Day 6 is the emotional centerpiece of week 1 — do not skip or postpone it."
+          ]
+        },
+        {
+          "lectureTitle": "Week 2 — depth, integration, and personal philosophy",
+          "lectureDescription": "Seven days moving from established practices to live application, cultural synthesis, and the development of a personal ongoing practice philosophy.",
+          "estimatedDuration": "7 days",
+          "learningObjectives": [
+            "Complete the best-possible-self exercise and extract three core values",
+            "Complete PERMA and Ubuntu audits and identify gaps in each",
+            "Write a Day 14 reflection that articulates a genuine change and a specific ongoing commitment"
+          ],
+          "workedExample": {
+            "problem": "On Day 14, someone writes: 'I feel better than I did two weeks ago and plan to keep doing the practices.' Diagnose why this is insufficient and what the reflection should contain.",
+            "steps": [
+              "Problem: 'I feel better' is a reported emotional state, not an observed behavioral or cognitive change. It cannot be verified, sustained, or built upon.",
+              "Problem: 'plan to keep doing the practices' is a vague intention. Plans without specifics do not survive contact with real life.",
+              "Required element 1: a specific assumption or belief they held two weeks ago that they would now examine more carefully.",
+              "Required element 2: a specific moment in the past two weeks when they caught themselves reasoning differently about happiness.",
+              "Required element 3: a specific ongoing commitment — not 'practice more' but 'three good things every night at 10pm in the blue notebook, with the phone charging in another room.'"
+            ],
+            "conclusion": "The Day 14 reflection converts two weeks of experience into a concrete, articulable, and therefore sustainable forward commitment."
+          },
+          "lectureTopics": [
+            {
+              "text": "Week 2 daily schedule: Every night — three good things continues (vary categories: one involving another person, one you created, one sensory detail you normally ignore). Day 8 — Best possible self exercise (20 min); extract three core values; read about Islamic khalifah or Hindu svadharma and notice whether either reframes the vision. Day 9 — Negative visualization (10 min); compare to Buddhist anicca contemplation: same destination, different path. Day 10 — PERMA audit (rate 1–5 on each dimension) followed by Ubuntu audit (how connected have you been to your community? What would fuller connection look like?). Day 11 — Second kindness day; include at least one act with a collective or community dimension (Ubuntu dimension). Day 12 — Connection practice: reach out to one person you have been meaning to connect with; make it a call or in-person plan, not a text. Day 13 — Ikigai mapping: draw the four circles and identify where they overlap; revisit the best possible self vision through the ikigai lens. Day 14 — Reflection: which cultural tradition resonated most and why; what did it add that science alone did not; what practice will you continue and in what specific form.",
+              "summary": "Week 2 applies the practices in live conditions, introduces deeper cultural synthesis, and culminates in the development of a personal philosophy and ongoing practice commitment.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Week 2 checklist: Night 8-14 — 3 good things (varied categories). Day 8 — Best possible self + khalifah/dharma reading. Day 9 — Negative visualization + anicca comparison. Day 10 — PERMA audit + Ubuntu audit. Day 11 — Kindness day with community dimension. Day 12 — Connection practice (call or in person). Day 13 — Ikigai mapping + best possible self revisit. Day 14 — Personal philosophy reflection."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Week 2 moves from established habits to live application and cultural synthesis — culminating in the Day 14 reflection that articulates a personal philosophy and specific ongoing commitment.",
+            "The ikigai mapping and PERMA/Ubuntu audits on Days 10 and 13 are the most practically consequential sessions for long-term practice design."
+          ]
+        }
+      ],
+      "quiz": {
+        "passingScore": 80,
+        "attemptsAllowed": 3,
+        "interleaved": true,
+        "questions": [
+          {
+            "question": "Why does the 2-week plan include cultural readings alongside most daily practices?",
+            "questionType": "short-answer",
+            "options": [],
+            "answer": "The cultural context serves two purposes: (1) it deepens the meaning of the practice by connecting it to a tradition that has been developing and refining the same insight for centuries — making the practice feel like participation in something larger. (2) It helps identify which framing is most motivating for the individual learner — someone who finds the Islamic shukr framing more compelling than the secular gratitude framing will practice more consistently if they use the framing that resonates. The goal is a practice that is genuinely and sustainably yours.",
+            "explanation": "Science provides confidence that the practice works; tradition provides meaning for why it matters. Different people find different combinations most compelling — the cultural exposure helps identify which combination works best."
+          }
+        ]
+      },
+      "practicalActivity": {
+        "title": "Day 14 personal philosophy reflection",
+        "description": "Write a 400–600 word reflection that articulates what has changed, which tradition resonated most, and what your specific ongoing practice commitment is.",
+        "scenario": "You have completed 14 days of deliberate happiness practice and been exposed to eight cultural frameworks. This reflection is not a summary — it is the articulation of your own philosophy, drawn from what you have experienced.",
+        "steps": [
+          "Identify one specific belief or assumption about happiness you held two weeks ago that you would now examine more carefully.",
+          "Describe one specific moment in the past two weeks when you noticed your reasoning about happiness shift in real time.",
+          "Name the cultural tradition or concept that added the most to your understanding — and write two sentences about what specifically it added that science alone did not give you.",
+          "Write your specific ongoing commitment: not 'practice more' but a concrete schedule, tool, and form.",
+          "End with one sentence in the voice of the tradition that resonated most — a phrase, teaching, or framing you want to carry forward."
+        ],
+        "successCriteria": [
+          "The reflection is 400–600 words",
+          "A specific (not general) belief change is named",
+          "A specific moment of real-time reasoning shift is described",
+          "A named cultural tradition is credited with a specific addition to understanding",
+          "An ongoing commitment is written with specific time, tool, and form"
+        ],
+        "downloadableTemplate": ""
+      },
+      "summary": [
+        "The 2-week plan builds happiness as a durable habit through daily deliberate practice — not passive understanding — with cultural context that deepens meaning and helps identify which framing sustains motivation.",
+        "The Day 14 reflection is the capstone: it converts two weeks of experience into a personal philosophy and a specific, sustainable forward commitment."
+      ]
+    },
+    {
+      "sectionTitle": "Progress checkpoints and next steps",
+      "sectionDescription": "Three observable milestones for tracking genuine progress, plus a curated map of where to go next — organized by tradition, practice type, and reading.",
+      "estimatedDuration": "Ongoing",
+      "whyThisMatters": "Without clear progress markers, people either assume they are failing when they are not, or assume they are succeeding without genuine change. Observable milestones make practice accountable.",
+      "learningObjectives": [
+        "Identify and test yourself against all three progress milestones",
+        "Articulate your own philosophy of joy drawing from at least two traditions",
+        "Design an ongoing practice that is specific, sustainable, and genuinely yours"
+      ],
+      "reviewContent": [
+        "What is the first observable sign that the three-good-things practice is working — and on what day does it typically appear?",
+        "What is the test for the second milestone, and what must a cultural articulation include to count as genuine?",
+        "What does it mean to articulate your own philosophy of joy, and how is this different from summarizing a tradition?"
+      ],
+      "lectures": [
+        {
+          "lectureTitle": "Three milestones, next practices, and ongoing resources",
+          "lectureDescription": "Observable behavioral and cognitive shifts that signal genuine progress, plus the highest-value next steps organized by tradition and practice type.",
+          "estimatedDuration": "20 minutes",
+          "learningObjectives": [
+            "Test yourself against all three milestones with honest self-observation",
+            "Identify the next depth level in the tradition that resonated most",
+            "Design a sustainable ongoing practice combining science and tradition"
+          ],
+          "workedExample": {
+            "problem": "Someone finds that Buddhist concepts resonated most strongly. They want to go deeper. What is the sequence?",
+            "steps": [
+              "Step 1: establish a formal daily meditation practice (10–20 minutes) using the 8-week MBSR structure — the most rigorously validated entry point, available through Jon Kabat-Zinn's Full Catastrophe Living or numerous online programs.",
+              "Step 2: read primary texts — the Dhammapada is the most accessible; Thich Nhat Hanh's The Miracle of Mindfulness bridges tradition and daily life.",
+              "Step 3: read Robert Wright's Why Buddhism is True — a rigorous evolutionary psychologist examining whether Buddhist insights hold up under scientific scrutiny.",
+              "Step 4: attend a local sangha (Buddhist meditation community) or secular mindfulness group — community practice is significantly more sustaining than solo practice.",
+              "Step 5: when ready for depth, explore Pema Chodron's When Things Fall Apart — the most accessible treatment of the harder teachings on impermanence and suffering."
+            ],
+            "conclusion": "Going deeper in one tradition is more valuable than broad sampling. The sequence matters: daily practice before primary texts; primary texts before community; community before advanced teachings."
+          },
+          "lectureTopics": [
+            {
+              "text": "Three milestones: Milestone 1 (end of week 1) — you are noticing good things during the day, mid-afternoon, without prompting. The attention training has transferred to daily life. If you are still struggling at night, the scan has not started — keep going, it typically shifts between day 5 and 10. Cultural parallel: Zen beginner's mind made habitual; Buddhist clear seeing; Stoic practice of gratitude for 'the things already given.' Milestone 2 (end of week 2) — you can name your flow activity AND articulate what one cultural tradition adds beyond the science in two concrete sentences. The cultural articulation must be specific — 'Buddhism is interesting' does not count. Milestone 3 (4–6 weeks out) — your baseline emotional tone has shifted noticeably, and you can articulate your own philosophy of joy in one paragraph. The baseline shift is most reliably detected externally — an unprompted comment from someone who knows you well. The philosophy is yours: a coherent account of what happiness is, where it comes from, and what you do daily to cultivate it. Next practices: daily meditation (8-week MBSR), loving-kindness daily, self-compassion work (Kristin Neff), flow design. Next books: Flourish (Seligman), The How of Happiness (Lyubomirsky), The Good Life (Waldinger & Schulz), A Guide to the Good Life (Irvine on Stoicism), Why Buddhism is True (Wright), Man's Search for Meaning (Frankl), Self-Compassion (Neff), The Book of Joy (Dalai Lama and Tutu). Primary texts: Meditations (Marcus Aurelius), The Dhammapada, Nicomachean Ethics Books I and X, The Analects (Confucius), Bhagavad Gita chapters 2-3 and 6. Tools: VIA survey (viacharacter.org), Science of Well-Being (Yale/Coursera, free), Waking Up app (Sam Harris), paper journal.",
+              "summary": "Three milestones — proactive attention scanning, flow identification and cultural articulation, baseline shift and personal philosophy — are behavioral and cognitive, not emotional reports. The most reliable indicator of Milestone 3 is external observation.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Priority sequence for next steps: (1) Establish daily meditation (10 min minimum, 8-week MBSR structure). (2) Read one primary text from your resonant tradition. (3) Join or create a practice community. (4) Take the Yale Science of Well-Being course for structured accountability. (5) Design your personal ikigai map and use it to guide time allocation."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "The three milestones measure behavioral and cognitive shifts — proactive attention scanning, flow identification, cultural articulation, and externally observable baseline change — not reported emotional states.",
+            "Going deeper in one tradition is more valuable than broad sampling; daily practice is more valuable than reading; community practice is more sustaining than solo practice."
+          ]
+        }
+      ],
+      "quiz": {
+        "passingScore": 80,
+        "attemptsAllowed": 3,
+        "interleaved": true,
+        "questions": [
+          {
+            "question": "Which of the following best indicates that Milestone 1 has been reached?",
+            "questionType": "multiple-choice",
+            "options": [
+              { "text": "Feeling significantly happier than before starting the course", "explanation": "Incorrect. Reported emotional states are not reliable progress indicators — they fluctuate with circumstances. Milestone 1 is a behavioral shift, not a reported feeling." },
+              { "text": "Catching yourself noting positive experiences during the day, before the nightly writing session", "explanation": "Correct. The milestone is reached when attention scanning becomes proactive — when you notice good things in real time rather than only when prompted by the writing practice." },
+              { "text": "Completing all 14 days of the three-good-things practice without missing a day", "explanation": "Incorrect. Completing the practice is necessary but not sufficient — the milestone is a change in real-time attentional scanning, not a completion count." },
+              { "text": "Being able to explain the three-good-things practice to someone else", "explanation": "Incorrect. Understanding and explaining the practice is preparation, not the milestone." }
+            ],
+            "answer": "Catching yourself noting positive experiences during the day, before the nightly writing session",
+            "explanation": "Milestone 1 is reached when the attentional training has transferred from practice time to daily life — the brain is proactively scanning for positive experiences throughout the day. This shift typically happens between day 5 and day 10."
+          },
+          {
+            "question": "True or false: the most reliable indicator of Milestone 3 (baseline shift) is your own report that you feel lastingly happier.",
+            "questionType": "true-false",
+            "options": [
+              { "text": "True", "explanation": "Incorrect. Self-reports of happiness are subject to positive bias and temporary mood effects. The most reliable indicator is an unprompted observation from someone who knows you well." },
+              { "text": "False", "explanation": "Correct. The most reliable indicator of Milestone 3 is external: an unprompted comment from a partner, close friend, or colleague that you seem different. Others are not subject to the positive bias that self-reports carry." }
+            ],
+            "answer": "False",
+            "explanation": "Self-reports of happiness improvement are unreliable as milestone markers. The most reliable signal of a genuine baseline shift is external observation — someone who knows you well commenting, unprompted, that something has changed."
+          }
+        ]
+      },
+      "practicalActivity": {
+        "title": "Personal practice design — beyond the course",
+        "description": "Design your specific ongoing happiness practice: what you will do, when, how, and with which cultural framing. Specific enough to survive contact with real life.",
+        "scenario": "The two-week course ends. Real life resumes. Without a specific, designed practice, most people revert to default patterns within two to three weeks. This activity makes reversion structurally harder.",
+        "steps": [
+          "Identify your two highest-response practices from the course — the ones that produced the clearest shift in how you felt or noticed.",
+          "For each, write a specific ongoing schedule: what time, what days, what tool, what location.",
+          "Name the cultural tradition whose framing will sustain your motivation — not the most intellectually interesting one but the one that makes you want to practice.",
+          "Identify one practice community — online or in person — that you will join or create within the next 30 days.",
+          "Write your one-paragraph personal philosophy of joy: what happiness is, where it comes from, and what you do daily to cultivate it. Date it and keep it somewhere visible."
+        ],
+        "successCriteria": [
+          "Two specific ongoing practices are designed with complete schedules (time, days, tool, location)",
+          "A named cultural tradition is chosen as the motivating framing with a one-sentence explanation of why",
+          "A practice community is identified with a specific commitment date",
+          "A one-paragraph personal philosophy of joy is written, dated, and placed somewhere visible"
+        ],
+        "downloadableTemplate": ""
+      },
+      "summary": [
+        "Progress is measured by observable behavioral and cognitive shifts — not reported emotional states — and the most reliable indicator of deep change is external observation from people who know you well.",
+        "The goal beyond the course is a personal practice that is specific, sustainable, grounded in both evidence and the tradition that resonates most — and genuinely yours rather than a replica of any single framework."
+      ]
+    }
+  ]
+}
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let state = {
+  currentScreen: 'intro',
+  currentSectionIndex: 0,
+  currentLectureIndex: 0,
+  completedLectures: new Set(),
+  completedQuizzes: new Set(),
+  completedActivities: new Set(),
+  quizAnswers: {},     // sectionIndex -> { qIndex -> answer }
+  quizSubmitted: {},   // sectionIndex -> bool
+};
+
+// ── NAVIGATION ───────────────────────────────────────────────────────────────
+function goToScreen(screen, sIdx, lIdx) {
+  if (sIdx !== undefined) state.currentSectionIndex = sIdx;
+  if (lIdx !== undefined) state.currentLectureIndex = lIdx;
+  state.currentScreen = screen;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('screen-' + screen);
+  if (el) el.classList.add('active');
+  renderScreen(screen);
+  updateSidebar();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── SIDEBAR ──────────────────────────────────────────────────────────────────
+function buildSidebar() {
+  document.getElementById('sidebar-title').textContent = COURSE.courseTitle;
+  renderGlossary();
+  updateSidebar();
+}
+
+function updateSidebar() {
+  const nav = document.getElementById('sidebar-nav');
+  nav.innerHTML = '';
+
+  COURSE.sections.forEach((section, sIdx) => {
+    const sectionDone = isSectionDone(sIdx);
+    const isOpen = sIdx === state.currentSectionIndex;
+
+    const item = document.createElement('div');
+    item.className = 'section-nav-item' + (isOpen ? ' open' : '');
+
+    const header = document.createElement('div');
+    header.className = 'section-nav-header' + (isOpen ? ' active' : '');
+    header.innerHTML = `
+      <span class="section-check ${sectionDone ? 'done' : (isOpen ? 'active' : '')}">${sectionDone ? '✓' : (sIdx + 1)}</span>
+      <span class="section-nav-title">${section.sectionTitle}</span>
+      <span class="section-nav-arrow">›</span>
+    `;
+    header.onclick = () => {
+      goToScreen('section-intro', sIdx, 0);
+    };
+
+    const lectures = document.createElement('div');
+    lectures.className = 'section-nav-lectures';
+
+    section.lectures.forEach((lec, lIdx) => {
+      const lecDone = state.completedLectures.has(`${sIdx}-${lIdx}`);
+      const isActiveLec = state.currentScreen === 'lecture' && sIdx === state.currentSectionIndex && lIdx === state.currentLectureIndex;
+      const lecItem = document.createElement('div');
+      lecItem.className = `lecture-nav-item ${isActiveLec ? 'active' : ''} ${lecDone ? 'done' : ''}`;
+      lecItem.innerHTML = `<span class="lecture-dot"></span>${lec.lectureTitle}`;
+      lecItem.onclick = () => goToScreen('lecture', sIdx, lIdx);
+      lectures.appendChild(lecItem);
+    });
+
+    // Quiz link
+    const quizItem = document.createElement('div');
+    const quizDone = state.completedQuizzes.has(sIdx);
+    const isActiveQuiz = state.currentScreen === 'quiz' && sIdx === state.currentSectionIndex;
+    quizItem.className = `quiz-nav-item ${isActiveQuiz ? 'active' : ''}`;
+    quizItem.innerHTML = `<span class="lecture-dot" style="background:var(--gold)"></span>Section Quiz ${quizDone ? '✓' : ''}`;
+    quizItem.onclick = () => goToScreen('quiz', sIdx);
+    lectures.appendChild(quizItem);
+
+    // Activity link
+    const actItem = document.createElement('div');
+    const actDone = state.completedActivities.has(sIdx);
+    const isActiveAct = state.currentScreen === 'activity' && sIdx === state.currentSectionIndex;
+    actItem.className = `quiz-nav-item ${isActiveAct ? 'active' : ''}`;
+    actItem.innerHTML = `<span class="lecture-dot" style="background:#c9973a88"></span>Practical Activity ${actDone ? '✓' : ''}`;
+    actItem.onclick = () => goToScreen('activity', sIdx);
+    lectures.appendChild(actItem);
+
+    item.appendChild(header);
+    item.appendChild(lectures);
+    nav.appendChild(item);
+  });
+
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = COURSE.sections.reduce((acc, s) => acc + s.lectures.length + 2, 0); // lectures + quiz + activity
+  const done = state.completedLectures.size + state.completedQuizzes.size + state.completedActivities.size;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${pct}% complete`;
+}
+
+function isSectionDone(sIdx) {
+  const s = COURSE.sections[sIdx];
+  const allLecs = s.lectures.every((_, lIdx) => state.completedLectures.has(`${sIdx}-${lIdx}`));
+  return allLecs && state.completedQuizzes.has(sIdx) && state.completedActivities.has(sIdx);
+}
+
+// ── RENDER SCREENS ───────────────────────────────────────────────────────────
+function renderScreen(screen) {
+  if (screen === 'intro') renderIntro();
+  else if (screen === 'section-intro') renderSectionIntro();
+  else if (screen === 'lecture') renderLecture();
+  else if (screen === 'quiz') renderQuiz();
+  else if (screen === 'activity') renderActivity();
+  else if (screen === 'section-summary') renderSectionSummary();
+}
+
+// INTRO
+function renderIntro() {
+  const c = COURSE;
+  document.getElementById('screen-intro').innerHTML = `
+    <div style="margin-bottom:8px">
+      <span class="tag tag-green">${c.difficultyLevel}</span>
+      <span class="tag tag-gray" style="margin-left:6px">⏱ ${c.estimatedDuration}</span>
+    </div>
+    <h1>${c.courseTitle}</h1>
+    <p class="desc">${c.courseDescription}</p>
+    <div class="meta-row">
+      <div class="meta-item"><strong>${c.sections.length}</strong>Sections</div>
+      <div class="meta-item"><strong>${c.sections.reduce((a,s)=>a+s.lectures.length,0)}</strong>Lectures</div>
+      <div class="meta-item"><strong>${c.estimatedDuration}</strong>Total time</div>
+      <div class="meta-item"><strong>v${c.version}</strong>Version</div>
+    </div>
+    ${c.learningOutcomes.length ? `
+      <h3 style="font-size:18px;margin-bottom:8px">What you'll be able to do</h3>
+      <ul class="outcomes-list">${c.learningOutcomes.map(o=>`<li>${o}</li>`).join('')}</ul>
+    ` : ''}
+    ${c.prerequisites.length ? `
+      <h3 style="font-size:18px;margin-bottom:8px">Prerequisites</h3>
+      <ul class="prereq-list">${c.prerequisites.map(p=>`<li>${p}</li>`).join('')}</ul>
+    ` : ''}
+    <button class="btn btn-primary" onclick="goToScreen('section-intro', 0, 0)">Start Course →</button>
+  `;
+}
+
+// SECTION INTRO
+function renderSectionIntro() {
+  const sIdx = state.currentSectionIndex;
+  const section = COURSE.sections[sIdx];
+  const el = document.getElementById('screen-section-intro');
+  el.innerHTML = `
+    <div class="section-eyebrow">Section ${sIdx + 1} of ${COURSE.sections.length}</div>
+    <h1 style="font-size:32px;margin-bottom:12px">${section.sectionTitle}</h1>
+    <p style="color:var(--text-secondary);margin-bottom:20px;font-size:15px">${section.sectionDescription}</p>
+    ${section.whyThisMatters ? `<div class="why-box">💡 <strong>Why this matters:</strong> ${section.whyThisMatters}</div>` : ''}
+    ${section.reviewContent && section.reviewContent.length ? `
+      <div class="review-box">
+        <h4>↩ Spaced Review — Recall from before</h4>
+        <ul>${section.reviewContent.map(r=>`<li>${r}</li>`).join('')}</ul>
+      </div>
+    ` : ''}
+    <h3 style="font-size:16px;margin-bottom:10px">In this section you'll learn to</h3>
+    <ul class="objectives-list">${section.learningObjectives.map(o=>`<li>${o}</li>`).join('')}</ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="${sIdx > 0 ? `goToScreen('section-summary', ${sIdx-1})` : `goToScreen('intro')`}">← Back</button>
+      <button class="btn btn-primary" onclick="goToScreen('lecture', ${sIdx}, 0)">Begin Section →</button>
+    </div>
+  `;
+}
+
+// LECTURE
+function renderLecture() {
+  const sIdx = state.currentSectionIndex;
+  const lIdx = state.currentLectureIndex;
+  const lecture = COURSE.sections[sIdx].lectures[lIdx];
+  const section = COURSE.sections[sIdx];
+  const totalLectures = section.lectures.length;
+  const el = document.getElementById('screen-lecture');
+
+  let topicsHTML = lecture.lectureTopics.map(topic => {
+    let mediaHTML = '';
+    if (topic.media && topic.media.length) {
+      topic.media.forEach(m => {
+        if (m.type === 'image') {
+          mediaHTML += `
+            <div class="media-block">
+              <img src="${m.url}" alt="${m.altText || m.label || ''}" onerror="this.style.display='none'">
+              ${m.label ? `<p class="media-caption">${m.label}</p>` : ''}
+            </div>`;
+        } else if (m.type === 'video') {
+          mediaHTML += `
+            <div class="media-block">
+              <div class="video-placeholder">
+                <div class="play-btn">▶</div>
+                <span>Video: ${m.url || 'Unavailable in preview'}</span>
+              </div>
+            </div>`;
+        } else if (m.type === 'text') {
+          mediaHTML += `<div class="media-text-block">${m.content}</div>`;
+        }
+      });
+    }
+    return `
+      <div class="topic-block">
+        <p class="topic-text">${topic.text}</p>
+        ${mediaHTML}
+        ${topic.summary ? `<div class="topic-summary"><strong>Key takeaway:</strong> ${topic.summary}</div>` : ''}
+      </div>`;
+  }).join('');
+
+  let workedHTML = '';
+  if (lecture.workedExample) {
+    const we = lecture.workedExample;
+    workedHTML = `
+      <div class="worked-example">
+        <div class="worked-example-label">Worked Example</div>
+        <h4>${we.problem}</h4>
+        <ol>${we.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+        ${we.conclusion ? `<p class="conclusion">${we.conclusion}</p>` : ''}
+      </div>`;
+  }
+
+  let objHTML = '';
+  if (lecture.learningObjectives && lecture.learningObjectives.length) {
+    objHTML = `<ul class="objectives-list" style="margin-bottom:20px">${lecture.learningObjectives.map(o=>`<li>${o}</li>`).join('')}</ul>`;
+  }
+
+  let summaryHTML = '';
+  if (lecture.summary && lecture.summary.length) {
+    summaryHTML = `
+      <div class="lecture-summary">
+        <h4>Lecture Summary</h4>
+        <ul>${lecture.summary.map(s=>`<li>${s}</li>`).join('')}</ul>
+      </div>`;
+  }
+
+  // determine next destination
+  const isLastLecture = lIdx === totalLectures - 1;
+  const nextLabel = isLastLecture ? 'Section Quiz →' : 'Next Lecture →';
+  const nextAction = isLastLecture
+    ? `markLectureDone(${sIdx},${lIdx}); goToScreen('quiz', ${sIdx})`
+    : `markLectureDone(${sIdx},${lIdx}); goToScreen('lecture', ${sIdx}, ${lIdx+1})`;
+
+  const prevAction = lIdx === 0
+    ? `goToScreen('section-intro', ${sIdx})`
+    : `goToScreen('lecture', ${sIdx}, ${lIdx-1})`;
+
+  el.innerHTML = `
+    <div class="lecture-header">
+      <div class="section-eyebrow">${section.sectionTitle} · Lecture ${lIdx + 1} of ${totalLectures}</div>
+      <h2>${lecture.lectureTitle}</h2>
+      <div class="lecture-meta">
+        ${lecture.estimatedDuration ? `<span>⏱ ${lecture.estimatedDuration}</span>` : ''}
+      </div>
+      <p style="color:var(--text-secondary);margin-top:10px;font-size:14px">${lecture.lectureDescription}</p>
+    </div>
+    ${objHTML}
+    ${workedHTML}
+    ${topicsHTML}
+    ${summaryHTML}
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="${prevAction}">← Back</button>
+      <button class="btn btn-primary" onclick="${nextAction}">${nextLabel}</button>
+    </div>
+  `;
+}
+
+function markLectureDone(sIdx, lIdx) {
+  state.completedLectures.add(`${sIdx}-${lIdx}`);
+}
+
+// QUIZ
+function renderQuiz() {
+  const sIdx = state.currentSectionIndex;
+  const section = COURSE.sections[sIdx];
+  const quiz = section.quiz;
+  const submitted = !!state.quizSubmitted[sIdx];
+  const answers = state.quizAnswers[sIdx] || {};
+  const el = document.getElementById('screen-quiz');
+
+  let questionsHTML = quiz.questions.map((q, qIdx) => {
+    const selectedAnswer = answers[qIdx];
+    const isCorrect = selectedAnswer === q.answer;
+
+    if (q.questionType === 'multiple-choice') {
+      const optionsHTML = q.options.map((opt, oIdx) => {
+        const letter = ['A','B','C','D'][oIdx];
+        let cls = 'option-item';
+        if (submitted) {
+          cls += ' disabled';
+          if (opt.text === q.answer) cls += ' correct';
+          else if (opt.text === selectedAnswer && opt.text !== q.answer) cls += ' incorrect';
+        } else if (selectedAnswer === opt.text) cls += ' selected';
+        return `
+          <li class="${cls}" onclick="${submitted ? '' : `selectAnswer(${sIdx},${qIdx},'${escapeQ(opt.text)}')`}">
+            <span class="option-letter">${letter}</span>
+            <span>${opt.text}</span>
+          </li>`;
+      }).join('');
+
+      let feedbackHTML = '';
+      if (submitted && selectedAnswer !== undefined) {
+        const chosen = q.options.find(o => o.text === selectedAnswer);
+        feedbackHTML = `
+          <div class="feedback-box ${isCorrect ? 'correct' : 'incorrect'} show">
+            <strong>${isCorrect ? '✓ Correct' : '✗ Incorrect'}</strong>
+            ${chosen ? chosen.explanation : ''}
+          </div>
+          ${!isCorrect ? `<div class="feedback-box correct show" style="margin-top:6px"><strong>Overall:</strong> ${q.explanation}</div>` : ''}`;
+      }
+
+      return `
+        <div class="question-block">
+          <div class="question-number">Question ${qIdx + 1} · Multiple Choice</div>
+          <div class="question-text">${q.question}</div>
+          <ul class="options-list">${optionsHTML}</ul>
+          ${feedbackHTML}
+        </div>`;
+
+    } else if (q.questionType === 'true-false') {
+      const optionsHTML = q.options.map(opt => {
+        let cls = 'option-item';
+        if (submitted) {
+          cls += ' disabled';
+          if (opt.text === q.answer) cls += ' correct';
+          else if (opt.text === selectedAnswer) cls += ' incorrect';
+        } else if (selectedAnswer === opt.text) cls += ' selected';
+        return `<li class="${cls}" onclick="${submitted ? '' : `selectAnswer(${sIdx},${qIdx},'${escapeQ(opt.text)}')`}" style="justify-content:center">${opt.text}</li>`;
+      }).join('');
+
+      let feedbackHTML = '';
+      if (submitted) {
+        feedbackHTML = `
+          <div class="feedback-box ${isCorrect ? 'correct' : 'incorrect'} show">
+            <strong>${isCorrect ? '✓ Correct' : '✗ Incorrect'}</strong>
+            ${q.explanation}
+          </div>`;
+      }
+
+      return `
+        <div class="question-block">
+          <div class="question-number">Question ${qIdx + 1} · True or False</div>
+          <div class="question-text">${q.question}</div>
+          <ul class="options-list tf-options">${optionsHTML}</ul>
+          ${feedbackHTML}
+        </div>`;
+
+    } else if (q.questionType === 'short-answer') {
+      const val = answers[qIdx] || '';
+      return `
+        <div class="question-block">
+          <div class="question-number">Question ${qIdx + 1} · Short Answer</div>
+          <div class="question-text">${q.question}</div>
+          <textarea class="short-answer-input" placeholder="Write your answer here…" id="sa-${sIdx}-${qIdx}" ${submitted ? 'disabled' : ''}>${val}</textarea>
+          <p class="short-answer-hint">There's no single correct answer — focus on applying the concepts from this section.</p>
+          ${submitted ? `<div class="feedback-box correct show"><strong>Model answer:</strong> ${q.explanation}</div>` : ''}
+        </div>`;
+    }
+    return '';
+  }).join('');
+
+  // score
+  let scoreHTML = '';
+  if (submitted) {
+    const gradeable = quiz.questions.filter(q => q.questionType !== 'short-answer');
+    const correct = gradeable.filter((q, qIdx) => answers[qIdx] === q.answer).length;
+    const pct = gradeable.length > 0 ? Math.round((correct / gradeable.length) * 100) : 100;
+    const passed = pct >= quiz.passingScore;
+    scoreHTML = `
+      <div class="quiz-overall-feedback show">
+        <div class="quiz-score">${pct}%</div>
+        <h3>${passed ? '🎉 Well done!' : '📚 Keep going'}</h3>
+        <p>${passed ? `You scored ${pct}% — above the passing mark of ${quiz.passingScore}%. Move on to the practical activity.`
+          : `You scored ${pct}%. The passing mark is ${quiz.passingScore}%. Review the lectures and try the quiz again.`}</p>
+        ${passed ? `<button class="btn btn-primary" style="margin-top:14px" onclick="goToScreen('activity',${sIdx})">Practical Activity →</button>` : ''}
+      </div>`;
+  }
+
+  const allAnswered = quiz.questions.every((q, qIdx) => {
+    if (q.questionType === 'short-answer') return true;
+    return answers[qIdx] !== undefined;
+  });
+
+  el.innerHTML = `
+    <div class="quiz-header">
+      <div class="section-eyebrow">${section.sectionTitle}</div>
+      <h2>Section Quiz</h2>
+      <div class="quiz-meta">
+        <span>📝 ${quiz.questions.length} questions</span>
+        <span>Passing: ${quiz.passingScore}%</span>
+        <span>Attempts: ${quiz.attemptsAllowed}</span>
+      </div>
+    </div>
+    ${questionsHTML}
+    ${!submitted ? `
+      <button class="btn btn-primary" style="margin-top:4px" id="submit-quiz-btn" onclick="submitQuiz(${sIdx})" ${allAnswered ? '' : 'disabled'}>
+        Submit Quiz
+      </button>` : ''}
+    ${scoreHTML}
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goToScreen('lecture', ${sIdx}, ${section.lectures.length - 1})">← Back to Lectures</button>
+      ${submitted ? `<button class="btn btn-primary" onclick="goToScreen('activity', ${sIdx})">Practical Activity →</button>` : ''}
+    </div>
+  `;
+
+  // attach short-answer live listeners
+  if (!submitted) {
+    quiz.questions.forEach((q, qIdx) => {
+      if (q.questionType === 'short-answer') {
+        const ta = document.getElementById(`sa-${sIdx}-${qIdx}`);
+        if (ta) ta.addEventListener('input', () => {
+          if (!state.quizAnswers[sIdx]) state.quizAnswers[sIdx] = {};
+          state.quizAnswers[sIdx][qIdx] = ta.value;
+        });
+      }
+    });
+  }
+}
+
+function escapeQ(s) { return s.replace(/'/g, "\\'"); }
+
+function selectAnswer(sIdx, qIdx, answer) {
+  if (!state.quizAnswers[sIdx]) state.quizAnswers[sIdx] = {};
+  state.quizAnswers[sIdx][qIdx] = answer;
+  renderQuiz();
+}
+
+function submitQuiz(sIdx) {
+  // capture short answers
+  const quiz = COURSE.sections[sIdx].quiz;
+  quiz.questions.forEach((q, qIdx) => {
+    if (q.questionType === 'short-answer') {
+      const ta = document.getElementById(`sa-${sIdx}-${qIdx}`);
+      if (ta) {
+        if (!state.quizAnswers[sIdx]) state.quizAnswers[sIdx] = {};
+        state.quizAnswers[sIdx][qIdx] = ta.value;
+      }
+    }
+  });
+  state.quizSubmitted[sIdx] = true;
+  state.completedQuizzes.add(sIdx);
+  renderQuiz();
+  updateSidebar();
+}
+
+// ACTIVITY
+function renderActivity() {
+  const sIdx = state.currentSectionIndex;
+  const section = COURSE.sections[sIdx];
+  const act = section.practicalActivity;
+  const el = document.getElementById('screen-activity');
+
+  el.innerHTML = `
+    <div class="activity-header">
+      <div class="section-eyebrow">${section.sectionTitle} · Practical Activity</div>
+      <h2>${act.title}</h2>
+      <p style="color:var(--text-secondary);font-size:14px;margin-top:8px">${act.description}</p>
+    </div>
+    <div class="scenario-box">
+      <h4>Your Scenario</h4>
+      <p>${act.scenario}</p>
+    </div>
+    <h3 style="font-size:17px;margin-bottom:12px">Steps</h3>
+    <ol class="steps-list">${act.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+    <h3 style="font-size:17px;margin-bottom:10px">Success Criteria</h3>
+    <ul class="criteria-list">${act.successCriteria.map(c=>`<li>${c}</li>`).join('')}</ul>
+    <h3 style="font-size:17px;margin-bottom:10px">Your Response</h3>
+    <textarea class="activity-response" placeholder="Write your response here — you can refer back to this at any time…" id="activity-response-${sIdx}"></textarea>
+    <div style="margin-top:14px;display:flex;gap:10px;align-items:center">
+      <button class="btn btn-primary btn-sm" onclick="completeActivity(${sIdx})">Mark as Complete</button>
+      <span id="activity-done-${sIdx}" style="font-size:13px;color:var(--accent);display:none">✓ Completed</span>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goToScreen('quiz', ${sIdx})">← Back to Quiz</button>
+      <button class="btn btn-primary" onclick="goToScreen('section-summary', ${sIdx})">Section Summary →</button>
+    </div>
+  `;
+
+  if (state.completedActivities.has(sIdx)) {
+    const doneEl = document.getElementById(`activity-done-${sIdx}`);
+    if (doneEl) doneEl.style.display = 'inline';
+  }
+}
+
+function completeActivity(sIdx) {
+  state.completedActivities.add(sIdx);
+  const doneEl = document.getElementById(`activity-done-${sIdx}`);
+  if (doneEl) doneEl.style.display = 'inline';
+  updateSidebar();
+}
+
+// SECTION SUMMARY
+function renderSectionSummary() {
+  const sIdx = state.currentSectionIndex;
+  const section = COURSE.sections[sIdx];
+  const isLast = sIdx === COURSE.sections.length - 1;
+  const el = document.getElementById('screen-section-summary');
+
+  el.innerHTML = `
+    <div class="section-eyebrow">Section ${sIdx + 1} Complete</div>
+    <h1 style="font-size:32px;margin-bottom:16px">${section.sectionTitle}</h1>
+    <div class="section-summary">
+      <h4>What you covered</h4>
+      <div class="summary-grid">
+        ${section.summary.map(s=>`<div class="summary-item">${s}</div>`).join('')}
+      </div>
+    </div>
+    <p style="color:var(--text-secondary);font-size:14px;margin-bottom:28px">
+      Take a moment to reflect: can you explain each of these points in your own words? That's the true test of understanding.
+    </p>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goToScreen('activity', ${sIdx})">← Back to Activity</button>
+      ${isLast
+        ? `<button class="btn btn-primary" onclick="goToScreen('complete')">Finish Course 🎓</button>`
+        : `<button class="btn btn-primary" onclick="goToScreen('section-intro', ${sIdx + 1}, 0)">Next Section →</button>`
+      }
+    </div>
+  `;
+}
+
+// GLOSSARY
+function renderGlossary() {
+  const body = document.getElementById('glossary-body');
+  if (!COURSE.glossary || !COURSE.glossary.length) {
+    body.innerHTML = '<p style="padding:16px;font-size:13px;color:var(--text-secondary)">No glossary terms defined.</p>';
+    return;
+  }
+  body.innerHTML = COURSE.glossary.map(g => `
+    <dl class="glossary-term">
+      <dt>${g.term}</dt>
+      <dd>${g.definition}</dd>
+    </dl>`).join('');
+}
+
+function toggleGlossary() {
+  document.getElementById('glossary-drawer').classList.toggle('open');
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+buildSidebar();
+renderScreen('intro');
+</script>
+</body>
+</html>

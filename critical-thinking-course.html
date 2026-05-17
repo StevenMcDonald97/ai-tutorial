@@ -1,0 +1,2472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Course Player</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f5f2;
+    --surface: #ffffff;
+    --border: #e8e4de;
+    --text: #1a1917;
+    --text-secondary: #6b6760;
+    --accent: #2d5a3d;
+    --accent-light: #eaf2ec;
+    --accent-muted: #4a7c5f;
+    --warn: #8b3a2a;
+    --warn-light: #fdf0ee;
+    --gold: #c9973a;
+    --gold-light: #fdf6e8;
+    --radius: 10px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4 { font-family: 'DM Serif Display', serif; font-weight: 400; line-height: 1.25; }
+
+  /* ── Layout ── */
+  #app { display: flex; min-height: 100vh; }
+
+  /* ── Sidebar ── */
+  #sidebar {
+    width: 300px;
+    min-width: 300px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  #sidebar-header {
+    padding: 24px 20px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  #sidebar-header .course-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  #sidebar-header h2 { font-size: 18px; color: var(--text); }
+
+  #progress-bar-wrap {
+    margin-top: 14px;
+    background: var(--border);
+    border-radius: 99px;
+    height: 5px;
+    overflow: hidden;
+  }
+  #progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  #progress-label {
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  /* Section nav */
+  .section-nav-item { border-bottom: 1px solid var(--border); }
+
+  .section-nav-header {
+    padding: 12px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .section-nav-header:hover { background: var(--bg); }
+  .section-nav-header.active { color: var(--text); }
+
+  .section-check {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 9px;
+    transition: all 0.2s;
+  }
+  .section-check.done { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .section-check.active { border-color: var(--accent); }
+
+  .section-nav-title { flex: 1; }
+  .section-nav-arrow { font-size: 10px; transition: transform 0.2s; }
+  .section-nav-item.open .section-nav-arrow { transform: rotate(90deg); }
+
+  .section-nav-lectures { display: none; }
+  .section-nav-item.open .section-nav-lectures { display: block; }
+
+  .lecture-nav-item {
+    padding: 8px 20px 8px 48px;
+    cursor: pointer;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    display: flex; align-items: center; gap: 8px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .lecture-nav-item:hover { background: var(--bg); color: var(--text); }
+  .lecture-nav-item.active { color: var(--accent); font-weight: 500; }
+  .lecture-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .lecture-nav-item.active .lecture-dot { background: var(--accent); }
+  .lecture-nav-item.done .lecture-dot { background: var(--accent-muted); }
+
+  /* Quiz & activity in sidebar */
+  .quiz-nav-item {
+    padding: 8px 20px 8px 48px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex; align-items: center; gap: 8px;
+    transition: background 0.15s;
+  }
+  .quiz-nav-item:hover { background: var(--bg); }
+  .quiz-nav-item.active { color: var(--gold); font-weight: 500; }
+  .quiz-nav-item .lecture-dot { background: var(--gold); opacity: 0.4; }
+  .quiz-nav-item.active .lecture-dot { opacity: 1; }
+
+  /* ── Main Content ── */
+  #main {
+    flex: 1;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 40px;
+  }
+
+  /* ── Screens ── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Course intro */
+  #screen-intro .course-image {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    margin-bottom: 32px;
+    background: linear-gradient(135deg, var(--accent-light), var(--border));
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+    font-size: 48px;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .tag-green { background: var(--accent-light); color: var(--accent); }
+  .tag-gray { background: var(--border); color: var(--text-secondary); }
+
+  #screen-intro h1 { font-size: 36px; margin: 12px 0 16px; }
+  #screen-intro .desc { color: var(--text-secondary); font-size: 15px; margin-bottom: 28px; }
+
+  .meta-row {
+    display: flex; flex-wrap: wrap; gap: 20px;
+    padding: 20px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+  }
+  .meta-item { font-size: 13px; color: var(--text-secondary); }
+  .meta-item strong { color: var(--text); display: block; font-weight: 600; font-size: 14px; }
+
+  .outcomes-list, .prereq-list {
+    list-style: none;
+    margin: 12px 0 24px;
+  }
+  .outcomes-list li, .prereq-list li {
+    padding: 6px 0 6px 20px;
+    position: relative;
+    font-size: 14px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+  }
+  .outcomes-list li::before {
+    content: '✓';
+    position: absolute; left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .prereq-list li::before {
+    content: '·';
+    position: absolute; left: 6px;
+    color: var(--text-secondary);
+    font-size: 18px;
+    line-height: 1.2;
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 28px;
+    border-radius: 99px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-muted); }
+  .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--bg); }
+  .btn-sm { padding: 8px 18px; font-size: 13px; }
+
+  /* Section intro */
+  .section-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .why-box {
+    background: var(--accent-light);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 14px 18px;
+    margin: 20px 0;
+    font-size: 14px;
+    color: var(--accent);
+  }
+
+  .objectives-list {
+    list-style: none;
+    margin: 12px 0 24px;
+  }
+  .objectives-list li {
+    padding: 8px 12px 8px 36px;
+    position: relative;
+    font-size: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 6px;
+  }
+  .objectives-list li::before {
+    content: '→';
+    position: absolute; left: 12px;
+    color: var(--accent);
+  }
+
+  /* Review box */
+  .review-box {
+    background: var(--gold-light);
+    border: 1px solid #e8d5a8;
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 28px;
+  }
+  .review-box h4 { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+  .review-box ul { list-style: none; }
+  .review-box li { font-size: 13.5px; color: var(--text-secondary); padding: 4px 0; padding-left: 16px; position: relative; }
+  .review-box li::before { content: '↩'; position: absolute; left: 0; color: var(--gold); font-size: 11px; }
+
+  /* Lecture */
+  .lecture-header { margin-bottom: 28px; }
+  .lecture-header h2 { font-size: 28px; margin: 8px 0 10px; }
+  .lecture-meta { font-size: 12px; color: var(--text-secondary); display: flex; gap: 16px; }
+
+  .worked-example {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 28px;
+  }
+  .worked-example-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--accent-muted); margin-bottom: 10px;
+  }
+  .worked-example h4 { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .worked-example ol { padding-left: 18px; }
+  .worked-example ol li { font-size: 13.5px; color: var(--text-secondary); margin-bottom: 4px; }
+  .worked-example .conclusion { margin-top: 12px; font-size: 13px; color: var(--accent); font-style: italic; }
+
+  /* Topic */
+  .topic-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .topic-text { font-size: 15px; line-height: 1.75; color: var(--text); margin-bottom: 16px; }
+  .topic-summary {
+    background: var(--accent-light);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--accent);
+    margin-top: 14px;
+  }
+  .topic-summary strong { font-weight: 600; }
+
+  .media-block { margin-top: 16px; }
+  .media-block img {
+    width: 100%; border-radius: 6px;
+    border: 1px solid var(--border);
+    margin-bottom: 6px;
+  }
+  .media-caption { font-size: 12px; color: var(--text-secondary); text-align: center; }
+  .media-text-block {
+    background: var(--bg);
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 12px;
+  }
+  .video-placeholder {
+    background: #1a1917;
+    border-radius: 6px;
+    height: 200px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-size: 13px;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .play-btn {
+    width: 40px; height: 40px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  /* Lecture summary */
+  .lecture-summary {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-top: 28px;
+  }
+  .lecture-summary h4 { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 10px; }
+  .lecture-summary ul { list-style: none; }
+  .lecture-summary li { padding: 5px 0 5px 18px; position: relative; font-size: 14px; color: var(--text-secondary); }
+  .lecture-summary li::before { content: '✓'; position: absolute; left: 0; color: var(--accent); font-weight: 700; font-size: 12px; }
+
+  /* Nav buttons */
+  .nav-buttons {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 36px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Quiz */
+  .quiz-header { margin-bottom: 28px; }
+  .quiz-header h2 { font-size: 28px; margin: 8px 0 10px; }
+  .quiz-meta { font-size: 13px; color: var(--text-secondary); display: flex; gap: 16px; }
+
+  .question-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .question-number { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 8px; }
+  .question-text { font-size: 16px; font-weight: 500; margin-bottom: 18px; line-height: 1.5; }
+
+  .options-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .option-item {
+    padding: 12px 16px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex; align-items: flex-start; gap: 12px;
+    transition: all 0.15s;
+    background: var(--surface);
+  }
+  .option-item:hover { border-color: var(--accent); background: var(--accent-light); }
+  .option-item.selected { border-color: var(--accent); background: var(--accent-light); }
+  .option-item.correct { border-color: var(--accent); background: var(--accent-light); }
+  .option-item.incorrect { border-color: var(--warn); background: var(--warn-light); }
+  .option-item.disabled { cursor: default; pointer-events: none; }
+  .option-letter {
+    width: 22px; height: 22px; min-width: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 1px;
+    transition: all 0.15s;
+  }
+  .option-item.selected .option-letter { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .option-item.correct .option-letter { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .option-item.incorrect .option-letter { background: var(--warn); border-color: var(--warn); color: #fff; }
+
+  .feedback-box {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 13.5px;
+    display: none;
+  }
+  .feedback-box.show { display: block; }
+  .feedback-box.correct { background: var(--accent-light); color: var(--accent); }
+  .feedback-box.incorrect { background: var(--warn-light); color: var(--warn); }
+  .feedback-box strong { display: block; margin-bottom: 4px; font-weight: 600; }
+
+  /* True/false */
+  .tf-options { display: flex; gap: 12px; }
+  .tf-options .option-item { flex: 1; justify-content: center; text-align: center; }
+
+  /* Short answer */
+  .short-answer-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    resize: vertical;
+    min-height: 80px;
+    transition: border 0.15s;
+    background: var(--surface);
+    color: var(--text);
+  }
+  .short-answer-input:focus { outline: none; border-color: var(--accent); }
+  .short-answer-hint { font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
+
+  .check-btn {
+    margin-top: 14px;
+    padding: 10px 22px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .check-btn:hover { background: var(--accent-muted); }
+  .check-btn:disabled { opacity: 0.4; cursor: default; }
+
+  .quiz-overall-feedback {
+    background: var(--accent-light);
+    border: 1px solid #b8d9c2;
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-top: 24px;
+    display: none;
+  }
+  .quiz-overall-feedback.show { display: block; }
+  .quiz-overall-feedback h3 { font-size: 20px; margin-bottom: 6px; }
+  .quiz-overall-feedback p { font-size: 14px; color: var(--text-secondary); }
+  .quiz-score { font-size: 36px; font-family: 'DM Serif Display', serif; color: var(--accent); }
+
+  /* Practical activity */
+  .activity-header { margin-bottom: 28px; }
+  .activity-header h2 { font-size: 28px; margin: 8px 0 10px; }
+
+  .scenario-box {
+    background: var(--gold-light);
+    border: 1px solid #e8d5a8;
+    border-left: 3px solid var(--gold);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 24px;
+  }
+  .scenario-box h4 { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+  .scenario-box p { font-size: 14px; color: var(--text-secondary); }
+
+  .steps-list { list-style: none; counter-reset: steps; margin-bottom: 24px; }
+  .steps-list li {
+    counter-increment: steps;
+    padding: 12px 16px 12px 52px;
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  .steps-list li::before {
+    content: counter(steps);
+    position: absolute; left: 16px;
+    width: 22px; height: 22px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    top: 12px;
+  }
+
+  .criteria-list { list-style: none; margin-bottom: 24px; }
+  .criteria-list li {
+    padding: 8px 12px 8px 32px;
+    position: relative;
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+  .criteria-list li::before { content: '◇'; position: absolute; left: 8px; color: var(--accent); font-size: 12px; }
+
+  .activity-response {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    resize: vertical;
+    min-height: 140px;
+    transition: border 0.15s;
+    background: var(--surface);
+    color: var(--text);
+  }
+  .activity-response:focus { outline: none; border-color: var(--accent); }
+
+  /* Section summary */
+  .section-summary {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .section-summary h4 { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 14px; }
+  .summary-grid { display: grid; gap: 8px; }
+  .summary-item {
+    padding: 10px 14px 10px 36px;
+    position: relative;
+    background: var(--accent-light);
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--accent);
+  }
+  .summary-item::before { content: '✓'; position: absolute; left: 12px; font-weight: 700; }
+
+  /* Glossary drawer */
+  #glossary-btn {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 99px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(45,90,61,0.3);
+    z-index: 100;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  #glossary-drawer {
+    position: fixed; bottom: 0; right: 0;
+    width: 320px;
+    max-height: 50vh;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius) var(--radius) 0 0;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.1);
+    z-index: 200;
+    display: none;
+    flex-direction: column;
+  }
+  #glossary-drawer.open { display: flex; }
+  #glossary-drawer-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  #glossary-drawer-header h4 { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); }
+  #glossary-close { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--text-secondary); }
+  #glossary-body { overflow-y: auto; padding: 10px 0; }
+  .glossary-term { padding: 10px 18px; border-bottom: 1px solid var(--border); }
+  .glossary-term dt { font-size: 13px; font-weight: 600; color: var(--accent); }
+  .glossary-term dd { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+  /* Completion */
+  #screen-complete {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .complete-badge {
+    width: 80px; height: 80px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    margin: 0 auto 28px;
+  }
+  #screen-complete h1 { font-size: 40px; margin-bottom: 12px; }
+  #screen-complete p { color: var(--text-secondary); font-size: 16px; max-width: 480px; margin: 0 auto 32px; }
+
+  /* Transitions */
+  .screen { animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Scrollbar */
+  #sidebar::-webkit-scrollbar { width: 4px; }
+  #sidebar::-webkit-scrollbar-track { background: transparent; }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  @media (max-width: 700px) {
+    #sidebar { display: none; }
+    #main { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <nav id="sidebar">
+    <div id="sidebar-header">
+      <div class="course-label">Course</div>
+      <h2 id="sidebar-title"></h2>
+      <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+      <div id="progress-label"></div>
+    </div>
+    <div id="sidebar-nav"></div>
+  </nav>
+
+  <main id="main">
+    <div id="screen-intro" class="screen active"></div>
+    <div id="screen-section-intro" class="screen"></div>
+    <div id="screen-lecture" class="screen"></div>
+    <div id="screen-quiz" class="screen"></div>
+    <div id="screen-activity" class="screen"></div>
+    <div id="screen-section-summary" class="screen"></div>
+    <div id="screen-complete" class="screen">
+      <div class="complete-badge">🎓</div>
+      <h1>Course Complete!</h1>
+      <p>Congratulations — you've completed the course. Review any section using the sidebar, or restart from the beginning.</p>
+      <button class="btn btn-primary" onclick="goToScreen('intro')">Back to Start</button>
+    </div>
+  </main>
+</div>
+
+<button id="glossary-btn" onclick="toggleGlossary()">📖 Glossary</button>
+<div id="glossary-drawer">
+  <div id="glossary-drawer-header">
+    <h4>Glossary</h4>
+    <button id="glossary-close" onclick="toggleGlossary()">✕</button>
+  </div>
+  <div id="glossary-body"></div>
+</div>
+
+<script>
+// ── COURSE DATA ─────────────────────────────────────────────────────────────
+// Replace this object with your own course JSON to use the player with different content.
+const COURSE = {
+  "courseTitle": "Critical Thinking: A Practical Guide",
+  "courseDescription": "A hands-on, application-first course on critical thinking. You will learn to evaluate claims, identify bias, argue rigorously, and teach these skills to others — through concrete exercises you can apply the same day.",
+  "courseImage": "",
+  "estimatedDuration": "2 weeks at 20 minutes per day",
+  "lastUpdated": "2026-05-16",
+  "version": "1.0",
+  "prerequisites": [
+    "No formal prerequisites — some prior exposure to reasoning or debate is helpful but not required",
+    "Willingness to examine your own beliefs and assumptions"
+  ],
+  "difficultyLevel": "intermediate",
+  "learningOutcomes": [
+    "Reliably distinguish claims from evidence in everyday conversations, news, and professional contexts",
+    "Apply the 5-question audit to any claim within seconds",
+    "Construct a fair steel-man of a position you personally disagree with",
+    "Catch and name your own confirmation bias in real time",
+    "Use the Socratic method to guide others toward better reasoning without triggering defensiveness",
+    "Build a shared critical thinking culture within a team or group"
+  ],
+  "glossary": [
+    { "term": "Claim", "definition": "An assertion that something is true, without necessarily providing supporting evidence." },
+    { "term": "Evidence", "definition": "Information — such as data, studies, or direct observation — that supports or refutes a claim." },
+    { "term": "Confirmation bias", "definition": "The tendency to search for, interpret, and remember information in a way that confirms one's pre-existing beliefs." },
+    { "term": "Steel-manning", "definition": "Engaging with the strongest possible version of an opposing argument, rather than a weakened or distorted version." },
+    { "term": "Straw-manning", "definition": "Misrepresenting or oversimplifying an opponent's argument to make it easier to attack." },
+    { "term": "Correlation", "definition": "A statistical relationship between two variables that change together, without implying that one causes the other." },
+    { "term": "Causation", "definition": "A relationship in which one event or condition directly produces another." },
+    { "term": "Falsifiability", "definition": "The property of a claim that makes it possible, at least in principle, to be proven false by evidence." },
+    { "term": "Motivated reasoning", "definition": "Reasoning that is driven by a desire to reach a particular conclusion, rather than by an objective evaluation of evidence." },
+    { "term": "Socratic method", "definition": "A form of dialogue in which questions are used to stimulate critical thinking and help others discover gaps in their own reasoning." },
+    { "term": "Argument mapping", "definition": "A visual or written technique for breaking an argument into its conclusion and supporting reasons to evaluate its structure." },
+    { "term": "Epistemic humility", "definition": "An awareness of the limits of one's own knowledge and the possibility that one's beliefs may be wrong." }
+  ],
+  "sections": [
+    {
+      "sectionTitle": "Foundational concepts",
+      "sectionDescription": "The five core ideas that underpin all critical thinking. Understanding these is necessary before applying any technique.",
+      "estimatedDuration": "3 days",
+      "whyThisMatters": "Most reasoning errors — in decisions, debates, and everyday conversation — trace back to one of these five failures. Naming them is the first step to correcting them.",
+      "learningObjectives": [
+        "Distinguish between a claim and supporting evidence",
+        "Evaluate sources by incentive and credibility, not just authority",
+        "Explain why correlation does not imply causation using a concrete example",
+        "Define steel-manning and contrast it with straw-manning",
+        "Identify at least one personal belief susceptible to confirmation bias"
+      ],
+      "reviewContent": [
+        "What is the difference between a claim and evidence? Give an example of each.",
+        "Why does knowing who funds a study matter when evaluating its findings?",
+        "Ice cream sales and drowning both rise in summer. What does this illustrate, and why?",
+        "What makes an argument a steel-man rather than a straw man?",
+        "Describe confirmation bias in one sentence and give a personal example."
+      ],
+      "lectures": [
+        {
+          "lectureTitle": "Claims vs. evidence",
+          "lectureDescription": "Learn to reliably separate what someone asserts from what actually supports that assertion — the most fundamental distinction in critical thinking.",
+          "estimatedDuration": "15 minutes",
+          "learningObjectives": [
+            "Define 'claim' and 'evidence' precisely",
+            "Classify any statement as a claim, anecdote, or evidence on demand"
+          ],
+          "workedExample": {
+            "problem": "A colleague says: 'Our new onboarding process is working great — Sarah told me she found it really helpful.' Is this evidence that the onboarding process is effective?",
+            "steps": [
+              "Identify the claim: the onboarding process is effective.",
+              "Identify what is offered as support: one colleague's positive anecdote.",
+              "Ask: does this support the claim? An anecdote from one person tells you that one person had a good experience. It does not tell you about the average experience, or whether the process caused the improvement.",
+              "Ask: what would count as actual evidence? Completion rates before and after, time-to-productivity metrics, or a survey of all new hires."
+            ],
+            "conclusion": "Anecdotes are not evidence of population-level effects. They can inspire hypotheses worth testing, but should not be treated as proof."
+          },
+          "lectureTopics": [
+            {
+              "text": "A claim is what someone asserts to be true. Evidence is what actually supports it. Most people treat confident, detailed, or emotionally resonant claims as if they were evidence. They are not. A friend saying 'that supplement really works' is a claim. A peer-reviewed randomized controlled trial showing a statistically significant effect is evidence. The question to always ask is: what is actually being offered as support here?",
+              "summary": "A claim asserts something is true; evidence is what supports that assertion. Confidence and detail in a claim do not make it evidence.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Claim spectrum — from weakest to strongest support: (1) bare assertion, (2) personal anecdote, (3) expert opinion, (4) observational study, (5) randomized controlled trial, (6) systematic review of multiple RCTs."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "A claim is an assertion; evidence is what supports it — these are not the same thing.",
+            "Always ask: what is actually being offered as support, and how strong is it?"
+          ]
+        },
+        {
+          "lectureTitle": "The source question",
+          "lectureDescription": "Before evaluating what is said, ask who is saying it and why. Source evaluation is calibration, not cynicism.",
+          "estimatedDuration": "15 minutes",
+          "learningObjectives": [
+            "Evaluate a source's credibility and potential conflicts of interest",
+            "Distinguish between dismissing a source and calibrating your confidence in it"
+          ],
+          "workedExample": {
+            "problem": "A study finds that eating red meat three times a week has no negative health effects. The study was funded by the National Beef Association. A second study with identical methodology was funded by an independent public health institute. How should you weigh these?",
+            "steps": [
+              "Note the methodology is identical — so the methodology alone does not differentiate them.",
+              "Consider incentive: the Beef Association has a financial interest in a particular result; the public health institute does not.",
+              "Apply calibration, not dismissal: the industry-funded study is not automatically wrong, but conflicts of interest are correlated with favorable results in the research literature. Weight it less, not zero.",
+              "Seek the independent replication before treating either as definitive."
+            ],
+            "conclusion": "Source evaluation means calibrating your confidence proportionally to incentive and independence — not automatically trusting or dismissing any source."
+          },
+          "lectureTopics": [
+            {
+              "text": "Before evaluating what is said, ask who is saying it and why. Not to dismiss them — but to calibrate. A pharmaceutical company funding a study on their own drug has a financial conflict of interest. A doctor with no stake in the outcome giving you an uncomfortable diagnosis has their professional reputation and your wellbeing at stake. These differences matter for how much confidence to place in a claim.",
+              "summary": "Source evaluation is about proportioning your confidence to incentives and independence, not about wholesale trust or dismissal.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Key questions for any source: (1) What do they stand to gain if this claim is believed? (2) Are they an expert in this specific domain? (3) Have they been reliably accurate in the past? (4) Is this claim independently replicated?"
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Always ask who is making the claim and what incentive they have for you to believe it.",
+            "Conflicts of interest should reduce your confidence in a finding, not automatically invalidate it."
+          ]
+        },
+        {
+          "lectureTitle": "Correlation vs. causation",
+          "lectureDescription": "The most common logical error in everyday reasoning — and how to spot it instantly.",
+          "estimatedDuration": "15 minutes",
+          "learningObjectives": [
+            "Explain why two correlated variables may not be causally related",
+            "Identify at least three alternative explanations (confounding, reverse causation, coincidence) for any correlation"
+          ],
+          "workedExample": {
+            "problem": "A city notice: 'Neighborhoods with more parks have lower crime rates. Therefore, building more parks reduces crime.' Is this conclusion justified?",
+            "steps": [
+              "Identify the correlation: parks and low crime co-occur.",
+              "Ask: could a third variable explain both? Wealthier, more stable neighborhoods tend to have more parks AND lower crime. Wealth is the confounder.",
+              "Ask: could causation run the other way? Low-crime areas may attract park investment, not the reverse.",
+              "Conclusion: the correlation is real but the causal claim is not established. You would need a controlled study — e.g., randomly assigning park construction across comparable neighborhoods and measuring crime before and after."
+            ],
+            "conclusion": "Correlation shows that two things move together. It does not show why. Always generate at least two alternative explanations before accepting a causal claim."
+          },
+          "lectureTopics": [
+            {
+              "text": "Two things happening together does not mean one caused the other. Ice cream sales and drowning rates both peak in summer — not because ice cream causes drowning, but because summer causes both. This is called a confounding variable. Similarly, causation can run in the opposite direction to what is assumed (reverse causation), or the correlation may be coincidental. When you hear 'X leads to Y' or 'X is linked to Y,' always ask: could a third factor explain both? Could Y actually cause X?",
+              "summary": "Correlation means two things move together; causation means one produces the other. The two are routinely confused, especially in media reporting.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Three alternative explanations for any correlation: (1) Confounding — a third variable causes both. (2) Reverse causation — Y causes X, not X causes Y. (3) Coincidence — the correlation is spurious and will not replicate."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Correlation is not causation — two things occurring together does not mean one produced the other.",
+            "Always generate at least two alternative explanations (confounding, reverse causation, coincidence) before accepting a causal claim."
+          ]
+        },
+        {
+          "lectureTitle": "Steel-manning vs. straw-manning",
+          "lectureDescription": "Learn to engage with the strongest version of opposing arguments — the hallmark of a rigorous thinker.",
+          "estimatedDuration": "20 minutes",
+          "learningObjectives": [
+            "Define and distinguish steel-manning from straw-manning",
+            "Construct a genuine steel-man of a position you personally oppose"
+          ],
+          "workedExample": {
+            "problem": "Someone opposes a four-day work week policy. Construct both a straw man and a steel-man of their position.",
+            "steps": [
+              "Straw man: 'They just want employees to suffer and don't care about work-life balance.' This is a caricature — it attributes bad motives without engaging with any actual argument.",
+              "Steel-man: 'The strongest version of this position is that productivity gains from a four-day week are uneven across industries — manufacturing, healthcare, and customer service face real operational constraints that office-based roles do not. Implementing a blanket policy could disadvantage sectors where coverage cannot be compressed, potentially reducing service quality or increasing workload on remaining staff.'",
+              "Test: could someone who holds the opposing view read the steel-man and say 'yes, that is a fair representation of my concern'?"
+            ],
+            "conclusion": "A steel-man represents the strongest honest version of a view. If you cannot write one for a position you oppose, you do not yet understand it well enough to argue against it."
+          },
+          "lectureTopics": [
+            {
+              "text": "A straw man is a weakened or distorted version of an opposing argument constructed to be easy to defeat. Steel-manning is the opposite: deliberately engaging with the strongest, most charitable version of the argument you disagree with. If you cannot accurately describe why thoughtful, well-informed people hold the view you oppose, you do not understand the issue well enough yet. Steel-manning does not require agreeing — it requires understanding.",
+              "summary": "Steel-manning means engaging with the best version of an opposing argument. It is a prerequisite for genuine rebuttal — and for intellectual honesty.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Test for a valid steel-man: show your written defense to someone who actually holds the view. Ask: 'Is this a fair representation of your position?' If they say no, revise until they say yes."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "A straw man distorts an opposing argument to make it easier to defeat; a steel-man represents it at its strongest.",
+            "You cannot effectively rebut a position you cannot accurately represent."
+          ]
+        },
+        {
+          "lectureTitle": "Confirmation bias — your own reasoning is the obstacle",
+          "lectureDescription": "The most pervasive thinking error is not stupidity — it is the systematic distortion of how we seek and interpret evidence.",
+          "estimatedDuration": "20 minutes",
+          "learningObjectives": [
+            "Define confirmation bias and explain why it operates below conscious awareness",
+            "Apply the 'what would change my mind?' test to a personally held belief"
+          ],
+          "workedExample": {
+            "problem": "You believe your team's new process is working well. You are asked to evaluate it. Walk through how confirmation bias could corrupt this evaluation.",
+            "steps": [
+              "Notice what you look for: you are likely to notice and remember positive signals (faster turnaround, positive feedback) more readily than negative ones.",
+              "Notice what you ignore: complaints, workarounds people have developed, slowdowns in edge cases — these are less salient because they conflict with your existing belief.",
+              "Notice how you interpret ambiguous data: a metric that is flat could mean 'holding steady despite headwinds' (confirms the belief) or 'failing to improve' (disconfirms it). You will default to the confirming interpretation.",
+              "The fix: before evaluating, write down what negative evidence would look like. Then actively search for it."
+            ],
+            "conclusion": "Confirmation bias is not a character flaw — it is a feature of how human cognition works. The antidote is building deliberate search processes for disconfirming evidence."
+          },
+          "lectureTopics": [
+            {
+              "text": "Confirmation bias is the tendency to search for, notice, and remember information that confirms what you already believe — and to discount or overlook information that contradicts it. It operates largely below conscious awareness. You are not immune to it. Intelligence does not protect against it; if anything, more intelligent people are often better at rationalizing their existing beliefs. The fix is not to try harder to be objective — it is to build systems: actively seek disconfirming evidence, ask 'what would change my mind?', and treat your most strongly held beliefs as hypotheses to be tested, not conclusions already established.",
+              "summary": "Confirmation bias distorts how we seek and interpret evidence in favor of pre-existing beliefs. The antidote is deliberate, systematic search for disconfirming information.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "The 'what would change my mind?' test: for any belief you hold, write down the specific evidence that would cause you to revise it. If you cannot produce a credible answer, this is a warning sign that you have stopped treating the belief as a hypothesis."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Confirmation bias causes us to seek and weight evidence that confirms existing beliefs, and to discount evidence that challenges them.",
+            "The practical fix is to deliberately and systematically search for disconfirming evidence before concluding you are right."
+          ]
+        }
+      ],
+      "quiz": {
+        "passingScore": 80,
+        "attemptsAllowed": 3,
+        "interleaved": true,
+        "questions": [
+          {
+            "question": "A nutritionist appears on a podcast and states confidently that intermittent fasting cures insulin resistance. What best describes this?",
+            "questionType": "multiple-choice",
+            "options": [
+              { "text": "Evidence, because the source is an expert", "explanation": "Expertise increases the prior probability that a claim is worth investigating, but an assertion — however confident — is still a claim, not evidence." },
+              { "text": "A claim requiring supporting evidence", "explanation": "Correct. Expert opinion is a claim with higher prior credibility, but it is not itself evidence. The evidence would be the studies or data the nutritionist is drawing from." },
+              { "text": "A fact, because nutritionists study this professionally", "explanation": "Professional expertise does not convert a claim into a fact. Even experts make unsubstantiated assertions." },
+              { "text": "Irrelevant, because all dietary claims are uncertain", "explanation": "Uncertainty about a domain does not mean all claims are equally unassessable. Evidence-based claims in nutrition are still stronger than unsupported assertions." }
+            ],
+            "answer": "A claim requiring supporting evidence",
+            "explanation": "Any assertion — regardless of how confident or credentialed the source — is a claim until it is backed by evidence. The appropriate response is to ask what data or studies support the statement."
+          },
+          {
+            "question": "Countries with higher chocolate consumption per capita win more Nobel Prizes per capita. What is the most likely explanation?",
+            "questionType": "multiple-choice",
+            "options": [
+              { "text": "Chocolate consumption causes improved cognitive function leading to Nobel Prizes", "explanation": "This treats a correlation as causation without evidence of a causal mechanism or controlled study." },
+              { "text": "Winning Nobel Prizes causes people to celebrate with chocolate", "explanation": "Reverse causation is a valid alternative to consider, but the direction here is implausible at a population level." },
+              { "text": "Wealthier countries tend to have both higher chocolate consumption and more Nobel Prize winners", "explanation": "Correct. Wealth is a plausible confounding variable — it correlates with both chocolate consumption (disposable income) and Nobel Prizes (research funding, education systems)." },
+              { "text": "The correlation is definitely a coincidence with no possible explanation", "explanation": "Calling something a coincidence without investigation is not rigorous. The confounding explanation is more credible and falsifiable." }
+            ],
+            "answer": "Wealthier countries tend to have both higher chocolate consumption and more Nobel Prize winners",
+            "explanation": "This is a classic confounding variable case. Wealth independently drives both variables. This illustrates why correlation alone never establishes causation."
+          },
+          {
+            "question": "True or false: steel-manning an argument means you agree with it.",
+            "questionType": "true-false",
+            "options": [
+              { "text": "True", "explanation": "Incorrect. Steel-manning means representing an argument at its strongest — it does not require endorsing it." },
+              { "text": "False", "explanation": "Correct. Steel-manning is an analytical act, not an expression of agreement. You can produce the strongest version of an argument you ultimately reject." }
+            ],
+            "answer": "False",
+            "explanation": "Steel-manning means engaging honestly with the best version of a position. It is compatible with ultimately disagreeing — and in fact, you can only disagree rigorously if you have first understood the strongest form of the opposing view."
+          },
+          {
+            "question": "Which of the following best demonstrates confirmation bias?",
+            "questionType": "multiple-choice",
+            "options": [
+              { "text": "Reading studies that both support and challenge your dietary beliefs before forming a view", "explanation": "This is the correct approach — actively seeking disconfirming evidence is the antidote to confirmation bias, not an example of it." },
+              { "text": "Sharing an article that confirms your political views without checking its sources", "explanation": "Correct. Accepting and sharing information that confirms your existing beliefs without scrutiny is confirmation bias in action." },
+              { "text": "Changing your view when presented with strong contradictory evidence", "explanation": "Updating beliefs in response to evidence is the opposite of confirmation bias — it is the goal." },
+              { "text": "Being uncertain about a topic you have little expertise in", "explanation": "Epistemic humility in unfamiliar domains is healthy and unrelated to confirmation bias." }
+            ],
+            "answer": "Sharing an article that confirms your political views without checking its sources",
+            "explanation": "Confirmation bias operates when we apply less scrutiny to information that confirms existing beliefs. Sharing without fact-checking is a common and consequential manifestation of this."
+          }
+        ]
+      },
+      "practicalActivity": {
+        "title": "5-question audit on a live claim",
+        "description": "Apply the 5-question critical thinking audit to a real claim from your current environment — a news headline, a work proposal, or something said in conversation today.",
+        "scenario": "You encounter a claim in a meeting: 'Remote teams are less productive than in-office teams — studies show it.' Your task is to audit this claim systematically before accepting or rejecting it.",
+        "steps": [
+          "Write out the claim precisely in your own words. Remove any vagueness.",
+          "List what evidence was actually offered. Categorize it: bare assertion, anecdote, single study, meta-analysis, etc.",
+          "Identify the source. Research who conducted the studies cited, and note any conflicts of interest.",
+          "Generate two alternative explanations for any correlation cited (confounding variables, reverse causation).",
+          "Write one sentence describing what evidence would change your mind — in either direction."
+        ],
+        "successCriteria": [
+          "The claim is restated precisely — no vague terms left undefined",
+          "Evidence is categorized by strength, not just listed",
+          "At least one conflict of interest or source limitation is identified",
+          "At least two alternative explanations are generated",
+          "A clear falsifiability condition is stated"
+        ],
+        "downloadableTemplate": ""
+      },
+      "summary": [
+        "Critical thinking begins with distinguishing claims from evidence — confidence and expertise do not convert an assertion into proof.",
+        "Source evaluation, correlation analysis, steel-manning, and bias awareness are the five foundational tools — master these before adding complexity."
+      ]
+    },
+    {
+      "sectionTitle": "The 5-question audit — your minimum viable skill",
+      "sectionDescription": "A single, portable framework you can apply to any claim within seconds. This is the core practical tool of the course.",
+      "estimatedDuration": "2 days",
+      "whyThisMatters": "Most people encounter dozens of claims every day and evaluate almost none of them. This framework fits inside a conversation and can be applied without anyone knowing you're doing it.",
+      "learningObjectives": [
+        "Apply all five audit questions to any claim in under two minutes",
+        "Use the framework in real time during conversations without disrupting the flow",
+        "Articulate a falsifiability condition for any belief you hold"
+      ],
+      "reviewContent": [
+        "What are the five questions in the audit, in order?",
+        "What is the difference between a vague claim and a precise one? Restate 'social media is bad for teens' precisely.",
+        "What does it mean to ask 'what would change my mind?' and why does it matter?",
+        "Give an example of a claim where the source's incentive should significantly lower your confidence."
+      ],
+      "lectures": [
+        {
+          "lectureTitle": "The 5-question audit — walkthrough",
+          "lectureDescription": "A step-by-step walkthrough of the core framework applied to a real example.",
+          "estimatedDuration": "20 minutes",
+          "learningObjectives": [
+            "Apply all five questions sequentially to a given claim",
+            "Distinguish between a useful falsifiability condition and a trivially easy or impossibly hard one"
+          ],
+          "workedExample": {
+            "problem": "Headline: 'Coffee linked to lower risk of Alzheimer's disease.' Run the full 5-question audit.",
+            "steps": [
+              "Q1 — What exactly is being claimed? Drinking coffee is correlated with reduced incidence of Alzheimer's disease in a study population. Note: 'linked to' means correlation, not causation.",
+              "Q2 — What evidence is offered? One observational study is implied. No sample size, duration, or methodology is mentioned in the headline.",
+              "Q3 — Who is the source and what is their incentive? Headline only — we need to find the original study. Key questions: who funded it? A coffee industry body has a conflict of interest; an independent academic group does not.",
+              "Q4 — What alternative explanations exist? Healthier, more active people may drink more coffee — lifestyle is the confounder, not coffee. Reverse causation: people in early cognitive decline may reduce coffee consumption, making coffee drinkers appear healthier.",
+              "Q5 — What would change my mind? A randomized controlled trial assigning people to coffee or no-coffee conditions, controlling for lifestyle variables, over 10+ years, showing a statistically significant protective effect."
+            ],
+            "conclusion": "The headline is a claim backed by weak evidence as presented. The correct response is to find the original study before updating your beliefs, not to accept or dismiss the headline at face value."
+          },
+          "lectureTopics": [
+            {
+              "text": "The 5-question audit: (1) What exactly is being claimed? Restate it precisely — vague claims cannot be evaluated. (2) What evidence is offered? Categorize it by strength. (3) Who is the source and what is their incentive? Calibrate your confidence accordingly. (4) What alternative explanations exist? Generate at least two. (5) What would change my mind? If you cannot answer this, you have pre-decided regardless of evidence.",
+              "summary": "The 5-question audit is a portable, fast framework for evaluating any claim in conversation, media, or professional settings.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "The 5 questions: (1) What exactly is being claimed? (2) What evidence is offered? (3) Who is the source — and what is their incentive? (4) What alternative explanations exist? (5) What would change my mind?"
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "The 5-question audit can be applied to any claim in under two minutes and requires no special tools.",
+            "The falsifiability question (Q5) is the most important — if you cannot state what would change your mind, you are not reasoning, you are rationalizing."
+          ]
+        }
+      ],
+      "quiz": {
+        "passingScore": 80,
+        "attemptsAllowed": 3,
+        "interleaved": true,
+        "questions": [
+          {
+            "question": "Someone says 'everyone knows that working from home kills collaboration.' Which audit question is most urgently needed first?",
+            "questionType": "multiple-choice",
+            "options": [
+              { "text": "Q3 — who is the source?", "explanation": "Source matters, but the claim is too vague to evaluate at all yet." },
+              { "text": "Q1 — what exactly is being claimed?", "explanation": "Correct. 'Everyone knows' is not a source. 'Kills collaboration' is undefined. The claim must be made precise before any other analysis is possible." },
+              { "text": "Q5 — what would change my mind?", "explanation": "You cannot assess falsifiability before you know what the claim actually is." },
+              { "text": "Q4 — what alternative explanations exist?", "explanation": "Alternative explanations are relevant to a precise claim. The current claim is too vague to generate meaningful alternatives." }
+            ],
+            "answer": "Q1 — what exactly is being claimed?",
+            "explanation": "Vague claims cannot be evaluated. The first step is always to restate the claim precisely. 'Kills collaboration' needs to be operationalized — does it mean fewer cross-team projects? Lower output quality? Reduced relationship-building? The answer matters for what evidence would count."
+          },
+          {
+            "question": "You hold a strong belief. You cannot think of any evidence that would change your mind. What does this suggest?",
+            "questionType": "short-answer",
+            "options": [],
+            "answer": "It suggests the belief may be functioning as an unfalsifiable conviction rather than a hypothesis — meaning you may be rationalizing rather than reasoning. The appropriate response is to deliberately construct what falsifying evidence would look like, or to acknowledge that you are holding this belief on grounds other than evidence.",
+            "explanation": "A belief that cannot in principle be falsified by any evidence is not a scientific or rational claim — it is a faith position. This is not automatically wrong, but it should be recognized for what it is. For beliefs that could in principle be falsified, the inability to state the conditions suggests motivated reasoning."
+          }
+        ]
+      },
+      "practicalActivity": {
+        "title": "One-week audit log",
+        "description": "For five consecutive days, apply the 5-question audit to one claim per day from your actual environment — news, work, conversation. Write up each audit in 100–200 words.",
+        "scenario": "You are building a habit, not completing an assignment. The goal is to make the five questions automatic — so automatic you start asking them internally without prompting.",
+        "steps": [
+          "Each morning, identify one claim you will audit that day — from a news source you actually read, a meeting you will attend, or a conversation you expect to have.",
+          "At the end of the day, write the five questions and your answers for that claim. Do not skip any question, even if the answer is 'I don't know.'",
+          "For Q5 (what would change my mind?), write a specific, credible answer — not 'nothing' and not 'absolute proof.'",
+          "On day 5, review all five audits. Note which question was hardest to answer consistently and why."
+        ],
+        "successCriteria": [
+          "Five audits completed, one per day",
+          "Every audit answers all five questions explicitly",
+          "Q5 answers are specific and credible (not 'nothing' or impossibly demanding)",
+          "Day 5 reflection identifies a genuine pattern in your own reasoning"
+        ],
+        "downloadableTemplate": ""
+      },
+      "summary": [
+        "The 5-question audit is the core portable tool of this course — commit it to memory and use it daily.",
+        "The falsifiability question is the hardest and most important: if no evidence could change your mind, you have stopped reasoning."
+      ]
+    },
+    {
+      "sectionTitle": "Hands-on exercises",
+      "sectionDescription": "Four structured exercises that build the core critical thinking muscles through active practice, not passive reading.",
+      "estimatedDuration": "4 days (one exercise per day)",
+      "whyThisMatters": "Critical thinking is a skill, not a body of knowledge. Like any skill, it is built through deliberate practice on real material — not through reading about it.",
+      "learningObjectives": [
+        "Map the logical structure of a real argument without evaluating it first",
+        "Produce a genuine steel-man of an opposing position",
+        "Reverse-engineer the reasoning behind a personal decision to identify bias",
+        "Apply the falsifiability test to claims in a professional context"
+      ],
+      "reviewContent": [
+        "What is argument mapping, and why does structure analysis come before evaluation?",
+        "What is the test for whether you have genuinely steel-manned a position?",
+        "Name three hidden assumptions that typically go unexamined in business decisions.",
+        "What distinguishes a falsifiable claim from an unfalsifiable one? Give a business example of each."
+      ],
+      "lectures": [
+        {
+          "lectureTitle": "Exercise 1 — argument mapping",
+          "lectureDescription": "Learn to break any argument into its structural components before evaluating whether it holds together.",
+          "estimatedDuration": "20 minutes",
+          "learningObjectives": [
+            "Identify the main conclusion and supporting reasons in any argument",
+            "Distinguish between a reason that supports a conclusion and a separate claim that needs its own support"
+          ],
+          "workedExample": {
+            "problem": "Op-ed argument: 'We should ban smartphones in schools. Students who use phones during class get lower grades. Phones are addictive by design. And other countries that have banned phones have seen test score improvements.'",
+            "steps": [
+              "Identify the conclusion: smartphones should be banned in schools.",
+              "List the reasons offered: (1) phone use correlates with lower grades, (2) phones are addictive by design, (3) countries that banned phones saw test score improvements.",
+              "Evaluate the support: Reason 1 is a correlation — does not establish causation. Reason 2 is a claim about design intent — needs its own evidence. Reason 3 is closer to causal evidence but depends on whether those countries are comparable.",
+              "Identify hidden assumptions: that correlation between phone use and grades is causal; that a ban would be enforced effectively; that the benefit outweighs the cost to student autonomy.",
+              "Note what is missing: no evidence about alternative interventions, no discussion of whether selective bans (during class only) would achieve the same result."
+            ],
+            "conclusion": "Argument mapping reveals that the third reason is the strongest, the first relies on a causal claim it has not established, and the argument omits important alternatives. This is visible only after mapping — before mapping, the argument can seem airtight."
+          },
+          "lectureTopics": [
+            {
+              "text": "Argument mapping means breaking an argument into its conclusion and supporting reasons before evaluating it. The process: write the conclusion at the top. Below it, list every reason given. For each reason, ask: is this actually direct support for the conclusion, or is it a separate claim that needs its own support? Draw the logical connections. Then ask: what assumptions are hidden? What would an opponent say is missing?",
+              "summary": "Argument mapping separates structure from evaluation — it reveals the architecture of reasoning before you judge whether it holds.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Mapping template: CONCLUSION → [Reason 1] [Reason 2] [Reason 3] → Hidden assumptions: [A] [B] → Missing evidence: [X] [Y]"
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Map the structure of an argument before evaluating it — structure analysis and quality judgment are separate cognitive tasks.",
+            "Hidden assumptions are often where arguments are weakest — they are worth the most scrutiny."
+          ]
+        },
+        {
+          "lectureTitle": "Exercise 2 — steel-man a view you dislike",
+          "lectureDescription": "The most difficult and most valuable exercise: constructing a genuine defense of a position you personally oppose.",
+          "estimatedDuration": "25 minutes",
+          "learningObjectives": [
+            "Produce a 3-paragraph defense of an opposing view that its proponents would recognize as fair",
+            "Identify which parts of an opposing argument are hardest to rebut — these are the strongest parts"
+          ],
+          "workedExample": {
+            "problem": "You believe remote work should be the default for knowledge workers. Steel-man the opposing position.",
+            "steps": [
+              "Do not start with a caricature. Do not write 'some people think offices are better because they don't trust employees.'",
+              "Find the strongest structural argument: spontaneous collaboration — hallway conversations, whiteboard sessions, chance encounters across teams — is difficult to replicate asynchronously and may be where the highest-value innovation occurs.",
+              "Add the strongest empirical argument: junior employees develop faster with in-person mentorship and observation of senior colleagues. Remote work may systematically disadvantage career entry.",
+              "Add the strongest practical argument: coordination costs (scheduling, documentation, tool overhead) for distributed teams may outweigh flexibility gains for projects requiring tight iteration."
+            ],
+            "conclusion": "The strongest case for in-person work centers on spontaneous collaboration, junior development, and coordination costs — not distrust or tradition. Knowing this, a remote-first advocate can address these specific objections rather than arguing against a straw man."
+          },
+          "lectureTopics": [
+            {
+              "text": "Pick a position you strongly disagree with — politically, professionally, or personally. Write a 3-paragraph defense of it as if you were the most informed, most articulate advocate for that view. Do not include any rebuttals or hedges. The discomfort this produces is the point — it means you are encountering the view's actual strength. Note which parts were hardest to write: those are the strongest parts of the argument, and the ones your rebuttal must address.",
+              "summary": "A genuine steel-man is uncomfortable to write. If it was easy, you have probably produced another straw man.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "The steel-man test: show your written defense to someone who genuinely holds the opposing view. Ask: 'Is this a fair and strong representation of your position?' Revise until they say yes."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "A genuine steel-man is validated by the people who actually hold the view — not by how fair you think you were.",
+            "The parts of the steel-man that are hardest to write are the parts of the opposing argument you most need to address."
+          ]
+        },
+        {
+          "lectureTitle": "Exercise 3 — bias hunting in your own decisions",
+          "lectureDescription": "Reverse-engineer a past decision to identify where confirmation bias shaped what you looked for and what you ignored.",
+          "estimatedDuration": "20 minutes",
+          "learningObjectives": [
+            "Identify at least two instances of selective evidence-gathering in a past personal or professional decision",
+            "Distinguish between evidence you sought actively and evidence you encountered passively"
+          ],
+          "workedExample": {
+            "problem": "You recommended a vendor to your organization and feel good about the decision. Audit your own reasoning process.",
+            "steps": [
+              "List all the evidence you actively sought before deciding: reviews you read, demos you attended, references you called.",
+              "List all the evidence you passively received: unsolicited reviews, comparisons that came up in conversation, concerns raised by colleagues.",
+              "Now list the evidence pointing against your preferred vendor that you were aware of but did not weight heavily. Be honest.",
+              "Ask: did I actively seek out negative reviews of my preferred vendor? Did I call references from the vendor I did not choose? If not, why not?",
+              "Identify the asymmetry: the difference between how hard you worked to find confirming vs. disconfirming evidence is the fingerprint of confirmation bias."
+            ],
+            "conclusion": "The goal is not to reverse your decision — it may still have been right. The goal is to see where your process was asymmetric, so future decisions are more balanced."
+          },
+          "lectureTopics": [
+            {
+              "text": "Think of a recent decision you feel good about. Write down all the evidence you considered. Then separately write down all the evidence that would have pointed the other way — things you were aware of but did not weight heavily. Finally, ask: did you actively seek out the disconfirming evidence, or only notice the confirming evidence when it appeared? The asymmetry in effort is the measure of confirmation bias.",
+              "summary": "Bias hunting means auditing not just what you concluded, but how you gathered evidence — specifically, whether you worked equally hard to find information for and against your preferred outcome.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Bias audit questions: (1) What evidence did I actively seek? (2) What evidence did I passively receive? (3) What evidence existed that I did not seek and did not weight? (4) Was my search effort symmetric?"
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Confirmation bias shows up in the effort asymmetry of evidence-gathering — we work harder to find confirming information than disconfirming information.",
+            "Auditing past decisions is the fastest way to see your own bias patterns — and to correct them in future decisions."
+          ]
+        },
+        {
+          "lectureTitle": "Exercise 4 — the 'how would we know?' test",
+          "lectureDescription": "Apply the falsifiability criterion to claims in your professional and personal environment.",
+          "estimatedDuration": "15 minutes",
+          "learningObjectives": [
+            "Classify claims as falsifiable or unfalsifiable",
+            "Rewrite an unfalsifiable claim as a falsifiable one"
+          ],
+          "workedExample": {
+            "problem": "Your company's strategy deck includes the claim: 'We are committed to a culture of innovation.' Apply the falsifiability test.",
+            "steps": [
+              "Ask: how would we know if this were false? What observable evidence would indicate the culture does not value innovation?",
+              "Test 1: if the company has rejected every novel idea proposed in the last year, would leadership accept this as disconfirming evidence? Probably not — they would explain it away.",
+              "Test 2: there is no metric defined, no baseline, no threshold that would count as failure. The claim is structured to be irrefutable.",
+              "Rewrite as falsifiable: 'At least 20% of our product roadmap this year consists of net-new initiatives proposed by individual contributors, not leadership.' This can be measured and falsified.",
+              "Note the difference in usefulness: the falsifiable version creates accountability; the unfalsifiable version is a values statement that cannot be evaluated."
+            ],
+            "conclusion": "Unfalsifiable claims are not lies — they may reflect genuine values. But they cannot be used for decision-making or accountability. Whenever possible, convert them into falsifiable versions."
+          },
+          "lectureTopics": [
+            {
+              "text": "For any claim, ask: how would we know if this were false? If no conceivable evidence could disprove it, the claim is unfalsifiable. Unfalsifiable claims are not meaningless — they may express genuine values or intentions — but they cannot be evaluated, tested, or held accountable to. In professional contexts, unfalsifiable claims are often used (consciously or not) to appear committal while avoiding accountability. Recognizing them is the first step to replacing them with something testable.",
+              "summary": "The falsifiability test asks: what evidence could possibly disprove this claim? Claims that fail this test cannot be evaluated and should not drive decisions.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Falsifiable vs. unfalsifiable — examples: Unfalsifiable: 'We put customers first.' Falsifiable: 'Our median customer support response time is under 4 hours.' Unfalsifiable: 'This policy will help the economy.' Falsifiable: 'This policy will reduce unemployment by 0.5% within 18 months.'"
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "A claim that cannot in principle be falsified cannot be used for evaluation, accountability, or decision-making.",
+            "Many professional and political claims are structurally unfalsifiable — recognizing this is a critical skill."
+          ]
+        }
+      ],
+      "quiz": {
+        "passingScore": 80,
+        "attemptsAllowed": 3,
+        "interleaved": true,
+        "questions": [
+          {
+            "question": "You write a 3-paragraph steel-man of a position you oppose and feel it is fair. What is the best way to validate this?",
+            "questionType": "multiple-choice",
+            "options": [
+              { "text": "Ask a friend who shares your view whether it sounds fair", "explanation": "Your friend likely shares your framing and may not recognize the steel-man's weaknesses." },
+              { "text": "Show it to someone who genuinely holds the opposing view and ask if it represents their position fairly", "explanation": "Correct. The only valid external test for a steel-man is whether it passes muster with someone who actually holds the view." },
+              { "text": "Check whether it includes all the main points from a Wikipedia article on the topic", "explanation": "Wikipedia coverage does not validate fairness. Someone who holds the view is the right validator." },
+              { "text": "Assess whether it was difficult to write", "explanation": "Difficulty is a useful internal signal that you engaged seriously, but it is not a substitute for external validation." }
+            ],
+            "answer": "Show it to someone who genuinely holds the opposing view and ask if it represents their position fairly",
+            "explanation": "A steel-man that only its author judges to be fair may still be a sophisticated straw man. External validation from an actual holder of the view is the most reliable test."
+          },
+          {
+            "question": "True or false: an unfalsifiable claim is always false.",
+            "questionType": "true-false",
+            "options": [
+              { "text": "True", "explanation": "Incorrect. An unfalsifiable claim may be true, false, or a values statement — the problem is not its truth value but that it cannot be evaluated by evidence." },
+              { "text": "False", "explanation": "Correct. Unfalsifiable claims are not necessarily false — they may express genuine values or be true. The problem is that we have no way to assess whether they are true or false, which makes them useless for evidence-based decision-making." }
+            ],
+            "answer": "False",
+            "explanation": "Falsifiability is about testability, not truth. 'We are committed to excellence' may genuinely reflect an organization's values — but because no evidence could disprove it, it cannot be used as an accountability mechanism."
+          }
+        ]
+      },
+      "practicalActivity": {
+        "title": "Steel-man and refute",
+        "description": "Choose a contested issue in your professional or personal domain. Write the strongest possible steel-man of the opposing view, then write your rebuttal — addressing the steel-man, not a weakened version of it.",
+        "scenario": "A colleague has argued that your team should adopt a new project management methodology. You are skeptical. Before responding, you must write the strongest possible case for their position.",
+        "steps": [
+          "Choose the issue and identify your actual position clearly.",
+          "Write a 3-paragraph steel-man of the opposing view. Do not include any rebuttals or hedges in this section.",
+          "Test the steel-man: identify the single strongest point in your own steel-man — the one you find hardest to rebut.",
+          "Write your rebuttal, starting with the strongest point from the steel-man. Address it directly rather than pivoting to an easier argument.",
+          "Reflect: did your rebuttal change at all compared to what you would have written before the steel-man exercise?"
+        ],
+        "successCriteria": [
+          "The steel-man contains no straw man elements (verified by someone who holds the view, if possible)",
+          "The rebuttal directly addresses the strongest point in the steel-man",
+          "The reflection section identifies at least one way the steel-man exercise changed or strengthened the rebuttal"
+        ],
+        "downloadableTemplate": ""
+      },
+      "summary": [
+        "The four exercises — argument mapping, steel-manning, bias hunting, and falsifiability testing — cover the four most important practical skills in critical thinking.",
+        "These exercises should be repeated regularly on new material, not treated as one-time tasks."
+      ]
+    },
+    {
+      "sectionTitle": "Common mistakes and how to avoid them",
+      "sectionDescription": "The three errors that most reliably undermine critical thinking in practice — including in people who consider themselves good thinkers.",
+      "estimatedDuration": "1 day",
+      "whyThisMatters": "Knowing the techniques is not enough if you repeatedly fall into the same traps. These mistakes are common precisely because they feel like good thinking.",
+      "learningObjectives": [
+        "Distinguish genuine skepticism from cynicism and explain why cynicism is not critical thinking",
+        "Recognize when you are applying critical thinking asymmetrically",
+        "Identify when complexity is being used as a rhetorical device rather than a marker of depth"
+      ],
+      "reviewContent": [
+        "What is the difference between skepticism and cynicism? Give an example of each.",
+        "Describe a situation where you have applied critical thinking asymmetrically — more rigorously to views you oppose than to views you hold.",
+        "Why does jargon or complexity in an argument not indicate that the argument is rigorous?"
+      ],
+      "lectures": [
+        {
+          "lectureTitle": "Mistake 1 — confusing skepticism with cynicism",
+          "lectureDescription": "Cynicism pre-commits to a conclusion just as much as credulity does. Neither is critical thinking.",
+          "estimatedDuration": "15 minutes",
+          "learningObjectives": [
+            "Define the difference between skepticism and cynicism operationally",
+            "Identify when a dismissive response has replaced genuine evaluation"
+          ],
+          "workedExample": {
+            "problem": "A colleague presents a new research finding that challenges a widely held assumption in your field. You say: 'That's probably just another study with methodological problems — I'll wait for the replication.' Is this skepticism or cynicism?",
+            "steps": [
+              "Ask: have you evaluated the methodology of this specific study, or are you applying a blanket prior?",
+              "Ask: are you equally likely to say 'wait for the replication' when a study confirms your existing view?",
+              "Ask: what would it take for you to take this finding seriously? Is there a credible answer?",
+              "If your dismissal is pre-emptive and asymmetric — applied to inconvenient findings but not confirming ones — it is cynicism, not skepticism."
+            ],
+            "conclusion": "Skepticism means holding beliefs proportional to evidence — including the evidence in front of you right now. Cynicism means deciding in advance that inconvenient findings are untrustworthy."
+          },
+          "lectureTopics": [
+            {
+              "text": "Skepticism means holding beliefs proportional to evidence and being genuinely willing to be convinced in either direction. Cynicism means pre-committing to the conclusion that something is false, untrustworthy, or motivated — without evaluating the specific evidence. Cynicism feels like critical thinking because it involves refusing to accept claims uncritically. But it is just lazy certainty in the other direction. The diagnostic question: what would it take for you to accept this claim? If the answer is 'nothing,' you are being cynical, not skeptical.",
+              "summary": "Skepticism is proportional to evidence and open to persuasion; cynicism is a pre-committed rejection that masquerades as rigor.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Diagnostic: 'What would it take for me to accept this claim?' If you cannot give a credible answer, you are being cynical. The question works equally in the other direction: 'What would it take for me to reject this claim I currently believe?' — identifying intellectual lock-in."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Cynicism is not critical thinking — it is pre-committed rejection that mimics rigor.",
+            "The diagnostic question is always: what would it take to change my mind? A credible answer is required for either acceptance or rejection."
+          ]
+        },
+        {
+          "lectureTitle": "Mistake 2 — applying critical thinking asymmetrically",
+          "lectureDescription": "The most pervasive failure: applying rigorous scrutiny to opposing views and lenient scrutiny to views you want to believe.",
+          "estimatedDuration": "15 minutes",
+          "learningObjectives": [
+            "Recognize the asymmetric application of scrutiny in yourself and others",
+            "Apply the same audit standard to claims you agree with as to claims you are suspicious of"
+          ],
+          "workedExample": {
+            "problem": "You encounter two news stories in one day. Story A supports a policy you favor — you share it immediately. Story B undermines the same policy — you pause and think 'I should check the methodology on that.' What is happening?",
+            "steps": [
+              "Notice the asymmetry: identical scrutiny standards were not applied to both stories.",
+              "Story A was shared without source-checking, methodology review, or falsifiability assessment.",
+              "Story B was held to a higher evidential standard precisely because it was inconvenient.",
+              "Apply the fix: before sharing Story A, run the same 5-question audit you spontaneously applied to Story B."
+            ],
+            "conclusion": "If your critical thinking tools are only deployed against inconvenient evidence, they are not tools for finding truth — they are tools for defending a pre-existing position."
+          },
+          "lectureTopics": [
+            {
+              "text": "Most people become skilled at identifying flaws in arguments they already oppose, and much less skilled at identifying flaws in arguments they want to believe. This asymmetry is the most common failure mode in otherwise intelligent thinkers. The fix is not to become less rigorous with opposing views — it is to apply equal rigor to agreeable ones. The 5-question audit does not take a holiday when a claim happens to confirm your existing beliefs.",
+              "summary": "Critical thinking applied only to inconvenient evidence is not critical thinking — it is sophisticated motivated reasoning.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Symmetry check: after applying scrutiny to an opposing argument, ask — would I apply this same level of scrutiny to the best argument on my own side? If not, recalibrate."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Asymmetric scrutiny — rigorous for opponents, lenient for allies — is the most common failure mode of intelligent thinkers.",
+            "The fix is to apply the 5-question audit equally to claims you are inclined to accept."
+          ]
+        },
+        {
+          "lectureTitle": "Mistake 3 — mistaking complexity for depth",
+          "lectureDescription": "Jargon, length, and difficulty do not make an argument rigorous. The reverse is often true.",
+          "estimatedDuration": "15 minutes",
+          "learningObjectives": [
+            "Recognize when complexity is being used rhetorically rather than necessarily",
+            "Apply the plain-language test to any argument before accepting it"
+          ],
+          "workedExample": {
+            "problem": "A consultant presents a strategy using terms like 'synergistic value-chain optimization,' 'cross-functional alignment leverage,' and 'dynamic capability repositioning.' You struggle to follow it. What should you do?",
+            "steps": [
+              "Do not assume you are the problem. Ask the presenter to explain what they mean in plain language.",
+              "Ask: if I cannot restate this argument in simple terms, is it because the concept is genuinely complex, or because the argument does not hold together under simplification?",
+              "Test: ask the presenter 'what specifically would we do differently on Monday as a result of this?' If they cannot answer, the argument has no operational content.",
+              "Note: genuinely complex ideas can almost always be stated simply at their core, even if the details are intricate. 'We should acquire this competitor before they scale' is complex in execution but simple in essence."
+            ],
+            "conclusion": "Complexity that resists simplification is usually a sign of unclear thinking, not profound insight. Real depth survives plain language."
+          },
+          "lectureTopics": [
+            {
+              "text": "Beginners often defer to complex-sounding arguments, assuming difficulty indicates rigor. This is a mistake that confident communicators exploit. A clear, simple argument supported by solid evidence is more credible than a jargon-heavy one that is difficult to follow. When you cannot understand an argument, it is often because the argument does not hold together — not because you lack the sophistication to follow it. The plain-language test: ask for any argument to be restated simply. If it cannot survive simplification, that inability is diagnostic.",
+              "summary": "Complexity and jargon are not markers of rigor. Real insight survives being stated in plain language.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Plain-language test: 'Can you explain the core claim in two sentences without jargon?' A valid argument can always do this, even if the full argument has technical dimensions."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Complexity does not signal depth — real insight can be stated simply at its core.",
+            "When an argument cannot survive plain language, treat this as a signal of a structural problem, not a gap in your understanding."
+          ]
+        }
+      ],
+      "quiz": {
+        "passingScore": 80,
+        "attemptsAllowed": 3,
+        "interleaved": true,
+        "questions": [
+          {
+            "question": "A friend says: 'I never trust studies funded by pharmaceutical companies — they're always biased.' This is an example of:",
+            "questionType": "multiple-choice",
+            "options": [
+              { "text": "Healthy skepticism", "explanation": "Healthy skepticism would reduce confidence in industry-funded studies — not reject them categorically. This statement rejects them entirely without evaluating specific methodology." },
+              { "text": "Cynicism — pre-committed rejection without case-by-case evaluation", "explanation": "Correct. Industry funding is a legitimate reason to reduce confidence and scrutinize methodology more carefully — but categorical rejection without evaluation is cynicism, not skepticism." },
+              { "text": "A fair application of source evaluation", "explanation": "Source evaluation adjusts confidence; it does not produce categorical dismissal. This statement goes further than the evidence warrants." },
+              { "text": "Appropriate use of the 5-question framework", "explanation": "The 5-question framework requires evaluating specific evidence. This statement bypasses evaluation entirely." }
+            ],
+            "answer": "Cynicism — pre-committed rejection without case-by-case evaluation",
+            "explanation": "Industry funding is a valid reason to scrutinize a study more carefully and weight it less than independent research. But categorical rejection without examining methodology is pre-committed dismissal — the mirror image of credulity."
+          },
+          {
+            "question": "True or false: if you find an argument difficult to follow, this is most likely a sign that the argument is too sophisticated for your current level.",
+            "questionType": "true-false",
+            "options": [
+              { "text": "True", "explanation": "Incorrect. Difficulty following an argument is often a sign that the argument does not hold together under scrutiny, rather than that it is too advanced." },
+              { "text": "False", "explanation": "Correct. While some arguments are genuinely complex, difficulty understanding is frequently a signal that the argument cannot survive simplification — a sign of weak reasoning, not sophisticated reasoning." }
+            ],
+            "answer": "False",
+            "explanation": "Genuinely deep arguments can almost always be stated simply at their core. When an argument resists simplification, this is more often a structural problem with the argument than a gap in the listener's comprehension."
+          }
+        ]
+      },
+      "practicalActivity": {
+        "title": "Symmetry audit",
+        "description": "Review five pieces of content you engaged with (shared, agreed with, or acted on) in the past week. Apply the same 5-question audit you would apply to content you were initially suspicious of.",
+        "scenario": "You are auditing your own recent information consumption — not to reverse any decisions, but to identify where your scrutiny was asymmetric.",
+        "steps": [
+          "List five pieces of content you accepted, shared, or acted on in the past week without significant scrutiny.",
+          "Apply the full 5-question audit to each.",
+          "Note which questions you would not have thought to ask at the time.",
+          "Identify any patterns: do you apply less scrutiny to certain sources, certain topics, or certain types of claims?"
+        ],
+        "successCriteria": [
+          "All five items are audited with all five questions answered",
+          "At least two items reveal a gap in your original scrutiny",
+          "A pattern in asymmetric scrutiny is identified and named"
+        ],
+        "downloadableTemplate": ""
+      },
+      "summary": [
+        "The three most common mistakes are cynicism masquerading as skepticism, asymmetric scrutiny, and deference to complexity — all three feel like good thinking in the moment.",
+        "The corrective for all three is the same: apply a consistent, symmetric standard to all claims regardless of whether they confirm or challenge your existing beliefs."
+      ]
+    },
+    {
+      "sectionTitle": "Teaching critical thinking to others",
+      "sectionDescription": "How to help others reason better — without triggering defensiveness, creating power dynamics, or making them feel attacked.",
+      "estimatedDuration": "2 days",
+      "whyThisMatters": "Your individual reasoning is one lever. Building a culture of critical thinking in a team, family, or community is a force multiplier — and it requires entirely different skills than thinking well yourself.",
+      "learningObjectives": [
+        "Apply the Socratic method to guide someone to a reasoning gap without telling them they are wrong",
+        "Introduce the 5-question audit as a shared team tool",
+        "Model epistemic humility publicly by changing your stated position in response to good arguments",
+        "Identify the three most common errors when trying to teach critical thinking and avoid them"
+      ],
+      "reviewContent": [
+        "Why does telling someone they are reasoning poorly usually make things worse?",
+        "What makes a question Socratic rather than rhetorical?",
+        "Why is publicly changing your mind one of the most powerful teaching tools available?",
+        "What is the difference between 'catching' someone in bad reasoning and creating conditions for them to discover it themselves?"
+      ],
+      "lectures": [
+        {
+          "lectureTitle": "Core principle — you cannot lecture people into thinking better",
+          "lectureDescription": "Understanding why direct instruction fails and what to do instead.",
+          "estimatedDuration": "15 minutes",
+          "learningObjectives": [
+            "Explain why confronting poor reasoning directly tends to entrench it",
+            "Describe the conditions under which people revise their own reasoning voluntarily"
+          ],
+          "workedExample": {
+            "problem": "A team member presents a business case with a clear survivorship bias error — they are only looking at successful examples of the strategy. You need to address this without damaging the relationship or shutting down the conversation.",
+            "steps": [
+              "Do not say: 'You're only looking at the successes — that's survivorship bias.'",
+              "Ask: 'These are great examples. Do you know of any cases where companies tried this approach and it didn't work out?'",
+              "If they say no: 'That's interesting — I wonder if we should look into that before we finalize. Companies that failed at this might not be as visible.'",
+              "Let them arrive at the survivorship bias insight themselves. Do not name it until they have articulated the problem.",
+              "Once they articulate it, you can name the concept: 'Yes, exactly — that's what's called survivorship bias. It's a really common issue with this kind of analysis.'"
+            ],
+            "conclusion": "Naming the error before the person sees it triggers defensiveness. Creating conditions for them to see it themselves produces genuine insight — and they will remember it because it felt like their own discovery."
+          },
+          "lectureTopics": [
+            {
+              "text": "Telling someone they are reasoning poorly rarely improves their reasoning. It usually triggers a defensive response that causes them to argue more strongly for their original position (a well-documented psychological effect called 'backfire'). Critical thinking is a habit, not a fact to be transmitted. Your job when teaching it is to create conditions where the other person discovers the gap in their own reasoning themselves. The insight must feel like theirs — because it is. You are a catalyst, not a corrector.",
+              "summary": "Direct correction of poor reasoning usually entrenches it. Teaching works by creating conditions for self-discovery, not by delivering verdicts.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "The backfire effect: when people feel their identity or deeply held beliefs are threatened by a correction, they often double down rather than update. This effect is strongest when the person has stated the belief publicly. Approach: separate the person from the belief; engage with the reasoning, not the person."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Direct correction of reasoning errors triggers defensiveness more often than it produces insight.",
+            "Your role as a teacher of critical thinking is to create conditions for self-discovery, not to deliver verdicts."
+          ]
+        },
+        {
+          "lectureTitle": "Technique 1 — the Socratic method",
+          "lectureDescription": "Ask questions that lead people to discover gaps in their own reasoning.",
+          "estimatedDuration": "20 minutes",
+          "learningObjectives": [
+            "Construct a genuine Socratic question (as opposed to a rhetorical or leading question)",
+            "Sustain a Socratic dialogue for at least three exchanges without stating your own conclusion"
+          ],
+          "workedExample": {
+            "problem": "A friend is convinced that a particular investment strategy 'always works' because they and two acquaintances have made money with it. Guide them to examine this reasoning using only questions.",
+            "steps": [
+              "Q1: 'That's interesting — how many people do you know who have tried this strategy altogether?'",
+              "Q2: 'Of the ones who tried it, do you know how many it worked for and how many it didn't?'",
+              "Q3: 'Do you think the people it didn't work for talk about it as much as the people it did work for?'",
+              "Q4: 'So if you only hear from the success stories, what does that mean for your sample?'",
+              "Let them articulate survivorship bias in their own words. Do not name it first."
+            ],
+            "conclusion": "Each question builds on the previous answer and moves toward the gap without naming it. The person does the reasoning — you only ask."
+          },
+          "lectureTopics": [
+            {
+              "text": "The Socratic method means using questions to help someone examine their own reasoning. The key distinction from a rhetorical question: a Socratic question is genuinely open and depends on the other person's answer to proceed. You do not know where they will go. A rhetorical question is a statement in disguise — the answer is pre-determined and the question is a form of pressure. Good Socratic questions are short, specific, and non-threatening. They invite reflection, not defense. The signal that a question is working: a genuine pause before the answer.",
+              "summary": "A Socratic question is genuinely open and builds on the previous answer. A rhetorical question is a statement in disguise. Only the first produces real thinking.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Socratic question types: (1) Clarification — 'What do you mean by X?' (2) Assumption probing — 'What are we assuming here?' (3) Evidence probing — 'What is this based on?' (4) Alternative perspectives — 'How might someone who disagrees see this?' (5) Implication — 'If this is true, what follows?'"
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Socratic questions are open, build on the previous answer, and do not presuppose the conclusion — they create conditions for discovery.",
+            "The diagnostic signal: did the other person pause genuinely before answering? If not, the question was not deep enough."
+          ]
+        },
+        {
+          "lectureTitle": "Technique 2 — use low-stakes, shared examples first",
+          "lectureDescription": "Introduce critical thinking through neutral territory before applying it to charged topics.",
+          "estimatedDuration": "15 minutes",
+          "learningObjectives": [
+            "Identify a low-stakes, neutral topic appropriate for introducing critical thinking to a specific person or group",
+            "Use a shared example to establish a reasoning framework before applying it to contested ground"
+          ],
+          "workedExample": {
+            "problem": "You want to introduce the concept of correlation vs. causation to a team that regularly makes decisions based on correlated metrics. How do you do this without implying their past decisions were flawed?",
+            "steps": [
+              "Start with the chocolate-Nobel Prize example: countries with more chocolate consumption per capita win more Nobel Prizes per capita. Ask the team what they make of it.",
+              "Let them work through it — most will quickly identify that wealth explains both.",
+              "Once they have the insight, ask: 'Can you think of any times we might be doing something similar with our own metrics?'",
+              "This question now lands differently because they generated the concept themselves."
+            ],
+            "conclusion": "A neutral, slightly absurd example creates playful engagement with the concept. Once the concept is learned on neutral ground, applying it to real work feels like an intellectual exercise rather than a critique."
+          },
+          "lectureTopics": [
+            {
+              "text": "Do not introduce critical thinking through a topic the other person is emotionally invested in. Identity-linked beliefs trigger defensiveness before any reasoning can occur. Start with something neutral — a historical case, a business scenario from another industry, a deliberately absurd example like the chocolate-Nobel Prize correlation. Once the reasoning tool is established on neutral ground, it can transfer to charged topics — and the person brings it there themselves, which means they own the insight.",
+              "summary": "Neutral examples build the reasoning tool without triggering defensiveness. The tool then transfers to charged topics without resistance.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "High-value neutral examples: (1) Chocolate and Nobel Prizes (correlation vs. causation). (2) The Monty Hall problem (probabilistic intuition). (3) Abraham Wald's bullet holes (survivorship bias). (4) The 1948 Truman-Dewey polling failure (sampling bias). These are memorable, non-threatening, and applicable to almost any domain."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Neutral examples teach reasoning tools without triggering defensive responses — build the tool in safe territory before applying it to contested ground.",
+            "The best examples are slightly absurd, concrete, and quickly produce the insight you want."
+          ]
+        },
+        {
+          "lectureTitle": "Technique 3 — model it visibly",
+          "lectureDescription": "Demonstrate good reasoning publicly — including changing your mind.",
+          "estimatedDuration": "15 minutes",
+          "learningObjectives": [
+            "Articulate uncertainty and reasoning process out loud in a professional context",
+            "Publicly change your stated position in response to a good argument and explain why"
+          ],
+          "workedExample": {
+            "problem": "In a meeting you state a position confidently. A colleague presents a counterpoint that genuinely changes your view. What do you do?",
+            "steps": [
+              "Say, clearly: 'That is a fair point — I had not considered that. It changes my view.'",
+              "Optionally, explain: 'I was assuming X, and your point shows that assumption was wrong.'",
+              "Do not immediately pivot to finding a flaw in the new argument to recover ground.",
+              "Let the update stand visibly."
+            ],
+            "conclusion": "This is rare enough that it is memorable. It establishes a norm: in this group, changing your mind when the evidence warrants it is a sign of intellectual honesty, not weakness."
+          },
+          "lectureTopics": [
+            {
+              "text": "The most powerful teaching happens through modeling. When you say 'I'm not sure — what's the evidence here?' or 'I believed X until I saw Y, and it changed my view,' you normalize uncertainty and updating. Most professional cultures treat changing your mind as weakness. Visibly and explicitly updating your position in response to a good argument inverts this — it demonstrates that good reasoning sometimes produces new conclusions, and that this is something to respect rather than penalize. People learn this norm by seeing it enacted, not by being told it exists.",
+              "summary": "Publicly modeling uncertainty and belief-updating teaches the norm that good reasoning produces changed minds — and that this is a sign of strength, not weakness.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Phrases that model good reasoning: 'I'm not certain — let me think about that.' | 'What's the evidence for that? I want to make sure I'm not just assuming.' | 'You've changed my view on this — here's why.' | 'I was wrong about that. Here's what I missed.'"
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Visibly modeling uncertainty and belief-updating establishes a cultural norm that good reasoners change their minds when warranted.",
+            "Publicly changing your mind in response to a good argument is the single most powerful norm-setting action available to a leader or teacher."
+          ]
+        },
+        {
+          "lectureTitle": "Technique 4 — shared tools and group rituals",
+          "lectureDescription": "Embed critical thinking into group processes so it becomes the default, not the exception.",
+          "estimatedDuration": "15 minutes",
+          "learningObjectives": [
+            "Introduce the 5-question audit as a shared team framework",
+            "Design one group ritual that builds critical thinking into an existing workflow"
+          ],
+          "workedExample": {
+            "problem": "You want your team to apply better evidence evaluation to proposals before committing resources. Design a lightweight group ritual.",
+            "steps": [
+              "Before any proposal discussion, spend 5 minutes running the group through the 5-question audit on the proposal together — projected on a screen.",
+              "Assign someone each meeting to be the 'evidence auditor' — their job is to ask the evidence and source questions.",
+              "After 4–6 meetings, rotate the role so everyone has done it.",
+              "After 2 months, remove the explicit role. The questions should now come from anyone in the room, without prompting."
+            ],
+            "conclusion": "The goal is for the framework to become invisible — not a special step but the ordinary way the group thinks about proposals. Ritual establishes habit; habit eventually becomes culture."
+          },
+          "lectureTopics": [
+            {
+              "text": "Teams and groups benefit from shared vocabulary and shared processes. When 'what's the evidence for this?' is a normal question anyone can ask — not a challenge, just a step — the culture of the group shifts. Introduce the 5-question framework as a tool the whole group uses together, not as a personal standard you impose. Use it on real decisions in real meetings. After enough repetitions, the questions become the group's internal voice rather than an external imposition.",
+              "summary": "Shared frameworks embedded in group rituals normalize critical thinking as the default mode rather than an exceptional act.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Simple group ritual: before any significant decision, the facilitator says: 'Let's take 5 minutes to audit this.' Run the 5 questions as a group. Document the answers. This takes 5 minutes and prevents hours of later regret."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Shared frameworks and group rituals normalize critical thinking — they make evidence evaluation a standard step rather than an exceptional challenge.",
+            "The goal is for the framework to become invisible: the ordinary way the group thinks, not a special procedure."
+          ]
+        },
+        {
+          "lectureTitle": "What to avoid when teaching",
+          "lectureDescription": "Three specific failure modes that undermine teaching and damage relationships.",
+          "estimatedDuration": "10 minutes",
+          "learningObjectives": [
+            "Identify the three most common errors when attempting to teach critical thinking",
+            "Describe what each error looks like in practice and how to avoid it"
+          ],
+          "workedExample": {
+            "problem": "A colleague makes a logically flawed argument in a group meeting. You recognize the flaw immediately. What are the three wrong ways to respond?",
+            "steps": [
+              "Wrong response 1 — the gotcha: 'Actually, that's a classic post hoc fallacy. You're assuming causation from correlation.' This scores a point at their expense. The room learns that critical thinking is a weapon.",
+              "Wrong response 2 — exempting yourself: You apply rigorous scrutiny to their argument but later make an equally unsupported claim that no one challenges because you have established yourself as the standard-setter. Others notice the asymmetry.",
+              "Wrong response 3 — rushing to correct: You jump in before they have finished and before the group has had a moment to process. You rob them of the chance to catch it themselves, and you rob the group of seeing self-correction happen."
+            ],
+            "conclusion": "The right response: wait. Ask a genuine question. Let them or the group find the problem. If no one does, ask a more pointed question. Reserve naming the error for after the insight has emerged."
+          },
+          "lectureTopics": [
+            {
+              "text": "Three errors to avoid: (1) Making it a gotcha — publicly embarrassing someone for poor reasoning poisons the environment. People stop speaking up, which produces less reasoning, not more. (2) Exempting yourself — if your critical thinking is only directed at others and never at your own claims, people notice. You lose credibility and create resentment. Invite critique of your own reasoning explicitly. (3) Rushing to correct — letting someone sit with a flawed argument for a moment sometimes allows them to catch it themselves. Self-correction is more lasting than external correction and produces a better norm.",
+              "summary": "The three teaching failure modes — gotcha, exempting yourself, and rushing to correct — all damage the trust and safety that good group reasoning requires.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "The test for whether you are teaching or performing: are you trying to help this person reason better, or to demonstrate that you reason better than they do? The first produces better thinking. The second produces defensiveness."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Turning critical thinking into a gotcha, exempting your own reasoning from scrutiny, and rushing to correct before someone can self-discover are the three most common and damaging teaching errors.",
+            "Ask yourself: am I trying to help this person think better, or to show that I think better?"
+          ]
+        }
+      ],
+      "quiz": {
+        "passingScore": 80,
+        "attemptsAllowed": 3,
+        "interleaved": true,
+        "questions": [
+          {
+            "question": "A colleague makes a reasoning error in a meeting. You recognize it immediately. What is the best first response?",
+            "questionType": "multiple-choice",
+            "options": [
+              { "text": "Name the logical fallacy immediately so the group learns the correct terminology", "explanation": "Naming the error before the person sees it typically triggers defensiveness. The terminology is less valuable than the insight." },
+              { "text": "Say nothing — it is not your place to correct their reasoning", "explanation": "Saying nothing allows the error to propagate. The goal is to create conditions for self-discovery, not to stay silent." },
+              { "text": "Ask a genuine open question that invites them to examine the reasoning themselves", "explanation": "Correct. A well-chosen question creates the conditions for self-discovery — which is more lasting and less damaging than external correction." },
+              { "text": "Address it privately after the meeting to avoid embarrassing them", "explanation": "Private correction is better than public embarrassment, but it misses the opportunity to establish a group norm. The Socratic approach can work in a group setting without causing embarrassment." }
+            ],
+            "answer": "Ask a genuine open question that invites them to examine the reasoning themselves",
+            "explanation": "The Socratic method — using genuine open questions to guide someone toward a reasoning gap — produces more lasting insight than correction and avoids triggering defensive responses."
+          },
+          {
+            "question": "You are trying to teach your team about confirmation bias. Which scenario is the best starting point?",
+            "questionType": "multiple-choice",
+            "options": [
+              { "text": "Ask them to examine a decision they made last month that you believe was influenced by confirmation bias", "explanation": "Starting with a specific past decision they were involved in is too close to identity — it will likely trigger defensiveness before the concept is established." },
+              { "text": "Present the concept as a lecture using slides and ask them to reflect on whether they experience it", "explanation": "Lecture-style delivery is less effective than discovery-based learning. Asking people to reflect on whether they experience it is more useful, but starting with neutral examples is better." },
+              { "text": "Use a neutral historical or scientific example first, then ask if it reminds them of anything in their own work", "explanation": "Correct. Neutral examples establish the concept without triggering defensiveness. The transfer to personal experience is then driven by the learner, not the teacher." },
+              { "text": "Show them an article about how common confirmation bias is in their industry", "explanation": "Industry-level examples are better than personal ones, but still close enough to identity to trigger defensiveness. A genuinely neutral example (historical, scientific, or absurd) is safer as a starting point." }
+            ],
+            "answer": "Use a neutral historical or scientific example first, then ask if it reminds them of anything in their own work",
+            "explanation": "Neutral examples build the reasoning concept without activating identity-defense. Once the concept is understood on safe ground, learners transfer it to their own contexts voluntarily — and the insight lands as their own."
+          },
+          {
+            "question": "True or false: publicly changing your stated position in response to a colleague's argument undermines your authority.",
+            "questionType": "true-false",
+            "options": [
+              { "text": "True", "explanation": "Incorrect. In cultures that value critical thinking, changing your mind in response to a good argument demonstrates intellectual honesty and strengthens rather than undermines credibility." },
+              { "text": "False", "explanation": "Correct. Publicly updating your position in response to good reasoning is one of the most powerful ways to establish a norm of evidence-based thinking. It signals that in this group, good arguments matter more than positions." }
+            ],
+            "answer": "False",
+            "explanation": "In most professional cultures, people assume changing your mind signals weakness. In a critical thinking culture, it signals intellectual honesty. By modeling it publicly, you actively shift the norm — and people with genuine intellectual curiosity will respect it."
+          }
+        ]
+      },
+      "practicalActivity": {
+        "title": "Socratic dialogue practice",
+        "description": "Conduct a Socratic dialogue with a real person on a topic where you believe they are reasoning poorly. Use only questions — do not state your own conclusion.",
+        "scenario": "A friend, colleague, or family member holds a view you believe is based on weak evidence or faulty reasoning. Your task is to guide them toward examining their own reasoning using only genuine open questions — no statements of your position, no corrections.",
+        "steps": [
+          "Identify the person and the specific reasoning issue. Write down the flaw you see before the conversation.",
+          "Plan three opening questions that are genuinely open and non-threatening.",
+          "Conduct the conversation. Do not state your conclusion at any point.",
+          "After the conversation, write: (a) did they arrive at any insight themselves? (b) what question was most effective? (c) where did you feel the urge to correct rather than ask, and how did you manage it?",
+          "If the conversation did not produce insight, identify what different question might have worked."
+        ],
+        "successCriteria": [
+          "You asked at least five questions without making any statements of your own position",
+          "At least one question produced a genuine pause from the other person",
+          "You reflected on where you felt the urge to correct and how you managed it",
+          "You can identify one question that would have been more effective in hindsight"
+        ],
+        "downloadableTemplate": ""
+      },
+      "summary": [
+        "Teaching critical thinking requires entirely different skills than practicing it — lecturing fails, Socratic questioning works.",
+        "The most powerful teaching tools are: genuine open questions, neutral examples, visible modeling of uncertainty and belief-updating, shared frameworks, and patience that allows self-discovery."
+      ]
+    },
+    {
+      "sectionTitle": "2-week practice plan",
+      "sectionDescription": "A concrete daily schedule for building critical thinking as a durable habit over 14 days.",
+      "estimatedDuration": "2 weeks at 15–30 minutes per day",
+      "whyThisMatters": "Knowing the concepts is not the same as having the habit. This plan builds the automatic application that makes critical thinking actually change how you think.",
+      "learningObjectives": [
+        "Complete the full 14-session plan with written outputs for each session",
+        "Identify a pattern in your own reasoning from the Day 14 reflection",
+        "Apply at least one technique in a live professional setting during the second week"
+      ],
+      "reviewContent": [
+        "Why is writing the audit down more valuable than doing it in your head?",
+        "What is the most important difference between week 1 and week 2 of the plan?",
+        "What should the Day 14 reflection include, and why is it the most important session?"
+      ],
+      "lectures": [
+        {
+          "lectureTitle": "Week 1 — build the audit habit",
+          "lectureDescription": "Seven sessions focused on internalizing the core frameworks through daily written practice.",
+          "estimatedDuration": "7 days",
+          "learningObjectives": [
+            "Complete the 5-question audit in writing every day for five consecutive days",
+            "Complete the steel-man exercise on Day 5 without including rebuttals"
+          ],
+          "workedExample": {
+            "problem": "Day 1 audit: headline reads 'Exercise reduces depression risk by 40%.' Apply the 5-question audit in writing.",
+            "steps": [
+              "Q1: What exactly is being claimed? Regular exercise is associated with a 40% reduction in the risk of developing depression, according to some study.",
+              "Q2: What evidence is offered? A percentage is cited — likely from a study. No sample size, methodology, or duration is given in the headline.",
+              "Q3: Who is the source? Unknown from the headline. Need to find the original study and check funding source.",
+              "Q4: Alternative explanations? People who are healthy enough to exercise regularly may be less prone to depression for other reasons (socioeconomic stability, social connection, physical health). Reverse causation: people already experiencing depression may be less likely to exercise.",
+              "Q5: What would change my mind? If a randomized controlled trial assigning sedentary adults to exercise or control groups showed a 40% risk reduction, that would be strong evidence. The current headline does not establish this."
+            ],
+            "conclusion": "The claim is plausible and exercise likely has mood benefits — but the specific '40%' figure requires a much stronger study than an observational correlation to be trusted as a causal claim."
+          },
+          "lectureTopics": [
+            {
+              "text": "Week 1 schedule: Day 1–2 — read one news article and write the full 5-question audit. Write it on paper; do not do it in your head. Day 3 — do the argument mapping exercise (Exercise 1) on an op-ed. Spend 20 minutes mapping structure only — do not evaluate quality yet. Day 4 — pick three beliefs you hold strongly and write one sentence for each describing what evidence would change your mind. Day 5 — steel-man exercise (Exercise 2). Take the full time. Do not include rebuttals. Day 6–7 — apply the 5-question audit to two claims from your actual week: a colleague's argument, a decision you made, something you read at work.",
+              "summary": "Week 1 builds the audit habit through daily written practice — the writing is not optional; it forces the precision that in-the-head evaluation skips.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Week 1 checklist: Day 1 — 5Q audit (news). Day 2 — 5Q audit (news). Day 3 — Argument mapping. Day 4 — Falsifiability check on 3 beliefs. Day 5 — Steel-man exercise. Day 6 — 5Q audit (work). Day 7 — 5Q audit (conversation)."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Week 1 is about internalizing the core frameworks through daily written practice — not application under pressure.",
+            "The steel-man exercise on Day 5 is the hardest and most important session of the week."
+          ]
+        },
+        {
+          "lectureTitle": "Week 2 — apply under real conditions",
+          "lectureDescription": "Seven sessions applying critical thinking in live professional and personal contexts.",
+          "estimatedDuration": "7 days",
+          "learningObjectives": [
+            "Apply at least one critical thinking technique in a live meeting or conversation during week 2",
+            "Complete the Day 14 reflection identifying a genuine change in how you reason"
+          ],
+          "workedExample": {
+            "problem": "Day 11 application: in a team meeting, a proposal is presented with confident language but no data. How do you apply what you have learned without disrupting the meeting?",
+            "steps": [
+              "Internally run Q1 (what exactly is being claimed?) and Q2 (what evidence is offered?) during the presentation.",
+              "If appropriate, ask: 'What data do we have on this? I want to make sure I understand the evidence base before we commit.'",
+              "If the room is not the right context, note it for follow-up and raise it privately: 'Before we finalize, I'd like to understand the evidence better — can we go through it?'",
+              "Do not name the framework or make the other person feel audited. Frame it as due diligence, not critique."
+            ],
+            "conclusion": "Week 2 is about naturalizing the habit in real settings. The goal is not to perform critical thinking visibly — it is to integrate it invisibly into how you engage with information."
+          },
+          "lectureTopics": [
+            {
+              "text": "Week 2 schedule: Day 8–9 — bias hunt (Exercise 3) on a recent professional decision. Write the full audit of your own reasoning. Day 10 — find a real debate (podcast or written exchange) and identify which side is steel-manning the other and which is straw-manning. Day 11–12 — in one real meeting or conversation, apply 'what evidence supports this?' at least once, internally or aloud. Day 13 — run the falsifiability test on five claims from your work week. Day 14 — write a one-page reflection: what assumption did you hold two weeks ago that you would now examine more carefully? What changed?",
+              "summary": "Week 2 applies the frameworks under real conditions — the shift from written exercises to live application is where the habit forms.",
+              "media": [
+                {
+                  "type": "text",
+                  "content": "Week 2 checklist: Day 8 — Bias hunt (decision). Day 9 — Bias hunt (follow-up). Day 10 — Debate analysis. Day 11 — Live application (meeting). Day 12 — Live application (conversation). Day 13 — Falsifiability test (work claims). Day 14 — Reflection."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            "Week 2 is where the habit forms — live application under real conditions is qualitatively different from exercises on prepared material.",
+            "Day 14's reflection is the most important session: identifying a genuine change in how you reason is the evidence that the course has worked."
+          ]
+        }
+      ],
+      "quiz": {
+        "passingScore": 80,
+        "attemptsAllowed": 3,
+        "interleaved": true,
+        "questions": [
+          {
+            "question": "Why is writing the 5-question audit on paper more effective than doing it mentally?",
+            "questionType": "short-answer",
+            "options": [],
+            "answer": "Writing forces precision. Mental evaluation allows you to glide past vagueness — you can feel like you have answered a question without actually formulating a specific answer. Writing makes the gaps in your analysis visible. It also creates a record that can be reviewed, which is essential for the Day 14 reflection.",
+            "explanation": "This is not about the medium — it is about the cognitive demand. Writing requires committing to specific words, which exposes imprecision that mental evaluation lets you skip."
+          }
+        ]
+      },
+      "practicalActivity": {
+        "title": "Day 14 reflection",
+        "description": "Write a one-page (400–600 word) reflection on how your reasoning has changed over the past two weeks.",
+        "scenario": "You have completed 14 sessions of deliberate critical thinking practice. This reflection is the evidence of what changed.",
+        "steps": [
+          "Identify one belief or assumption you held at the start of the course that you would now examine more carefully.",
+          "Describe a specific moment in the past two weeks when you caught yourself reasoning poorly — and what you did about it.",
+          "Identify the technique that was hardest for you personally and explain why.",
+          "State one thing you will continue to do differently as a result of this course — be specific, not vague."
+        ],
+        "successCriteria": [
+          "The reflection is 400–600 words",
+          "A specific belief or assumption is named and examined — not a general observation",
+          "A specific moment of catching poor reasoning is described",
+          "A specific ongoing practice is committed to — not 'think more critically' but a concrete behavior"
+        ],
+        "downloadableTemplate": ""
+      },
+      "summary": [
+        "The 2-week plan builds critical thinking as a durable habit through daily deliberate practice, not passive learning.",
+        "The Day 14 reflection is the capstone: identifying a genuine change in how you reason is the measure of success."
+      ]
+    }
+  ]
+};
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let state = {
+  currentScreen: 'intro',
+  currentSectionIndex: 0,
+  currentLectureIndex: 0,
+  completedLectures: new Set(),
+  completedQuizzes: new Set(),
+  completedActivities: new Set(),
+  quizAnswers: {},     // sectionIndex -> { qIndex -> answer }
+  quizSubmitted: {},   // sectionIndex -> bool
+};
+
+// ── NAVIGATION ───────────────────────────────────────────────────────────────
+function goToScreen(screen, sIdx, lIdx) {
+  if (sIdx !== undefined) state.currentSectionIndex = sIdx;
+  if (lIdx !== undefined) state.currentLectureIndex = lIdx;
+  state.currentScreen = screen;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('screen-' + screen);
+  if (el) el.classList.add('active');
+  renderScreen(screen);
+  updateSidebar();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── SIDEBAR ──────────────────────────────────────────────────────────────────
+function buildSidebar() {
+  document.getElementById('sidebar-title').textContent = COURSE.courseTitle;
+  renderGlossary();
+  updateSidebar();
+}
+
+function updateSidebar() {
+  const nav = document.getElementById('sidebar-nav');
+  nav.innerHTML = '';
+
+  COURSE.sections.forEach((section, sIdx) => {
+    const sectionDone = isSectionDone(sIdx);
+    const isOpen = sIdx === state.currentSectionIndex;
+
+    const item = document.createElement('div');
+    item.className = 'section-nav-item' + (isOpen ? ' open' : '');
+
+    const header = document.createElement('div');
+    header.className = 'section-nav-header' + (isOpen ? ' active' : '');
+    header.innerHTML = `
+      <span class="section-check ${sectionDone ? 'done' : (isOpen ? 'active' : '')}">${sectionDone ? '✓' : (sIdx + 1)}</span>
+      <span class="section-nav-title">${section.sectionTitle}</span>
+      <span class="section-nav-arrow">›</span>
+    `;
+    header.onclick = () => {
+      goToScreen('section-intro', sIdx, 0);
+    };
+
+    const lectures = document.createElement('div');
+    lectures.className = 'section-nav-lectures';
+
+    section.lectures.forEach((lec, lIdx) => {
+      const lecDone = state.completedLectures.has(`${sIdx}-${lIdx}`);
+      const isActiveLec = state.currentScreen === 'lecture' && sIdx === state.currentSectionIndex && lIdx === state.currentLectureIndex;
+      const lecItem = document.createElement('div');
+      lecItem.className = `lecture-nav-item ${isActiveLec ? 'active' : ''} ${lecDone ? 'done' : ''}`;
+      lecItem.innerHTML = `<span class="lecture-dot"></span>${lec.lectureTitle}`;
+      lecItem.onclick = () => goToScreen('lecture', sIdx, lIdx);
+      lectures.appendChild(lecItem);
+    });
+
+    // Quiz link
+    const quizItem = document.createElement('div');
+    const quizDone = state.completedQuizzes.has(sIdx);
+    const isActiveQuiz = state.currentScreen === 'quiz' && sIdx === state.currentSectionIndex;
+    quizItem.className = `quiz-nav-item ${isActiveQuiz ? 'active' : ''}`;
+    quizItem.innerHTML = `<span class="lecture-dot" style="background:var(--gold)"></span>Section Quiz ${quizDone ? '✓' : ''}`;
+    quizItem.onclick = () => goToScreen('quiz', sIdx);
+    lectures.appendChild(quizItem);
+
+    // Activity link
+    const actItem = document.createElement('div');
+    const actDone = state.completedActivities.has(sIdx);
+    const isActiveAct = state.currentScreen === 'activity' && sIdx === state.currentSectionIndex;
+    actItem.className = `quiz-nav-item ${isActiveAct ? 'active' : ''}`;
+    actItem.innerHTML = `<span class="lecture-dot" style="background:#c9973a88"></span>Practical Activity ${actDone ? '✓' : ''}`;
+    actItem.onclick = () => goToScreen('activity', sIdx);
+    lectures.appendChild(actItem);
+
+    item.appendChild(header);
+    item.appendChild(lectures);
+    nav.appendChild(item);
+  });
+
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = COURSE.sections.reduce((acc, s) => acc + s.lectures.length + 2, 0); // lectures + quiz + activity
+  const done = state.completedLectures.size + state.completedQuizzes.size + state.completedActivities.size;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${pct}% complete`;
+}
+
+function isSectionDone(sIdx) {
+  const s = COURSE.sections[sIdx];
+  const allLecs = s.lectures.every((_, lIdx) => state.completedLectures.has(`${sIdx}-${lIdx}`));
+  return allLecs && state.completedQuizzes.has(sIdx) && state.completedActivities.has(sIdx);
+}
+
+// ── RENDER SCREENS ───────────────────────────────────────────────────────────
+function renderScreen(screen) {
+  if (screen === 'intro') renderIntro();
+  else if (screen === 'section-intro') renderSectionIntro();
+  else if (screen === 'lecture') renderLecture();
+  else if (screen === 'quiz') renderQuiz();
+  else if (screen === 'activity') renderActivity();
+  else if (screen === 'section-summary') renderSectionSummary();
+}
+
+// INTRO
+function renderIntro() {
+  const c = COURSE;
+  document.getElementById('screen-intro').innerHTML = `
+    <div style="margin-bottom:8px">
+      <span class="tag tag-green">${c.difficultyLevel}</span>
+      <span class="tag tag-gray" style="margin-left:6px">⏱ ${c.estimatedDuration}</span>
+    </div>
+    <h1>${c.courseTitle}</h1>
+    <p class="desc">${c.courseDescription}</p>
+    <div class="meta-row">
+      <div class="meta-item"><strong>${c.sections.length}</strong>Sections</div>
+      <div class="meta-item"><strong>${c.sections.reduce((a,s)=>a+s.lectures.length,0)}</strong>Lectures</div>
+      <div class="meta-item"><strong>${c.estimatedDuration}</strong>Total time</div>
+      <div class="meta-item"><strong>v${c.version}</strong>Version</div>
+    </div>
+    ${c.learningOutcomes.length ? `
+      <h3 style="font-size:18px;margin-bottom:8px">What you'll be able to do</h3>
+      <ul class="outcomes-list">${c.learningOutcomes.map(o=>`<li>${o}</li>`).join('')}</ul>
+    ` : ''}
+    ${c.prerequisites.length ? `
+      <h3 style="font-size:18px;margin-bottom:8px">Prerequisites</h3>
+      <ul class="prereq-list">${c.prerequisites.map(p=>`<li>${p}</li>`).join('')}</ul>
+    ` : ''}
+    <button class="btn btn-primary" onclick="goToScreen('section-intro', 0, 0)">Start Course →</button>
+  `;
+}
+
+// SECTION INTRO
+function renderSectionIntro() {
+  const sIdx = state.currentSectionIndex;
+  const section = COURSE.sections[sIdx];
+  const el = document.getElementById('screen-section-intro');
+  el.innerHTML = `
+    <div class="section-eyebrow">Section ${sIdx + 1} of ${COURSE.sections.length}</div>
+    <h1 style="font-size:32px;margin-bottom:12px">${section.sectionTitle}</h1>
+    <p style="color:var(--text-secondary);margin-bottom:20px;font-size:15px">${section.sectionDescription}</p>
+    ${section.whyThisMatters ? `<div class="why-box">💡 <strong>Why this matters:</strong> ${section.whyThisMatters}</div>` : ''}
+    ${section.reviewContent && section.reviewContent.length ? `
+      <div class="review-box">
+        <h4>↩ Spaced Review — Recall from before</h4>
+        <ul>${section.reviewContent.map(r=>`<li>${r}</li>`).join('')}</ul>
+      </div>
+    ` : ''}
+    <h3 style="font-size:16px;margin-bottom:10px">In this section you'll learn to</h3>
+    <ul class="objectives-list">${section.learningObjectives.map(o=>`<li>${o}</li>`).join('')}</ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="${sIdx > 0 ? `goToScreen('section-summary', ${sIdx-1})` : `goToScreen('intro')`}">← Back</button>
+      <button class="btn btn-primary" onclick="goToScreen('lecture', ${sIdx}, 0)">Begin Section →</button>
+    </div>
+  `;
+}
+
+// LECTURE
+function renderLecture() {
+  const sIdx = state.currentSectionIndex;
+  const lIdx = state.currentLectureIndex;
+  const lecture = COURSE.sections[sIdx].lectures[lIdx];
+  const section = COURSE.sections[sIdx];
+  const totalLectures = section.lectures.length;
+  const el = document.getElementById('screen-lecture');
+
+  let topicsHTML = lecture.lectureTopics.map(topic => {
+    let mediaHTML = '';
+    if (topic.media && topic.media.length) {
+      topic.media.forEach(m => {
+        if (m.type === 'image') {
+          mediaHTML += `
+            <div class="media-block">
+              <img src="${m.url}" alt="${m.altText || m.label || ''}" onerror="this.style.display='none'">
+              ${m.label ? `<p class="media-caption">${m.label}</p>` : ''}
+            </div>`;
+        } else if (m.type === 'video') {
+          mediaHTML += `
+            <div class="media-block">
+              <div class="video-placeholder">
+                <div class="play-btn">▶</div>
+                <span>Video: ${m.url || 'Unavailable in preview'}</span>
+              </div>
+            </div>`;
+        } else if (m.type === 'text') {
+          mediaHTML += `<div class="media-text-block">${m.content}</div>`;
+        }
+      });
+    }
+    return `
+      <div class="topic-block">
+        <p class="topic-text">${topic.text}</p>
+        ${mediaHTML}
+        ${topic.summary ? `<div class="topic-summary"><strong>Key takeaway:</strong> ${topic.summary}</div>` : ''}
+      </div>`;
+  }).join('');
+
+  let workedHTML = '';
+  if (lecture.workedExample) {
+    const we = lecture.workedExample;
+    workedHTML = `
+      <div class="worked-example">
+        <div class="worked-example-label">Worked Example</div>
+        <h4>${we.problem}</h4>
+        <ol>${we.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+        ${we.conclusion ? `<p class="conclusion">${we.conclusion}</p>` : ''}
+      </div>`;
+  }
+
+  let objHTML = '';
+  if (lecture.learningObjectives && lecture.learningObjectives.length) {
+    objHTML = `<ul class="objectives-list" style="margin-bottom:20px">${lecture.learningObjectives.map(o=>`<li>${o}</li>`).join('')}</ul>`;
+  }
+
+  let summaryHTML = '';
+  if (lecture.summary && lecture.summary.length) {
+    summaryHTML = `
+      <div class="lecture-summary">
+        <h4>Lecture Summary</h4>
+        <ul>${lecture.summary.map(s=>`<li>${s}</li>`).join('')}</ul>
+      </div>`;
+  }
+
+  // determine next destination
+  const isLastLecture = lIdx === totalLectures - 1;
+  const nextLabel = isLastLecture ? 'Section Quiz →' : 'Next Lecture →';
+  const nextAction = isLastLecture
+    ? `markLectureDone(${sIdx},${lIdx}); goToScreen('quiz', ${sIdx})`
+    : `markLectureDone(${sIdx},${lIdx}); goToScreen('lecture', ${sIdx}, ${lIdx+1})`;
+
+  const prevAction = lIdx === 0
+    ? `goToScreen('section-intro', ${sIdx})`
+    : `goToScreen('lecture', ${sIdx}, ${lIdx-1})`;
+
+  el.innerHTML = `
+    <div class="lecture-header">
+      <div class="section-eyebrow">${section.sectionTitle} · Lecture ${lIdx + 1} of ${totalLectures}</div>
+      <h2>${lecture.lectureTitle}</h2>
+      <div class="lecture-meta">
+        ${lecture.estimatedDuration ? `<span>⏱ ${lecture.estimatedDuration}</span>` : ''}
+      </div>
+      <p style="color:var(--text-secondary);margin-top:10px;font-size:14px">${lecture.lectureDescription}</p>
+    </div>
+    ${objHTML}
+    ${workedHTML}
+    ${topicsHTML}
+    ${summaryHTML}
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="${prevAction}">← Back</button>
+      <button class="btn btn-primary" onclick="${nextAction}">${nextLabel}</button>
+    </div>
+  `;
+}
+
+function markLectureDone(sIdx, lIdx) {
+  state.completedLectures.add(`${sIdx}-${lIdx}`);
+}
+
+// QUIZ
+function renderQuiz() {
+  const sIdx = state.currentSectionIndex;
+  const section = COURSE.sections[sIdx];
+  const quiz = section.quiz;
+  const submitted = !!state.quizSubmitted[sIdx];
+  const answers = state.quizAnswers[sIdx] || {};
+  const el = document.getElementById('screen-quiz');
+
+  let questionsHTML = quiz.questions.map((q, qIdx) => {
+    const selectedAnswer = answers[qIdx];
+    const isCorrect = selectedAnswer === q.answer;
+
+    if (q.questionType === 'multiple-choice') {
+      const optionsHTML = q.options.map((opt, oIdx) => {
+        const letter = ['A','B','C','D'][oIdx];
+        let cls = 'option-item';
+        if (submitted) {
+          cls += ' disabled';
+          if (opt.text === q.answer) cls += ' correct';
+          else if (opt.text === selectedAnswer && opt.text !== q.answer) cls += ' incorrect';
+        } else if (selectedAnswer === opt.text) cls += ' selected';
+        return `
+          <li class="${cls}" onclick="${submitted ? '' : `selectAnswer(${sIdx},${qIdx},'${escapeQ(opt.text)}')`}">
+            <span class="option-letter">${letter}</span>
+            <span>${opt.text}</span>
+          </li>`;
+      }).join('');
+
+      let feedbackHTML = '';
+      if (submitted && selectedAnswer !== undefined) {
+        const chosen = q.options.find(o => o.text === selectedAnswer);
+        feedbackHTML = `
+          <div class="feedback-box ${isCorrect ? 'correct' : 'incorrect'} show">
+            <strong>${isCorrect ? '✓ Correct' : '✗ Incorrect'}</strong>
+            ${chosen ? chosen.explanation : ''}
+          </div>
+          ${!isCorrect ? `<div class="feedback-box correct show" style="margin-top:6px"><strong>Overall:</strong> ${q.explanation}</div>` : ''}`;
+      }
+
+      return `
+        <div class="question-block">
+          <div class="question-number">Question ${qIdx + 1} · Multiple Choice</div>
+          <div class="question-text">${q.question}</div>
+          <ul class="options-list">${optionsHTML}</ul>
+          ${feedbackHTML}
+        </div>`;
+
+    } else if (q.questionType === 'true-false') {
+      const optionsHTML = q.options.map(opt => {
+        let cls = 'option-item';
+        if (submitted) {
+          cls += ' disabled';
+          if (opt.text === q.answer) cls += ' correct';
+          else if (opt.text === selectedAnswer) cls += ' incorrect';
+        } else if (selectedAnswer === opt.text) cls += ' selected';
+        return `<li class="${cls}" onclick="${submitted ? '' : `selectAnswer(${sIdx},${qIdx},'${escapeQ(opt.text)}')`}" style="justify-content:center">${opt.text}</li>`;
+      }).join('');
+
+      let feedbackHTML = '';
+      if (submitted) {
+        feedbackHTML = `
+          <div class="feedback-box ${isCorrect ? 'correct' : 'incorrect'} show">
+            <strong>${isCorrect ? '✓ Correct' : '✗ Incorrect'}</strong>
+            ${q.explanation}
+          </div>`;
+      }
+
+      return `
+        <div class="question-block">
+          <div class="question-number">Question ${qIdx + 1} · True or False</div>
+          <div class="question-text">${q.question}</div>
+          <ul class="options-list tf-options">${optionsHTML}</ul>
+          ${feedbackHTML}
+        </div>`;
+
+    } else if (q.questionType === 'short-answer') {
+      const val = answers[qIdx] || '';
+      return `
+        <div class="question-block">
+          <div class="question-number">Question ${qIdx + 1} · Short Answer</div>
+          <div class="question-text">${q.question}</div>
+          <textarea class="short-answer-input" placeholder="Write your answer here…" id="sa-${sIdx}-${qIdx}" ${submitted ? 'disabled' : ''}>${val}</textarea>
+          <p class="short-answer-hint">There's no single correct answer — focus on applying the concepts from this section.</p>
+          ${submitted ? `<div class="feedback-box correct show"><strong>Model answer:</strong> ${q.explanation}</div>` : ''}
+        </div>`;
+    }
+    return '';
+  }).join('');
+
+  // score
+  let scoreHTML = '';
+  if (submitted) {
+    const gradeable = quiz.questions.filter(q => q.questionType !== 'short-answer');
+    const correct = gradeable.filter((q, qIdx) => answers[qIdx] === q.answer).length;
+    const pct = gradeable.length > 0 ? Math.round((correct / gradeable.length) * 100) : 100;
+    const passed = pct >= quiz.passingScore;
+    scoreHTML = `
+      <div class="quiz-overall-feedback show">
+        <div class="quiz-score">${pct}%</div>
+        <h3>${passed ? '🎉 Well done!' : '📚 Keep going'}</h3>
+        <p>${passed ? `You scored ${pct}% — above the passing mark of ${quiz.passingScore}%. Move on to the practical activity.`
+          : `You scored ${pct}%. The passing mark is ${quiz.passingScore}%. Review the lectures and try the quiz again.`}</p>
+        ${passed ? `<button class="btn btn-primary" style="margin-top:14px" onclick="goToScreen('activity',${sIdx})">Practical Activity →</button>` : ''}
+      </div>`;
+  }
+
+  const allAnswered = quiz.questions.every((q, qIdx) => {
+    if (q.questionType === 'short-answer') return true;
+    return answers[qIdx] !== undefined;
+  });
+
+  el.innerHTML = `
+    <div class="quiz-header">
+      <div class="section-eyebrow">${section.sectionTitle}</div>
+      <h2>Section Quiz</h2>
+      <div class="quiz-meta">
+        <span>📝 ${quiz.questions.length} questions</span>
+        <span>Passing: ${quiz.passingScore}%</span>
+        <span>Attempts: ${quiz.attemptsAllowed}</span>
+      </div>
+    </div>
+    ${questionsHTML}
+    ${!submitted ? `
+      <button class="btn btn-primary" style="margin-top:4px" id="submit-quiz-btn" onclick="submitQuiz(${sIdx})" ${allAnswered ? '' : 'disabled'}>
+        Submit Quiz
+      </button>` : ''}
+    ${scoreHTML}
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goToScreen('lecture', ${sIdx}, ${section.lectures.length - 1})">← Back to Lectures</button>
+      ${submitted ? `<button class="btn btn-primary" onclick="goToScreen('activity', ${sIdx})">Practical Activity →</button>` : ''}
+    </div>
+  `;
+
+  // attach short-answer live listeners
+  if (!submitted) {
+    quiz.questions.forEach((q, qIdx) => {
+      if (q.questionType === 'short-answer') {
+        const ta = document.getElementById(`sa-${sIdx}-${qIdx}`);
+        if (ta) ta.addEventListener('input', () => {
+          if (!state.quizAnswers[sIdx]) state.quizAnswers[sIdx] = {};
+          state.quizAnswers[sIdx][qIdx] = ta.value;
+        });
+      }
+    });
+  }
+}
+
+function escapeQ(s) { return s.replace(/'/g, "\\'"); }
+
+function selectAnswer(sIdx, qIdx, answer) {
+  if (!state.quizAnswers[sIdx]) state.quizAnswers[sIdx] = {};
+  state.quizAnswers[sIdx][qIdx] = answer;
+  renderQuiz();
+}
+
+function submitQuiz(sIdx) {
+  // capture short answers
+  const quiz = COURSE.sections[sIdx].quiz;
+  quiz.questions.forEach((q, qIdx) => {
+    if (q.questionType === 'short-answer') {
+      const ta = document.getElementById(`sa-${sIdx}-${qIdx}`);
+      if (ta) {
+        if (!state.quizAnswers[sIdx]) state.quizAnswers[sIdx] = {};
+        state.quizAnswers[sIdx][qIdx] = ta.value;
+      }
+    }
+  });
+  state.quizSubmitted[sIdx] = true;
+  state.completedQuizzes.add(sIdx);
+  renderQuiz();
+  updateSidebar();
+}
+
+// ACTIVITY
+function renderActivity() {
+  const sIdx = state.currentSectionIndex;
+  const section = COURSE.sections[sIdx];
+  const act = section.practicalActivity;
+  const el = document.getElementById('screen-activity');
+
+  el.innerHTML = `
+    <div class="activity-header">
+      <div class="section-eyebrow">${section.sectionTitle} · Practical Activity</div>
+      <h2>${act.title}</h2>
+      <p style="color:var(--text-secondary);font-size:14px;margin-top:8px">${act.description}</p>
+    </div>
+    <div class="scenario-box">
+      <h4>Your Scenario</h4>
+      <p>${act.scenario}</p>
+    </div>
+    <h3 style="font-size:17px;margin-bottom:12px">Steps</h3>
+    <ol class="steps-list">${act.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+    <h3 style="font-size:17px;margin-bottom:10px">Success Criteria</h3>
+    <ul class="criteria-list">${act.successCriteria.map(c=>`<li>${c}</li>`).join('')}</ul>
+    <h3 style="font-size:17px;margin-bottom:10px">Your Response</h3>
+    <textarea class="activity-response" placeholder="Write your response here — you can refer back to this at any time…" id="activity-response-${sIdx}"></textarea>
+    <div style="margin-top:14px;display:flex;gap:10px;align-items:center">
+      <button class="btn btn-primary btn-sm" onclick="completeActivity(${sIdx})">Mark as Complete</button>
+      <span id="activity-done-${sIdx}" style="font-size:13px;color:var(--accent);display:none">✓ Completed</span>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goToScreen('quiz', ${sIdx})">← Back to Quiz</button>
+      <button class="btn btn-primary" onclick="goToScreen('section-summary', ${sIdx})">Section Summary →</button>
+    </div>
+  `;
+
+  if (state.completedActivities.has(sIdx)) {
+    const doneEl = document.getElementById(`activity-done-${sIdx}`);
+    if (doneEl) doneEl.style.display = 'inline';
+  }
+}
+
+function completeActivity(sIdx) {
+  state.completedActivities.add(sIdx);
+  const doneEl = document.getElementById(`activity-done-${sIdx}`);
+  if (doneEl) doneEl.style.display = 'inline';
+  updateSidebar();
+}
+
+// SECTION SUMMARY
+function renderSectionSummary() {
+  const sIdx = state.currentSectionIndex;
+  const section = COURSE.sections[sIdx];
+  const isLast = sIdx === COURSE.sections.length - 1;
+  const el = document.getElementById('screen-section-summary');
+
+  el.innerHTML = `
+    <div class="section-eyebrow">Section ${sIdx + 1} Complete</div>
+    <h1 style="font-size:32px;margin-bottom:16px">${section.sectionTitle}</h1>
+    <div class="section-summary">
+      <h4>What you covered</h4>
+      <div class="summary-grid">
+        ${section.summary.map(s=>`<div class="summary-item">${s}</div>`).join('')}
+      </div>
+    </div>
+    <p style="color:var(--text-secondary);font-size:14px;margin-bottom:28px">
+      Take a moment to reflect: can you explain each of these points in your own words? That's the true test of understanding.
+    </p>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goToScreen('activity', ${sIdx})">← Back to Activity</button>
+      ${isLast
+        ? `<button class="btn btn-primary" onclick="goToScreen('complete')">Finish Course 🎓</button>`
+        : `<button class="btn btn-primary" onclick="goToScreen('section-intro', ${sIdx + 1}, 0)">Next Section →</button>`
+      }
+    </div>
+  `;
+}
+
+// GLOSSARY
+function renderGlossary() {
+  const body = document.getElementById('glossary-body');
+  if (!COURSE.glossary || !COURSE.glossary.length) {
+    body.innerHTML = '<p style="padding:16px;font-size:13px;color:var(--text-secondary)">No glossary terms defined.</p>';
+    return;
+  }
+  body.innerHTML = COURSE.glossary.map(g => `
+    <dl class="glossary-term">
+      <dt>${g.term}</dt>
+      <dd>${g.definition}</dd>
+    </dl>`).join('');
+}
+
+function toggleGlossary() {
+  document.getElementById('glossary-drawer').classList.toggle('open');
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+buildSidebar();
+renderScreen('intro');
+</script>
+</body>
+</html>
