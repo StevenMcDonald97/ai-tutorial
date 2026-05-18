@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Course Author v2</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@300;500&family=Nunito:wght@400;500;600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#18181b;--ink2:#52525b;--ink3:#a1a1aa;--line:#e4e4e7;
+  --surface:#fff;--bg:#f4f4f5;--bg2:#fafafa;
+  --blue:#2563eb;--blue-l:#eff6ff;--green:#16a34a;--green-l:#f0fdf4;
+  --red:#dc2626;--red-l:#fef2f2;--amber:#d97706;--amber-l:#fffbeb;
+  --violet:#7c3aed;--violet-l:#f5f3ff;--teal:#0d9488;--teal-l:#f0fdfa;
+  --r:8px;--r2:12px;--sh:0 1px 4px rgba(0,0,0,.08);
+}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.55;min-height:100vh}
+
+/* ── Topbar ── */
+#topbar{position:sticky;top:0;z-index:200;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;height:54px;padding:0 20px}
+.logo{font-family:'Fraunces',serif;font-size:20px;font-weight:300;color:var(--ink);margin-right:auto}
+.logo span{color:var(--blue)}
+.tbtn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:99px;font-size:13px;font-weight:600;font-family:'Nunito',sans-serif;cursor:pointer;border:none;transition:all .15s}
+.tbtn-ghost{background:none;color:var(--ink2)}.tbtn-ghost:hover{background:var(--bg)}
+.tbtn-primary{background:var(--blue);color:#fff;margin-left:8px}.tbtn-primary:hover{background:#1d4ed8}
+.tbtn-preview{background:var(--bg);color:var(--ink2);border:1px solid var(--line);margin-left:8px}
+.tbtn-preview.on{background:#1e1e2e;color:#89b4fa;border-color:#2a2a3e}
+
+/* ── Layout ── */
+#layout{display:flex;min-height:calc(100vh - 54px)}
+
+/* ── Stepnav ── */
+#stepnav{width:230px;min-width:230px;background:var(--surface);border-right:1px solid var(--line);padding:16px 0;position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto}
+.snav-group{padding:8px 14px 3px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+.snav-item{display:flex;align-items:center;gap:9px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:500;color:var(--ink2);transition:background .12s,color .12s;position:relative}
+.snav-item:hover{background:var(--bg);color:var(--ink)}
+.snav-item.active{background:var(--blue-l);color:var(--blue);font-weight:700}
+.snav-item.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--blue);border-radius:0 2px 2px 0}
+.snav-dot{width:19px;height:19px;min-width:19px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--ink3)}
+.snav-item.active .snav-dot{border-color:var(--blue);background:var(--blue);color:#fff}
+.snav-child{padding:5px 14px 5px 38px;font-size:12px;font-weight:500;color:var(--ink3);cursor:pointer;transition:background .12s}
+.snav-child:hover{background:var(--bg);color:var(--ink2)}
+.snav-child.active{color:var(--blue);font-weight:700}
+.snav-add{display:flex;align-items:center;gap:5px;padding:7px 14px;font-size:12px;font-weight:700;color:var(--blue);cursor:pointer;background:none;border:none;font-family:'Nunito',sans-serif;width:100%}
+.snav-add:hover{background:var(--blue-l)}
+
+/* ── Editor ── */
+#editor{flex:1;padding:28px 32px;max-width:840px;margin:0 auto}
+.epanel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);margin-bottom:22px;overflow:hidden;box-shadow:var(--sh);animation:fadeSlide .18s ease}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.epanel-header{padding:15px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.epanel-title{font-family:'Fraunces',serif;font-size:18px;font-weight:300}
+.epanel-sub{font-size:11px;color:var(--ink3);margin-top:2px}
+.epanel-body{padding:20px}
+
+/* Fields */
+.frow{margin-bottom:16px}.frow:last-child{margin-bottom:0}
+label{display:block;font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:4px;letter-spacing:.02em}
+.fhint{font-size:11px;color:var(--ink3);margin-bottom:4px}
+input[type=text],input[type=url],input[type=number],select,textarea{width:100%;padding:8px 11px;border:1.5px solid var(--line);border-radius:var(--r);font-size:13.5px;font-family:'Nunito',sans-serif;color:var(--ink);background:var(--surface);transition:border .15s;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--blue)}
+textarea{resize:vertical;min-height:68px;line-height:1.5}
+select{cursor:pointer}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+/* Tag inputs */
+.tag-wrap{border:1.5px solid var(--line);border-radius:var(--r);padding:5px 7px;display:flex;flex-wrap:wrap;gap:4px;cursor:text;transition:border .15s}
+.tag-wrap:focus-within{border-color:var(--blue)}
+.chip{display:inline-flex;align-items:center;gap:3px;background:var(--blue-l);color:var(--blue);border-radius:99px;padding:2px 9px;font-size:12px;font-weight:600}
+.chip-remove{background:none;border:none;cursor:pointer;color:var(--blue);font-size:13px;line-height:1;padding:0;margin-left:2px}
+.chip-amber{background:var(--amber-l);color:var(--amber)}.chip-amber .chip-remove{color:var(--amber)}
+.chip-green{background:var(--green-l);color:var(--green)}.chip-green .chip-remove{color:var(--green)}
+.chip-violet{background:var(--violet-l);color:var(--violet)}.chip-violet .chip-remove{color:var(--violet)}
+.chip-teal{background:var(--teal-l);color:var(--teal)}.chip-teal .chip-remove{color:var(--teal)}
+.tag-input{border:none;outline:none;font-size:13px;font-family:'Nunito',sans-serif;background:transparent;color:var(--ink);min-width:100px;flex:1}
+
+/* Toggles */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-label{font-size:13px;font-weight:600}
+.toggle-hint{font-size:11px;color:var(--ink3)}
+.toggle{position:relative;width:38px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:var(--line);border-radius:99px;cursor:pointer;transition:.2s}
+.slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s}
+.toggle input:checked+.slider{background:var(--blue)}
+.toggle input:checked+.slider::before{transform:translateX(16px)}
+
+/* Accordions */
+.acc{border:1.5px solid var(--line);border-radius:var(--r);margin-bottom:8px;overflow:hidden}
+.acc-header{padding:10px 13px;display:flex;align-items:center;gap:8px;cursor:pointer;background:var(--bg2);user-select:none;transition:background .12s}
+.acc-header:hover{background:var(--bg)}
+.acc-arrow{font-size:10px;color:var(--ink3);transition:transform .2s;margin-left:auto}
+.acc.open .acc-arrow{transform:rotate(90deg)}
+.acc-title{font-size:13px;font-weight:700;flex:1}
+.acc-badge{font-size:11px;color:var(--ink3);padding:1px 7px;background:var(--bg);border-radius:99px;border:1px solid var(--line)}
+.acc-body{padding:14px;display:none;border-top:1px solid var(--line)}
+.acc.open .acc-body{display:block}
+
+/* Buttons */
+.add-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:99px;font-size:12px;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;border:1.5px dashed var(--line);background:transparent;color:var(--ink2);transition:all .15s;margin-top:6px}
+.add-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-l)}
+.del-btn{background:none;border:none;cursor:pointer;padding:3px 5px;border-radius:5px;font-size:14px;color:var(--ink3);transition:all .15s}
+.del-btn:hover{background:var(--red-l);color:var(--red)}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.pill-violet{background:var(--violet-l);color:var(--violet)}
+.pill-amber{background:var(--amber-l);color:var(--amber)}
+.pill-green{background:var(--green-l);color:var(--green)}
+.pill-teal{background:var(--teal-l);color:var(--teal)}
+.pill-red{background:var(--red-l);color:var(--red)}
+
+/* Section pill */
+.sec-pill{display:inline-flex;align-items:center;gap:5px;background:var(--blue-l);color:var(--blue);border-radius:99px;padding:3px 11px;font-size:12px;font-weight:700;margin-bottom:13px}
+
+/* JSON preview */
+#json-pane{width:340px;min-width:340px;background:#1e1e2e;border-left:1px solid #2a2a3e;position:sticky;top:54px;height:calc(100vh - 54px);display:none;flex-direction:column}
+#json-pane.open{display:flex}
+#json-pane-hdr{padding:9px 13px;border-bottom:1px solid #2a2a3e;display:flex;align-items:center;justify-content:space-between;background:#16162a;flex-shrink:0}
+#json-pane-hdr span{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#7c7cad}
+.jcopy{background:#2a2a3e;border:none;color:#a0a0cc;font-size:11px;font-weight:700;padding:3px 9px;border-radius:5px;cursor:pointer;font-family:'Nunito',sans-serif}
+.jcopy:hover{background:#3a3a5e;color:#fff}
+#json-body{flex:1;overflow:auto;padding:14px;font-family:'Menlo','Consolas',monospace;font-size:11px;line-height:1.65;color:#cdd6f4;white-space:pre}
+#json-body::-webkit-scrollbar{width:4px;height:4px}
+#json-body::-webkit-scrollbar-thumb{background:#3a3a5e;border-radius:99px}
+.jk{color:#89b4fa}.js{color:#a6e3a1}.jn{color:#fab387}.jb{color:#cba6f7}
+
+/* Stepnav scrollbar */
+#stepnav::-webkit-scrollbar{width:3px}
+#stepnav::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
+
+/* Toast */
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--ink);color:#fff;padding:9px 18px;border-radius:99px;font-size:13px;font-weight:600;z-index:600;transition:transform .3s;white-space:nowrap}
+#toast.show{transform:translateX(-50%) translateY(0)}
+
+.empty-state{text-align:center;padding:32px 16px;color:var(--ink3)}.empty-state .ei{font-size:36px;margin-bottom:10px}
+.divider{border:none;border-top:1px solid var(--line);margin:16px 0}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="logo">Course <span>Author</span> <span style="font-size:12px;color:var(--ink3);font-family:'Nunito',sans-serif;font-weight:600;margin-left:4px">v2</span></div>
+  <button class="tbtn tbtn-ghost" onclick="doImport()">⬆ Import JSON</button>
+  <button class="tbtn tbtn-preview" id="prev-btn" onclick="togglePreview()">{ } Preview</button>
+  <button class="tbtn tbtn-primary" onclick="doExport()">⬇ Export Course</button>
+</div>
+
+<div id="layout">
+  <!-- Stepnav -->
+  <nav id="stepnav">
+    <div class="snav-group">Course</div>
+    <div class="snav-item active" onclick="show('metadata')" id="nav-metadata"><span class="snav-dot">1</span>Metadata</div>
+    <div class="snav-item" onclick="show('learning-model')" id="nav-learning-model"><span class="snav-dot">2</span>Learning Model</div>
+    <div class="snav-item" onclick="show('competencies')" id="nav-competencies"><span class="snav-dot">3</span>Competencies</div>
+    <div class="snav-item" onclick="show('glossary')" id="nav-glossary"><span class="snav-dot">4</span>Glossary</div>
+    <div class="snav-item" onclick="show('assessments')" id="nav-assessments"><span class="snav-dot">5</span>Assessments</div>
+    <div class="snav-group" style="margin-top:10px">Sections</div>
+    <div id="section-nav"></div>
+    <button class="snav-add" onclick="addSection()">＋ Add Section</button>
+  </nav>
+
+  <!-- Editor -->
+  <div id="editor">
+
+    <!-- METADATA -->
+    <div id="panel-metadata" class="epanel">
+      <div class="epanel-header"><div><div class="epanel-title">Course Metadata</div><div class="epanel-sub">courseMetadata — top-level course identity and discoverability</div></div></div>
+      <div class="epanel-body">
+        <div class="g2">
+          <div class="frow"><label>Course ID</label><div class="fhint">Unique slug, e.g. critical-thinking-101</div><input type="text" id="f-courseId" placeholder="my-course-id" oninput="sync()"></div>
+          <div class="frow"><label>Version</label><input type="text" id="f-version" placeholder="2.0" oninput="sync()"></div>
+        </div>
+        <div class="frow"><label>Title</label><input type="text" id="f-title" placeholder="Course title" oninput="sync()"></div>
+        <div class="frow"><label>Description</label><textarea id="f-desc" placeholder="What will learners achieve?" oninput="sync()"></textarea></div>
+        <div class="g3">
+          <div class="frow"><label>Difficulty</label>
+            <select id="f-diff" onchange="sync()">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate" selected>Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </div>
+          <div class="frow"><label>Duration (minutes)</label><input type="number" id="f-dur" placeholder="840" oninput="sync()"></div>
+          <div class="frow"><label>Language</label><input type="text" id="f-lang" placeholder="en" oninput="sync()"></div>
+        </div>
+        <div class="frow"><label>Thumbnail Image URL</label><input type="url" id="f-thumb" placeholder="https://…" oninput="sync()"></div>
+        <div class="frow">
+          <label>Tags</label><div class="fhint">Press Enter after each tag</div>
+          <div class="tag-wrap" id="tags-wrap" onclick="focusLast(this)">
+            <div id="tags-chips" style="display:flex;flex-wrap:wrap;gap:4px"></div>
+            <input class="tag-input" id="tags-input" placeholder="Add tag…" onkeydown="chipKey(event,'tags')">
+          </div>
+        </div>
+        <div class="frow">
+          <label>Prerequisites</label><div class="fhint">Press Enter — format: "knowledge: Basic reading comprehension"</div>
+          <div class="tag-wrap" id="prereqs-wrap" onclick="focusLast(this)">
+            <div id="prereqs-chips" style="display:flex;flex-wrap:wrap;gap:4px"></div>
+            <input class="tag-input" id="prereqs-input" placeholder="knowledge: Basic reading comprehension" onkeydown="chipKey(event,'prereqs')">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEARNING MODEL -->
+    <div id="panel-learning-model" class="epanel" style="display:none">
+      <div class="epanel-header"><div><div class="epanel-title">Learning Model</div><div class="epanel-sub">learningModel — thresholds and active learning strategies</div></div></div>
+      <div class="epanel-body">
+        <div class="g2">
+          <div class="frow"><label>Mastery Threshold (0–1)</label><div class="fhint">e.g. 0.85 = 85% required for mastery</div><input type="number" id="f-mastery" min="0" max="1" step="0.05" placeholder="0.85" oninput="sync()"></div>
+          <div class="frow"><label>Passing Threshold (0–1)</label><div class="fhint">e.g. 0.7 = 70% to pass</div><input type="number" id="f-passing" min="0" max="1" step="0.05" placeholder="0.70" oninput="sync()"></div>
+        </div>
+        <hr class="divider">
+        <div class="toggle-row"><div><div class="toggle-label">Retrieval Practice</div><div class="toggle-hint">Embed recall prompts throughout experiences</div></div><label class="toggle"><input type="checkbox" id="lm-retrieval" checked onchange="sync()"><span class="slider"></span></label></div>
+        <div class="toggle-row"><div><div class="toggle-label">Confidence Calibration</div><div class="toggle-hint">Ask learners to rate their confidence after predictions</div></div><label class="toggle"><input type="checkbox" id="lm-confidence" checked onchange="sync()"><span class="slider"></span></label></div>
+        <div class="toggle-row"><div><div class="toggle-label">Adaptive Difficulty</div><div class="toggle-hint">Adjust question difficulty based on performance</div></div><label class="toggle"><input type="checkbox" id="lm-adaptive" checked onchange="sync()"><span class="slider"></span></label></div>
+        <div class="toggle-row"><div><div class="toggle-label">Interleaving</div><div class="toggle-hint">Mix question types across sessions</div></div><label class="toggle"><input type="checkbox" id="lm-interleave" checked onchange="sync()"><span class="slider"></span></label></div>
+        <div class="toggle-row"><div><div class="toggle-label">Spaced Repetition</div><div class="toggle-hint">Schedule retrieval practice at expanding intervals</div></div><label class="toggle"><input type="checkbox" id="lm-spaced" checked onchange="sync()"><span class="slider"></span></label></div>
+      </div>
+    </div>
+
+    <!-- COMPETENCIES -->
+    <div id="panel-competencies" class="epanel" style="display:none">
+      <div class="epanel-header">
+        <div><div class="epanel-title">Competencies</div><div class="epanel-sub">competencies — what learners will be able to do, with mastery criteria</div></div>
+        <button class="add-btn" onclick="addCompetency()">＋ Add Competency</button>
+      </div>
+      <div class="epanel-body" id="comp-list"><div class="empty-state"><div class="ei">🎯</div><p>No competencies yet.</p></div></div>
+    </div>
+
+    <!-- GLOSSARY -->
+    <div id="panel-glossary" class="epanel" style="display:none">
+      <div class="epanel-header">
+        <div><div class="epanel-title">Glossary</div><div class="epanel-sub">glossary — term/definition pairs shown in the player's glossary drawer</div></div>
+        <button class="add-btn" onclick="addGlossaryTerm()">＋ Add Term</button>
+      </div>
+      <div class="epanel-body" id="glos-list"><div class="empty-state"><div class="ei">📖</div><p>No terms yet.</p></div></div>
+    </div>
+
+    <!-- ASSESSMENTS -->
+    <div id="panel-assessments" class="epanel" style="display:none">
+      <div class="epanel-header">
+        <div><div class="epanel-title">Assessments</div><div class="epanel-sub">assessments — top-level scenario assessments with rubrics, linked to competencies</div></div>
+        <button class="add-btn" onclick="addAssessment()">＋ Add Assessment</button>
+      </div>
+      <div class="epanel-body" id="assess-list"><div class="empty-state"><div class="ei">📝</div><p>No assessments yet.</p></div></div>
+    </div>
+
+    <!-- Section panels injected here -->
+    <div id="section-panels"></div>
+  </div>
+
+  <!-- JSON Preview -->
+  <div id="json-pane">
+    <div id="json-pane-hdr"><span>📄 JSON Preview</span><button class="jcopy" onclick="copyJSON()">Copy</button></div>
+    <div id="json-body"></div>
+  </div>
+</div>
+
+<input type="file" id="import-input" accept=".json" style="display:none" onchange="handleImport(event)">
+<div id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// DATA MODEL — mirrors the v2 JSON schema exactly
+// ════════════════════════════════════════════════════════
+let C = {
+  courseMetadata:{courseId:'',title:'',description:'',thumbnailImage:'',estimatedDurationMinutes:0,difficultyLevel:'intermediate',version:'2.0',lastUpdated:'',language:'en',tags:[],prerequisites:[]},
+  learningModel:{masteryThreshold:0.85,passingThreshold:0.70,retrievalPracticeEnabled:true,confidenceCalibrationEnabled:true,adaptiveDifficultyEnabled:true,interleavingEnabled:true,spacedRepetitionEnabled:true},
+  competencies:[],
+  sections:[],
+  assessments:[],
+  retrievalSystem:{algorithm:'spaced-repetition',confidenceWeighting:true,interleavingEnabled:true,retrievalModes:['free-recall','application','scenario-analysis','contrast']},
+  masterySystem:{masteryLevels:['novice','developing','proficient','mastered'],decayModelEnabled:true,reverificationRequired:true},
+  learnerState:{completedExperiences:[],competencyProgress:[],retrievalStrength:{},confidenceCalibration:{},masteryState:{}},
+  analytics:{track:['accuracy','confidence','time-on-task','retrieval-strength','transfer-performance','misconception-frequency']},
+  glossary:[]
+};
+
+let activePanel = 'metadata';
+let previewOpen = false;
+
+// ════════════════════════════════════════════════════════
+// SYNC — read all form fields into C
+// ════════════════════════════════════════════════════════
+function sync(){
+  const m = C.courseMetadata;
+  m.courseId             = val('f-courseId');
+  m.title                = val('f-title');
+  m.description          = val('f-desc');
+  m.difficultyLevel      = val('f-diff');
+  m.estimatedDurationMinutes = +val('f-dur') || 0;
+  m.language             = val('f-lang') || 'en';
+  m.thumbnailImage       = val('f-thumb');
+  m.version              = val('f-version') || '2.0';
+  m.lastUpdated          = new Date().toISOString().split('T')[0];
+
+  const lm = C.learningModel;
+  lm.masteryThreshold             = +val('f-mastery') || 0.85;
+  lm.passingThreshold             = +val('f-passing') || 0.70;
+  lm.retrievalPracticeEnabled     = chk('lm-retrieval');
+  lm.confidenceCalibrationEnabled = chk('lm-confidence');
+  lm.adaptiveDifficultyEnabled    = chk('lm-adaptive');
+  lm.interleavingEnabled          = chk('lm-interleave');
+  lm.spacedRepetitionEnabled      = chk('lm-spaced');
+
+  updateSectionNav();
+  refreshPreview();
+}
+const val = id => { const e = document.getElementById(id); return e ? e.value.trim() : ''; };
+const chk = id => { const e = document.getElementById(id); return e ? e.checked : false; };
+
+// ════════════════════════════════════════════════════════
+// PANEL NAVIGATION
+// ════════════════════════════════════════════════════════
+function show(id){
+  activePanel = id;
+  document.querySelectorAll('.epanel').forEach(p => p.style.display = 'none');
+  const t = document.getElementById('panel-' + id);
+  if(t) t.style.display = '';
+  document.querySelectorAll('.snav-item,.snav-child').forEach(el => el.classList.remove('active'));
+  const n = document.getElementById('nav-' + id);
+  if(n) n.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ════════════════════════════════════════════════════════
+// CHIP / TAG INPUTS (course-level)
+// ════════════════════════════════════════════════════════
+function focusLast(wrap){ const inp = wrap.querySelector('.tag-input'); if(inp) inp.focus(); }
+
+function chipKey(e, field){
+  if(e.key !== 'Enter') return;
+  e.preventDefault();
+  const v = e.target.value.trim();
+  if(!v) return;
+  if(field === 'tags'){
+    C.courseMetadata.tags.push(v);
+    renderChips('tags', C.courseMetadata.tags, 'chip');
+  } else if(field === 'prereqs'){
+    // Parse "type: description" or just use as description with type "knowledge"
+    const colonIdx = v.indexOf(':');
+    if(colonIdx > 0){
+      C.courseMetadata.prerequisites.push({ type: v.slice(0,colonIdx).trim(), description: v.slice(colonIdx+1).trim() });
+    } else {
+      C.courseMetadata.prerequisites.push({ type: 'knowledge', description: v });
+    }
+    renderPrereqChips();
+  }
+  e.target.value = '';
+  sync();
+}
+
+function renderChips(field, arr, cls){
+  const el = document.getElementById(field + '-chips');
+  if(!el) return;
+  el.innerHTML = arr.map((t,i) => `<span class="${cls}">${t}<button class="chip-remove" onclick="removeChip('${field}',${i})">×</button></span>`).join('');
+}
+
+function removeChip(field, i){
+  if(field === 'tags') C.courseMetadata.tags.splice(i,1);
+  renderChips(field, C.courseMetadata[field === 'tags' ? 'tags' : field], 'chip');
+  sync();
+}
+
+function renderPrereqChips(){
+  const el = document.getElementById('prereqs-chips');
+  if(!el) return;
+  el.innerHTML = C.courseMetadata.prerequisites.map((p,i) =>
+    `<span class="chip chip-amber">${p.type}: ${p.description}<button class="chip-remove" onclick="removePrereq(${i})">×</button></span>`
+  ).join('');
+}
+function removePrereq(i){ C.courseMetadata.prerequisites.splice(i,1); renderPrereqChips(); sync(); }
+
+// ════════════════════════════════════════════════════════
+// COMPETENCIES
+// ════════════════════════════════════════════════════════
+function addCompetency(){
+  C.competencies.push({
+    competencyId: 'comp-' + Date.now(),
+    title:'', description:'', taxonomyLevel:'analyze',
+    difficultyProfile:{overall:3,conceptualComplexity:3,ambiguity:3,technicalSkill:2,readingDemand:2},
+    transferRequired:true, masteryThreshold:0.85,
+    desiredOutcomes:[], commonMisconceptions:[]
+  });
+  renderCompetencies();
+  refreshPreview();
+}
+
+function renderCompetencies(){
+  const el = document.getElementById('comp-list');
+  if(!C.competencies.length){ el.innerHTML = '<div class="empty-state"><div class="ei">🎯</div><p>No competencies yet.</p></div>'; return; }
+  el.innerHTML = C.competencies.map((c,i) => `
+    <div class="acc open" id="comp-acc-${i}">
+      <div class="acc-header" onclick="toggleAcc('comp-acc-${i}')">
+        <span class="acc-title">${c.title||'New Competency'}</span>
+        <span class="pill pill-violet">${c.taxonomyLevel}</span>
+        <button class="del-btn" onclick="event.stopPropagation();delComp(${i})">🗑</button>
+        <span class="acc-arrow">›</span>
+      </div>
+      <div class="acc-body">
+        <div class="g2">
+          <div class="frow"><label>Competency ID</label><input type="text" value="${esc(c.competencyId)}" oninput="C.competencies[${i}].competencyId=this.value;updateCompTitle(${i});sync()"></div>
+          <div class="frow"><label>Taxonomy Level</label>
+            <select onchange="C.competencies[${i}].taxonomyLevel=this.value;renderCompetencies();sync()">
+              ${['remember','understand','apply','analyze','evaluate','create'].map(l=>`<option value="${l}" ${c.taxonomyLevel===l?'selected':''}>${l}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="frow"><label>Title</label><input type="text" value="${esc(c.title)}" oninput="C.competencies[${i}].title=this.value;updateCompTitle(${i});sync()"></div>
+        <div class="frow"><label>Description</label><textarea oninput="C.competencies[${i}].description=this.value;sync()">${esc(c.description)}</textarea></div>
+        <div class="g3">
+          <div class="frow"><label>Overall Difficulty (1–5)</label><input type="number" min="1" max="5" value="${c.difficultyProfile.overall}" oninput="C.competencies[${i}].difficultyProfile.overall=+this.value;sync()"></div>
+          <div class="frow"><label>Conceptual Complexity</label><input type="number" min="1" max="5" value="${c.difficultyProfile.conceptualComplexity}" oninput="C.competencies[${i}].difficultyProfile.conceptualComplexity=+this.value;sync()"></div>
+          <div class="frow"><label>Ambiguity</label><input type="number" min="1" max="5" value="${c.difficultyProfile.ambiguity}" oninput="C.competencies[${i}].difficultyProfile.ambiguity=+this.value;sync()"></div>
+        </div>
+        <div class="g2">
+          <div class="frow"><label>Technical Skill</label><input type="number" min="1" max="5" value="${c.difficultyProfile.technicalSkill}" oninput="C.competencies[${i}].difficultyProfile.technicalSkill=+this.value;sync()"></div>
+          <div class="frow"><label>Reading Demand</label><input type="number" min="1" max="5" value="${c.difficultyProfile.readingDemand}" oninput="C.competencies[${i}].difficultyProfile.readingDemand=+this.value;sync()"></div>
+        </div>
+        <div class="g2">
+          <div class="frow"><label>Mastery Threshold</label><input type="number" min="0" max="1" step="0.05" value="${c.masteryThreshold}" oninput="C.competencies[${i}].masteryThreshold=+this.value;sync()"></div>
+          <div class="frow"><label>Transfer Required</label>
+            <select onchange="C.competencies[${i}].transferRequired=this.value==='true';sync()">
+              <option value="true" ${c.transferRequired?'selected':''}>Yes</option>
+              <option value="false" ${!c.transferRequired?'selected':''}>No</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Misconceptions -->
+        <div style="margin-top:10px">
+          <label>Common Misconceptions</label>
+          <div id="misc-list-${i}">${renderMisconceptions(i)}</div>
+          <button class="add-btn" onclick="addMisconception(${i})">＋ Add Misconception</button>
+        </div>
+
+        <!-- Desired Outcomes -->
+        <div style="margin-top:12px">
+          <label>Desired Outcomes</label>
+          <div id="outcome-list-${i}">${renderOutcomes(i)}</div>
+          <button class="add-btn" onclick="addOutcome(${i})">＋ Add Outcome</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function updateCompTitle(i){
+  const h = document.querySelector(`#comp-acc-${i} .acc-title`);
+  if(h) h.textContent = C.competencies[i].title || 'New Competency';
+}
+function delComp(i){ C.competencies.splice(i,1); renderCompetencies(); sync(); }
+
+function renderMisconceptions(ci){
+  return (C.competencies[ci].commonMisconceptions||[]).map((m,mi) => `
+    <div class="acc" id="misc-${ci}-${mi}" style="margin-bottom:6px">
+      <div class="acc-header" onclick="toggleAcc('misc-${ci}-${mi}')">
+        <span class="acc-title" style="font-size:12px">${m.misconception||'New Misconception'}</span>
+        <button class="del-btn" onclick="event.stopPropagation();delMisc(${ci},${mi})">🗑</button>
+        <span class="acc-arrow">›</span>
+      </div>
+      <div class="acc-body">
+        <div class="frow"><label>Misconception</label><input type="text" value="${esc(m.misconception)}" oninput="C.competencies[${ci}].commonMisconceptions[${mi}].misconception=this.value;sync()"></div>
+        <div class="frow"><label>Why Incorrect</label><textarea oninput="C.competencies[${ci}].commonMisconceptions[${mi}].whyIncorrect=this.value;sync()">${esc(m.whyIncorrect)}</textarea></div>
+        <div class="frow" style="margin-bottom:0"><label>Remediation Strategy</label><input type="text" value="${esc(m.remediationStrategy)}" oninput="C.competencies[${ci}].commonMisconceptions[${mi}].remediationStrategy=this.value;sync()"></div>
+      </div>
+    </div>`).join('');
+}
+function addMisconception(ci){ C.competencies[ci].commonMisconceptions.push({misconception:'',whyIncorrect:'',remediationStrategy:''}); renderCompetencies(); }
+function delMisc(ci,mi){ C.competencies[ci].commonMisconceptions.splice(mi,1); rerenderMiscs(ci); sync(); }
+function rerenderMiscs(ci){ const el=document.getElementById('misc-list-'+ci); if(el) el.innerHTML=renderMisconceptions(ci); }
+
+function renderOutcomes(ci){
+  return (C.competencies[ci].desiredOutcomes||[]).map((o,oi) => `
+    <div class="acc" id="out-${ci}-${oi}" style="margin-bottom:6px">
+      <div class="acc-header" onclick="toggleAcc('out-${ci}-${oi}')">
+        <span class="acc-title" style="font-size:12px">${o.description||'New Outcome'}</span>
+        <button class="del-btn" onclick="event.stopPropagation();delOutcome(${ci},${oi})">🗑</button>
+        <span class="acc-arrow">›</span>
+      </div>
+      <div class="acc-body">
+        <div class="frow"><label>Outcome ID</label><input type="text" value="${esc(o.outcomeId)}" oninput="C.competencies[${ci}].desiredOutcomes[${oi}].outcomeId=this.value;sync()"></div>
+        <div class="frow"><label>Description</label><textarea oninput="C.competencies[${ci}].desiredOutcomes[${oi}].description=this.value;sync()">${esc(o.description)}</textarea></div>
+        <div class="frow"><label>Verified By (assessment/exercise IDs, comma-separated)</label>
+          <input type="text" value="${(o.verifiedBy||[]).join(', ')}" oninput="C.competencies[${ci}].desiredOutcomes[${oi}].verifiedBy=this.value.split(',').map(s=>s.trim()).filter(Boolean);sync()">
+        </div>
+        <div class="g3">
+          <div class="frow"><label>Min Accuracy</label><input type="number" min="0" max="1" step="0.05" value="${(o.verificationCriteria||{}).minimumAccuracy||0.8}" oninput="ensureVC(${ci},${oi});C.competencies[${ci}].desiredOutcomes[${oi}].verificationCriteria.minimumAccuracy=+this.value;sync()"></div>
+          <div class="frow"><label>Min Confidence Cal.</label><input type="number" min="0" max="1" step="0.05" value="${(o.verificationCriteria||{}).minimumConfidenceCalibration||0.7}" oninput="ensureVC(${ci},${oi});C.competencies[${ci}].desiredOutcomes[${oi}].verificationCriteria.minimumConfidenceCalibration=+this.value;sync()"></div>
+          <div class="frow"><label>Requires Transfer</label>
+            <select onchange="ensureVC(${ci},${oi});C.competencies[${ci}].desiredOutcomes[${oi}].verificationCriteria.requiresTransferSuccess=this.value==='true';sync()">
+              <option value="true" ${(o.verificationCriteria||{}).requiresTransferSuccess?'selected':''}>Yes</option>
+              <option value="false" ${!(o.verificationCriteria||{}).requiresTransferSuccess?'selected':''}>No</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function ensureVC(ci,oi){ if(!C.competencies[ci].desiredOutcomes[oi].verificationCriteria) C.competencies[ci].desiredOutcomes[oi].verificationCriteria={}; }
+function addOutcome(ci){ C.competencies[ci].desiredOutcomes.push({outcomeId:'outcome-'+Date.now(),description:'',verifiedBy:[],verificationCriteria:{minimumAccuracy:0.8,minimumConfidenceCalibration:0.7,requiresTransferSuccess:true}}); renderCompetencies(); }
+function delOutcome(ci,oi){ C.competencies[ci].desiredOutcomes.splice(oi,1); renderCompetencies(); sync(); }
+
+// ════════════════════════════════════════════════════════
+// GLOSSARY
+// ════════════════════════════════════════════════════════
+function addGlossaryTerm(){ C.glossary.push({term:'',definition:''}); renderGlossary(); }
+function delGlossaryTerm(i){ C.glossary.splice(i,1); renderGlossary(); sync(); }
+function renderGlossary(){
+  const el = document.getElementById('glos-list');
+  if(!C.glossary.length){ el.innerHTML='<div class="empty-state"><div class="ei">📖</div><p>No terms yet.</p></div>'; return; }
+  el.innerHTML = C.glossary.map((g,i) => `
+    <div class="acc open" id="glos-${i}">
+      <div class="acc-header" onclick="toggleAcc('glos-${i}')">
+        <span class="acc-title">${g.term||'New Term'}</span>
+        <button class="del-btn" onclick="event.stopPropagation();delGlossaryTerm(${i})">🗑</button>
+        <span class="acc-arrow">›</span>
+      </div>
+      <div class="acc-body">
+        <div class="frow"><label>Term</label><input type="text" value="${esc(g.term)}" oninput="C.glossary[${i}].term=this.value;updateGlosTitle(${i});sync()"></div>
+        <div class="frow" style="margin-bottom:0"><label>Definition</label><textarea oninput="C.glossary[${i}].definition=this.value;sync()">${esc(g.definition)}</textarea></div>
+      </div>
+    </div>`).join('');
+}
+function updateGlosTitle(i){ const h=document.querySelector(`#glos-${i} .acc-title`); if(h) h.textContent=C.glossary[i].term||'New Term'; }
+
+// ════════════════════════════════════════════════════════
+// ASSESSMENTS (top-level)
+// ════════════════════════════════════════════════════════
+function addAssessment(){
+  C.assessments.push({assessmentId:'assess-'+Date.now(),title:'',assessmentType:'scenario-analysis',linkedCompetencies:[],adaptiveDifficulty:true,questions:[]});
+  renderAssessments(); refreshPreview();
+}
+function delAssessment(i){ C.assessments.splice(i,1); renderAssessments(); sync(); }
+function renderAssessments(){
+  const el = document.getElementById('assess-list');
+  if(!C.assessments.length){ el.innerHTML='<div class="empty-state"><div class="ei">📝</div><p>No assessments yet.</p></div>'; return; }
+  el.innerHTML = C.assessments.map((a,ai) => `
+    <div class="acc open" id="assess-acc-${ai}">
+      <div class="acc-header" onclick="toggleAcc('assess-acc-${ai}')">
+        <span class="acc-title">${a.title||'New Assessment'}</span>
+        <span class="pill pill-amber">${a.assessmentType}</span>
+        <button class="del-btn" onclick="event.stopPropagation();delAssessment(${ai})">🗑</button>
+        <span class="acc-arrow">›</span>
+      </div>
+      <div class="acc-body">
+        <div class="g2">
+          <div class="frow"><label>Assessment ID</label><input type="text" value="${esc(a.assessmentId)}" oninput="C.assessments[${ai}].assessmentId=this.value;sync()"></div>
+          <div class="frow"><label>Type</label>
+            <select onchange="C.assessments[${ai}].assessmentType=this.value;renderAssessments();sync()">
+              ${['scenario-analysis','multiple-choice','mixed','project'].map(t=>`<option value="${t}" ${a.assessmentType===t?'selected':''}>${t}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="frow"><label>Title</label><input type="text" value="${esc(a.title)}" oninput="C.assessments[${ai}].title=this.value;updateAssessTitle(${ai});sync()"></div>
+        <div class="frow">
+          <label>Linked Competency IDs <span style="font-weight:400;color:var(--ink3)">(comma-separated)</span></label>
+          <input type="text" value="${(a.linkedCompetencies||[]).join(', ')}" oninput="C.assessments[${ai}].linkedCompetencies=this.value.split(',').map(s=>s.trim()).filter(Boolean);sync()">
+        </div>
+        <div class="frow">
+          <label>Adaptive Difficulty</label>
+          <select onchange="C.assessments[${ai}].adaptiveDifficulty=this.value==='true';sync()">
+            <option value="true" ${a.adaptiveDifficulty?'selected':''}>Yes</option>
+            <option value="false" ${!a.adaptiveDifficulty?'selected':''}>No</option>
+          </select>
+        </div>
+        <!-- Questions -->
+        <div style="margin-top:12px"><label>Questions</label></div>
+        <div id="q-list-${ai}">${renderQuestions(ai)}</div>
+        <button class="add-btn" onclick="addQuestion(${ai})">＋ Add Question</button>
+      </div>
+    </div>`).join('');
+}
+function updateAssessTitle(ai){ const h=document.querySelector(`#assess-acc-${ai} .acc-title`); if(h) h.textContent=C.assessments[ai].title||'New Assessment'; }
+
+function renderQuestions(ai){
+  return (C.assessments[ai].questions||[]).map((q,qi) => `
+    <div class="acc open" id="q-${ai}-${qi}" style="margin-bottom:6px">
+      <div class="acc-header" onclick="toggleAcc('q-${ai}-${qi}')">
+        <span class="acc-title" style="font-size:12px">Q${qi+1}: ${(q.prompt||'').substring(0,48)||'New Question'}</span>
+        <button class="del-btn" onclick="event.stopPropagation();delQuestion(${ai},${qi})">🗑</button>
+        <span class="acc-arrow">›</span>
+      </div>
+      <div class="acc-body">
+        <div class="g2">
+          <div class="frow"><label>Question ID</label><input type="text" value="${esc(q.questionId)}" oninput="C.assessments[${ai}].questions[${qi}].questionId=this.value;sync()"></div>
+          <div class="frow"><label>Type</label>
+            <select onchange="C.assessments[${ai}].questions[${qi}].questionType=this.value;sync()">
+              ${['short-answer','multiple-choice','scenario-analysis'].map(t=>`<option value="${t}" ${q.questionType===t?'selected':''}>${t}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="frow"><label>Difficulty (1–5)</label><input type="number" min="1" max="5" value="${q.difficulty||3}" oninput="C.assessments[${ai}].questions[${qi}].difficulty=+this.value;sync()"></div>
+        <div class="frow"><label>Prompt</label><textarea oninput="C.assessments[${ai}].questions[${qi}].prompt=this.value;updateQTitle(${ai},${qi});sync()">${esc(q.prompt)}</textarea></div>
+        <div class="frow"><label>Success Criteria <span style="font-weight:400;color:var(--ink3)">(one per line)</span></label>
+          <textarea oninput="C.assessments[${ai}].questions[${qi}].successCriteria=this.value.split('\\n').map(s=>s.trim()).filter(Boolean);sync()">${(q.successCriteria||[]).join('\n')}</textarea>
+        </div>
+        <div class="frow"><label>Rubric — Excellent</label><textarea oninput="ensureRubric(${ai},${qi});C.assessments[${ai}].questions[${qi}].rubric.excellent=this.value;sync()">${(q.rubric||{}).excellent||''}</textarea></div>
+        <div class="frow"><label>Rubric — Adequate</label><textarea oninput="ensureRubric(${ai},${qi});C.assessments[${ai}].questions[${qi}].rubric.adequate=this.value;sync()">${(q.rubric||{}).adequate||''}</textarea></div>
+        <div class="frow" style="margin-bottom:0"><label>Rubric — Weak</label><textarea oninput="ensureRubric(${ai},${qi});C.assessments[${ai}].questions[${qi}].rubric.weak=this.value;sync()">${(q.rubric||{}).weak||''}</textarea></div>
+      </div>
+    </div>`).join('');
+}
+function ensureRubric(ai,qi){ if(!C.assessments[ai].questions[qi].rubric) C.assessments[ai].questions[qi].rubric={}; }
+function addQuestion(ai){ C.assessments[ai].questions.push({questionId:'q-'+Date.now(),difficulty:3,prompt:'',questionType:'short-answer',successCriteria:[],rubric:{excellent:'',adequate:'',weak:''}}); rerenderQuestions(ai); }
+function delQuestion(ai,qi){ C.assessments[ai].questions.splice(qi,1); rerenderQuestions(ai); sync(); }
+function rerenderQuestions(ai){ const el=document.getElementById('q-list-'+ai); if(el) el.innerHTML=renderQuestions(ai); }
+function updateQTitle(ai,qi){ const h=document.querySelector(`#q-${ai}-${qi} .acc-title`); if(h) h.textContent=`Q${qi+1}: `+(C.assessments[ai].questions[qi].prompt||'').substring(0,48); }
+
+// ════════════════════════════════════════════════════════
+// SECTIONS
+// ════════════════════════════════════════════════════════
+function addSection(){
+  C.sections.push({
+    sectionId:'section-'+Date.now(), title:'', description:'',
+    learningObjectives:[], motivationHooks:[], learningExperiences:[]
+  });
+  updateSectionNav(); renderSectionPanels();
+  const idx = C.sections.length-1;
+  show('sec-'+idx+'-info');
+}
+
+function delSection(i){
+  if(!confirm('Delete this section and all its content?')) return;
+  C.sections.splice(i,1);
+  updateSectionNav(); renderSectionPanels(); show('metadata'); sync();
+}
+
+function updateSectionNav(){
+  const el = document.getElementById('section-nav');
+  el.innerHTML = C.sections.map((s,i) => `
+    <div>
+      <div class="snav-item ${activePanel.startsWith('sec-'+i)?'active':''}" onclick="show('sec-${i}-info')" id="nav-sec-${i}-info">
+        <span class="snav-dot" style="font-size:9px">${i+1}</span>${s.title||'New Section'}
+      </div>
+      <div class="snav-child ${activePanel==='sec-'+i+'-experiences'?'active':''}" onclick="show('sec-${i}-experiences')" id="nav-sec-${i}-experiences">Experiences</div>
+      <div class="snav-child ${activePanel==='sec-'+i+'-hooks'?'active':''}" onclick="show('sec-${i}-hooks')" id="nav-sec-${i}-hooks">Motivation Hooks</div>
+      <div class="snav-child ${activePanel==='sec-'+i+'-objectives'?'active':''}" onclick="show('sec-${i}-objectives')" id="nav-sec-${i}-objectives">Objectives</div>
+    </div>`).join('');
+}
+
+function renderSectionPanels(){
+  const container = document.getElementById('section-panels');
+  container.innerHTML = C.sections.map((s,i) =>
+    renderSecInfo(s,i) + renderSecHooks(s,i) + renderSecObjectives(s,i) + renderSecExperiences(s,i)
+  ).join('');
+}
+
+// ── Section Info ──
+function renderSecInfo(s,i){
+  return `<div id="panel-sec-${i}-info" class="epanel" style="display:none">
+    <div class="epanel-header">
+      <div><div class="sec-pill">Section ${i+1}</div><div class="epanel-title">Section Info</div><div class="epanel-sub">sections[${i}] — sectionId, title, description</div></div>
+      <button class="tbtn tbtn-ghost" style="color:var(--red);font-size:12px" onclick="delSection(${i})">🗑 Delete</button>
+    </div>
+    <div class="epanel-body">
+      <div class="g2">
+        <div class="frow"><label>Section ID</label><input type="text" value="${esc(s.sectionId)}" oninput="C.sections[${i}].sectionId=this.value;sync()"></div>
+      </div>
+      <div class="frow"><label>Title</label><input type="text" value="${esc(s.title)}" placeholder="e.g. Foundational Concepts" oninput="C.sections[${i}].title=this.value;updateSectionNav();sync()"></div>
+      <div class="frow"><label>Description</label><textarea placeholder="What does this section cover?" oninput="C.sections[${i}].description=this.value;sync()">${esc(s.description)}</textarea></div>
+    </div>
+  </div>`;
+}
+
+// ── Motivation Hooks ──
+function renderSecHooks(s,i){
+  const hooks = (s.motivationHooks||[]).map((h,hi) => `
+    <div class="acc open" id="hook-${i}-${hi}">
+      <div class="acc-header" onclick="toggleAcc('hook-${i}-${hi}')">
+        <span class="pill ${h.type==='real-world-stakes'?'pill-red':'pill-amber'}">${h.type}</span>
+        <span class="acc-title" style="margin-left:8px;font-size:12px">${(h.prompt||'').substring(0,50)||'New Hook'}</span>
+        <button class="del-btn" onclick="event.stopPropagation();delHook(${i},${hi})">🗑</button>
+        <span class="acc-arrow">›</span>
+      </div>
+      <div class="acc-body">
+        <div class="frow"><label>Type</label>
+          <select onchange="C.sections[${i}].motivationHooks[${hi}].type=this.value;rerenderHooks(${i});sync()">
+            <option value="real-world-stakes" ${h.type==='real-world-stakes'?'selected':''}>real-world-stakes</option>
+            <option value="prediction-gap" ${h.type==='prediction-gap'?'selected':''}>prediction-gap</option>
+            <option value="curiosity" ${h.type==='curiosity'?'selected':''}>curiosity</option>
+            <option value="challenge" ${h.type==='challenge'?'selected':''}>challenge</option>
+          </select>
+        </div>
+        <div class="frow" style="margin-bottom:0"><label>Prompt</label><textarea oninput="C.sections[${i}].motivationHooks[${hi}].prompt=this.value;sync()">${esc(h.prompt)}</textarea></div>
+      </div>
+    </div>`).join('');
+
+  return `<div id="panel-sec-${i}-hooks" class="epanel" style="display:none">
+    <div class="epanel-header">
+      <div><div class="sec-pill">Section ${i+1}</div><div class="epanel-title">Motivation Hooks</div><div class="epanel-sub">sections[${i}].motivationHooks — why this matters, shown at section start</div></div>
+      <button class="add-btn" onclick="addHook(${i})">＋ Add Hook</button>
+    </div>
+    <div class="epanel-body" id="hooks-list-${i}">
+      ${hooks||'<div class="empty-state"><div class="ei">🎣</div><p>No hooks yet.</p></div>'}
+    </div>
+  </div>`;
+}
+function addHook(i){ C.sections[i].motivationHooks=C.sections[i].motivationHooks||[]; C.sections[i].motivationHooks.push({type:'real-world-stakes',prompt:''}); rerenderHooks(i); }
+function delHook(i,hi){ C.sections[i].motivationHooks.splice(hi,1); rerenderHooks(i); sync(); }
+function rerenderHooks(i){
+  const el=document.getElementById('hooks-list-'+i);
+  if(!el) return;
+  const s=C.sections[i];
+  const hooks=(s.motivationHooks||[]).map((h,hi)=>`
+    <div class="acc open" id="hook-${i}-${hi}">
+      <div class="acc-header" onclick="toggleAcc('hook-${i}-${hi}')">
+        <span class="pill ${h.type==='real-world-stakes'?'pill-red':'pill-amber'}">${h.type}</span>
+        <span class="acc-title" style="margin-left:8px;font-size:12px">${(h.prompt||'').substring(0,50)||'New Hook'}</span>
+        <button class="del-btn" onclick="event.stopPropagation();delHook(${i},${hi})">🗑</button>
+        <span class="acc-arrow">›</span>
+      </div>
+      <div class="acc-body">
+        <div class="frow"><label>Type</label>
+          <select onchange="C.sections[${i}].motivationHooks[${hi}].type=this.value;rerenderHooks(${i});sync()">
+            ${['real-world-stakes','prediction-gap','curiosity','challenge'].map(t=>`<option value="${t}" ${h.type===t?'selected':''}>${t}</option>`).join('')}
+          </select>
+        </div>
+        <div class="frow" style="margin-bottom:0"><label>Prompt</label><textarea oninput="C.sections[${i}].motivationHooks[${hi}].prompt=this.value;sync()">${esc(h.prompt)}</textarea></div>
+      </div>
+    </div>`).join('');
+  el.innerHTML = hooks||'<div class="empty-state"><div class="ei">🎣</div><p>No hooks yet.</p></div>';
+}
+
+// ── Learning Objectives ──
+function renderSecObjectives(s,i){
+  const objs=(s.learningObjectives||[]).map((o,oi)=>`
+    <div class="acc open" id="obj-${i}-${oi}">
+      <div class="acc-header" onclick="toggleAcc('obj-${i}-${oi}')">
+        <span class="acc-title" style="font-size:12px">${o.description||'New Objective'}</span>
+        <button class="del-btn" onclick="event.stopPropagation();delObjective(${i},${oi})">🗑</button>
+        <span class="acc-arrow">›</span>
+      </div>
+      <div class="acc-body">
+        <div class="frow"><label>Objective ID</label><input type="text" value="${esc(o.objectiveId)}" oninput="C.sections[${i}].learningObjectives[${oi}].objectiveId=this.value;sync()"></div>
+        <div class="frow"><label>Description</label><textarea oninput="C.sections[${i}].learningObjectives[${oi}].description=this.value;sync()">${esc(o.description)}</textarea></div>
+        <div class="frow" style="margin-bottom:0"><label>Linked Competency IDs <span style="font-weight:400;color:var(--ink3)">(comma-separated)</span></label>
+          <input type="text" value="${(o.linkedCompetencies||[]).join(', ')}" oninput="C.sections[${i}].learningObjectives[${oi}].linkedCompetencies=this.value.split(',').map(s=>s.trim()).filter(Boolean);sync()">
+        </div>
+      </div>
+    </div>`).join('');
+
+  return `<div id="panel-sec-${i}-objectives" class="epanel" style="display:none">
+    <div class="epanel-header">
+      <div><div class="sec-pill">Section ${i+1}</div><div class="epanel-title">Learning Objectives</div><div class="epanel-sub">sections[${i}].learningObjectives — linked to competencies</div></div>
+      <button class="add-btn" onclick="addObjective(${i})">＋ Add Objective</button>
+    </div>
+    <div class="epanel-body" id="obj-list-${i}">
+      ${objs||'<div class="empty-state"><div class="ei">🎯</div><p>No objectives yet.</p></div>'}
+    </div>
+  </div>`;
+}
+function addObjective(i){ C.sections[i].learningObjectives=C.sections[i].learningObjectives||[]; C.sections[i].learningObjectives.push({objectiveId:'obj-'+Date.now(),description:'',linkedCompetencies:[]}); rerenderObjectives(i); }
+function delObjective(i,oi){ C.sections[i].learningObjectives.splice(oi,1); rerenderObjectives(i); sync(); }
+function rerenderObjectives(i){
+  const el=document.getElementById('obj-list-'+i); if(!el) return;
+  el.innerHTML=(C.sections[i].learningObjectives||[]).map((o,oi)=>`
+    <div class="acc open" id="obj-${i}-${oi}">
+      <div class="acc-header" onclick="toggleAcc('obj-${i}-${oi}')">
+        <span class="acc-title" style="font-size:12px">${o.description||'New Objective'}</span>
+        <button class="del-btn" onclick="event.stopPropagation();delObjective(${i},${oi})">🗑</button>
+        <span class="acc-arrow">›</span>
+      </div>
+      <div class="acc-body">
+        <div class="frow"><label>Objective ID</label><input type="text" value="${esc(o.objectiveId)}" oninput="C.sections[${i}].learningObjectives[${oi}].objectiveId=this.value;sync()"></div>
+        <div class="frow"><label>Description</label><textarea oninput="C.sections[${i}].learningObjectives[${oi}].description=this.value;sync()">${esc(o.description)}</textarea></div>
+        <div class="frow" style="margin-bottom:0"><label>Linked Competency IDs</label>
+          <input type="text" value="${(o.linkedCompetencies||[]).join(', ')}" oninput="C.sections[${i}].learningObjectives[${oi}].linkedCompetencies=this.value.split(',').map(s=>s.trim()).filter(Boolean);sync()">
+        </div>
+      </div>
+    </div>`).join('')||'<div class="empty-state"><div class="ei">🎯</div><p>No objectives yet.</p></div>';
+}
+
+// ════════════════════════════════════════════════════════
+// LEARNING EXPERIENCES
+// ════════════════════════════════════════════════════════
+function renderSecExperiences(s,i){
+  const exps=(s.learningExperiences||[]).map((e,ei)=>renderExp(e,i,ei)).join('');
+  return `<div id="panel-sec-${i}-experiences" class="epanel" style="display:none">
+    <div class="epanel-header">
+      <div><div class="sec-pill">Section ${i+1}</div><div class="epanel-title">Learning Experiences</div><div class="epanel-sub">sections[${i}].learningExperiences — content, interactions, retrieval, transfer</div></div>
+      <button class="add-btn" onclick="addExp(${i})">＋ Add Experience</button>
+    </div>
+    <div class="epanel-body" id="exp-list-${i}">
+      ${exps||'<div class="empty-state"><div class="ei">🔬</div><p>No experiences yet.</p></div>'}
+    </div>
+  </div>`;
+}
+
+function renderExp(e,si,ei){
+  const tabs = ['Content','Interactions','Worked Examples','Retrieval','Transfer','Mastery'];
+  return `<div class="acc open" id="exp-${si}-${ei}">
+    <div class="acc-header" onclick="toggleAcc('exp-${si}-${ei}')">
+      <span class="acc-title">${e.title||'New Experience'}</span>
+      <span class="pill pill-teal">${e.experienceType||'guided-analysis'}</span>
+      <button class="del-btn" onclick="event.stopPropagation();delExp(${si},${ei})">🗑</button>
+      <span class="acc-arrow">›</span>
+    </div>
+    <div class="acc-body">
+      <!-- Core fields -->
+      <div class="g2">
+        <div class="frow"><label>Experience ID</label><input type="text" value="${esc(e.experienceId)}" oninput="C.sections[${si}].learningExperiences[${ei}].experienceId=this.value;sync()"></div>
+        <div class="frow"><label>Type</label>
+          <select onchange="C.sections[${si}].learningExperiences[${ei}].experienceType=this.value;rerenderExps(${si});sync()">
+            ${['guided-analysis','worked-example','practice','exploration','case-study'].map(t=>`<option value="${t}" ${e.experienceType===t?'selected':''}>${t}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="frow"><label>Title</label><input type="text" value="${esc(e.title)}" oninput="C.sections[${si}].learningExperiences[${ei}].title=this.value;updateExpTitle(${si},${ei});sync()"></div>
+      <div class="g2">
+        <div class="frow"><label>Duration (minutes)</label><input type="number" min="1" value="${e.estimatedDurationMinutes||15}" oninput="C.sections[${si}].learningExperiences[${ei}].estimatedDurationMinutes=+this.value;sync()"></div>
+        <div class="frow"><label>Overall Difficulty (1–5)</label><input type="number" min="1" max="5" value="${(e.difficultyProfile||{}).overall||3}" oninput="ensureExpDP(${si},${ei});C.sections[${si}].learningExperiences[${ei}].difficultyProfile.overall=+this.value;sync()"></div>
+      </div>
+      <div class="g2">
+        <div class="frow"><label>Conceptual Complexity (1–5)</label><input type="number" min="1" max="5" value="${(e.difficultyProfile||{}).conceptualComplexity||3}" oninput="ensureExpDP(${si},${ei});C.sections[${si}].learningExperiences[${ei}].difficultyProfile.conceptualComplexity=+this.value;sync()"></div>
+        <div class="frow"><label>Ambiguity (1–5)</label><input type="number" min="1" max="5" value="${(e.difficultyProfile||{}).ambiguity||3}" oninput="ensureExpDP(${si},${ei});C.sections[${si}].learningExperiences[${ei}].difficultyProfile.ambiguity=+this.value;sync()"></div>
+      </div>
+      <div class="frow">
+        <label>Linked Competency IDs <span style="font-weight:400;color:var(--ink3)">(comma-separated)</span></label>
+        <input type="text" value="${(e.linkedCompetencies||[]).join(', ')}" oninput="C.sections[${si}].learningExperiences[${ei}].linkedCompetencies=this.value.split(',').map(s=>s.trim()).filter(Boolean);sync()">
+      </div>
+      <div class="frow">
+        <label>Desired Cognitive Actions</label><div class="fhint">Press Enter after each: prediction, analysis, reflection, retrieval, application, contrast</div>
+        <div class="tag-wrap" onclick="focusLast(this)">
+          <div id="cog-chips-${si}-${ei}" style="display:flex;flex-wrap:wrap;gap:4px">
+            ${(e.desiredCognitiveActions||[]).map((a,ai2)=>`<span class="chip chip-violet">${a}<button class="chip-remove" onclick="removeCogAction(${si},${ei},${ai2})">×</button></span>`).join('')}
+          </div>
+          <input class="tag-input" placeholder="Add action…" onkeydown="cogActionKey(event,${si},${ei})">
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Content Blocks -->
+      <div style="margin-bottom:6px"><label>Content Blocks <span style="font-weight:400;color:var(--ink3)">(text or image blocks shown to learner)</span></label></div>
+      <div id="cb-list-${si}-${ei}">${renderContentBlocks(si,ei)}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="add-btn" onclick="addContentBlock(${si},${ei},'text')">＋ Text</button>
+        <button class="add-btn" onclick="addContentBlock(${si},${ei},'image')">＋ Image</button>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Interaction Sequence -->
+      <div style="margin-bottom:6px"><label>Interaction Sequence <span style="font-weight:400;color:var(--ink3)">(prediction → compare-responses → reflection)</span></label></div>
+      <div id="int-list-${si}-${ei}">${renderInteractions(si,ei)}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="add-btn" onclick="addInteraction(${si},${ei},'prediction')">＋ Prediction</button>
+        <button class="add-btn" onclick="addInteraction(${si},${ei},'compare-responses')">＋ Compare Responses</button>
+        <button class="add-btn" onclick="addInteraction(${si},${ei},'reflection')">＋ Reflection</button>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Worked Examples -->
+      <div style="margin-bottom:6px"><label>Worked Examples</label></div>
+      <div id="we-list-${si}-${ei}">${renderWorkedExamples(si,ei)}</div>
+      <button class="add-btn" onclick="addWorkedExample(${si},${ei})">＋ Add Worked Example</button>
+
+      <hr class="divider">
+
+      <!-- Retrieval Practice -->
+      <div style="margin-bottom:6px"><label>Retrieval Practice</label></div>
+      <div id="ret-list-${si}-${ei}">${renderRetrievalItems(si,ei)}</div>
+      <button class="add-btn" onclick="addRetrievalItem(${si},${ei})">＋ Add Retrieval Item</button>
+
+      <hr class="divider">
+
+      <!-- Transfer Exercises -->
+      <div style="margin-bottom:6px"><label>Transfer Exercises</label></div>
+      <div id="tx-list-${si}-${ei}">${renderTransferItems(si,ei)}</div>
+      <button class="add-btn" onclick="addTransferItem(${si},${ei})">＋ Add Transfer Exercise</button>
+
+      <hr class="divider">
+
+      <!-- Mastery Verification -->
+      <div style="margin-bottom:6px"><label>Mastery Verification</label></div>
+      <div class="g2">
+        <div class="frow"><label>Assessment IDs <span style="font-weight:400;color:var(--ink3)">(comma-separated)</span></label>
+          <input type="text" value="${((e.masteryVerification||{}).assessmentIds||[]).join(', ')}" oninput="ensureMV(${si},${ei});C.sections[${si}].learningExperiences[${ei}].masteryVerification.assessmentIds=this.value.split(',').map(s=>s.trim()).filter(Boolean);sync()">
+        </div>
+        <div class="frow"><label>Min Accuracy</label>
+          <input type="number" min="0" max="1" step="0.05" value="${((e.masteryVerification||{}).requiredPerformance||{}).minimumAccuracy||0.8}" oninput="ensureMVPerf(${si},${ei});C.sections[${si}].learningExperiences[${ei}].masteryVerification.requiredPerformance.minimumAccuracy=+this.value;sync()">
+        </div>
+      </div>
+      <div class="frow"><label>Min Transfer Score</label>
+        <input type="number" min="0" max="1" step="0.05" value="${((e.masteryVerification||{}).requiredPerformance||{}).minimumTransferScore||0.75}" oninput="ensureMVPerf(${si},${ei});C.sections[${si}].learningExperiences[${ei}].masteryVerification.requiredPerformance.minimumTransferScore=+this.value;sync()">
+      </div>
+    </div>
+  </div>`;
+}
+
+function ensureExpDP(si,ei){ if(!C.sections[si].learningExperiences[ei].difficultyProfile) C.sections[si].learningExperiences[ei].difficultyProfile={}; }
+function ensureMV(si,ei){ if(!C.sections[si].learningExperiences[ei].masteryVerification) C.sections[si].learningExperiences[ei].masteryVerification={assessmentIds:[],requiredPerformance:{}}; }
+function ensureMVPerf(si,ei){ ensureMV(si,ei); if(!C.sections[si].learningExperiences[ei].masteryVerification.requiredPerformance) C.sections[si].learningExperiences[ei].masteryVerification.requiredPerformance={}; }
+
+function addExp(si){
+  C.sections[si].learningExperiences = C.sections[si].learningExperiences||[];
+  C.sections[si].learningExperiences.push({
+    experienceId:'exp-'+Date.now(), title:'', experienceType:'guided-analysis',
+    difficultyProfile:{overall:3,conceptualComplexity:3,ambiguity:3},
+    estimatedDurationMinutes:15, linkedCompetencies:[], desiredCognitiveActions:[],
+    contentBlocks:[], interactionSequence:[], workedExamples:[],
+    retrievalPractice:[], transferExercises:[],
+    masteryVerification:{assessmentIds:[],requiredPerformance:{minimumAccuracy:0.8,minimumTransferScore:0.75}}
+  });
+  rerenderExps(si); sync();
+}
+function delExp(si,ei){ C.sections[si].learningExperiences.splice(ei,1); rerenderExps(si); sync(); }
+function rerenderExps(si){
+  const el=document.getElementById('exp-list-'+si); if(!el) return;
+  el.innerHTML=(C.sections[si].learningExperiences||[]).map((e,ei)=>renderExp(e,si,ei)).join('')||'<div class="empty-state"><div class="ei">🔬</div><p>No experiences yet.</p></div>';
+}
+function updateExpTitle(si,ei){ const h=document.querySelector(`#exp-${si}-${ei} .acc-title`); if(h) h.textContent=C.sections[si].learningExperiences[ei].title||'New Experience'; }
+
+// Cognitive actions
+function cogActionKey(e,si,ei){
+  if(e.key!=='Enter') return; e.preventDefault();
+  const v=e.target.value.trim(); if(!v) return;
+  C.sections[si].learningExperiences[ei].desiredCognitiveActions=C.sections[si].learningExperiences[ei].desiredCognitiveActions||[];
+  C.sections[si].learningExperiences[ei].desiredCognitiveActions.push(v);
+  e.target.value=''; rerenderCogChips(si,ei); sync();
+}
+function removeCogAction(si,ei,ai2){ C.sections[si].learningExperiences[ei].desiredCognitiveActions.splice(ai2,1); rerenderCogChips(si,ei); sync(); }
+function rerenderCogChips(si,ei){
+  const el=document.getElementById(`cog-chips-${si}-${ei}`); if(!el) return;
+  el.innerHTML=(C.sections[si].learningExperiences[ei].desiredCognitiveActions||[]).map((a,ai2)=>`<span class="chip chip-violet">${a}<button class="chip-remove" onclick="removeCogAction(${si},${ei},${ai2})">×</button></span>`).join('');
+}
+
+// ── Content Blocks ──
+function renderContentBlocks(si,ei){
+  return (C.sections[si].learningExperiences[ei].contentBlocks||[]).map((b,bi)=>`
+    <div class="acc open" id="cb-${si}-${ei}-${bi}" style="margin-bottom:6px">
+      <div class="acc-header" onclick="toggleAcc('cb-${si}-${ei}-${bi}')">
+        <span class="pill ${b.type==='image'?'pill-amber':'pill-teal'}">${b.type}</span>
+        <span class="acc-title" style="margin-left:8px;font-size:12px">${b.blockId||'Block'}</span>
+        <button class="del-btn" onclick="event.stopPropagation();delContentBlock(${si},${ei},${bi})">🗑</button>
+        <span class="acc-arrow">›</span>
+      </div>
+      <div class="acc-body">
+        <div class="frow"><label>Block ID</label><input type="text" value="${esc(b.blockId)}" oninput="C.sections[${si}].learningExperiences[${ei}].contentBlocks[${bi}].blockId=this.value;sync()"></div>
+        ${b.type==='text'
+          ? `<div class="frow" style="margin-bottom:0"><label>Content</label><textarea style="min-height:90px" oninput="C.sections[${si}].learningExperiences[${ei}].contentBlocks[${bi}].content=this.value;sync()">${esc(b.content)}</textarea></div>`
+          : `<div class="frow"><label>Image URL</label><input type="url" value="${esc(b.url)}" oninput="C.sections[${si}].learningExperiences[${ei}].contentBlocks[${bi}].url=this.value;sync()"></div>
+             <div class="frow" style="margin-bottom:0"><label>Alt Text</label><input type="text" value="${esc(b.altText)}" oninput="C.sections[${si}].learningExperiences[${ei}].contentBlocks[${bi}].altText=this.value;sync()"></div>`}
+      </div>
+    </div>`).join('');
+}
+function addContentBlock(si,ei,type){
+  const base = type==='text' ? {blockId:'block-'+Date.now(),type:'text',content:''} : {blockId:'block-'+Date.now(),type:'image',url:'',altText:''};
+  C.sections[si].learningExperiences[ei].contentBlocks.push(base);
+  rerenderContentBlocks(si,ei); sync();
+}
+function delContentBlock(si,ei,bi){ C.sections[si].learningExperiences[ei].contentBlocks.splice(bi,1); rerenderContentBlocks(si,ei); sync(); }
+function rerenderContentBlocks(si,ei){ const el=document.getElementById(`cb-list-${si}-${ei}`); if(el) el.innerHTML=renderContentBlocks(si,ei); }
+
+// ── Interactions ──
+function renderInteractions(si,ei){
+  return (C.sections[si].learningExperiences[ei].interactionSequence||[]).map((int,ii)=>{
+    const typeColors = {'prediction':'pill-blue','compare-responses':'pill-amber','reflection':'pill-violet'};
+    const body = buildInteractionBody(int,si,ei,ii);
+    return `<div class="acc open" id="int-${si}-${ei}-${ii}" style="margin-bottom:6px">
+      <div class="acc-header" onclick="toggleAcc('int-${si}-${ei}-${ii}')">
+        <span class="pill ${typeColors[int.interactionType]||'pill-teal'}">${int.interactionType}</span>
+        <span class="acc-title" style="margin-left:8px;font-size:12px">${int.interactionId||'Interaction'}</span>
+        <button class="del-btn" onclick="event.stopPropagation();delInteraction(${si},${ei},${ii})">🗑</button>
+        <span class="acc-arrow">›</span>
+      </div>
+      <div class="acc-body">${body}</div>
+    </div>`;
+  }).join('');
+}
+
+function buildInteractionBody(int,si,ei,ii){
+  const base = `<div class="frow"><label>Interaction ID</label><input type="text" value="${esc(int.interactionId)}" oninput="C.sections[${si}].learningExperiences[${ei}].interactionSequence[${ii}].interactionId=this.value;sync()"></div>`;
+  if(int.interactionType==='prediction'){
+    return base + `
+      <div class="frow"><label>Prompt</label><textarea oninput="C.sections[${si}].learningExperiences[${ei}].interactionSequence[${ii}].prompt=this.value;sync()">${esc(int.prompt)}</textarea></div>
+      <div class="g2">
+        <div class="frow"><label>Response Format</label>
+          <select onchange="C.sections[${si}].learningExperiences[${ei}].interactionSequence[${ii}].responseFormat=this.value;sync()">
+            <option value="short-answer" ${int.responseFormat==='short-answer'?'selected':''}>short-answer</option>
+            <option value="multiple-choice" ${int.responseFormat==='multiple-choice'?'selected':''}>multiple-choice</option>
+          </select>
+        </div>
+        <div class="frow"><label>Required</label>
+          <select onchange="C.sections[${si}].learningExperiences[${ei}].interactionSequence[${ii}].required=this.value==='true';sync()">
+            <option value="true" ${int.required!==false?'selected':''}>Yes</option>
+            <option value="false" ${int.required===false?'selected':''}>No</option>
+          </select>
+        </div>
+      </div>
+      <div class="frow"><label>Confidence Prompt Enabled</label>
+        <select onchange="ensureConf(${si},${ei},${ii});C.sections[${si}].learningExperiences[${ei}].interactionSequence[${ii}].confidencePrompt.enabled=this.value==='true';sync()">
+          <option value="true" ${(int.confidencePrompt||{}).enabled!==false?'selected':''}>Yes</option>
+          <option value="false" ${(int.confidencePrompt||{}).enabled===false?'selected':''}>No</option>
+        </select>
+      </div>
+      <div class="g3">
+        <div class="frow"><label>Scale Min</label><input type="number" value="${(int.confidencePrompt||{}).scaleMin||1}" oninput="ensureConf(${si},${ei},${ii});C.sections[${si}].learningExperiences[${ei}].interactionSequence[${ii}].confidencePrompt.scaleMin=+this.value;sync()"></div>
+        <div class="frow"><label>Scale Max</label><input type="number" value="${(int.confidencePrompt||{}).scaleMax||5}" oninput="ensureConf(${si},${ei},${ii});C.sections[${si}].learningExperiences[${ei}].interactionSequence[${ii}].confidencePrompt.scaleMax=+this.value;sync()"></div>
+        <div class="frow"><label>Confidence Prompt Text</label><input type="text" value="${esc((int.confidencePrompt||{}).prompt)}" oninput="ensureConf(${si},${ei},${ii});C.sections[${si}].learningExperiences[${ei}].interactionSequence[${ii}].confidencePrompt.prompt=this.value;sync()"></div>
+      </div>`;
+  }
+  if(int.interactionType==='compare-responses'){
+    const er = (int.responseModels||{}).expertResponse||{};
+    const sl = (int.responseModels||{}).strongLearnerResponse||{};
+    const wr = (int.responseModels||{}).weakResponse||{};
+    return base + `
+      <div style="font-size:12px;font-weight:700;color:var(--ink2);margin:8px 0 6px">Expert Response</div>
+      <div class="frow"><label>Answer</label><textarea oninput="ensureRM(${si},${ei},${ii});C.sections[${si}].learningExperiences[${ei}].interactionSequence[${ii}].responseModels.expertResponse.answer=this.value;sync()">${esc(er.answer)}</textarea></div>
+      <div class="frow"><label>Reasoning Steps <span style="font-weight:400;color:var(--ink3)">(one per line)</span></label>
+        <textarea oninput="ensureRM(${si},${ei},${ii});C.sections[${si}].learningExperiences[${ei}].interactionSequence[${ii}].responseModels.expertResponse.reasoningSteps=this.value.split('\\n').map(s=>s.trim()).filter(Boolean);sync()">${(er.reasoningSteps||[]).join('\n')}</textarea>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:var(--ink2);margin:8px 0 6px">Strong Learner Response</div>
+      <div class="frow"><label>Answer</label><textarea oninput="ensureRM(${si},${ei},${ii});C.sections[${si}].learningExperiences[${ei}].interactionSequence[${ii}].responseModels.strongLearnerResponse.answer=this.value;sync()">${esc(sl.answer)}</textarea></div>
+      <div style="font-size:12px;font-weight:700;color:var(--ink2);margin:8px 0 6px">Weak Response</div>
+      <div class="frow"><label>Answer</label><textarea oninput="ensureRM(${si},${ei},${ii});C.sections[${si}].learningExperiences[${ei}].interactionSequence[${ii}].responseModels.weakResponse.answer=this.value;sync()">${esc(wr.answer)}</textarea></div>
+      <div class="frow" style="margin-bottom:0"><label>Diagnosis <span style="font-weight:400;color:var(--ink3)">(one per line)</span></label>
+        <textarea oninput="ensureRM(${si},${ei},${ii});C.sections[${si}].learningExperiences[${ei}].interactionSequence[${ii}].responseModels.weakResponse.diagnosis=this.value.split('\\n').map(s=>s.trim()).filter(Boolean);sync()">${(wr.diagnosis||[]).join('\n')}</textarea>
+      </div>`;
+  }
+  if(int.interactionType==='reflection'){
+    return base + `
+      <div class="frow"><label>Prompt</label><textarea oninput="C.sections[${si}].learningExperiences[${ei}].interactionSequence[${ii}].prompt=this.value;sync()">${esc(int.prompt)}</textarea></div>
+      <div class="frow" style="margin-bottom:0"><label>Timing</label>
+        <select onchange="C.sections[${si}].learningExperiences[${ei}].interactionSequence[${ii}].timing=this.value;sync()">
+          <option value="post-feedback" ${int.timing==='post-feedback'?'selected':''}>post-feedback</option>
+          <option value="immediate" ${int.timing==='immediate'?'selected':''}>immediate</option>
+        </select>
+      </div>`;
+  }
+  return base;
+}
+function ensureConf(si,ei,ii){ if(!C.sections[si].learningExperiences[ei].interactionSequence[ii].confidencePrompt) C.sections[si].learningExperiences[ei].interactionSequence[ii].confidencePrompt={}; }
+function ensureRM(si,ei,ii){ const int=C.sections[si].learningExperiences[ei].interactionSequence[ii]; if(!int.responseModels) int.responseModels={expertResponse:{},strongLearnerResponse:{},weakResponse:{}}; }
+function addInteraction(si,ei,type){
+  C.sections[si].learningExperiences[ei].interactionSequence=C.sections[si].learningExperiences[ei].interactionSequence||[];
+  const base = {interactionId:'int-'+Date.now(),interactionType:type};
+  if(type==='prediction') Object.assign(base,{prompt:'',required:true,responseFormat:'short-answer',revealCondition:'after-response',confidencePrompt:{enabled:true,scaleMin:1,scaleMax:5,prompt:'How confident are you?'}});
+  if(type==='compare-responses') Object.assign(base,{responseModels:{expertResponse:{answer:'',reasoningSteps:[]},strongLearnerResponse:{answer:''},weakResponse:{answer:'',diagnosis:[]}}});
+  if(type==='reflection') Object.assign(base,{prompt:'',timing:'post-feedback'});
+  C.sections[si].learningExperiences[ei].interactionSequence.push(base);
+  rerenderInteractions(si,ei); sync();
+}
+function delInteraction(si,ei,ii){ C.sections[si].learningExperiences[ei].interactionSequence.splice(ii,1); rerenderInteractions(si,ei); sync(); }
+function rerenderInteractions(si,ei){ const el=document.getElementById(`int-list-${si}-${ei}`); if(el) el.innerHTML=renderInteractions(si,ei); }
+
+// ── Worked Examples ──
+function renderWorkedExamples(si,ei){
+  return (C.sections[si].learningExperiences[ei].workedExamples||[]).map((w,wi)=>`
+    <div class="acc open" id="we-${si}-${ei}-${wi}" style="margin-bottom:6px">
+      <div class="acc-header" onclick="toggleAcc('we-${si}-${ei}-${wi}')">
+        <span class="acc-title" style="font-size:12px">${w.problem||'New Example'}</span>
+        <button class="del-btn" onclick="event.stopPropagation();delWorkedExample(${si},${ei},${wi})">🗑</button>
+        <span class="acc-arrow">›</span>
+      </div>
+      <div class="acc-body">
+        <div class="frow"><label>Example ID</label><input type="text" value="${esc(w.exampleId)}" oninput="C.sections[${si}].learningExperiences[${ei}].workedExamples[${wi}].exampleId=this.value;sync()"></div>
+        <div class="frow"><label>Problem</label><textarea oninput="C.sections[${si}].learningExperiences[${ei}].workedExamples[${wi}].problem=this.value;sync()">${esc(w.problem)}</textarea></div>
+        <div class="frow"><label>Steps <span style="font-weight:400;color:var(--ink3)">(one per line)</span></label>
+          <textarea oninput="C.sections[${si}].learningExperiences[${ei}].workedExamples[${wi}].steps=this.value.split('\\n').map(s=>s.trim()).filter(Boolean);sync()">${(w.steps||[]).join('\n')}</textarea>
+        </div>
+        <div class="frow" style="margin-bottom:0"><label>Conclusion</label><input type="text" value="${esc(w.conclusion)}" oninput="C.sections[${si}].learningExperiences[${ei}].workedExamples[${wi}].conclusion=this.value;sync()"></div>
+      </div>
+    </div>`).join('');
+}
+function addWorkedExample(si,ei){ C.sections[si].learningExperiences[ei].workedExamples.push({exampleId:'we-'+Date.now(),problem:'',steps:[],conclusion:''}); rerenderWorkedExamples(si,ei); sync(); }
+function delWorkedExample(si,ei,wi){ C.sections[si].learningExperiences[ei].workedExamples.splice(wi,1); rerenderWorkedExamples(si,ei); sync(); }
+function rerenderWorkedExamples(si,ei){ const el=document.getElementById(`we-list-${si}-${ei}`); if(el) el.innerHTML=renderWorkedExamples(si,ei); }
+
+// ── Retrieval Practice ──
+function renderRetrievalItems(si,ei){
+  return (C.sections[si].learningExperiences[ei].retrievalPractice||[]).map((r,ri)=>`
+    <div class="acc open" id="ret-${si}-${ei}-${ri}" style="margin-bottom:6px">
+      <div class="acc-header" onclick="toggleAcc('ret-${si}-${ei}-${ri}')">
+        <span class="pill pill-green">${r.retrievalType||'free-recall'}</span>
+        <span class="acc-title" style="margin-left:8px;font-size:12px">${(r.prompt||'').substring(0,48)||'Retrieval Item'}</span>
+        <button class="del-btn" onclick="event.stopPropagation();delRetrievalItem(${si},${ei},${ri})">🗑</button>
+        <span class="acc-arrow">›</span>
+      </div>
+      <div class="acc-body">
+        <div class="frow"><label>Item ID</label><input type="text" value="${esc(r.retrievalItemId)}" oninput="C.sections[${si}].learningExperiences[${ei}].retrievalPractice[${ri}].retrievalItemId=this.value;sync()"></div>
+        <div class="g2">
+          <div class="frow"><label>Type</label>
+            <select onchange="C.sections[${si}].learningExperiences[${ei}].retrievalPractice[${ri}].retrievalType=this.value;sync()">
+              ${['free-recall','application','scenario-analysis','contrast'].map(t=>`<option value="${t}" ${r.retrievalType===t?'selected':''}>${t}</option>`).join('')}
+            </select>
+          </div>
+          <div class="frow"><label>Difficulty (1–5)</label><input type="number" min="1" max="5" value="${r.difficulty||2}" oninput="C.sections[${si}].learningExperiences[${ei}].retrievalPractice[${ri}].difficulty=+this.value;sync()"></div>
+        </div>
+        <div class="frow"><label>Prompt</label><textarea oninput="C.sections[${si}].learningExperiences[${ei}].retrievalPractice[${ri}].prompt=this.value;sync()">${esc(r.prompt)}</textarea></div>
+        <div class="frow"><label>Initial Review (days)</label><input type="number" value="${(r.schedule||{}).initialReviewDays||1}" oninput="ensureRSched(${si},${ei},${ri});C.sections[${si}].learningExperiences[${ei}].retrievalPractice[${ri}].schedule.initialReviewDays=+this.value;sync()"></div>
+        <div class="frow" style="margin-bottom:0"><label>Subsequent Reviews (days, comma-separated)</label>
+          <input type="text" value="${((r.schedule||{}).subsequentReviewDays||[3,7,14,30]).join(', ')}" oninput="ensureRSched(${si},${ei},${ri});C.sections[${si}].learningExperiences[${ei}].retrievalPractice[${ri}].schedule.subsequentReviewDays=this.value.split(',').map(s=>+s.trim()).filter(n=>n>0);sync()">
+        </div>
+      </div>
+    </div>`).join('');
+}
+function ensureRSched(si,ei,ri){ if(!C.sections[si].learningExperiences[ei].retrievalPractice[ri].schedule) C.sections[si].learningExperiences[ei].retrievalPractice[ri].schedule={initialReviewDays:1,subsequentReviewDays:[3,7,14,30]}; }
+function addRetrievalItem(si,ei){ C.sections[si].learningExperiences[ei].retrievalPractice.push({retrievalItemId:'ret-'+Date.now(),retrievalType:'free-recall',prompt:'',difficulty:2,schedule:{initialReviewDays:1,subsequentReviewDays:[3,7,14,30]}}); rerenderRetrievalItems(si,ei); sync(); }
+function delRetrievalItem(si,ei,ri){ C.sections[si].learningExperiences[ei].retrievalPractice.splice(ri,1); rerenderRetrievalItems(si,ei); sync(); }
+function rerenderRetrievalItems(si,ei){ const el=document.getElementById(`ret-list-${si}-${ei}`); if(el) el.innerHTML=renderRetrievalItems(si,ei); }
+
+// ── Transfer Exercises ──
+function renderTransferItems(si,ei){
+  return (C.sections[si].learningExperiences[ei].transferExercises||[]).map((t,ti)=>`
+    <div class="acc open" id="tx-${si}-${ei}-${ti}" style="margin-bottom:6px">
+      <div class="acc-header" onclick="toggleAcc('tx-${si}-${ei}-${ti}')">
+        <span class="pill pill-red">${t.context||'context'}</span>
+        <span class="acc-title" style="margin-left:8px;font-size:12px">${(t.scenario||'').substring(0,48)||'Transfer Exercise'}</span>
+        <button class="del-btn" onclick="event.stopPropagation();delTransferItem(${si},${ei},${ti})">🗑</button>
+        <span class="acc-arrow">›</span>
+      </div>
+      <div class="acc-body">
+        <div class="frow"><label>Exercise ID</label><input type="text" value="${esc(t.exerciseId)}" oninput="C.sections[${si}].learningExperiences[${ei}].transferExercises[${ti}].exerciseId=this.value;sync()"></div>
+        <div class="frow"><label>Context</label><input type="text" value="${esc(t.context)}" placeholder="e.g. finance, medicine, law" oninput="C.sections[${si}].learningExperiences[${ei}].transferExercises[${ti}].context=this.value;sync()"></div>
+        <div class="frow"><label>Scenario</label><textarea oninput="C.sections[${si}].learningExperiences[${ei}].transferExercises[${ti}].scenario=this.value;sync()">${esc(t.scenario)}</textarea></div>
+        <div class="frow"><label>Task</label><textarea oninput="C.sections[${si}].learningExperiences[${ei}].transferExercises[${ti}].task=this.value;sync()">${esc(t.task)}</textarea></div>
+        <div class="frow" style="margin-bottom:0"><label>Success Criteria <span style="font-weight:400;color:var(--ink3)">(one per line)</span></label>
+          <textarea oninput="C.sections[${si}].learningExperiences[${ei}].transferExercises[${ti}].successCriteria=this.value.split('\\n').map(s=>s.trim()).filter(Boolean);sync()">${(t.successCriteria||[]).join('\n')}</textarea>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function addTransferItem(si,ei){ C.sections[si].learningExperiences[ei].transferExercises.push({exerciseId:'tx-'+Date.now(),context:'',scenario:'',task:'',successCriteria:[]}); rerenderTransferItems(si,ei); sync(); }
+function delTransferItem(si,ei,ti){ C.sections[si].learningExperiences[ei].transferExercises.splice(ti,1); rerenderTransferItems(si,ei); sync(); }
+function rerenderTransferItems(si,ei){ const el=document.getElementById(`tx-list-${si}-${ei}`); if(el) el.innerHTML=renderTransferItems(si,ei); }
+
+// ════════════════════════════════════════════════════════
+// JSON PREVIEW
+// ════════════════════════════════════════════════════════
+function togglePreview(){
+  previewOpen = !previewOpen;
+  document.getElementById('json-pane').classList.toggle('open', previewOpen);
+  document.getElementById('prev-btn').classList.toggle('on', previewOpen);
+  if(previewOpen) refreshPreview();
+}
+function refreshPreview(){
+  if(!previewOpen) return;
+  document.getElementById('json-body').innerHTML = highlight(JSON.stringify(buildOutput(),null,2));
+}
+function highlight(json){
+  return json.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,m=>{
+      if(/^"/.test(m)) return /:$/.test(m)?`<span class="jk">${m}</span>`:`<span class="js">${m}</span>`;
+      if(/true|false|null/.test(m)) return `<span class="jb">${m}</span>`;
+      return `<span class="jn">${m}</span>`;
+    });
+}
+function copyJSON(){
+  const d=JSON.stringify(buildOutput(),null,2);
+  navigator.clipboard.writeText(d).then(()=>toast('JSON copied ✓')).catch(()=>{
+    const t=document.createElement('textarea');t.value=d;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);toast('JSON copied ✓');
+  });
+}
+
+// ════════════════════════════════════════════════════════
+// BUILD OUTPUT — assemble v2 JSON
+// ════════════════════════════════════════════════════════
+function buildOutput(){
+  return JSON.parse(JSON.stringify(C));
+}
+
+// ════════════════════════════════════════════════════════
+// EXPORT / IMPORT
+// ════════════════════════════════════════════════════════
+function doExport(){
+  sync();
+  const data = JSON.stringify(buildOutput(),null,2);
+  const blob = new Blob([data],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url;
+  a.download=(C.courseMetadata.courseId||'course')+'.json';
+  a.click(); URL.revokeObjectURL(url);
+  toast('Course exported ✓');
+}
+function doImport(){ document.getElementById('import-input').click(); }
+function handleImport(e){
+  const file=e.target.files[0]; if(!file) return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      C=JSON.parse(ev.target.result);
+      loadIntoUI();
+      toast('Course imported ✓');
+    }catch{ toast('Invalid JSON'); }
+  };
+  r.readAsText(file);
+}
+
+function loadIntoUI(){
+  const m=C.courseMetadata;
+  setv('f-courseId',m.courseId);setv('f-title',m.title);setv('f-desc',m.description);
+  setv('f-diff',m.difficultyLevel);setv('f-dur',m.estimatedDurationMinutes);
+  setv('f-lang',m.language);setv('f-thumb',m.thumbnailImage);setv('f-version',m.version);
+  const lm=C.learningModel;
+  setv('f-mastery',lm.masteryThreshold);setv('f-passing',lm.passingThreshold);
+  setchk('lm-retrieval',lm.retrievalPracticeEnabled);setchk('lm-confidence',lm.confidenceCalibrationEnabled);
+  setchk('lm-adaptive',lm.adaptiveDifficultyEnabled);setchk('lm-interleave',lm.interleavingEnabled);setchk('lm-spaced',lm.spacedRepetitionEnabled);
+  renderChips('tags',m.tags,'chip');
+  renderPrereqChips();
+  renderCompetencies();renderGlossary();renderAssessments();
+  updateSectionNav();renderSectionPanels();
+  show('metadata');refreshPreview();
+}
+const setv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v??''};
+const setchk=(id,v)=>{const e=document.getElementById(id);if(e)e.checked=!!v};
+
+// ════════════════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════════════════
+const esc=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+function toggleAcc(id){ document.getElementById(id)?.classList.toggle('open'); }
+function toast(msg){ const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2400); }
+
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+show('metadata');
+</script>
+</body>
+</html>
