@@ -231,6 +231,59 @@
     text-align: right;
   }
 
+  /* count precision toggle */
+  .precision-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0px;
+  }
+  .precision-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .switch {
+    position: relative;
+    width: 52px;
+    height: 30px;
+    flex-shrink: 0;
+  }
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .switch-slider {
+    position: absolute;
+    inset: 0;
+    background: #d6d2cc;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .switch-slider::before {
+    content: '';
+    position: absolute;
+    height: 22px;
+    width: 22px;
+    left: 4px;
+    top: 4px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    transition: transform 0.2s;
+  }
+  .switch input:checked + .switch-slider {
+    background: var(--accent);
+  }
+  .switch input:checked + .switch-slider::before {
+    transform: translateX(22px);
+  }
+
   /* ── SIDEBAR ── */
   .sidebar { position: sticky; top: 2rem; }
   .prompt-card {
@@ -453,7 +506,11 @@
           <input type="text" id="goal" placeholder="What should learners be able to do after completing this?" oninput="rebuild()">
         </div>
         <div class="field">
-          <label>Specific skills or knowledge areas (comma-separated)</label>
+          <label>Suggested Topics to Include</label>
+          <textarea id="suggested-topics" placeholder="e.g. data structures, common conventions, historical precedents" oninput="rebuild()"></textarea>
+        </div>
+        <div class="field">
+          <label>Specific skills or knowledge areas to Include (comma-separated)</label>
           <textarea id="skills" placeholder="e.g. data preprocessing, model evaluation, Python basics" oninput="rebuild()"></textarea>
         </div>
         <div class="field">
@@ -468,6 +525,16 @@
         <h2>Course structure</h2>
       </div>
       <div class="section-body">
+        <div class="field">
+          <label>Slider wording mode</label>
+          <div class="precision-toggle">
+            <span class="precision-label" id="precision-mode-label">Approximately</span>
+            <label class="switch" aria-label="Toggle slider wording mode">
+              <input type="checkbox" id="exact-counts" onchange="rebuild()">
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+        </div>
         <div class="field">
           <label>Number of sections</label>
           <div class="range-wrap">
@@ -609,72 +676,379 @@
     <details class="schema-toggle" style="margin-top:1rem;">
       <summary>View JSON schema reference</summary>
       <pre class="schema-pre">{
-  "courseTitle": "name",
-  "courseDescription": "description",
-  "courseImage": "image url",
-  "estimatedDuration": "...",
-  "lastUpdated": "YYYY-MM-DD",
-  "version": "1.0",
-  "prerequisites": ["..."],
-  "difficultyLevel": "beginner|intermediate|advanced",
-  "learningOutcomes": ["..."],
-  "glossary": [
-    { "term": "...", "definition": "..." }
-  ],
-  "sections": [{
-    "sectionTitle": "...",
-    "sectionDescription": "...",
-    "estimatedDuration": "...",
-    "whyThisMatters": "...",
-    "learningObjectives": ["..."],
-    "reviewContent": ["..."],
-    "lectures": [{
-      "lectureTitle": "...",
-      "lectureDescription": "...",
-      "estimatedDuration": "...",
-      "learningObjectives": ["..."],
-      "workedExample": {
-        "problem": "...",
-        "steps": ["..."],
-        "conclusion": "..."
+  "courseMetadata": {
+    "courseId": "critical-thinking-101",
+    "title": "Critical Thinking: A Practical Guide",
+    "description": "Learn to evaluate claims, detect weak reasoning, and apply rigorous thinking in real-world contexts.",
+    "thumbnailImage": "https://example.com/course-image.jpg",
+    "estimatedDurationMinutes": 840,
+    "difficultyLevel": "intermediate",
+    "version": "2.0",
+    "lastUpdated": "2026-05-17",
+    "language": "en",
+    "tags": [
+      "critical thinking",
+      "reasoning",
+      "decision making"
+    ],
+    "prerequisites": [
+      {
+        "type": "knowledge",
+        "description": "Basic reading comprehension"
+      }
+    ]
+  },
+
+  "learningModel": {
+    "masteryThreshold": 0.85,
+    "passingThreshold": 0.7,
+    "retrievalPracticeEnabled": true,
+    "confidenceCalibrationEnabled": true,
+    "adaptiveDifficultyEnabled": true,
+    "interleavingEnabled": true,
+    "spacedRepetitionEnabled": true
+  },
+
+  "competencies": [
+    {
+      "competencyId": "causal-reasoning-01",
+      "title": "Evaluate causal claims",
+      "description": "Distinguish correlation from causation and identify alternative explanations.",
+      "taxonomyLevel": "analyze",
+      "difficultyProfile": {
+        "overall": 3,
+        "conceptualComplexity": 4,
+        "ambiguity": 5,
+        "technicalSkill": 1,
+        "readingDemand": 2
       },
-      "lectureTopics": [{
-        "text": "...",
-        "summary": "...",
-        "media": [{
-          "type": "image|video|text",
-          "url": "...",
-          "label": "...",
-          "altText": "..."
-        }]
-      }],
-      "summary": ["..."]
-    }],
-    "quiz": {
-      "passingScore": 80,
-      "attemptsAllowed": 3,
-      "interleaved": true,
-      "questions": [{
-        "question": "...",
-        "questionType": "multiple-choice|true-false|short-answer",
-        "options": [
-          { "text": "...", "explanation": "..." }
-        ],
-        "answer": "...",
-        "explanation": "..."
-      }]
+      "transferRequired": true,
+      "masteryThreshold": 0.85,
+
+      "desiredOutcomes": [
+        {
+          "outcomeId": "outcome-01",
+          "description": "Learner can identify weak causal claims in news articles.",
+          "verifiedBy": [
+            "assessment-causal-analysis",
+            "transfer-exercise-news-01"
+          ],
+          "verificationCriteria": {
+            "minimumAccuracy": 0.8,
+            "minimumConfidenceCalibration": 0.7,
+            "requiresTransferSuccess": true
+          }
+        }
+      ],
+
+      "commonMisconceptions": [
+        {
+          "misconception": "Correlation automatically proves causation.",
+          "whyIncorrect": "Two variables can move together without a direct causal relationship.",
+          "remediationStrategy": "Prompt learner to generate alternative explanations."
+        }
+      ]
+    }
+  ],
+
+  "sections": [
+    {
+      "sectionId": "foundational-concepts",
+      "title": "Foundational Concepts",
+      "description": "Core reasoning principles used throughout the course.",
+
+      "learningObjectives": [
+        {
+          "objectiveId": "objective-01",
+          "description": "Identify the difference between claims and evidence.",
+          "linkedCompetencies": [
+            "causal-reasoning-01"
+          ]
+        }
+      ],
+
+      "motivationHooks": [
+        {
+          "type": "real-world-stakes",
+          "prompt": "Poor causal reasoning has contributed to financial crashes, medical misinformation, and policy failures."
+        },
+        {
+          "type": "prediction-gap",
+          "prompt": "Most learners initially fail this reasoning test."
+        }
+      ],
+
+      "learningExperiences": [
+        {
+          "experienceId": "correlation-vs-causation",
+
+          "title": "Correlation vs. Causation",
+
+          "experienceType": "guided-analysis",
+
+          "difficultyProfile": {
+            "overall": 3,
+            "conceptualComplexity": 4,
+            "ambiguity": 5
+          },
+
+          "estimatedDurationMinutes": 15,
+
+          "linkedCompetencies": [
+            "causal-reasoning-01"
+          ],
+
+          "desiredCognitiveActions": [
+            "prediction",
+            "analysis",
+            "reflection",
+            "retrieval"
+          ],
+
+          "contentBlocks": [
+            {
+              "blockId": "intro-text",
+              "type": "text",
+              "content": "People frequently mistake correlation for causation in everyday reasoning."
+            },
+            {
+              "blockId": "example-image",
+              "type": "image",
+              "url": "https://example.com/chart.png",
+              "altText": "Scatterplot showing correlation between variables"
+            }
+          ],
+
+          "interactionSequence": [
+            {
+              "interactionId": "prediction-01",
+              "interactionType": "prediction",
+
+              "prompt": "A city notices that neighborhoods with more parks have lower crime rates. Does this prove parks reduce crime?",
+
+              "required": true,
+
+              "responseFormat": "short-answer",
+
+              "revealCondition": "after-response",
+
+              "confidencePrompt": {
+                "enabled": true,
+                "scaleMin": 1,
+                "scaleMax": 5,
+                "prompt": "How confident are you in your answer?"
+              }
+            },
+
+            {
+              "interactionId": "compare-responses-01",
+              "interactionType": "compare-responses",
+
+              "responseModels": {
+                "expertResponse": {
+                  "answer": "The correlation alone does not prove causation because confounding variables may exist.",
+                  "reasoningSteps": [
+                    "Identify the observed correlation",
+                    "Search for alternative explanations",
+                    "Consider reverse causality",
+                    "Evaluate evidence quality"
+                  ]
+                },
+
+                "strongLearnerResponse": {
+                  "answer": "There may be another factor causing both the parks and lower crime."
+                },
+
+                "weakResponse": {
+                  "answer": "Yes, the parks probably caused the crime reduction.",
+                  "diagnosis": [
+                    "Assumes correlation proves causation",
+                    "Does not evaluate confounding variables"
+                  ]
+                }
+              }
+            },
+
+            {
+              "interactionId": "reflection-01",
+              "interactionType": "reflection",
+
+              "prompt": "What assumption did you initially make when evaluating this claim?",
+
+              "timing": "post-feedback"
+            }
+          ],
+
+          "workedExamples": [
+            {
+              "exampleId": "worked-example-01",
+
+              "problem": "Ice cream sales and drowning deaths rise together during summer months.",
+
+              "steps": [
+                "Identify correlation",
+                "Search for shared causes",
+                "Evaluate seasonal variables"
+              ],
+
+              "conclusion": "Temperature is a confounding variable affecting both."
+            }
+          ],
+
+          "retrievalPractice": [
+            {
+              "retrievalItemId": "retrieval-01",
+
+              "retrievalType": "free-recall",
+
+              "prompt": "Name three possible explanations for a correlation.",
+
+              "difficulty": 2,
+
+              "schedule": {
+                "initialReviewDays": 1,
+                "subsequentReviewDays": [
+                  3,
+                  7,
+                  14,
+                  30
+                ]
+              }
+            }
+          ],
+
+          "transferExercises": [
+            {
+              "exerciseId": "transfer-finance-01",
+
+              "context": "finance",
+
+              "scenario": "A stock analyst claims a company’s profits increased because they redesigned their logo.",
+
+              "task": "Evaluate whether the evidence supports causation.",
+
+              "successCriteria": [
+                "Identifies lack of causal evidence",
+                "Generates alternative explanations",
+                "Discusses confounding variables"
+              ]
+            }
+          ],
+
+          "masteryVerification": {
+            "assessmentIds": [
+              "assessment-causal-analysis"
+            ],
+
+            "requiredPerformance": {
+              "minimumAccuracy": 0.8,
+              "minimumTransferScore": 0.75
+            }
+          }
+        }
+      ]
+    }
+  ],
+
+  "assessments": [
+    {
+      "assessmentId": "assessment-causal-analysis",
+
+      "title": "Causal Reasoning Assessment",
+
+      "assessmentType": "scenario-analysis",
+
+      "linkedCompetencies": [
+        "causal-reasoning-01"
+      ],
+
+      "adaptiveDifficulty": true,
+
+      "questions": [
+        {
+          "questionId": "question-01",
+
+          "difficulty": 3,
+
+          "prompt": "A school introduces tablets and test scores improve. Does this prove tablets caused the improvement?",
+
+          "questionType": "short-answer",
+
+          "successCriteria": [
+            "Mentions confounding variables",
+            "Questions causal certainty",
+            "Discusses evidence limitations"
+          ],
+
+          "rubric": {
+            "excellent": "Identifies multiple alternative explanations and evaluates evidence quality.",
+            "adequate": "Questions causality but provides limited reasoning.",
+            "weak": "Assumes causation from correlation."
+          }
+        }
+      ]
+    }
+  ],
+
+  "retrievalSystem": {
+    "algorithm": "spaced-repetition",
+
+    "confidenceWeighting": true,
+
+    "interleavingEnabled": true,
+
+    "retrievalModes": [
+      "free-recall",
+      "application",
+      "scenario-analysis",
+      "contrast"
+    ]
+  },
+
+  "masterySystem": {
+    "masteryLevels": [
+      "novice",
+      "developing",
+      "proficient",
+      "mastered"
+    ],
+
+    "decayModelEnabled": true,
+
+    "reverificationRequired": true
+  },
+
+  "learnerState": {
+    "completedExperiences": [],
+    "competencyProgress": [],
+    "retrievalStrength": {},
+    "confidenceCalibration": {},
+    "masteryState": {}
+  },
+
+  "analytics": {
+    "track": [
+      "accuracy",
+      "confidence",
+      "time-on-task",
+      "retrieval-strength",
+      "transfer-performance",
+      "misconception-frequency"
+    ]
+  },
+
+  "glossary": [
+    {
+      "term": "Correlation",
+      "definition": "A relationship where two variables change together."
     },
-    "practicalActivity": {
-      "title": "...",
-      "description": "...",
-      "scenario": "...",
-      "steps": ["..."],
-      "successCriteria": ["..."],
-      "downloadableTemplate": "..."
-    },
-    "summary": ["..."]
-  }]
-}</pre>
+    {
+      "term": "Confounding Variable",
+      "definition": "An outside factor influencing multiple variables."
+    }
+  ]
+}
+</pre>
     </details>
   </div>
 
@@ -682,80 +1056,375 @@
 
 <script>
   const JSON_SCHEMA = `{
-  "courseTitle": "name",
-  "courseDescription": "description",
-  "courseImage": "image url or empty string",
-  "estimatedDuration": "estimated duration",
-  "lastUpdated": "YYYY-MM-DD",
-  "version": "1.0",
-  "prerequisites": ["prerequisite 1", "prerequisite 2"],
-  "difficultyLevel": "beginner | intermediate | advanced",
-  "learningOutcomes": ["learning outcome 1", "learning outcome 2"],
-  "glossary": [
-    { "term": "term 1", "definition": "definition 1" },
-    { "term": "term 2", "definition": "definition 2" }
+  "courseMetadata": {
+    "courseId": "critical-thinking-101",
+    "title": "Critical Thinking: A Practical Guide",
+    "description": "Learn to evaluate claims, detect weak reasoning, and apply rigorous thinking in real-world contexts.",
+    "thumbnailImage": "https://example.com/course-image.jpg",
+    "estimatedDurationMinutes": 840,
+    "difficultyLevel": "intermediate",
+    "version": "2.0",
+    "lastUpdated": "2026-05-17",
+    "language": "en",
+    "tags": [
+      "critical thinking",
+      "reasoning",
+      "decision making"
+    ],
+    "prerequisites": [
+      {
+        "type": "knowledge",
+        "description": "Basic reading comprehension"
+      }
+    ]
+  },
+
+  "learningModel": {
+    "masteryThreshold": 0.85,
+    "passingThreshold": 0.7,
+    "retrievalPracticeEnabled": true,
+    "confidenceCalibrationEnabled": true,
+    "adaptiveDifficultyEnabled": true,
+    "interleavingEnabled": true,
+    "spacedRepetitionEnabled": true
+  },
+
+  "competencies": [
+    {
+      "competencyId": "causal-reasoning-01",
+      "title": "Evaluate causal claims",
+      "description": "Distinguish correlation from causation and identify alternative explanations.",
+      "taxonomyLevel": "analyze",
+      "difficultyProfile": {
+        "overall": 3,
+        "conceptualComplexity": 4,
+        "ambiguity": 5,
+        "technicalSkill": 1,
+        "readingDemand": 2
+      },
+      "transferRequired": true,
+      "masteryThreshold": 0.85,
+
+      "desiredOutcomes": [
+        {
+          "outcomeId": "outcome-01",
+          "description": "Learner can identify weak causal claims in news articles.",
+          "verifiedBy": [
+            "assessment-causal-analysis",
+            "transfer-exercise-news-01"
+          ],
+          "verificationCriteria": {
+            "minimumAccuracy": 0.8,
+            "minimumConfidenceCalibration": 0.7,
+            "requiresTransferSuccess": true
+          }
+        }
+      ],
+
+      "commonMisconceptions": [
+        {
+          "misconception": "Correlation automatically proves causation.",
+          "whyIncorrect": "Two variables can move together without a direct causal relationship.",
+          "remediationStrategy": "Prompt learner to generate alternative explanations."
+        }
+      ]
+    }
   ],
+
   "sections": [
     {
-      "sectionTitle": "section name",
-      "sectionDescription": "section description",
-      "estimatedDuration": "estimated duration",
-      "whyThisMatters": "brief statement connecting this section to real-world relevance",
-      "learningObjectives": ["learning objective 1", "learning objective 2"],
-      "reviewContent": ["spaced repetition prompt 1", "spaced repetition prompt 2"],
-      "lectures": [
+      "sectionId": "foundational-concepts",
+      "title": "Foundational Concepts",
+      "description": "Core reasoning principles used throughout the course.",
+
+      "learningObjectives": [
         {
-          "lectureTitle": "lecture name",
-          "lectureDescription": "lecture description",
-          "estimatedDuration": "estimated duration",
-          "learningObjectives": ["lecture-level objective 1", "lecture-level objective 2"],
-          "workedExample": {
-            "problem": "problem statement",
-            "steps": ["step 1", "step 2", "step 3"],
-            "conclusion": "what this example demonstrates"
+          "objectiveId": "objective-01",
+          "description": "Identify the difference between claims and evidence.",
+          "linkedCompetencies": [
+            "causal-reasoning-01"
+          ]
+        }
+      ],
+
+      "motivationHooks": [
+        {
+          "type": "real-world-stakes",
+          "prompt": "Poor causal reasoning has contributed to financial crashes, medical misinformation, and policy failures."
+        },
+        {
+          "type": "prediction-gap",
+          "prompt": "Most learners initially fail this reasoning test."
+        }
+      ],
+
+      "learningExperiences": [
+        {
+          "experienceId": "correlation-vs-causation",
+
+          "title": "Correlation vs. Causation",
+
+          "experienceType": "guided-analysis",
+
+          "difficultyProfile": {
+            "overall": 3,
+            "conceptualComplexity": 4,
+            "ambiguity": 5
           },
-          "lectureTopics": [
+
+          "estimatedDurationMinutes": 15,
+
+          "linkedCompetencies": [
+            "causal-reasoning-01"
+          ],
+
+          "desiredCognitiveActions": [
+            "prediction",
+            "analysis",
+            "reflection",
+            "retrieval"
+          ],
+
+          "contentBlocks": [
             {
-              "text": "full topic text",
-              "summary": "one or two sentence recap of this topic",
-              "media": [
-                { "type": "image", "url": "image url", "label": "image label", "altText": "descriptive text for accessibility" },
-                { "type": "video", "url": "video url", "transcript": "transcript url" },
-                { "type": "text", "content": "text content" }
+              "blockId": "intro-text",
+              "type": "text",
+              "content": "People frequently mistake correlation for causation in everyday reasoning."
+            },
+            {
+              "blockId": "example-image",
+              "type": "image",
+              "url": "https://example.com/chart.png",
+              "altText": "Scatterplot showing correlation between variables"
+            }
+          ],
+
+          "interactionSequence": [
+            {
+              "interactionId": "prediction-01",
+              "interactionType": "prediction",
+
+              "prompt": "A city notices that neighborhoods with more parks have lower crime rates. Does this prove parks reduce crime?",
+
+              "required": true,
+
+              "responseFormat": "short-answer",
+
+              "revealCondition": "after-response",
+
+              "confidencePrompt": {
+                "enabled": true,
+                "scaleMin": 1,
+                "scaleMax": 5,
+                "prompt": "How confident are you in your answer?"
+              }
+            },
+
+            {
+              "interactionId": "compare-responses-01",
+              "interactionType": "compare-responses",
+
+              "responseModels": {
+                "expertResponse": {
+                  "answer": "The correlation alone does not prove causation because confounding variables may exist.",
+                  "reasoningSteps": [
+                    "Identify the observed correlation",
+                    "Search for alternative explanations",
+                    "Consider reverse causality",
+                    "Evaluate evidence quality"
+                  ]
+                },
+
+                "strongLearnerResponse": {
+                  "answer": "There may be another factor causing both the parks and lower crime."
+                },
+
+                "weakResponse": {
+                  "answer": "Yes, the parks probably caused the crime reduction.",
+                  "diagnosis": [
+                    "Assumes correlation proves causation",
+                    "Does not evaluate confounding variables"
+                  ]
+                }
+              }
+            },
+
+            {
+              "interactionId": "reflection-01",
+              "interactionType": "reflection",
+
+              "prompt": "What assumption did you initially make when evaluating this claim?",
+
+              "timing": "post-feedback"
+            }
+          ],
+
+          "workedExamples": [
+            {
+              "exampleId": "worked-example-01",
+
+              "problem": "Ice cream sales and drowning deaths rise together during summer months.",
+
+              "steps": [
+                "Identify correlation",
+                "Search for shared causes",
+                "Evaluate seasonal variables"
+              ],
+
+              "conclusion": "Temperature is a confounding variable affecting both."
+            }
+          ],
+
+          "retrievalPractice": [
+            {
+              "retrievalItemId": "retrieval-01",
+
+              "retrievalType": "free-recall",
+
+              "prompt": "Name three possible explanations for a correlation.",
+
+              "difficulty": 2,
+
+              "schedule": {
+                "initialReviewDays": 1,
+                "subsequentReviewDays": [
+                  3,
+                  7,
+                  14,
+                  30
+                ]
+              }
+            }
+          ],
+
+          "transferExercises": [
+            {
+              "exerciseId": "transfer-finance-01",
+
+              "context": "finance",
+
+              "scenario": "A stock analyst claims a company’s profits increased because they redesigned their logo.",
+
+              "task": "Evaluate whether the evidence supports causation.",
+
+              "successCriteria": [
+                "Identifies lack of causal evidence",
+                "Generates alternative explanations",
+                "Discusses confounding variables"
               ]
             }
           ],
-          "summary": ["lecture summary point 1", "lecture summary point 2"]
-        }
-      ],
-      "quiz": {
-        "passingScore": 80,
-        "attemptsAllowed": 3,
-        "interleaved": true,
-        "questions": [
-          {
-            "question": "question text",
-            "questionType": "multiple-choice | true-false | short-answer",
-            "options": [
-              { "text": "option 1", "explanation": "why this is or isn't correct" },
-              { "text": "option 2", "explanation": "why this is or isn't correct" },
-              { "text": "option 3", "explanation": "why this is or isn't correct" },
-              { "text": "option 4", "explanation": "why this is or isn't correct" }
+
+          "masteryVerification": {
+            "assessmentIds": [
+              "assessment-causal-analysis"
             ],
-            "answer": "option 1",
-            "explanation": "overall explanation of the correct answer"
+
+            "requiredPerformance": {
+              "minimumAccuracy": 0.8,
+              "minimumTransferScore": 0.75
+            }
           }
-        ]
-      },
-      "practicalActivity": {
-        "title": "activity title",
-        "description": "what the learner must do",
-        "scenario": "real-world context framing the task",
-        "steps": ["step 1", "step 2", "step 3"],
-        "successCriteria": ["criterion 1", "criterion 2"],
-        "downloadableTemplate": "url to template if applicable"
-      },
-      "summary": ["section summary point 1", "section summary point 2"]
+        }
+      ]
+    }
+  ],
+
+  "assessments": [
+    {
+      "assessmentId": "assessment-causal-analysis",
+
+      "title": "Causal Reasoning Assessment",
+
+      "assessmentType": "scenario-analysis",
+
+      "linkedCompetencies": [
+        "causal-reasoning-01"
+      ],
+
+      "adaptiveDifficulty": true,
+
+      "questions": [
+        {
+          "questionId": "question-01",
+
+          "difficulty": 3,
+
+          "prompt": "A school introduces tablets and test scores improve. Does this prove tablets caused the improvement?",
+
+          "questionType": "short-answer",
+
+          "successCriteria": [
+            "Mentions confounding variables",
+            "Questions causal certainty",
+            "Discusses evidence limitations"
+          ],
+
+          "rubric": {
+            "excellent": "Identifies multiple alternative explanations and evaluates evidence quality.",
+            "adequate": "Questions causality but provides limited reasoning.",
+            "weak": "Assumes causation from correlation."
+          }
+        }
+      ]
+    }
+  ],
+
+  "retrievalSystem": {
+    "algorithm": "spaced-repetition",
+
+    "confidenceWeighting": true,
+
+    "interleavingEnabled": true,
+
+    "retrievalModes": [
+      "free-recall",
+      "application",
+      "scenario-analysis",
+      "contrast"
+    ]
+  },
+
+  "masterySystem": {
+    "masteryLevels": [
+      "novice",
+      "developing",
+      "proficient",
+      "mastered"
+    ],
+
+    "decayModelEnabled": true,
+
+    "reverificationRequired": true
+  },
+
+  "learnerState": {
+    "completedExperiences": [],
+    "competencyProgress": [],
+    "retrievalStrength": {},
+    "confidenceCalibration": {},
+    "masteryState": {}
+  },
+
+  "analytics": {
+    "track": [
+      "accuracy",
+      "confidence",
+      "time-on-task",
+      "retrieval-strength",
+      "transfer-performance",
+      "misconception-frequency"
+    ]
+  },
+
+  "glossary": [
+    {
+      "term": "Correlation",
+      "definition": "A relationship where two variables change together."
+    },
+    {
+      "term": "Confounding Variable",
+      "definition": "An outside factor influencing multiple variables."
     }
   ]
 }`;
@@ -771,6 +1440,7 @@
     const duration = val('duration') || 'to be determined';
     const goal     = val('goal') || 'master the core concepts and apply them in practice';
     const skills   = val('skills');
+    const suggestedTopics = val('suggested-topics');
     const prereqs  = val('prereqs');
     const tone     = val('tone');
     const context  = val('context');
@@ -780,11 +1450,14 @@
     const nLectures  = num('lectures');
     const nQuestions = num('questions');
     const nGlossary  = num('glossary');
+    const useExactCounts = checked('exact-counts');
+    const countWord = useExactCounts ? 'exactly' : 'approximately';
 
     document.getElementById('sections-val').textContent = nSections;
     document.getElementById('lectures-val').textContent = nLectures;
     document.getElementById('questions-val').textContent = nQuestions;
     document.getElementById('glossary-val').textContent = nGlossary;
+    document.getElementById('precision-mode-label').textContent = useExactCounts ? 'Exactly' : 'Approximately';
 
     // Stats
     document.getElementById('s-sections').textContent = nSections;
@@ -817,10 +1490,11 @@
     const sectionFeatures = [];
     if (hasWhy) sectionFeatures.push('"whyThisMatters" — a real-world relevance statement');
     if (hasSpaced) sectionFeatures.push('"reviewContent" — spaced repetition prompts for the section');
-    if (hasQuiz) sectionFeatures.push(`a "quiz" with ${nQuestions} questions per section using question types: ${qtypes.join(', ')}. Each option must include an "explanation" field. Include an overall "explanation" for the correct answer.`);
+    if (hasQuiz) sectionFeatures.push(`a "quiz" with ${countWord} ${nQuestions} questions per section using question types: ${qtypes.join(', ')}. Each option must include an "explanation" field. Include an overall "explanation" for the correct answer.`);
     if (hasActivity) sectionFeatures.push('"practicalActivity" with title, description, scenario, steps, successCriteria, and downloadableTemplate');
     sectionFeatures.push('"summary" — an array of key section takeaways');
-
+    
+    const suggestedList = suggestedTopics ? `\nSuggested topics to include:\n${suggestedTopics.split(',').map(s=>`  - ${s.trim()}`).join('\n')}` : '';
     const skillsList = skills ? `\nSpecific skills and knowledge areas to cover:\n${skills.split(',').map(s=>`  - ${s.trim()}`).join('\n')}` : '';
     const prereqText = prereqs ? `\nPrerequisites: ${prereqs}` : '';
     const contextText = context ? `\nReal-world context / domain emphasis: ${context}` : '';
@@ -834,13 +1508,14 @@ Topic: ${topic}
 Target audience: ${audience}
 Difficulty level: ${level}
 Estimated total duration: ${duration}
-Primary learning goal: ${goal}${skillsList}${prereqText}${contextText}
+Primary learning goal: ${goal}${skillsList}${prereqText}${suggestedList}${contextText}
 Writing tone: ${tone}
 
 ## Structure requirements
 
-Produce exactly ${nSections} sections, each containing approximately ${nLectures} lectures.
-Include a glossary of exactly ${nGlossary} key terms with precise definitions.
+Create the structure for ${countWord} ${nSections} sections, each containing ${countWord} ${nLectures} lectures. 
+Do not yet fill in the actual teaching content for the sections — just create the array of sections with title and descriptions filled in. I will ask you in a follow up to populate each section one by one.
+Include a glossary of ${countWord} ${nGlossary} key terms with precise definitions.
 Include ${7} learning outcomes at the course level.
 
 ## Lecture requirements
@@ -915,6 +1590,7 @@ ${JSON_SCHEMA}`;
     document.getElementById('lectures').value = 3;
     document.getElementById('questions').value = 4;
     document.getElementById('glossary').value = 15;
+    document.getElementById('exact-counts').checked = false;
     ['f-example','f-summary','f-objectives','f-quiz','f-activity','f-spaced','f-why','q-mc','q-tf'].forEach(id => {
       document.getElementById(id).checked = true;
     });
