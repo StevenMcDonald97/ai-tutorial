@@ -1,0 +1,476 @@
+{
+  "sectionId": "s04",
+  "title": "Functional Programming for React Architects",
+  "description": "Establishes the FP principles — purity, immutability, structural sharing, function composition, and higher-order functions — that underpin idiomatic React and modern state management patterns, and defines the hook contract model that distinguishes well-designed abstractions from code extraction.",
+  "learningObjectives": [
+    {
+      "objectiveId": "s04-obj-01",
+      "description": "Distinguish pure from impure functions and explain why component render functions must be pure.",
+      "linkedCompetencies": ["functional-programming-react", "react-rendering-model"]
+    },
+    {
+      "objectiveId": "s04-obj-02",
+      "description": "Apply function composition and higher-order functions to build reusable data transformation pipelines in a React context.",
+      "linkedCompetencies": ["functional-programming-react"]
+    },
+    {
+      "objectiveId": "s04-obj-03",
+      "description": "Explain structural sharing and demonstrate how Immer achieves immutability without full cloning.",
+      "linkedCompetencies": ["functional-programming-react", "state-topology"]
+    },
+    {
+      "objectiveId": "s04-obj-04",
+      "description": "Compose custom React hooks from smaller hooks, articulate the design benefits of this pattern, and explain what distinguishes a well-designed hook contract from mere code extraction.",
+      "linkedCompetencies": ["functional-programming-react", "component-design-patterns"]
+    }
+  ],
+  "motivationHooks": [
+    {
+      "type": "real-world-stakes",
+      "prompt": "React's design is soaked in functional programming ideas — but React is not a functional programming framework. It uses FP idioms where they reduce bugs and improve composability, and pragmatically breaks them where it needs to. Understanding which FP principles React applies, why, and where the boundaries are gives you a principled vocabulary for every state management, hook design, and data transformation decision that follows in this course. Without this vocabulary, decisions about reducers, selectors, and hook composition are made by feel rather than by principle."
+    },
+    {
+      "type": "prediction-gap",
+      "prompt": "Before reading: a reducer does this — state.items.push(newItem); return state. A useSelector that depends on state.items doesn't re-run after this action fires. Why? And separately: two custom hooks exist — one returns { user, setUser, loading, setLoading }, the other returns { user, status, reload }. Which is a contract and which is extracted code? Hold both answers — the reasoning behind them is the core of this section."
+    }
+  ],
+  "furtherReading": [
+    {
+      "resourceId": "s04-fr-01",
+      "title": "Immer Documentation",
+      "resourceType": "website",
+      "url": "https://immerjs.github.io/immer/",
+      "author": "Michel Weststrate",
+      "rationaleNote": "The official Immer docs with clear explanations of the produce API, draft mechanics, and structural sharing model. The 'Pitfalls' section is particularly valuable for React architects — covers exactly where Immer's mutation syntax can mislead.",
+      "linkedCompetencies": ["functional-programming-react", "state-topology"]
+    },
+    {
+      "resourceId": "s04-fr-02",
+      "title": "React Docs: Keeping Components Pure",
+      "resourceType": "website",
+      "url": "https://react.dev/learn/keeping-components-pure",
+      "author": "React Team",
+      "rationaleNote": "The canonical React explanation of render purity with concrete examples of pure vs. impure components and why concurrent mode makes purity a correctness requirement, not just a style preference.",
+      "linkedCompetencies": ["functional-programming-react", "react-rendering-model"]
+    },
+    {
+      "resourceId": "s04-fr-03",
+      "title": "Professor Frisby's Mostly Adequate Guide to Functional Programming",
+      "resourceType": "website",
+      "url": "https://mostly-adequate.gitbook.io/mostly-adequate-guide/",
+      "author": "Brian Lonsdorf",
+      "rationaleNote": "A free, practical introduction to FP concepts in JavaScript — composition, purity, immutability, and functors. Chapters 1-6 are directly applicable to the React architecture patterns in this section. Not React-specific, which is intentional: the principles are general.",
+      "linkedCompetencies": ["functional-programming-react"]
+    },
+    {
+      "resourceId": "s04-fr-04",
+      "title": "Reselect: Memoized Selector Library",
+      "resourceType": "website",
+      "url": "https://reselect.js.org/",
+      "author": "Redux Team",
+      "rationaleNote": "Reselect's createSelector is function composition applied to Redux state derivation. Reading how it works — memoized input selectors composed into an output selector — reinforces the selector-level HOF pattern described in Part 3.",
+      "linkedCompetencies": ["functional-programming-react", "library-ecosystem"]
+    }
+  ],
+  "learningExperiences": [
+    {
+      "experienceId": "s04-exp-01",
+      "title": "Functional Programming Principles in React Architecture",
+      "experienceType": "guided-analysis",
+      "difficultyProfile": {
+        "overall": 3,
+        "conceptualComplexity": 4,
+        "ambiguity": 3
+      },
+      "estimatedDurationMinutes": 40,
+      "linkedCompetencies": ["functional-programming-react", "react-rendering-model", "component-design-patterns"],
+      "desiredCognitiveActions": ["prediction", "analysis", "comparison", "retrieval"],
+      "contentBlocks": [
+        {
+          "blockId": "s04-cb-01",
+          "type": "text",
+          "content": "WHY THIS MATTERS\n\nReact's design is soaked in functional programming ideas — but React is not a functional programming framework. It uses FP idioms where they reduce bugs and improve composability, and pragmatically breaks them where it needs to. Understanding which FP principles React applies, why, and where the boundaries are gives you a principled vocabulary for every state management, hook design, and data transformation decision that follows in this course."
+        },
+        {
+          "blockId": "s04-cb-02",
+          "type": "text",
+          "content": "LEARNING OBJECTIVES\n\nBy the end of this section, you will be able to:\n1. Distinguish pure from impure functions and explain why component render functions must be pure.\n2. Apply function composition and higher-order functions to build reusable data transformation pipelines.\n3. Explain structural sharing and demonstrate how Immer achieves immutability without full cloning.\n4. Compose custom React hooks from smaller hooks and explain what distinguishes a well-designed hook contract from mere code extraction."
+        },
+        {
+          "blockId": "s04-cb-03",
+          "type": "text",
+          "content": "KEY TERMS & DEFINITIONS\n\nPure function — A function that (a) always returns the same output for the same inputs, and (b) has no side effects. Given the same arguments, it is completely predictable.\n\nSide effect — Any interaction with the outside world from within a function: mutating external state, making network requests, reading from a DOM, writing to a log. React isolates side effects to useEffect and event handlers.\n\nImmutability — The principle that data is never mutated in place. Updates produce new values; old values remain unchanged. This makes change detection cheap (reference equality) and history trivial to preserve.\n\nStructural sharing — An optimization where an immutable update reuses unchanged parts of a data structure rather than copying the whole thing. A tree with 1000 nodes where one leaf changes shares 999 nodes with the previous version.\n\nHigher-order function (HOF) — A function that takes a function as an argument or returns a function. Array.map, Array.filter, and React's HOC pattern are all higher-order.\n\nFunction composition — Combining two or more functions so the output of one becomes the input of the next. compose(f, g)(x) is equivalent to f(g(x)).\n\nReferential transparency — A property of pure functions: any call can be replaced with its return value without changing program behavior. This is what makes memoization safe."
+        },
+        {
+          "blockId": "s04-cb-04",
+          "type": "text",
+          "content": "PART 1: PURITY AND WHY REACT REQUIRES IT\n\nA pure function has no memory and no agenda — it takes inputs and returns an output, every time, without touching anything else.\n\n  // Pure — same input always produces same output\n  function formatCurrency(amount: number, currency: string): string {\n    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);\n  }\n\n  // Impure — reads external mutable state\n  function formatCurrency(amount: number): string {\n    return amount.toFixed(userPreferences.decimalPlaces); // external dependency\n  }\n\nReact component render functions MUST be pure. This is not a style preference — it is a correctness requirement enforced by concurrent mode. As Section 1 established, React may call your component function multiple times before committing. If your render function mutates state, fires analytics events, or reads non-stable external values, those side effects fire unpredictably.\n\n  // Impure render — mutates ref during render\n  function Counter({ count }: { count: number }) {\n    renderCount.current++; // mutation in render body — wrong\n    return <div>{count}</div>;\n  }\n\n  // Move side effects to useEffect\n  function Counter({ count }: { count: number }) {\n    useEffect(() => { renderCount.current++; }, [count]);\n    return <div>{count}</div>;\n  }\n\nREACT IS NOT PURELY FUNCTIONAL. Side effects are necessary and expected — they live in useEffect, event handlers, and server actions. The constraint is WHERE side effects live, not their elimination."
+        },
+        {
+          "blockId": "s04-cb-05",
+          "type": "text",
+          "content": "PART 2: IMMUTABILITY AND STRUCTURAL SHARING\n\nImmutability is how React detects change cheaply. The reconciler, React.memo, Redux selectors, and useEffect dependencies all use reference equality (===) to detect change. If you mutate an object in place, the reference doesn't change, and React doesn't know something changed.\n\n  // Mutation — React won't detect the change\n  const items = state.items;\n  items.push(newItem); // same reference\n  setState(items);\n\n  // New reference — React detects the change\n  setState([...state.items, newItem]);\n\nTHE FULL-CLONE MISCONCEPTION: Many developers avoid immutability because they assume it means cloning the entire state tree on every update. That's not how production immutability works.\n\nSTRUCTURAL SHARING means only the changed path is copied; unchanged branches are shared:\n\n  Before update:              After adding item to list[2]:\n  root                        root (new)\n  ├── user ──────────────────►├── user (shared — same reference)\n  ├── settings ──────────────►├── settings (shared — same reference)\n  └── list                    └── list (new)\n      ├── [0] ───────────────►    ├── [0] (shared)\n      ├── [1] ───────────────►    ├── [1] (shared)\n      └── [2]                     └── [2] (new)\n\nIMMER implements structural sharing automatically. You write mutating code; Immer produces an immutable result:\n\n  import { produce } from 'immer';\n\n  const nextState = produce(state, draft => {\n    // draft is a mutable proxy — mutations are intercepted\n    draft.list.push(newItem);\n    draft.user.lastModified = Date.now();\n  });\n  // state is unchanged; nextState is a new object with structural sharing\n\nImmer's produce is pure from the caller's perspective — same state + same recipe = same nextState. The mutation syntax is a convenience; the output is immutable."
+        },
+        {
+          "blockId": "s04-cb-06",
+          "type": "text",
+          "content": "PART 3: FUNCTION COMPOSITION AND HIGHER-ORDER FUNCTIONS\n\nData transformation pipelines are where composition pays off most clearly in React. Rather than nesting transformations, chain them:\n\n  // Nested — hard to read, hard to test individual steps\n  const result = formatForDisplay(sortByDate(filterActive(filterByRole(users, role))));\n\n  // Composed pipeline — each step is testable in isolation\n  const processUsers = (role: Role) => (users: User[]) =>\n    users\n      .filter(u => u.role === role)\n      .filter(u => u.isActive)\n      .sort((a, b) => b.createdAt - a.createdAt)\n      .map(formatForDisplay);\n\n  const displayUsers = processUsers('admin')(allUsers);\n\nEach transformation is a pure function. The pipeline is the composition.\n\nHIGHER-ORDER FUNCTIONS IN REACT ARCHITECTURE:\n\nHOFs appear at three levels in React:\n\n  Component level — HOCs wrap a component and return a new component:\n    withAuth(Dashboard)\n\n  Hook level — A hook that returns another hook's interface, extended:\n    useEnhancedQuery(useQuery(...))\n\n  Selector level — Reselect's createSelector composes selector functions:\n    createSelector(selectUsers, selectRole, filterByRole)\n\nThe unifying principle: a HOF takes behavior as input and returns behavior as output. This is function composition applied to React's abstraction layers."
+        },
+        {
+          "blockId": "s04-cb-07",
+          "type": "text",
+          "content": "PART 4: CUSTOM HOOK COMPOSITION — CONTRACTS VS. CODE EXTRACTION\n\nThe distinction between a well-designed hook and extracted code is the difference between an abstraction and a shortcut.\n\nCODE EXTRACTION — moves lines out of a component without defining a new concept:\n\n  // This is just copy-paste in a trench coat\n  function useUserStuff(id: string) {\n    const [user, setUser] = useState(null);\n    const [loading, setLoading] = useState(false);\n    // ... 40 lines that were in the component\n    return { user, loading, setUser, setLoading }; // leaks internal state\n  }\n\nA HOOK CONTRACT — encapsulates a complete behavioral unit with a stable, minimal interface:\n\n  // Encapsulates the full async user lifecycle\n  function useUser(id: UserId): UserState {\n    const [state, dispatch] = useReducer(userReducer, { status: 'idle' });\n    useEffect(() => {\n      dispatch({ type: 'FETCH_START' });\n      fetchUser(id)\n        .then(data  => dispatch({ type: 'FETCH_SUCCESS', data }))\n        .catch(error => dispatch({ type: 'FETCH_ERROR', error }));\n    }, [id]);\n    return state; // returns a discriminated union — caller gets the contract, not the internals\n  }\n\nTHE THREE-QUESTION CONTRACT TEST:\n1. Can you describe what the hook does in one sentence without mentioning its implementation?\n2. Could you replace the internals (swap useState for useReducer) without changing any call sites?\n3. Is it testable with renderHook without mocking its internal structure?\n\nIf yes to all three, you have a contract. If no, you have extracted code.\n\nCOMPOSING HOOKS FROM SMALLER HOOKS is FP composition at the behavioral layer:\n\n  function useDashboardData(filters: Filters) {\n    const user        = useCurrentUser();            // encapsulated user contract\n    const metrics     = useMetrics(filters);         // encapsulated metrics contract\n    const permissions = usePermissions(user.id);     // encapsulated permissions contract\n    return { user, metrics, permissions };\n  }\n\nEach sub-hook is independently testable, independently replaceable. useDashboardData composes behavior the same way compose(f, g) composes functions."
+        },
+        {
+          "blockId": "s04-cb-08",
+          "type": "text",
+          "content": "COMMON ERRORS\n\nError 1: Mutating state directly in a reducer\nstate.items.push(item); return state — Redux and useReducer both depend on reference equality to detect changes. Mutating and returning the same reference means the store/component sees no change. Return a new object. Use Immer if mutation syntax is preferred.\n\nError 2: Treating Immer as permission to mutate anywhere\nImmer's mutation syntax is only safe inside produce's draft callback. Outside of it, the same immutability rules apply. A common mistake is using Immer in reducers but then mutating state directly in useEffect callbacks.\n\nError 3: Over-abstracting with composition\nA three-function pipeline where one function would do is not better architecture — it's indirection. Compose when each step is independently reusable or testable. Don't compose for composition's sake.\n\nError 4: Returning internal state setters from hooks\nReturning setUser or setLoading from a custom hook breaks encapsulation — callers can put the hook into states its internals don't expect. Return the minimal interface: state and named action dispatchers only."
+        }
+      ],
+      "interactionSequence": [
+        {
+          "interactionId": "s04-int-01",
+          "interactionType": "prediction",
+          "prompt": "Before reading: a reducer does this:\n\n  state.items.push(newItem);\n  return state;\n\nA useSelector that subscribes to state.items does NOT re-run after this action fires. Why not? Choose the explanation closest to your current understanding.\n\nA) useSelector only runs when the component re-renders, not when the store updates.\nB) The reducer returned the same state reference — useSelector uses reference equality to detect changes, so it sees no change.\nC) push() is not intercepted by Redux's middleware pipeline.\nD) The selector needs to be wrapped in reselect to detect array mutations.",
+          "required": true,
+          "responseFormat": "multiple-choice",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "B is correct. useSelector (and React.memo, and useEffect dependency arrays) all use reference equality (===) to detect change. When you call state.items.push(newItem) and return state, you are returning the exact same object reference. From the selector's perspective, the state is identical to the previous render — same reference means no change, so no re-run. This is the fundamental reason immutability is required in Redux and useReducer: it makes change detection O(1) — a single reference comparison — rather than requiring deep equality traversal of the entire state tree.",
+            "correctiveFeedback": "B: the reducer returned the same reference. Reference equality (===) means 'same object in memory'. Mutating and returning the same object looks unchanged to any reference-equality check.",
+            "hints": ["What does === return when comparing an array to itself after push()?", "How does useSelector know whether to re-run — what does it compare?"]
+          },
+          "confidencePrompt": {
+            "enabled": true,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How confident are you in your answer? (1 = guessing, 5 = certain)"
+          }
+        },
+        {
+          "interactionId": "s04-int-02",
+          "interactionType": "multiple-choice",
+          "prompt": "Which of the following makes a React component render function impure?\n\nA) Reading from props inside the function body.\nB) Calling useState to get the current state value.\nC) Incrementing a module-level counter variable on every render.\nD) Returning different JSX based on the value of a prop.",
+          "required": true,
+          "responseFormat": "multiple-choice",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "C is correct. Incrementing a module-level variable is a side effect — it changes something outside the function's scope. This makes the function impure in two ways: (1) it mutates external state, and (2) its behavior is non-deterministic across multiple calls because the counter's value at call time is unpredictable. In React 18 concurrent mode, the same component function may be called multiple times before committing — so the counter could be incremented 3 times for what appears to be a single render. Options A and B are pure reads with no external mutation. Option D is deterministic output given the same prop value — that's not a side effect.",
+            "correctiveFeedback": "C: modifying a module-level variable mutates external state — a side effect. React may call the render function multiple times in concurrent mode, so this counter becomes unpredictable.",
+            "hints": ["A side effect is anything that reaches outside the function's own scope.", "Would calling this function 3 times in a row with the same props produce the same result?"]
+          },
+          "confidencePrompt": {
+            "enabled": true,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How confident are you in this answer?"
+          }
+        },
+        {
+          "interactionId": "s04-int-03",
+          "interactionType": "multiple-choice",
+          "prompt": "Immer's produce(state, draft => { draft.list.push(item) }) returns:\n\nA) The same state object with item appended to list.\nB) A new object where only the changed path (list) is a new reference; unchanged parts share references with state.\nC) A deep clone of state with item appended.\nD) A frozen copy of state that cannot be mutated further.",
+          "required": true,
+          "responseFormat": "multiple-choice",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "B is correct. Immer uses structural sharing. After produce runs, only the path that was modified (list and its ancestors up to root) gets new references. Unchanged siblings (user, settings, other list items) retain the same references they had in the original state. This makes reference equality checks in React efficient: user === nextState.user is true, so components subscribed to user don't re-render. Only components subscribed to list or the root state object see a reference change. This is precisely why Immer is used in Redux Toolkit by default — it provides mutation-syntax convenience while preserving the reference equality invariants that React's change detection depends on.",
+            "correctiveFeedback": "B: structural sharing — only the modified path gets new references. Unchanged branches are shared with the original state. This is not a deep clone.",
+            "hints": ["A deep clone would make everything a new reference — what would that mean for reference equality checks?", "Structural sharing: think of it as creating new references only where the tree changed."]
+          },
+          "confidencePrompt": {
+            "enabled": true,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How confident are you in this answer?"
+          }
+        },
+        {
+          "interactionId": "s04-int-04",
+          "interactionType": "scenario-analysis",
+          "prompt": "Apply the three-question contract test to these two hooks:\n\nHook A: function useUserStuff(id) { return { user, setUser, loading, setLoading }; }\nHook B: function useUser(id): UserState { return state; } // where UserState is a discriminated union\n\nFor each hook, answer the three questions. Which is a contract and which is extracted code? What specifically would you change about Hook A to make it a contract?",
+          "required": true,
+          "responseFormat": "short-answer",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "Hook A — extracted code:\n1. Describable in one sentence without mentioning internals? Marginally — 'manages user state' — but the interface implies knowledge of internals (setUser, setLoading).\n2. Replaceable internals without changing call sites? No — if you swap useState for useReducer, setUser and setLoading no longer exist; every call site breaks.\n3. Testable without mocking internal structure? No — a renderHook test must call setUser and setLoading directly, coupling the test to the implementation.\n\nHook B — contract:\n1. 'Manages the async lifecycle of a user fetch for the given ID.' One sentence, no internals.\n2. Yes — the return type is UserState (a discriminated union). Changing useState to useReducer internally doesn't change the return type.\n3. Yes — renderHook tests interact with status, data, and error fields on the returned UserState. Internals can be replaced without touching tests.\n\nTo fix Hook A: replace { user, setUser, loading, setLoading } with a discriminated union return type and named action functions (e.g. reload()). Call sites interact with status and data, not with setters.",
+            "correctiveFeedback": "Hook A fails all three questions: setter exposure breaks replaceability and testability. Hook B passes all three: discriminated union return type is stable regardless of internal implementation. Fix: return state shape + named actions, never raw setters.",
+            "hints": ["If you swap useState for useReducer in Hook A, what breaks at the call site?", "Can you write a meaningful renderHook test for Hook A that doesn't call setUser directly?"]
+          },
+          "confidencePrompt": {
+            "enabled": true,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How clearly did you apply the three questions to both hooks?"
+          }
+        },
+        {
+          "interactionId": "s04-int-05",
+          "interactionType": "reflection",
+          "prompt": "REINFORCING SECTIONS 1 & 3 — connecting purity to rendering mechanics and type contracts: React's concurrent renderer may call your component function multiple times before committing. In 2-3 sentences, explain why this makes render function purity a correctness requirement (not just a style guideline), and how the discriminated union return type from Section 3 supports writing pure components that handle all states correctly.",
+          "required": true,
+          "responseFormat": "short-answer",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "Purity is a correctness requirement because concurrent mode can call the render function multiple times (to prepare alternative UIs, to abandon in-progress renders, or to retry after interruption). Any side effect in the render body — an API call, a mutation, an analytics event — fires multiple times unpredictably. The component contract — pure function from props to JSX — must hold across all those calls.\n\nDiscriminated union return types support this by ensuring the component can only write code for states that are structurally valid. If the render function only accesses state.data inside the status === 'success' branch, TypeScript guarantees that branch is reachable and that data is present. This eliminates an entire class of conditional render bugs — the type system enforces that the 'success' branch's render is deterministic given the same discriminated union value, making it trivially pure for that state.",
+            "correctiveFeedback": "Purity is correctness because concurrent mode calls render multiple times — side effects fire multiple times unpredictably. Discriminated unions ensure each branch only accesses valid fields, making the render function deterministic for each state.",
+            "hints": ["What happens to a console.log in a render function in React 18 Strict Mode?", "How does narrowing on a discriminated union prevent accessing undefined fields in a render?"]
+          },
+          "confidencePrompt": {
+            "enabled": true,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How well did you connect purity to both rendering mechanics (S1) and type contracts (S3)?"
+          }
+        }
+      ],
+      "workedExamples": [
+        {
+          "exampleId": "s04-we-01",
+          "problem": "A hook useFilteredReports(reports) mutates its prop array directly and sorts in-place. Refactor it to be pure, immutable, and correctly memoized.",
+          "steps": [
+            "Step 1 — Identify the purity violations in the original. (a) const filtered = reports — this aliases the prop, not a copy. (b) filtered.splice(i, 1) — mutates the original reports array through the alias. (c) filtered.sort(...) — Array.sort sorts in-place, mutating the array again. (d) return filtered — returns the mutated original, not a new array. Every caller of this hook now sees their reports prop mutated as a side effect.",
+            "Step 2 — Apply the immutability fix. Replace in-place mutations with pure transformations: .filter() returns a new array (does not mutate the original). .sort() on the filtered result still mutates — fix by chaining .slice() before .sort(), or use [...array].sort(). The result is a new array with no reference to the original reports.",
+            "Step 3 — Apply useMemo for reference stability. Without memoization, the hook returns a new array reference on every render of the consuming component, even when reports hasn't changed. This breaks React.memo children, useEffect dependencies that watch the output, and TanStack Query cache keys. Wrap the transformation in useMemo([reports]) — recomputes only when the reports reference changes.",
+            "Step 4 — Verify with the contract test. (1) One-sentence description without internals: 'Returns the published reports sorted by title.' Yes. (2) Replaceable internals: if we switch from .filter+.sort to a library sort, the return type doesn't change. Yes. (3) Testable without mocking internals: renderHook with a reports array; assert on the returned array's contents and order. No knowledge of useMemo or the filter implementation needed. Yes — it is a contract."
+          ],
+          "conclusion": "Pure transformation, no mutation, memoized for reference stability. The output reference is stable as long as the reports reference is stable — making it safe as a useEffect dependency or React.memo prop. The refactor is the same logic with three correctness improvements: no prop mutation, new array output, stable reference."
+        }
+      ],
+      "retrievalPractice": [
+        {
+          "retrievalItemId": "s04-retrieval-01",
+          "retrievalType": "cued-recall",
+          "prompt": "Name two React mechanisms that rely on reference equality to detect changes. For each, explain precisely what happens when a value is mutated in place rather than replaced with a new reference.",
+          "difficulty": 2,
+          "schedule": {
+            "initialReviewDays": 1,
+            "subsequentReviewDays": [3, 7, 14, 30],
+            "decayParameters": {
+              "decayRate": 0.3,
+              "strengthMultiplier": 2.0,
+              "minimumIntervalDays": 1,
+              "maximumIntervalDays": 60
+            }
+          }
+        },
+        {
+          "retrievalItemId": "s04-retrieval-02",
+          "retrievalType": "application",
+          "prompt": "A render function contains: analyticsClient.track('render', { componentId }). Is this pure or impure? What specifically makes it impure, and where should this call live instead?",
+          "difficulty": 2,
+          "schedule": {
+            "initialReviewDays": 1,
+            "subsequentReviewDays": [4, 10, 21],
+            "decayParameters": {
+              "decayRate": 0.3,
+              "strengthMultiplier": 2.0,
+              "minimumIntervalDays": 1,
+              "maximumIntervalDays": 45
+            }
+          }
+        },
+        {
+          "retrievalItemId": "s04-retrieval-03",
+          "retrievalType": "free-recall",
+          "prompt": "Explain structural sharing in your own words. For a state tree with 1000 nodes where one leaf changes, how many new object references does Immer's produce create? What happens to the other 999?",
+          "difficulty": 2,
+          "schedule": {
+            "initialReviewDays": 2,
+            "subsequentReviewDays": [5, 14, 30],
+            "decayParameters": {
+              "decayRate": 0.3,
+              "strengthMultiplier": 2.0,
+              "minimumIntervalDays": 2,
+              "maximumIntervalDays": 45
+            }
+          }
+        },
+        {
+          "retrievalItemId": "s04-retrieval-04",
+          "retrievalType": "contrast",
+          "prompt": "Contrast a hook that is a 'contract' vs. one that is 'extracted code'. Give one concrete signal in the hook's return type that immediately identifies it as extracted code rather than a proper contract.",
+          "difficulty": 3,
+          "schedule": {
+            "initialReviewDays": 2,
+            "subsequentReviewDays": [6, 14, 30],
+            "decayParameters": {
+              "decayRate": 0.28,
+              "strengthMultiplier": 2.1,
+              "minimumIntervalDays": 2,
+              "maximumIntervalDays": 45
+            }
+          }
+        },
+        {
+          "retrievalItemId": "s04-retrieval-05",
+          "retrievalType": "application",
+          "prompt": "At which three abstraction levels do higher-order functions appear in React architecture? Give one concrete example at each level.",
+          "difficulty": 3,
+          "schedule": {
+            "initialReviewDays": 3,
+            "subsequentReviewDays": [7, 21, 45],
+            "decayParameters": {
+              "decayRate": 0.3,
+              "strengthMultiplier": 2.0,
+              "minimumIntervalDays": 3,
+              "maximumIntervalDays": 60
+            }
+          }
+        },
+        {
+          "retrievalItemId": "s04-retrieval-06",
+          "retrievalType": "scenario-analysis",
+          "prompt": "INTERLEAVING — connecting FP principles to rendering mechanics and TypeScript contracts (bridges ig-types-fp group, reinforces S01 and S03): A custom hook returns { data, loading, error } where all three are independent state variables. Explain: (a) how this violates the hook contract principle from Part 4, (b) how it enables impossible states — the concern from Section 3, and (c) how fixing it with a discriminated union return type also makes the render function consuming it easier to write as a pure function.",
+          "difficulty": 4,
+          "schedule": {
+            "initialReviewDays": 3,
+            "subsequentReviewDays": [8, 21, 45],
+            "decayParameters": {
+              "decayRate": 0.28,
+              "strengthMultiplier": 2.2,
+              "minimumIntervalDays": 3,
+              "maximumIntervalDays": 60
+            }
+          }
+        }
+      ],
+      "transferExercises": [
+        {
+          "exerciseId": "s04-transfer-01",
+          "context": "Financial data ETL pipeline (Node.js, not a React UI)",
+          "scenario": "A Node.js ETL script processes daily transaction records:\n\n  function processTransactions(transactions: Transaction[]) {\n    for (const t of transactions) {\n      t.amount = t.amount * exchangeRates[t.currency]; // mutates input\n      if (t.amount < 0) transactions.splice(transactions.indexOf(t), 1);\n    }\n    transactions.sort((a, b) => b.date - a.date);\n    globalReport.total = transactions.reduce((s, t) => s + t.amount, 0);\n    return transactions;\n  }",
+          "task": "1. Identify every purity violation. Classify each as: (a) mutates input, (b) reads external mutable state, or (c) writes external state.\n2. Rewrite as a composed pipeline of pure functions. Each step — normalize currency, filter negatives, sort by date, compute total — should be a named pure function.\n3. The pipeline now needs to be testable. What does purity give you for free that the original function didn't? Be specific about what a test for a pure step looks like versus a test for the original impure function.",
+          "successCriteria": [
+            "Purity violations correctly classified: t.amount = ... (mutates input), transactions.splice (mutates input), exchangeRates[t.currency] (reads external mutable state), globalReport.total = ... (writes external state)",
+            "Rewrite uses pure named functions: normalizeCurrency(t, rates) returns a new transaction object; filterNegatives(transactions) returns a new filtered array; sortByDate(transactions) returns [...transactions].sort(...); computeTotal(transactions) returns a number — no mutations, no external reads or writes",
+            "Purity's testability gift: each step can be tested with input → expected output, no mocking of external state, no setup/teardown for global state, no ordering dependency between tests. The original function requires mocking exchangeRates and resetting globalReport for each test."
+          ]
+        }
+      ],
+      "masteryVerification": {
+        "assessmentIds": ["assess-functional-programming"],
+        "requiredPerformance": {
+          "minimumAccuracy": 0.82,
+          "minimumTransferScore": 0.78
+        }
+      }
+    },
+    {
+      "experienceId": "s04-exp-02",
+      "title": "Pipeline and Hook Refactor: Practical Activity",
+      "experienceType": "guided-analysis",
+      "difficultyProfile": {
+        "overall": 3,
+        "conceptualComplexity": 3,
+        "ambiguity": 3
+      },
+      "estimatedDurationMinutes": 20,
+      "linkedCompetencies": ["functional-programming-react", "component-design-patterns"],
+      "desiredCognitiveActions": ["analysis", "synthesis", "reflection"],
+      "contentBlocks": [
+        {
+          "blockId": "s04-cb-09",
+          "type": "text",
+          "content": "PRACTICAL ACTIVITY: PIPELINE AND HOOK REFACTOR\n\nGiven this component:\n\n  function ReportList({ reports }: { reports: Report[] }) {\n    const [search, setSearch] = useState('');\n    const results = [];\n    for (const r of reports) {\n      if (r.isPublished && r.title.toLowerCase().includes(search.toLowerCase())) {\n        results.push({ ...r, title: r.title.trim().toUpperCase() });\n      }\n    }\n    results.sort((a, b) => b.createdAt - a.createdAt);\n\n    return (\n      <>\n        <input value={search} onChange={e => setSearch(e.target.value)} />\n        {results.map(r => <ReportCard key={r.id} report={r} />)}\n      </>\n    );\n  }\n\nWork through the following:\n1. Extract the data transformation into a pure function pipeline (filter → transform → sort). Each step should be a named, separately testable function.\n2. Extract the search + filtering logic into a useFilteredReports(reports, search) hook with a clean contract.\n3. Apply useMemo correctly to avoid recomputing the pipeline on every keystroke.\n4. Identify: is useFilteredReports now a contract or just extracted code? Apply the three-question test."
+        }
+      ],
+      "interactionSequence": [
+        {
+          "interactionId": "s04-int-06",
+          "interactionType": "reflection",
+          "prompt": "After completing the refactor: when you applied useMemo in useFilteredReports, what did you use as the dependency array? What would happen if you omitted useMemo entirely — specifically, what would break in the consuming component if reports is a prop passed down from a parent that re-renders frequently?",
+          "required": false,
+          "responseFormat": "short-answer",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "Correct dependency array: [reports, search] — the hook should recompute when either the data source or the filter query changes.\n\nWithout useMemo: the hook returns a new array reference on every render of the consuming component — even when reports and search haven't changed. This has three consequences: (1) any React.memo wrapper on ReportCard sees a new items prop every render and can't bail out, (2) any useEffect in the consumer that has the filtered results as a dependency will re-run on every render (potentially causing infinite loops), and (3) any TanStack Query cache key that uses the filtered results will be invalidated unnecessarily.\n\nThe memoization is not about performance of the computation itself (a filter+sort is usually fast) — it's about reference stability. A stable output reference is the hook's implicit contract with its consumers.",
+            "correctiveFeedback": "Dependency array: [reports, search]. Without useMemo: new array reference every render breaks React.memo children, useEffect dependencies, and cache keys — reference instability propagates downstream.",
+            "hints": ["What two inputs determine what the filtered list should look like?", "What does a new array reference every render mean for a child wrapped in React.memo?"]
+          },
+          "confidencePrompt": {
+            "enabled": false,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How confident are you in your dependency array choice?"
+          }
+        }
+      ],
+      "workedExamples": [],
+      "retrievalPractice": [],
+      "transferExercises": [],
+      "masteryVerification": {
+        "assessmentIds": ["assess-functional-programming"],
+        "requiredPerformance": {
+          "minimumAccuracy": 0.80,
+          "minimumTransferScore": 0.75
+        }
+      }
+    },
+    {
+      "experienceId": "s04-exp-03",
+      "title": "Self-Guided: Refactor Extracted Code into a Hook Contract",
+      "experienceType": "self-guided-exercise",
+      "difficultyProfile": {
+        "overall": 4,
+        "conceptualComplexity": 3,
+        "ambiguity": 4
+      },
+      "estimatedDurationMinutes": 25,
+      "linkedCompetencies": ["functional-programming-react", "component-design-patterns"],
+      "desiredCognitiveActions": ["analysis", "synthesis", "reflection"],
+      "contentBlocks": [],
+      "interactionSequence": [],
+      "workedExamples": [],
+      "selfGuidedExercise": {
+        "exerciseId": "s04-sge-01",
+        "realWorldContext": "A custom React hook in a real codebase you work with — ideally one that returns raw state setters, mixes concerns, or has a return type that exposes implementation details. Alternatively, write a deliberately flawed hook from scratch and then fix it.",
+        "objective": "Apply the three-question contract test to a real hook, diagnose its failures, refactor it into a proper behavioral contract, and verify the contract with a renderHook test skeleton.",
+        "instructions": [
+          "Find a custom hook in a real codebase that you suspect is 'extracted code' rather than a proper contract. Good candidates: any hook that returns setState functions, any hook whose return type is an object of independent state variables (data, loading, error as separate fields), or any hook whose name describes what it does mechanically rather than what it provides conceptually.",
+          "Apply the three-question contract test. Write your answers down: (1) Can you describe what the hook does in one sentence without mentioning its internals? (2) Could you replace the internals (swap useState for useReducer, or vice versa) without changing any call sites? (3) Is it testable with renderHook without mocking its internal state shape?",
+          "For each question the hook fails, identify the specific return type or interface design that caused the failure.",
+          "Refactor the hook into a proper contract. Key changes to make: replace independent state variables (data, loading, error) with a discriminated union return type; replace raw setters (setUser, setLoading) with named action functions (reload(), reset()); ensure the return type is stable across internal implementation changes.",
+          "Write a renderHook test skeleton — even if you don't run it — that tests the hook's public interface: initial state, one state transition (e.g. triggering a fetch), and one error state. The test should make no assumptions about whether useState or useReducer is used internally.",
+          "Note what you had to change about the hook's return type to make the test possible without internal knowledge."
+        ],
+        "estimatedRealWorldDurationMinutes": 90,
+        "materialsOrPrerequisites": [
+          "A React codebase with at least one custom hook (or willingness to write one from scratch)",
+          "React Testing Library installed (for renderHook), or familiarity with its API to write a skeleton"
+        ],
+        "reflectionPrompts": [
+          "Which of the three contract questions did the hook fail first, and what was the specific interface design that caused it?",
+          "After refactoring, did you have to change the call sites in the consuming components? If yes, what does that tell you about how far the extracted-code pattern had propagated?",
+          "What did you have to remove from the return type (setters, loading boolean, etc.) to make the renderHook test interface-stable? How did removing it affect the consuming components?",
+          "Is there a case where returning raw setters from a hook is actually correct? Under what specific circumstances would you make that design choice deliberately?"
+        ],
+        "verification": {
+          "mode": "reflection-submission",
+          "isGating": false,
+          "selfAssessmentCriteria": [
+            "I applied all three contract questions and recorded specific answers for the original hook",
+            "I refactored the hook to return a discriminated union or named action interface rather than raw setters",
+            "I wrote a renderHook test skeleton that tests the public interface with no assumptions about internal implementation"
+          ]
+        },
+        "linkedCompetencies": ["functional-programming-react", "component-design-patterns"]
+      },
+      "retrievalPractice": [],
+      "transferExercises": [],
+      "masteryVerification": {
+        "assessmentIds": ["assess-functional-programming"],
+        "requiredPerformance": {
+          "minimumAccuracy": 0.80,
+          "minimumTransferScore": 0.80
+        }
+      }
+    }
+  ]
+}

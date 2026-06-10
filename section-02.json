@@ -1,0 +1,503 @@
+{
+  "sectionId": "s02",
+  "title": "Async UI Architecture: Suspense, Error Boundaries & Concurrent Features",
+  "description": "Establishes Suspense and Error Boundaries as a first-class boundary placement system, and concurrent features (useTransition, useDeferredValue, use()) as architectural tools for responsive UI design — building directly on the scheduling and rendering model from Section 1.",
+  "learningObjectives": [
+    {
+      "objectiveId": "s02-obj-01",
+      "description": "Explain the architectural role of Suspense as a declarative async boundary system, distinguishing it from the narrow React.lazy use case most developers know.",
+      "linkedCompetencies": ["async-ui-architecture"]
+    },
+    {
+      "objectiveId": "s02-obj-02",
+      "description": "Design a Suspense boundary layout for a SaaS feature with multiple independent async data regions, justifying boundary granularity decisions.",
+      "linkedCompetencies": ["async-ui-architecture", "architectural-judgment"]
+    },
+    {
+      "objectiveId": "s02-obj-03",
+      "description": "Place Error Boundaries at appropriate granularity levels in a component tree and explain the consequences of coarse vs. fine-grained boundary placement.",
+      "linkedCompetencies": ["async-ui-architecture"]
+    },
+    {
+      "objectiveId": "s02-obj-04",
+      "description": "Apply useTransition to classify a state update as non-urgent and explain how this changes the rendering pipeline relative to an unclassified update.",
+      "linkedCompetencies": ["async-ui-architecture", "react-rendering-model"]
+    },
+    {
+      "objectiveId": "s02-obj-05",
+      "description": "Use useDeferredValue to defer a computationally expensive derived render and explain when it is preferable to useTransition.",
+      "linkedCompetencies": ["async-ui-architecture", "performance-architecture"]
+    },
+    {
+      "objectiveId": "s02-obj-06",
+      "description": "Demonstrate use of the React 19 use() hook to consume a promise and a context value, and explain its relationship to Suspense.",
+      "linkedCompetencies": ["async-ui-architecture"]
+    }
+  ],
+  "motivationHooks": [
+    {
+      "type": "real-world-stakes",
+      "prompt": "Every SaaS application is fundamentally an async UI problem. Data loads. Requests fail. Some parts of the screen are ready before others. The naive solution — scattered isLoading, isError, and data booleans across components — works until it doesn't. It creates loading states that disagree with each other, error states that get swallowed, and UIs that flash between skeleton screens in ways that feel broken even when they aren't. Suspense and Error Boundaries are React's architectural answer. This section is about using them deliberately — not as convenience wrappers, but as a boundary placement system that defines which parts of your UI are allowed to fail or load independently."
+    },
+    {
+      "type": "prediction-gap",
+      "prompt": "Before reading: a SaaS dashboard has one Suspense boundary at the app root. The user header loads in 50ms (cached). The revenue chart takes 2 seconds. What does the user see during those 2 seconds? Hold your answer — then consider what fine-grained boundaries would change. Most developers get the first answer right but the architectural consequence wrong."
+    }
+  ],
+  "furtherReading": [
+    {
+      "resourceId": "s02-fr-01",
+      "title": "React Docs: Suspense",
+      "resourceType": "website",
+      "url": "https://react.dev/reference/react/Suspense",
+      "author": "React Team",
+      "rationaleNote": "The canonical reference for Suspense API behaviour, including the boundary coordination model and how it interacts with lazy loading vs. data fetching.",
+      "linkedCompetencies": ["async-ui-architecture"]
+    },
+    {
+      "resourceId": "s02-fr-02",
+      "title": "React Docs: useTransition",
+      "resourceType": "website",
+      "url": "https://react.dev/reference/react/useTransition",
+      "author": "React Team",
+      "rationaleNote": "Covers the urgent vs. non-urgent update classification model with concrete examples. Read the 'What is a Transition?' section carefully — the intent classification framing is the key insight.",
+      "linkedCompetencies": ["async-ui-architecture"]
+    },
+    {
+      "resourceId": "s02-fr-03",
+      "title": "React Docs: Error Boundaries",
+      "resourceType": "website",
+      "url": "https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary",
+      "author": "React Team",
+      "rationaleNote": "Definitive reference for Error Boundary implementation, including getDerivedStateFromError vs. componentDidCatch, and the explicit list of what Error Boundaries do not catch.",
+      "linkedCompetencies": ["async-ui-architecture"]
+    },
+    {
+      "resourceId": "s02-fr-04",
+      "title": "react-error-boundary library",
+      "resourceType": "website",
+      "url": "https://github.com/bvaughn/react-error-boundary",
+      "author": "Brian Vaughn",
+      "rationaleNote": "A production-ready Error Boundary library by a former React core team member. Useful for teams that want a hook-friendly API (useErrorBoundary) without writing class components.",
+      "linkedCompetencies": ["async-ui-architecture"]
+    }
+  ],
+  "learningExperiences": [
+    {
+      "experienceId": "s02-exp-01",
+      "title": "Suspense, Error Boundaries & the Boundary Placement System",
+      "experienceType": "guided-analysis",
+      "difficultyProfile": {
+        "overall": 4,
+        "conceptualComplexity": 4,
+        "ambiguity": 3
+      },
+      "estimatedDurationMinutes": 40,
+      "linkedCompetencies": ["async-ui-architecture", "react-rendering-model"],
+      "desiredCognitiveActions": ["prediction", "analysis", "comparison", "retrieval"],
+      "contentBlocks": [
+        {
+          "blockId": "s02-cb-01",
+          "type": "text",
+          "content": "WHY THIS MATTERS\n\nEvery SaaS application is fundamentally an async UI problem. Data loads. Requests fail. Some parts of the screen are ready before others. The naive solution — scattered isLoading, isError, and data booleans sprinkled across components — works until it doesn't. It creates loading states that disagree with each other, error states that get swallowed, and UIs that flash between skeleton screens in ways that feel broken even when they aren't.\n\nSuspense and Error Boundaries are React's architectural answer to this problem. They are not convenience features — they are a boundary placement system that lets you declare, at the component tree level, which parts of your UI are allowed to fail or load independently. Understanding them as architectural tools — not as performance tricks or last-resort catches — changes how you design features from the ground up.\n\nThis section also covers the concurrent features (useTransition, useDeferredValue, use()) that React 18/19 introduced to give you fine-grained control over how async updates flow through the UI. These are not micro-optimizations. They are the tools that let you keep a UI interactive while data is in flight."
+        },
+        {
+          "blockId": "s02-cb-02",
+          "type": "text",
+          "content": "LEARNING OBJECTIVES\n\nBy the end of this section, you will be able to:\n1. Explain the architectural role of Suspense as a declarative async boundary system, distinguishing it from the narrow React.lazy use case most developers know.\n2. Design a Suspense boundary layout for a SaaS feature with multiple independent async data regions, justifying boundary granularity decisions.\n3. Place Error Boundaries at appropriate granularity levels and explain the consequences of coarse vs. fine-grained placement.\n4. Apply useTransition to classify a state update as non-urgent and explain how this changes the rendering pipeline.\n5. Use useDeferredValue to defer an expensive derived render and explain when it is preferable to useTransition.\n6. Demonstrate the React 19 use() hook and explain its relationship to Suspense."
+        },
+        {
+          "blockId": "s02-cb-03",
+          "type": "text",
+          "content": "KEY TERMS & DEFINITIONS\n\nSuspense boundary — A <Suspense> component that catches 'suspended' renders from its subtree and displays a fallback prop until the suspended work resolves. A declarative loading container.\n\nSuspended component — A component that, during rendering, throws a Promise. React catches the thrown promise, renders the nearest Suspense boundary's fallback, and retries the component when the promise resolves.\n\nError Boundary — A class component implementing componentDidCatch and/or getDerivedStateFromError, catching JavaScript errors thrown during rendering in its subtree.\n\nBoundary granularity — The architectural decision of how large or small a subtree each Suspense or Error Boundary covers. Coarse = one boundary for the whole page. Fine = one boundary per independent data region.\n\nuseTransition — A React 18 hook returning [isPending, startTransition]. Wrapping a state update in startTransition marks it as non-urgent, allowing React to keep the current UI interactive while preparing the next state.\n\nuseDeferredValue — A React 18 hook that accepts a value and returns a deferred version. Unlike useTransition, it defers a value rather than wrapping a setter call.\n\nuse() hook (React 19) — A hook that can consume both Promises and Context values. When passed a Promise, the component suspends until it resolves. Unlike other hooks, use() can be called conditionally.\n\nWaterfall loading — A sequential loading pattern where component B can't start until component A finishes, creating cumulative latency. Fine-grained Suspense boundaries expose waterfalls and enable parallel data fetching."
+        },
+        {
+          "blockId": "s02-cb-04",
+          "type": "text",
+          "content": "PART 1: SUSPENSE IS A BOUNDARY SYSTEM, NOT A LAZY-LOADING FEATURE\n\nMost React developers encountered Suspense through React.lazy:\n\n  const HeavyChart = React.lazy(() => import('./HeavyChart'));\n  function Dashboard() {\n    return (\n      <Suspense fallback={<Spinner />}>\n        <HeavyChart />\n      </Suspense>\n    );\n  }\n\nThis is one valid use of Suspense. It is not what Suspense is for architecturally.\n\nWHAT SUSPENSE ACTUALLY DOES:\n<Suspense> is a boundary component. When any component in its subtree throws a Promise during rendering, Suspense catches that throw, renders its fallback, and retries the subtree when the Promise resolves. The thrown Promise is a signal: 'I'm not ready yet — try me again when this resolves.'\n\nThis protocol is what makes Suspense-compatible data libraries (TanStack Query, SWR, Relay) work: when data isn't in cache, the library throws a Promise for the in-flight request. React catches it, shows the Suspense fallback, and re-renders the component once the data arrives.\n\nTHE ARCHITECTURAL CONSEQUENCE:\nInstead of scattering if (isLoading) return <Spinner /> throughout your component tree, you move loading state up to the boundary level:\n\n  // Imperative loading scattered everywhere\n  function UserProfile({ userId }) {\n    const { data: user, isLoading, isError } = useUser(userId);\n    if (isLoading) return <ProfileSkeleton />;\n    if (isError) return <ErrorMessage />;\n    return <ProfileCard user={user} />;\n  }\n\n  // Suspense-compatible: component only handles the 'ready' case\n  function UserProfile({ userId }) {\n    const user = useUser(userId); // throws Promise if not cached\n    return <ProfileCard user={user} />;\n  }\n\n  // Boundary placed in the parent layout\n  <Suspense fallback={<ProfileSkeleton />}>\n    <UserProfile userId={userId} />\n  </Suspense>\n\nThe component becomes simpler because it only describes what the UI looks like when data is present. The boundary handles the async coordination.\n\nWHY THIS MATTERS BEYOND CLEANLINESS:\nThe boundary model lets React coordinate multiple suspended components as a unit. If <UserProfile> and <ActivityFeed> are both inside the same Suspense boundary, React waits for both to be ready before showing either — preventing 'content pop-in.' You control this coordination through boundary placement."
+        },
+        {
+          "blockId": "s02-cb-05",
+          "type": "text",
+          "content": "PART 2: BOUNDARY GRANULARITY — THE CORE DESIGN DECISION\n\nThe single most important Suspense architectural decision is where to place your boundaries. This is not a performance detail — it is a UX and resilience design decision.\n\nTHE SPECTRUM:\nCoarse: one boundary at the app root\n    ↕\nFine: one boundary per independent data region\n\nCOARSE BOUNDARY (app root only):\n  <Suspense fallback={<FullPageSpinner />}>\n    <App />\n  </Suspense>\n\nThe entire application shows a spinner until every suspended component is ready. The slowest data source blocks the entire UI.\n\nFINE-GRAINED BOUNDARIES (per independent region):\n  function DashboardLayout() {\n    return (\n      <div className=\"dashboard\">\n        <Suspense fallback={<HeaderSkeleton />}>\n          <UserHeader />   {/* fast — cached user data */}\n        </Suspense>\n        <Suspense fallback={<FiltersSkeleton />}>\n          <FilterPanel />  {/* medium — fetches filter options */}\n        </Suspense>\n        <Suspense fallback={<ChartSkeleton />}>\n          <RevenueChart /> {/* slow — large data query */}\n        </Suspense>\n        <Suspense fallback={<TableSkeleton />}>\n          <UserTable />    {/* slow — paginated query */}\n        </Suspense>\n      </div>\n    );\n  }\n\nNow each region loads independently. UserHeader appears immediately from cache. FilterPanel appears in 200ms. RevenueChart and UserTable appear when their data arrives — and they don't block each other.\n\nTHE DESIGN PRINCIPLE: A Suspense boundary should wrap a region of the UI that is meaningfully independent from adjacent regions in terms of data and loading experience. When in doubt, finer is better — coarse boundaries can always be merged, but splitting them after the fact requires restructuring the component tree."
+        },
+        {
+          "blockId": "s02-cb-06",
+          "type": "text",
+          "content": "PART 3: ERROR BOUNDARIES — SCOPED RESILIENCE\n\nError Boundaries catch JavaScript errors thrown during rendering or in lifecycle methods of their subtree. They are the structural equivalent of Suspense boundaries but for the failure case.\n\n  class FeatureErrorBoundary extends React.Component {\n    state = { hasError: false, error: null };\n\n    static getDerivedStateFromError(error) {\n      return { hasError: true, error };\n    }\n\n    componentDidCatch(error, info) {\n      reportError(error, info.componentStack); // log to Sentry, Datadog, etc.\n    }\n\n    render() {\n      if (this.state.hasError) {\n        return this.props.fallback ?? <DefaultErrorUI error={this.state.error} />;\n      }\n      return this.props.children;\n    }\n  }\n\nNote: Error Boundaries must be class components as of React 18.\n\nGRANULARITY FOR ERROR BOUNDARIES follows the same logic as Suspense. A single root-level Error Boundary means any rendering error in your entire application crashes the page — unacceptable for a SaaS product.\n\nTHE STANDARD PATTERN: Nest a Suspense boundary inside an Error Boundary for each independent UI region:\n\n  <FeatureErrorBoundary fallback={<HeaderError />}>\n    <Suspense fallback={<HeaderSkeleton />}>\n      <UserHeader />\n    </Suspense>\n  </FeatureErrorBoundary>\n\nThe Error Boundary handles render failures; the Suspense boundary handles async loading. Together they give you full resilience for a UI region with no loading/error state inside the components themselves.\n\nWHAT ERROR BOUNDARIES DO NOT CATCH:\n- Errors in event handlers (use try-catch there)\n- Async errors outside of rendering (use try-catch in async functions)\n- Server-side rendering errors\n- Errors in the Error Boundary component itself"
+        },
+        {
+          "blockId": "s02-cb-07",
+          "type": "text",
+          "content": "PART 4: useTransition — CLASSIFYING UPDATES AS URGENT VS. NON-URGENT\n\nReact's concurrent scheduler assigns priorities to updates. By default, every state update is urgent. useTransition lets you explicitly mark an update as non-urgent.\n\nTHE PROBLEM: A search input that filters a large list. Every keystroke triggers a state update → an expensive re-render of the filtered list. With the synchronous model, each keystroke causes visible lag.\n\nWITHOUT useTransition:\n  function SearchableList({ items }) {\n    const [query, setQuery] = useState('');\n    const filtered = items.filter(item =>\n      item.name.toLowerCase().includes(query.toLowerCase())\n    );\n    return (\n      <>\n        <input value={query} onChange={e => setQuery(e.target.value)} />\n        <LargeList items={filtered} />  {/* expensive render */}\n      </>\n    );\n  }\n\nEvery setQuery call re-renders LargeList synchronously. On a large dataset, the input feels laggy.\n\nWITH useTransition:\n  function SearchableList({ items }) {\n    const [query, setQuery] = useState('');\n    const [deferredQuery, setDeferredQuery] = useState('');\n    const [isPending, startTransition] = useTransition();\n    const filtered = items.filter(item =>\n      item.name.toLowerCase().includes(deferredQuery.toLowerCase())\n    );\n    function handleChange(e) {\n      setQuery(e.target.value);           // urgent — update input immediately\n      startTransition(() => {\n        setDeferredQuery(e.target.value); // non-urgent — update list when ready\n      });\n    }\n    return (\n      <>\n        <input value={query} onChange={handleChange} />\n        {isPending && <ListLoadingIndicator />}\n        <LargeList items={filtered} />\n      </>\n    );\n  }\n\nThe input updates immediately. React defers the expensive list re-render. isPending lets you show a subtle indicator during the transition.\n\nTHE ARCHITECTURAL INSIGHT: useTransition is not a performance hack — it's an API for expressing intent. You're telling React: 'the input update is urgent; the list update can wait.' This is an architectural decision about what the user cares about most at each moment."
+        },
+        {
+          "blockId": "s02-cb-08",
+          "type": "text",
+          "content": "PART 5: useDeferredValue — DEFERRING A VALUE, NOT A SETTER\n\nuseDeferredValue solves a similar problem to useTransition but from a different angle. Use it when you don't control the state setter — when a value comes from a prop or a library.\n\n  function FilteredResults({ query }) {  // query comes from a parent or URL param\n    const deferredQuery = useDeferredValue(query);\n    const results = useMemo(\n      () => expensiveFilter(allItems, deferredQuery),\n      [deferredQuery]\n    );\n    const isStale = query !== deferredQuery;\n    return (\n      <div style={{ opacity: isStale ? 0.7 : 1 }}>\n        <ResultsList items={results} />\n      </div>\n    );\n  }\n\nuseDeferredValue returns a version of query that React may intentionally lag behind the actual value during concurrent renders. React renders with the old deferredQuery until the main thread is free, then switches to the new value.\n\nuseTransition vs useDeferredValue:\n\n  useTransition:\n  - Controls: the state setter call\n  - Use when: you own the state update\n  - Provides: isPending flag\n\n  useDeferredValue:\n  - Controls: the received value\n  - Use when: value comes from props/library\n  - Provides: no isPending (derive from value comparison)\n\nTHE RULE OF THUMB: If you own the setState call, use useTransition. If you're receiving a value you don't control, use useDeferredValue."
+        },
+        {
+          "blockId": "s02-cb-09",
+          "type": "text",
+          "content": "PART 6: THE REACT 19 use() HOOK\n\nReact 19 introduced use(), a hook with two distinct capabilities:\n\n1. CONSUMING PROMISES:\n\n  import { use, Suspense } from 'react';\n\n  function UserProfile({ userPromise }) {\n    const user = use(userPromise);  // suspends until promise resolves\n    return <ProfileCard user={user} />;\n  }\n\n  // In the parent — Promise created OUTSIDE the component:\n  const userPromise = fetchUser(userId);\n\n  <Suspense fallback={<ProfileSkeleton />}>\n    <UserProfile userPromise={userPromise} />\n  </Suspense>\n\nWhen use() receives a Promise, the component suspends until it resolves, integrating with the nearest Suspense boundary. When it rejects, the nearest Error Boundary catches the error.\n\nCRITICAL: The Promise must be created outside the component or be stable across renders. Creating the Promise inside the component body recreates it on every render, causing an infinite suspend/retry loop.\n\n2. CONSUMING CONTEXT CONDITIONALLY:\n\n  function ConditionalFeature({ showFeature }) {\n    if (!showFeature) return null;\n    // use() can be called after a conditional return — unlike useContext\n    const theme = use(ThemeContext);\n    return <FeatureUI theme={theme} />;\n  }\n\nUnlike useContext, use() can be called conditionally.\n\nRELATIONSHIP TO SUSPENSE: use() with a Promise is the React 19 primitive for Suspense-compatible data consumption. It makes explicit what libraries like TanStack Query have been doing internally: throwing a Promise to signal 'not ready yet.'"
+        },
+        {
+          "blockId": "s02-cb-10",
+          "type": "text",
+          "content": "COMMON ERRORS\n\nError 1: Treating Suspense as load-order control\nSuspense does not guarantee sibling components load sequentially. Two components inside the same boundary may load in any order — Suspense shows the fallback until all are ready. To sequence loads (show A then add B), use nested boundaries.\n\nError 2: Creating promises inside components used with use()\nuse(fetchUser(id)) where fetchUser is called in the render body creates a new Promise every render, causing an infinite suspend loop. The Promise must be stable — created outside the component, passed as a prop, or stored in state/refs.\n\nError 3: Wrapping all state updates in startTransition 'for performance'\nTransition updates are interruptible and may be abandoned. Wrapping urgent updates (like controlled input values) in startTransition will cause the UI to feel unresponsive — the input won't show the character until React finishes the transition. Only non-urgent, background updates belong in transitions.\n\nError 4: Single root-level Error Boundary\nA single Error Boundary at the app root means any rendering error in any feature crashes the entire application. For SaaS products, this is equivalent to a full outage for a partial failure. Scope Error Boundaries to the feature they protect.\n\nError 5: Forgetting that Error Boundaries don't catch async errors\nAn unhandled rejection in a useEffect or event handler will not be caught by an Error Boundary. Only synchronous rendering errors are caught. Use separate error state management for async operation failures."
+        }
+      ],
+      "interactionSequence": [
+        {
+          "interactionId": "s02-int-01",
+          "interactionType": "prediction",
+          "prompt": "Before reading further: a SaaS dashboard has a single <Suspense> boundary at the app root. The user header loads in 50ms from cache. The revenue chart takes 2 seconds to fetch. What does the user see during those 2 seconds, and what is the architectural consequence?\n\nA) The header appears in 50ms; the chart shows a skeleton until 2 seconds.\nB) The entire app shows a full-page spinner for 2 seconds — the header is blocked by the slowest region.\nC) The header appears in 50ms; the chart area is blank until 2 seconds.\nD) React shows a partial render after 50ms, then completes at 2 seconds.",
+          "required": true,
+          "responseFormat": "multiple-choice",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "B is correct. A single Suspense boundary at the root means the entire subtree shows the fallback until all suspended components in that subtree have resolved. The header, despite being ready in 50ms, is inside the same boundary as the chart. React cannot show part of a boundary — it shows the fallback until everything is ready. The architectural consequence: a slow secondary data source holds the entire UI hostage. Fine-grained boundaries, one per independent region, would let the header appear in 50ms while the chart shows its own skeleton.",
+            "correctiveFeedback": "A single Suspense boundary waits for ALL suspended children before revealing any content. The header is blocked by the slowest region in the same boundary.",
+            "hints": ["Think of a Suspense boundary as an all-or-nothing reveal.", "What would happen if you moved the header outside the boundary?"]
+          },
+          "confidencePrompt": {
+            "enabled": true,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How confident are you in your answer? (1 = guessing, 5 = certain)"
+          }
+        },
+        {
+          "interactionId": "s02-int-02",
+          "interactionType": "multiple-choice",
+          "prompt": "A SaaS dashboard has a <Suspense> boundary wrapping both <RevenueChart> and <UserTable>. RevenueChart resolves in 300ms. UserTable resolves in 1200ms. When does the boundary's fallback disappear and content render?\n\nA) After 300ms — RevenueChart renders immediately, UserTable renders later.\nB) After 1200ms — the boundary waits for all children.\nC) After 750ms (average of the two).\nD) The behavior depends on which component mounts first.",
+          "required": true,
+          "responseFormat": "multiple-choice",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "B is correct. A Suspense boundary waits until all suspended children in its subtree have resolved before replacing the fallback with content. This is by design — it prevents the 'content pop-in' where parts of a UI appear at different times and cause jarring layout shifts. If you want each region to appear independently, give each its own boundary. The coordination vs. independence trade-off is the core boundary granularity decision.",
+            "correctiveFeedback": "A Suspense boundary is all-or-nothing: it reveals all content when all suspended children resolve. For independent appearance, each region needs its own boundary.",
+            "hints": ["A Suspense boundary coordinates its children as a unit.", "What problem does this all-or-nothing behaviour solve?"]
+          },
+          "confidencePrompt": {
+            "enabled": true,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How confident are you in this answer?"
+          }
+        },
+        {
+          "interactionId": "s02-int-03",
+          "interactionType": "multiple-choice",
+          "prompt": "An Error Boundary is placed at the root of a <FeatureDashboard> component. A TypeError is thrown inside a useEffect callback in a child component. Does the Error Boundary catch it?\n\nA) Yes — Error Boundaries catch all errors in their subtree.\nB) No — Error Boundaries only catch errors thrown during rendering, not in useEffect callbacks.\nC) Yes — useEffect is part of the render lifecycle, so its errors propagate to boundaries.\nD) It depends on whether the error is synchronous or asynchronous.",
+          "required": true,
+          "responseFormat": "multiple-choice",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "B is correct. Error Boundaries only catch errors thrown during the render phase (component function execution) and in lifecycle methods. Errors in useEffect, event handlers, and async callbacks are not caught — they occur after the render cycle has completed. For async errors, you need separate error state management (e.g. a try-catch in the effect that sets an error state, which then conditionally renders an error component inside the boundary). This is one of the most commonly misunderstood limitations of Error Boundaries.",
+            "correctiveFeedback": "Error Boundaries only catch render-phase errors. useEffect, event handlers, and async callbacks are outside the render cycle and are not caught.",
+            "hints": ["When does a useEffect callback execute relative to the render cycle?", "Which phase of the React lifecycle do Error Boundaries protect?"]
+          },
+          "confidencePrompt": {
+            "enabled": true,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How confident are you in this answer?"
+          }
+        },
+        {
+          "interactionId": "s02-int-04",
+          "interactionType": "scenario-analysis",
+          "prompt": "A search input updates a large filtered list. The list re-render takes 80ms. Without useTransition, describe the user experience. With useTransition wrapping the list state update, describe the user experience. Then: when would you use useDeferredValue instead of useTransition for this problem?",
+          "required": true,
+          "responseFormat": "short-answer",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "Without useTransition: each keystroke triggers an 80ms synchronous re-render of the list. The browser cannot repaint until the render completes, so the input visually lags — the user sees their typed character appear 80ms late. On fast typing, this compounds into visible jank.\n\nWith useTransition: setQuery (the input value) is kept urgent — the input shows the character immediately. startTransition(() => setDeferredQuery(...)) marks the list update as non-urgent. React keeps the current list visible while computing the new filtered list in the background. isPending shows a subtle indicator. The input feels instant.\n\nUseDeferredValue instead: use it when query comes from a prop or a router param you don't control. If a parent or React Router is updating the URL and passing searchParam down as a prop, you can't wrap that update in startTransition. useDeferredValue(searchParam) lets React defer the expensive render that depends on it while keeping the UI responsive — same outcome, different control point.",
+            "correctiveFeedback": "Without transition: 80ms lag per keystroke, input feels sluggish. With useTransition: input is urgent (immediate), list is non-urgent (deferred). useDeferredValue: when you don't own the setter — the value comes from props or a library.",
+            "hints": ["Focus on which update is urgent vs. which can wait.", "What changes if you receive the query value from a parent instead of owning the useState?"]
+          },
+          "confidencePrompt": {
+            "enabled": true,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How well did you capture both parts — the user experience difference and the useTransition vs. useDeferredValue distinction?"
+          }
+        },
+        {
+          "interactionId": "s02-int-05",
+          "interactionType": "reflection",
+          "prompt": "REINFORCING SECTION 1 (rendering mechanics): useTransition works by classifying an update as a lower-priority lane. In 2-3 sentences, connect this to what you learned about React's lane-based scheduler in Section 1. What does 'non-urgent' mean in terms of how the scheduler processes the update?",
+          "required": true,
+          "responseFormat": "short-answer",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "useTransition assigns the wrapped state update to a TransitionLane — a lower-priority lane in React's scheduler. The scheduler processes higher-priority lanes (SyncLane, InputContinuousLane) first. This means if a user keystroke (urgent, high lane) arrives while React is processing the transition (low lane), React can pause the transition render, process the keystroke, and resume the transition — keeping the input responsive. This is exactly the concurrent rendering capability introduced in Section 1: the work loop can yield between fibers to process higher-priority work. useTransition is the developer-facing API that expresses intent to the scheduler.",
+            "correctiveFeedback": "useTransition assigns the update to a low-priority lane (TransitionLane). The scheduler processes high-priority lanes first, so urgent updates interrupt and pre-empt the transition render.",
+            "hints": ["Recall the Lanes concept from Section 1.", "What happens when a high-priority update arrives while a low-priority render is in progress?"]
+          },
+          "confidencePrompt": {
+            "enabled": true,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How well did you connect the useTransition mechanism to the Section 1 scheduler model?"
+          }
+        }
+      ],
+      "workedExamples": [
+        {
+          "exampleId": "s02-we-01",
+          "problem": "A project management SaaS has a 'Project Detail' page with four regions: Project header (fast, usually cached), Task list (medium, paginated query), Activity feed (slow, aggregated from multiple sources), Comment thread (medium, real-time subscription). Design the complete async boundary map for this page, including Suspense boundaries, Error Boundaries, and useTransition for pagination.",
+          "steps": [
+            "Step 1 — Identify independent async regions. Each region has a different data source, different loading time, and different failure mode. A slow activity feed should not block the task list. They are independent — each warrants its own boundary.",
+            "Step 2 — Map boundary granularity decisions. Project header: fast and cached, own boundary is fine. Task list: independent data region, own boundary. Activity feed: slow, completely independent — separate boundary is critical. Comment thread: real-time subscription, different failure mode — own boundary.",
+            "Step 3 — Nest Error Boundaries around each Suspense boundary. The standard pattern: <FeatureErrorBoundary fallback={<RegionError />}><Suspense fallback={<Skeleton />}><Region /></Suspense></FeatureErrorBoundary>. This gives each region full resilience: render failures go to the Error Boundary, async loading goes to the Suspense fallback.",
+            "Step 4 — Apply useTransition for pagination. The task list has pagination. When the user clicks 'Next page', the current page should remain visible while the next page loads. Wrap the setPage call in startTransition. Use isPending to show a subtle opacity change or loading indicator on the task grid.",
+            "Step 5 — Validate the design. Ask: can each region fail without affecting the others? Yes — each has its own Error Boundary. Can each region load independently? Yes — each has its own Suspense boundary. Can the user interact with the task list during pagination? Yes — useTransition keeps the current page visible."
+          ],
+          "conclusion": "The boundary map is an architectural artifact you can draw before writing a single component. It answers: 'Which regions can fail or load independently?' The answer to that question determines your Suspense and Error Boundary placement. Draw the map first; the component structure follows from it."
+        }
+      ],
+      "retrievalPractice": [
+        {
+          "retrievalItemId": "s02-retrieval-01",
+          "retrievalType": "free-recall",
+          "prompt": "From memory: what does a component do mechanically when it 'suspends'? What does React do in response? Trace the full sequence from thrown Promise to fallback display to retry.",
+          "difficulty": 2,
+          "schedule": {
+            "initialReviewDays": 1,
+            "subsequentReviewDays": [3, 7, 14, 30],
+            "decayParameters": {
+              "decayRate": 0.3,
+              "strengthMultiplier": 2.0,
+              "minimumIntervalDays": 1,
+              "maximumIntervalDays": 60
+            }
+          }
+        },
+        {
+          "retrievalItemId": "s02-retrieval-02",
+          "retrievalType": "contrast",
+          "prompt": "Contrast coarse boundary placement (one Suspense at the app root) vs. fine-grained boundaries (one per independent region). For each: describe the user experience when one data source is slow, and name one scenario where that approach is correct.",
+          "difficulty": 2,
+          "schedule": {
+            "initialReviewDays": 1,
+            "subsequentReviewDays": [4, 10, 21],
+            "decayParameters": {
+              "decayRate": 0.3,
+              "strengthMultiplier": 2.0,
+              "minimumIntervalDays": 1,
+              "maximumIntervalDays": 45
+            }
+          }
+        },
+        {
+          "retrievalItemId": "s02-retrieval-03",
+          "retrievalType": "cued-recall",
+          "prompt": "List five types of errors that Error Boundaries do NOT catch. For each, name the correct mechanism to handle that error type.",
+          "difficulty": 3,
+          "schedule": {
+            "initialReviewDays": 2,
+            "subsequentReviewDays": [5, 14, 30],
+            "decayParameters": {
+              "decayRate": 0.35,
+              "strengthMultiplier": 1.8,
+              "minimumIntervalDays": 2,
+              "maximumIntervalDays": 45
+            }
+          }
+        },
+        {
+          "retrievalItemId": "s02-retrieval-04",
+          "retrievalType": "contrast",
+          "prompt": "useTransition vs. useDeferredValue: what does each control, when would you choose each, and what signal in your code tells you which one applies?",
+          "difficulty": 3,
+          "schedule": {
+            "initialReviewDays": 2,
+            "subsequentReviewDays": [6, 14, 30],
+            "decayParameters": {
+              "decayRate": 0.3,
+              "strengthMultiplier": 2.0,
+              "minimumIntervalDays": 2,
+              "maximumIntervalDays": 45
+            }
+          }
+        },
+        {
+          "retrievalItemId": "s02-retrieval-05",
+          "retrievalType": "application",
+          "prompt": "The React 19 use() hook: what constraint must be respected when using it with a Promise inside a component, and what happens if you violate it? Give the correct and incorrect pattern.",
+          "difficulty": 3,
+          "schedule": {
+            "initialReviewDays": 3,
+            "subsequentReviewDays": [7, 21, 45],
+            "decayParameters": {
+              "decayRate": 0.3,
+              "strengthMultiplier": 2.0,
+              "minimumIntervalDays": 3,
+              "maximumIntervalDays": 60
+            }
+          }
+        },
+        {
+          "retrievalItemId": "s02-retrieval-06",
+          "retrievalType": "scenario-analysis",
+          "prompt": "INTERLEAVING — connecting async boundaries to rendering mechanics (bridges ig-rendering-async group): A team member says 'useTransition is just a debounce for React renders.' Explain why this is wrong using the lane-based scheduler model from Section 1. What is the actual mechanism, and what can't debounce do that useTransition can?",
+          "difficulty": 4,
+          "schedule": {
+            "initialReviewDays": 3,
+            "subsequentReviewDays": [8, 21, 45],
+            "decayParameters": {
+              "decayRate": 0.28,
+              "strengthMultiplier": 2.2,
+              "minimumIntervalDays": 3,
+              "maximumIntervalDays": 60
+            }
+          }
+        }
+      ],
+      "transferExercises": [
+        {
+          "exerciseId": "s02-transfer-01",
+          "context": "E-commerce product page",
+          "scenario": "An e-commerce product page has these regions:\n- Product images and title — static, bundled with the page\n- Price and availability — fetched in real time from an inventory service (can be slow or fail)\n- Customer reviews — paginated, fetched from a reviews service\n- 'Frequently bought together' recommendations — fetched from a recommendation engine (p95 = 3 seconds)\n- Stock count notification form — a simple client-side form, no data fetch",
+          "task": "1. For each region, decide whether it needs a Suspense boundary, an Error Boundary, both, or neither. Justify each decision.\n2. A product manager asks: 'Can we show the price immediately even if reviews are still loading?' What boundary design makes this possible? What would prevent it?\n3. The recommendations widget is known to be slow (p95 = 3 seconds). A UX designer proposes that while recommendations are loading, the user should still be able to interact with the rest of the page normally. Which React API enables this, and where would you apply it?\n4. The inventory service occasionally returns 503 errors. When it does, you want to show 'Price temporarily unavailable' only in the price region — not crash the whole page. What mechanism handles this, and what are the limits of that mechanism?",
+          "successCriteria": [
+            "Static region (images/title): neither Suspense nor Error Boundary needed — no async, no runtime error risk from data",
+            "Price/availability: both Suspense boundary (async fetch) and Error Boundary (503 failures should show graceful fallback, not crash)",
+            "Reviews: Suspense boundary for pagination loading; Error Boundary for service failures; separate from price so each loads independently",
+            "Recommendations: Suspense boundary; useTransition or useDeferredValue to keep the page interactive during the slow load — the 3-second p95 makes this especially important",
+            "Notification form: no Suspense needed (no async data); Error Boundary optional (low failure risk, client-side only)",
+            "Price visible while reviews load: requires separate Suspense boundaries — price in its own boundary, reviews in theirs. A shared boundary would block price until reviews resolve.",
+            "Error Boundary limitation for 503: correctly identifies that the Error Boundary catches the rendering error thrown by the Suspense-compatible library on API failure, but does NOT catch errors in useEffect or event handlers"
+          ]
+        }
+      ],
+      "masteryVerification": {
+        "assessmentIds": ["assess-async-ui"],
+        "requiredPerformance": {
+          "minimumAccuracy": 0.85,
+          "minimumTransferScore": 0.80
+        }
+      }
+    },
+    {
+      "experienceId": "s02-exp-02",
+      "title": "Async Boundary Mapping: Practical Activity",
+      "experienceType": "guided-analysis",
+      "difficultyProfile": {
+        "overall": 4,
+        "conceptualComplexity": 3,
+        "ambiguity": 4
+      },
+      "estimatedDurationMinutes": 20,
+      "linkedCompetencies": ["async-ui-architecture", "architectural-judgment"],
+      "desiredCognitiveActions": ["analysis", "synthesis", "comparison"],
+      "contentBlocks": [
+        {
+          "blockId": "s02-cb-11",
+          "type": "text",
+          "content": "PRACTICAL ACTIVITY: ASYNC BOUNDARY MAPPING\n\nTake the following feature description for a SaaS analytics platform:\n\n'The Reports page shows: (1) a date-range filter bar at the top, (2) a summary stats row with 4 KPI cards, each fetching from a different endpoint, (3) a large line chart showing trend data for the selected date range, (4) a data table below the chart with exportable rows, and (5) a sidebar with saved report templates.'\n\nWork through the following:\n1. Describe the component tree for this page.\n2. For each data-fetching region, decide: independent boundary, or shared boundary with a sibling? Justify each decision.\n3. Where would you apply useTransition? (Hint: think about the date-range filter interaction.)\n4. Where would you apply useDeferredValue? Is there a case where you don't control the setter?\n5. Write the JSX skeleton for the boundary layout — just the <Suspense> and <FeatureErrorBoundary> nesting structure, no implementation."
+        }
+      ],
+      "interactionSequence": [
+        {
+          "interactionId": "s02-int-06",
+          "interactionType": "scenario-analysis",
+          "prompt": "For the Reports page activity: the date-range filter bar updates the chart and data table when the user selects a new range. Should you apply useTransition to the filter change? If yes, which update is urgent and which is non-urgent? If no, explain why.",
+          "required": true,
+          "responseFormat": "short-answer",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "Yes — useTransition is a strong fit here. The urgent update: the filter bar itself should reflect the user's selection immediately (the selected date range UI should update without delay). The non-urgent update: the chart and data table re-rendering with the new filtered data. These are expensive renders (large dataset, complex chart). Wrapping the state update that drives the chart/table in startTransition lets React keep the filter bar interactive while preparing the new chart in the background. isPending lets you show a subtle loading indicator on the chart area. This is exactly the pattern useTransition was designed for: a clear distinction between a UI selection that should feel immediate and a downstream data render that can be deferred.",
+            "correctiveFeedback": "Yes — apply useTransition. Urgent: filter bar selection UI. Non-urgent: chart and table re-rendering with new data. Use startTransition to wrap the state update that drives the expensive renders.",
+            "hints": ["What is the user watching when they select a date range?", "What renders are expensive and can afford to lag slightly?"]
+          },
+          "confidencePrompt": {
+            "enabled": false,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How confident are you in your boundary design?"
+          }
+        }
+      ],
+      "workedExamples": [],
+      "retrievalPractice": [],
+      "transferExercises": [],
+      "masteryVerification": {
+        "assessmentIds": ["assess-async-ui"],
+        "requiredPerformance": {
+          "minimumAccuracy": 0.80,
+          "minimumTransferScore": 0.75
+        }
+      }
+    },
+    {
+      "experienceId": "s02-exp-03",
+      "title": "Self-Guided: Async UX Audit of a Real SaaS Application",
+      "experienceType": "self-guided-exercise",
+      "difficultyProfile": {
+        "overall": 4,
+        "conceptualComplexity": 3,
+        "ambiguity": 4
+      },
+      "estimatedDurationMinutes": 35,
+      "linkedCompetencies": ["async-ui-architecture", "architectural-judgment"],
+      "desiredCognitiveActions": ["analysis", "reflection", "synthesis"],
+      "contentBlocks": [],
+      "interactionSequence": [],
+      "workedExamples": [],
+      "selfGuidedExercise": {
+        "exerciseId": "s02-sge-01",
+        "realWorldContext": "A SaaS web application you use regularly — a project management tool, a CRM, a data analytics platform, or similar — observed under realistic network conditions using browser DevTools.",
+        "objective": "Apply the async boundary model and boundary granularity principles to diagnose the loading behaviour of a real production SaaS application, then communicate findings as an async UX audit deliverable.",
+        "instructions": [
+          "Choose a SaaS web application you use regularly. Good candidates: Linear, Notion, Figma, Airtable, any analytics dashboard, a CRM, or a project management tool.",
+          "Open the application with browser DevTools open. In the Network tab, set throttling to 'Slow 3G'.",
+          "Navigate to the most data-heavy page in the application — typically a dashboard, a list view, or a detail page with multiple data panels.",
+          "Observe the loading sequence carefully. Note: what appears first? What blocks what? Do regions load independently or does the whole page wait for everything?",
+          "Look for: cascading spinners (one appears, then another, then another — waterfall loading), simultaneous skeletons (fine-grained boundaries working correctly), and full-page blocking (coarse boundary or no Suspense at all).",
+          "Identify any regions that 'pop in' after the rest of the page loads — sudden content appearing after a delay. Note the time gap and what data source it suggests.",
+          "If the app has a search or filter interaction, try it under Slow 3G. Does the UI feel responsive during filtering, or does it lag? Does this suggest useTransition is in use?",
+          "Write a 1-page async UX audit addressed to the product team. Include: what you observed in the loading sequence, whether the boundary design appears fine-grained or coarse, one specific improvement recommendation with reasoning about which React API would implement it."
+        ],
+        "estimatedRealWorldDurationMinutes": 60,
+        "materialsOrPrerequisites": [
+          "Browser DevTools (Chrome or Firefox) with network throttling capability",
+          "Access to a SaaS application with meaningful data loading behaviour"
+        ],
+        "reflectionPrompts": [
+          "Did the loading behaviour suggest fine-grained or coarse Suspense boundary usage? What specific observations led to that conclusion?",
+          "Were there any regions that appeared to pop in after the rest of the page? What does that tell you about their boundary placement relative to their siblings?",
+          "If the app has filter or search interactions, did they feel responsive under Slow 3G? What does that suggest about whether useTransition is in use?",
+          "What one change to the boundary design would most improve the user experience, and which React API would implement it?"
+        ],
+        "verification": {
+          "mode": "reflection-submission",
+          "isGating": false,
+          "selfAssessmentCriteria": [
+            "I observed the loading sequence under Slow 3G and noted what appeared first, what blocked what, and whether regions loaded independently",
+            "I classified the app's boundary design as fine-grained or coarse, with specific evidence from the loading sequence",
+            "I produced a written audit with at least one concrete improvement recommendation supported by my observations"
+          ]
+        },
+        "linkedCompetencies": ["async-ui-architecture", "architectural-judgment"]
+      },
+      "retrievalPractice": [],
+      "transferExercises": [],
+      "masteryVerification": {
+        "assessmentIds": ["assess-async-ui"],
+        "requiredPerformance": {
+          "minimumAccuracy": 0.80,
+          "minimumTransferScore": 0.80
+        }
+      }
+    }
+  ]
+}

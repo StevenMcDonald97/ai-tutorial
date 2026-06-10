@@ -1,0 +1,3122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Course Player</title>
+<style>
+
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#f7f5f2;
+  --surface:#ffffff;
+  --border:#e8e4de;
+  --text:#1a1917;
+  --text-secondary:#6b6760;
+  --accent:#2d5a3d;
+  --accent-light:#eaf2ec;
+  --accent-muted:#4a7c5f;
+  --warn:#8b3a2a;
+  --warn-light:#fdf0ee;
+  --gold:#c9973a;
+  --gold-light:#fdf6e8;
+  --blue:#2563eb;
+  --blue-light:#eff6ff;
+  --violet:#6d28d9;
+  --violet-light:#f5f3ff;
+  --radius:10px;
+  --shadow:0 2px 12px rgba(0,0,0,0.07);
+}
+
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
+h1,h2,h3,h4{font-family:'DM Serif Display',serif;font-weight:400;line-height:1.25}
+
+/* ── Layout ── */
+#app{display:flex;min-height:100vh}
+
+/* ── Sidebar ── */
+#sidebar{
+  width:290px;min-width:290px;background:var(--surface);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+#sidebar-header{padding:22px 20px 16px;border-bottom:1px solid var(--border)}
+#sidebar-header .course-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:5px}
+#sidebar-header h2{font-size:17px;color:var(--text);line-height:1.3}
+#progress-bar-wrap{margin-top:12px;background:var(--border);border-radius:99px;height:4px;overflow:hidden}
+#progress-bar{height:100%;background:var(--accent);border-radius:99px;transition:width .4s ease;width:0%}
+#progress-label{margin-top:5px;font-size:11px;color:var(--text-secondary)}
+
+/* Competency badges in sidebar */
+#competency-sidebar{padding:12px 16px;border-bottom:1px solid var(--border)}
+#competency-sidebar .comp-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-secondary);margin-bottom:8px}
+.comp-badge{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px}
+.comp-bar-wrap{flex:1;background:var(--border);border-radius:99px;height:4px;overflow:hidden}
+.comp-bar{height:100%;background:var(--accent);border-radius:99px;transition:width .4s}
+.comp-pct{font-size:11px;color:var(--text-secondary);width:28px;text-align:right}
+
+/* Section nav */
+.section-nav-item{border-bottom:1px solid var(--border)}
+.section-nav-header{
+  padding:11px 18px;cursor:pointer;display:flex;align-items:center;gap:10px;
+  font-size:13px;font-weight:500;color:var(--text-secondary);user-select:none;transition:background .15s;
+}
+.section-nav-header:hover{background:var(--bg)}
+.section-nav-header.active{color:var(--text)}
+.section-check{width:17px;height:17px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;transition:all .2s}
+.section-check.done{background:var(--accent);border-color:var(--accent);color:#fff}
+.section-check.active{border-color:var(--accent)}
+.section-nav-arrow{font-size:10px;transition:transform .2s;margin-left:auto}
+.section-nav-item.open .section-nav-arrow{transform:rotate(90deg)}
+.section-nav-experiences{display:none}
+.section-nav-item.open .section-nav-experiences{display:block}
+
+.exp-nav-item{
+  padding:7px 18px 7px 44px;cursor:pointer;font-size:12px;color:var(--text-secondary);
+  display:flex;align-items:center;gap:7px;transition:background .15s,color .15s;
+}
+.exp-nav-item:hover{background:var(--bg);color:var(--text)}
+.exp-nav-item.active{color:var(--accent);font-weight:600}
+.exp-nav-item.done .exp-dot{background:var(--accent-muted)}
+.exp-dot{width:6px;height:6px;border-radius:50%;background:var(--border);flex-shrink:0;transition:background .2s}
+.exp-nav-item.active .exp-dot{background:var(--accent)}
+
+.assess-nav-item{
+  padding:7px 18px 7px 44px;cursor:pointer;font-size:12px;color:var(--text-secondary);
+  display:flex;align-items:center;gap:7px;transition:background .15s;
+}
+.assess-nav-item:hover{background:var(--bg)}
+.assess-nav-item.active{color:var(--gold);font-weight:600}
+.assess-nav-item .exp-dot{background:rgba(201,151,58,.4)}
+.assess-nav-item.active .exp-dot{background:var(--gold)}
+
+/* ── Main ── */
+#main{flex:1;max-width:780px;margin:0 auto;padding:44px 36px}
+
+/* ── Screens ── */
+.screen{display:none;animation:fadeIn .22s ease}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Shared components ── */
+.tag{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.tag-green{background:var(--accent-light);color:var(--accent)}
+.tag-gray{background:var(--border);color:var(--text-secondary)}
+.tag-blue{background:var(--blue-light);color:var(--blue)}
+.tag-gold{background:var(--gold-light);color:var(--gold)}
+.tag-violet{background:var(--violet-light);color:var(--violet)}
+
+.btn{display:inline-flex;align-items:center;gap:7px;padding:11px 24px;border-radius:99px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-muted)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--bg)}
+.btn-sm{padding:8px 16px;font-size:13px}
+.btn-ghost{background:none;color:var(--accent);font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;border:none;padding:4px 0;text-decoration:underline;text-underline-offset:3px}
+
+.nav-buttons{display:flex;justify-content:space-between;align-items:center;margin-top:36px;padding-top:22px;border-top:1px solid var(--border)}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow);margin-bottom:16px}
+
+/* ── Intro screen ── */
+.course-hero{
+  background:linear-gradient(135deg,var(--accent-light),var(--border));
+  border-radius:var(--radius);height:180px;margin-bottom:28px;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+.course-hero img{width:100%;height:100%;object-fit:cover;border-radius:var(--radius)}
+.course-hero .hero-icon{font-size:52px}
+
+.meta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:24px}
+.meta-cell{padding:14px 16px;background:var(--surface);border-right:1px solid var(--border)}
+.meta-cell:last-child{border-right:none}
+.meta-cell strong{display:block;font-size:15px;font-weight:600;color:var(--text)}
+.meta-cell span{font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em}
+
+.lm-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:24px}
+.lm-pill{
+  display:inline-flex;align-items:center;gap:5px;
+  background:var(--surface);border:1px solid var(--border);border-radius:99px;
+  padding:5px 12px;font-size:12px;color:var(--text-secondary);
+}
+.lm-pill.on{background:var(--accent-light);border-color:#b8d9c2;color:var(--accent);font-weight:600}
+.lm-pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+
+.outcomes-list{list-style:none;margin:10px 0 22px}
+.outcomes-list li{padding:7px 0 7px 22px;position:relative;font-size:14px;color:var(--text-secondary);border-bottom:1px solid var(--border)}
+.outcomes-list li::before{content:'✓';position:absolute;left:0;color:var(--accent);font-weight:700}
+
+/* ── Motivation hooks ── */
+.hook-box{
+  border-radius:var(--radius);padding:14px 18px;margin-bottom:12px;
+  display:flex;align-items:flex-start;gap:12px;font-size:14px;
+}
+.hook-stakes{background:var(--warn-light);border-left:3px solid var(--warn);color:var(--warn)}
+.hook-gap{background:var(--gold-light);border-left:3px solid var(--gold);color:#7a5a1a}
+.hook-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+
+/* ── Section intro ── */
+.section-eyebrow{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.objectives-list{list-style:none;margin:10px 0 22px}
+.objectives-list li{padding:8px 12px 8px 34px;position:relative;font-size:14px;background:var(--surface);border:1px solid var(--border);border-radius:6px;margin-bottom:5px}
+.objectives-list li::before{content:'→';position:absolute;left:12px;color:var(--accent)}
+
+/* ── Experience screen ── */
+.exp-header{margin-bottom:24px}
+.exp-header h2{font-size:26px;margin:8px 0 8px}
+.exp-meta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.exp-meta-item{font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:4px}
+
+.cognitive-actions{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+
+/* Content blocks */
+.content-block-text{font-size:15px;line-height:1.75;color:var(--text);margin-bottom:18px}
+.content-block-image{margin-bottom:18px}
+.content-block-image img{width:100%;border-radius:var(--radius);border:1px solid var(--border)}
+.content-block-image .img-caption{font-size:12px;color:var(--text-secondary);text-align:center;margin-top:6px}
+
+/* Worked example */
+.worked-example{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 22px;margin-bottom:18px}
+.we-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-muted);margin-bottom:8px}
+.we-problem{font-size:14px;font-weight:600;margin-bottom:10px}
+.we-steps{list-style:none;counter-reset:we}
+.we-steps li{counter-increment:we;padding:6px 0 6px 28px;position:relative;font-size:13.5px;color:var(--text-secondary)}
+.we-steps li::before{content:counter(we);position:absolute;left:0;width:20px;height:20px;background:var(--accent);color:#fff;border-radius:50%;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;top:6px}
+.we-conclusion{margin-top:10px;font-size:13px;color:var(--accent);font-style:italic}
+
+/* ── Interactions ── */
+.interaction-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;margin-bottom:16px;box-shadow:var(--shadow)}
+.interaction-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.int-prediction .interaction-label{color:var(--blue)}
+.int-reflection .interaction-label{color:var(--violet)}
+.int-compare .interaction-label{color:var(--gold)}
+.int-retrieval .interaction-label{color:var(--accent)}
+.int-transfer .interaction-label{color:var(--warn)}
+
+.interaction-prompt{font-size:15px;font-weight:500;margin-bottom:16px;line-height:1.5}
+
+/* Short answer input */
+.sa-textarea{
+  width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:8px;
+  font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);
+  resize:vertical;min-height:90px;transition:border .15s;background:var(--surface);
+}
+.sa-textarea:focus{outline:none;border-color:var(--accent)}
+.sa-textarea:disabled{opacity:.7;background:var(--bg)}
+
+/* Confidence slider */
+.confidence-block{
+  background:var(--gold-light);border:1px solid #e8d5a8;border-radius:8px;
+  padding:12px 16px;margin-top:12px;
+}
+.confidence-label{font-size:12px;font-weight:600;color:var(--gold);margin-bottom:8px}
+.confidence-row{display:flex;align-items:center;gap:12px}
+.confidence-slider{flex:1;accent-color:var(--gold);cursor:pointer}
+.confidence-value{font-size:13px;font-weight:700;color:var(--gold);min-width:20px;text-align:center}
+.confidence-anchors{display:flex;justify-content:space-between;font-size:10px;color:var(--text-secondary);margin-top:4px}
+
+/* Compare responses */
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.compare-card{border-radius:8px;padding:14px 16px;font-size:13px;line-height:1.5}
+.compare-expert{background:var(--accent-light);border:1px solid #b8d9c2}
+.compare-expert .compare-card-label{color:var(--accent);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.compare-strong{background:var(--blue-light);border:1px solid #bfdbfe}
+.compare-strong .compare-card-label{color:var(--blue);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.compare-weak{background:var(--warn-light);border:1px solid #f5c3b8}
+.compare-weak .compare-card-label{color:var(--warn);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.compare-reasoning{margin-top:8px}
+.compare-reasoning li{font-size:12px;color:var(--text-secondary);margin-left:14px;margin-bottom:2px}
+.compare-diagnosis{margin-top:6px;font-size:12px;color:var(--warn)}
+
+/* Reflection shown post-feedback */
+.reflection-gate{font-size:12px;color:var(--text-secondary);font-style:italic;margin-bottom:10px}
+
+/* Transfer exercise */
+.transfer-scenario{background:var(--gold-light);border:1px solid #e8d5a8;border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:14px 16px;margin-bottom:14px}
+.transfer-scenario-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+.transfer-criteria{list-style:none;margin-top:10px}
+.transfer-criteria li{font-size:13px;color:var(--text-secondary);padding:4px 0 4px 18px;position:relative}
+.transfer-criteria li::before{content:'◇';position:absolute;left:0;color:var(--accent);font-size:11px}
+
+/* Retrieval prompt */
+.retrieval-prompt-box{background:var(--accent-light);border:1px solid #b8d9c2;border-radius:var(--radius);padding:16px 20px;margin-bottom:16px}
+.retrieval-prompt-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.retrieval-difficulty{display:inline-flex;gap:2px;margin-left:8px}
+.retrieval-difficulty span{width:8px;height:8px;border-radius:2px;background:var(--border)}
+.retrieval-difficulty span.filled{background:var(--accent)}
+
+/* Submit + feedback */
+.submit-row{margin-top:14px;display:flex;gap:10px;align-items:center}
+.feedback-revealed{display:none;margin-top:16px;padding:14px 16px;border-radius:8px;font-size:13.5px;line-height:1.6}
+.feedback-revealed.show{display:block}
+.feedback-correct{background:var(--accent-light);border:1px solid #b8d9c2;color:var(--accent)}
+.feedback-neutral{background:var(--blue-light);border:1px solid #bfdbfe;color:var(--blue)}
+.feedback-revealed strong{display:block;margin-bottom:4px;font-weight:700}
+
+/* ── Assessment ── */
+.assess-intro{margin-bottom:28px}
+.assess-rubric{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-top:12px}
+.rubric-row{display:flex;gap:10px;margin-bottom:6px;font-size:13px}
+.rubric-row:last-child{margin-bottom:0}
+.rubric-level{font-weight:700;min-width:72px;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+.rubric-excellent .rubric-level{color:var(--accent)}
+.rubric-adequate .rubric-level{color:var(--gold)}
+.rubric-weak .rubric-level{color:var(--warn)}
+.rubric-desc{color:var(--text-secondary)}
+
+/* ── Experience summary ── */
+.exp-summary-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:14px}
+.exp-summary-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-secondary);margin-bottom:10px}
+.mastery-meter{background:var(--border);border-radius:99px;height:8px;overflow:hidden;margin-top:8px}
+.mastery-fill{height:100%;border-radius:99px;transition:width .6s ease}
+.mastery-fill.novice{background:#d1d5db}
+.mastery-fill.developing{background:var(--gold)}
+.mastery-fill.proficient{background:var(--blue)}
+.mastery-fill.mastered{background:var(--accent)}
+
+/* ── Glossary drawer ── */
+#glossary-btn{
+  position:fixed;bottom:22px;right:22px;
+  background:var(--accent);color:#fff;border:none;border-radius:99px;
+  padding:9px 16px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;
+  cursor:pointer;box-shadow:0 4px 16px rgba(45,90,61,.3);z-index:100;
+  display:flex;align-items:center;gap:5px;
+}
+#glossary-drawer{
+  position:fixed;bottom:0;right:0;width:320px;max-height:50vh;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0;
+  box-shadow:0 -4px 24px rgba(0,0,0,.1);z-index:200;display:none;flex-direction:column;
+}
+#glossary-drawer.open{display:flex}
+#glossary-drawer-header{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+#glossary-drawer-header h4{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-secondary)}
+#glossary-close{background:none;border:none;cursor:pointer;font-size:17px;color:var(--text-secondary)}
+#glossary-body{overflow-y:auto;padding:8px 0}
+.glossary-term{padding:9px 16px;border-bottom:1px solid var(--border)}
+.glossary-term dt{font-size:13px;font-weight:600;color:var(--accent)}
+.glossary-term dd{font-size:13px;color:var(--text-secondary);margin-top:2px}
+
+/* ── Complete screen ── */
+#screen-complete{text-align:center;padding:60px 20px}
+.complete-badge{width:76px;height:76px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 24px}
+
+/* Scrollbar */
+#sidebar::-webkit-scrollbar{width:4px}
+#sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+
+@media(max-width:680px){#sidebar{display:none}#main{padding:24px 18px}}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- Sidebar -->
+  <nav id="sidebar">
+    <div id="sidebar-header">
+      <div class="course-label">Course</div>
+      <h2 id="sidebar-title"></h2>
+      <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+      <div id="progress-label"></div>
+    </div>
+    <div id="competency-sidebar">
+      <div class="comp-label">Competency Progress</div>
+      <div id="competency-bars"></div>
+    </div>
+    <div id="sidebar-nav"></div>
+  </nav>
+
+  <!-- Main -->
+  <main id="main">
+    <div id="screen-intro"    class="screen active"></div>
+    <div id="screen-section"  class="screen"></div>
+    <div id="screen-exp"      class="screen"></div>
+    <div id="screen-assess"   class="screen"></div>
+    <div id="screen-complete" class="screen">
+      <div class="complete-badge">🎓</div>
+      <h1 style="font-size:38px;margin-bottom:12px">Course Complete!</h1>
+      <p style="color:var(--text-secondary);font-size:16px;max-width:460px;margin:0 auto 30px">
+        You've worked through every section, experience, and assessment. Well done.
+      </p>
+      <button class="btn btn-primary" onclick="goScreen('intro')">Back to Start</button>
+    </div>
+  </main>
+</div>
+
+<button id="glossary-btn" onclick="toggleGlossary()">📖 Glossary</button>
+<div id="glossary-drawer">
+  <div id="glossary-drawer-header">
+    <h4>Glossary</h4>
+    <button id="glossary-close" onclick="toggleGlossary()">✕</button>
+  </div>
+  <div id="glossary-body"></div>
+</div>
+
+<script>
+// ── COURSE DATA ────────────────────────────────────────────────────────────────
+// Replace this with your own course object following the v2 schema
+console.log("1")
+const COURSE = {
+  "courseMetadata": {
+    "courseId": "typescript-advanced-startup-infra",
+    "title": "Advanced TypeScript: Building Startup Infrastructure",
+    "description": "A hands-on advanced course teaching working professionals how to design and build production-grade TypeScript infrastructure for a startup, covering type system mastery, scalable architecture, backend services, testing, and deployment patterns.",
+    "thumbnailImage": "",
+    "estimatedDurationMinutes": 480,
+    "difficultyLevel": "advanced",
+    "version": "1.0",
+    "lastUpdated": "2026-05-31",
+    "language": "en",
+    "tags": [
+      "typescript",
+      "infrastructure",
+      "startup",
+      "backend",
+      "advanced",
+      "node",
+      "architecture"
+    ],
+    "prerequisites": [
+      {
+        "type": "knowledge",
+        "description": "Solid understanding of JavaScript including ES6+ features such as modules, destructuring, async/await, and closures."
+      },
+      {
+        "type": "knowledge",
+        "description": "Object-oriented programming concepts including classes, inheritance, interfaces, and design patterns."
+      },
+      {
+        "type": "knowledge",
+        "description": "Beginner TypeScript including basic types, interfaces, generics, and tsconfig setup."
+      }
+    ]
+  },
+
+  "learningModel": {
+    "masteryThreshold": 0.85,
+    "passingThreshold": 0.7,
+    "retrievalPracticeEnabled": true,
+    "confidenceCalibrationEnabled": true,
+    "adaptiveDifficultyEnabled": true,
+    "interleavingEnabled": true,
+    "spacedRepetitionEnabled": true
+  },
+
+  "competencies": [
+    {
+      "competencyId": "advanced-types-01",
+      "title": "Master TypeScript's Advanced Type System",
+      "description": "Apply conditional types, mapped types, template literal types, and infer to model complex domain logic safely.",
+      "taxonomyLevel": "apply",
+      "difficultyProfile": {
+        "overall": 4,
+        "conceptualComplexity": 5,
+        "ambiguity": 3,
+        "technicalSkill": 4,
+        "readingDemand": 3
+      },
+      "transferRequired": true,
+      "masteryThreshold": 0.85,
+      "desiredOutcomes": [
+        {
+          "outcomeId": "outcome-adv-types-01",
+          "description": "Learner can write utility types that enforce business rules at compile time.",
+          "verifiedBy": ["assessment-advanced-types", "transfer-exercise-types-01"],
+          "verificationCriteria": {
+            "minimumAccuracy": 0.8,
+            "minimumConfidenceCalibration": 0.7,
+            "requiresTransferSuccess": true
+          }
+        }
+      ],
+      "commonMisconceptions": [
+        {
+          "misconception": "Using 'any' is an acceptable workaround for complex type problems.",
+          "whyIncorrect": "Using 'any' defeats the purpose of TypeScript and propagates unsafety through the codebase.",
+          "remediationStrategy": "Demonstrate 'unknown' and type narrowing as the correct alternative to 'any'."
+        }
+      ]
+    },
+    {
+      "competencyId": "architecture-patterns-02",
+      "title": "Design Scalable TypeScript Architecture",
+      "description": "Structure a startup codebase using dependency injection, layered architecture, and module boundaries that scale with the team.",
+      "taxonomyLevel": "create",
+      "difficultyProfile": {
+        "overall": 5,
+        "conceptualComplexity": 5,
+        "ambiguity": 4,
+        "technicalSkill": 4,
+        "readingDemand": 3
+      },
+      "transferRequired": true,
+      "masteryThreshold": 0.85,
+      "desiredOutcomes": [
+        {
+          "outcomeId": "outcome-arch-01",
+          "description": "Learner can design a layered service architecture with clear module boundaries in TypeScript.",
+          "verifiedBy": ["assessment-architecture", "transfer-exercise-arch-01"],
+          "verificationCriteria": {
+            "minimumAccuracy": 0.8,
+            "minimumConfidenceCalibration": 0.7,
+            "requiresTransferSuccess": true
+          }
+        }
+      ],
+      "commonMisconceptions": [
+        {
+          "misconception": "A single large file or flat structure is fine for a startup because it moves fast.",
+          "whyIncorrect": "Poor structure accumulates technical debt exponentially as the team grows, making refactoring costly.",
+          "remediationStrategy": "Walk through a before/after refactor of a monolithic service into a layered architecture."
+        }
+      ]
+    },
+    {
+      "competencyId": "backend-services-03",
+      "title": "Build Type-Safe Backend Services",
+      "description": "Implement REST and tRPC APIs, database access layers, and authentication flows using TypeScript throughout the stack.",
+      "taxonomyLevel": "apply",
+      "difficultyProfile": {
+        "overall": 4,
+        "conceptualComplexity": 4,
+        "ambiguity": 3,
+        "technicalSkill": 5,
+        "readingDemand": 2
+      },
+      "transferRequired": true,
+      "masteryThreshold": 0.85,
+      "desiredOutcomes": [
+        {
+          "outcomeId": "outcome-backend-01",
+          "description": "Learner can build an end-to-end type-safe API with validated inputs and typed database queries.",
+          "verifiedBy": ["assessment-backend", "transfer-exercise-backend-01"],
+          "verificationCriteria": {
+            "minimumAccuracy": 0.8,
+            "minimumConfidenceCalibration": 0.7,
+            "requiresTransferSuccess": true
+          }
+        }
+      ],
+      "commonMisconceptions": [
+        {
+          "misconception": "Runtime validation is unnecessary if TypeScript types are already defined.",
+          "whyIncorrect": "TypeScript types are erased at runtime; external inputs like HTTP request bodies must be validated at runtime using a library like Zod.",
+          "remediationStrategy": "Demonstrate a runtime type mismatch scenario where a malformed API payload passes TypeScript but crashes the app."
+        }
+      ]
+    },
+    {
+      "competencyId": "testing-quality-04",
+      "title": "Test and Maintain TypeScript Codebases",
+      "description": "Write type-safe unit tests, integration tests, and enforce quality through CI pipelines and strict TypeScript configuration.",
+      "taxonomyLevel": "evaluate",
+      "difficultyProfile": {
+        "overall": 4,
+        "conceptualComplexity": 3,
+        "ambiguity": 3,
+        "technicalSkill": 4,
+        "readingDemand": 2
+      },
+      "transferRequired": true,
+      "masteryThreshold": 0.85,
+      "desiredOutcomes": [
+        {
+          "outcomeId": "outcome-testing-01",
+          "description": "Learner can write comprehensive tests for a TypeScript service using Vitest and verify behavior with typed mocks.",
+          "verifiedBy": ["assessment-testing", "transfer-exercise-testing-01"],
+          "verificationCriteria": {
+            "minimumAccuracy": 0.8,
+            "minimumConfidenceCalibration": 0.7,
+            "requiresTransferSuccess": true
+          }
+        }
+      ],
+      "commonMisconceptions": [
+        {
+          "misconception": "TypeScript eliminates the need for runtime tests because the compiler catches errors.",
+          "whyIncorrect": "The compiler only validates static structure; runtime behavior, logic correctness, and integration scenarios still require tests.",
+          "remediationStrategy": "Provide an example of a TypeScript-correct function that has a logical bug only caught by a test."
+        }
+      ]
+    }
+  ],
+
+  "sections": [
+    {
+      "sectionId": "section-01-advanced-types",
+      "title": "Section 1: Mastering the TypeScript Type System",
+      "description": "Deep dive into TypeScript's advanced type featuresâconditional types, mapped types, template literal types, variance, and the 'infer' keywordâused to model real startup domain logic safely.",
+      "whyThisMatters": "In a startup, your type system is your first line of defense against production bugs. Advanced types let you encode business rulesâsuch as 'a paid user must have a billing address'âdirectly in the type system, so violations are caught at compile time rather than at 2am during an outage.",
+      "reviewContent": [
+        "What is the difference between 'unknown' and 'any', and when should you use each?",
+        "How does a conditional type like 'T extends string ? A : B' work?",
+        "What does the 'infer' keyword do inside a conditional type?",
+        "What is a mapped type and how do you use it to transform an object's properties?",
+        "What are template literal types and what kind of string constraints can they enforce?"
+      ],
+      "learningObjectives": [
+        {
+          "objectiveId": "obj-01-01",
+          "description": "Write conditional types using 'extends' and 'infer' to extract and transform type information.",
+          "linkedCompetencies": ["advanced-types-01"]
+        },
+        {
+          "objectiveId": "obj-01-02",
+          "description": "Build mapped types that transform existing types without duplicating definitions.",
+          "linkedCompetencies": ["advanced-types-01"]
+        },
+        {
+          "objectiveId": "obj-01-03",
+          "description": "Use template literal types to constrain string shapes in API route definitions and event names.",
+          "linkedCompetencies": ["advanced-types-01"]
+        },
+        {
+          "objectiveId": "obj-01-04",
+          "description": "Replace unsafe 'any' usage with 'unknown' and proper type narrowing strategies.",
+          "linkedCompetencies": ["advanced-types-01"]
+        }
+      ],
+      "motivationHooks": [
+        {
+          "type": "real-world-stakes",
+          "prompt": "Stripe's SDK is one of the most praised TypeScript APIs in the industry. Its secret is aggressive use of discriminated unions and conditional types to make invalid payment states unrepresentable."
+        },
+        {
+          "type": "prediction-gap",
+          "prompt": "Before reading on: can you write a type that extracts the return type of an async function? Most TypeScript developers with years of experience cannot do this without 'infer'."
+        }
+      ],
+      "learningExperiences": [
+        {
+          "experienceId": "exp-01-conditional-types",
+          "title": "Conditional Types and Infer",
+          "experienceType": "guided-analysis",
+          "difficultyProfile": {
+            "overall": 4,
+            "conceptualComplexity": 5,
+            "ambiguity": 3
+          },
+          "estimatedDurationMinutes": 30,
+          "linkedCompetencies": ["advanced-types-01"],
+          "desiredCognitiveActions": ["prediction", "analysis", "application", "retrieval"],
+          "contentBlocks": [
+            {
+              "blockId": "cb-01-01",
+              "type": "text",
+              "content": "Conditional types are the foundation of TypeScript's most powerful utility patterns. The syntax 'T extends U ? X : Y' means: if T is assignable to U, resolve to X; otherwise, resolve to Y. This is evaluated lazily when type parameters are supplied, which makes it possible to write types that behave differently depending on what is passed in. For example, you can write a type that returns 'string' when T is a number and 'number' when T is a string. More practically, you can extract the resolved type of a Promise using the built-in Awaited<T> utility, which is implemented using conditional types and infer internally."
+            },
+            {
+              "blockId": "cb-01-02",
+              "type": "text",
+              "content": "The 'infer' keyword is used exclusively inside the 'extends' clause of a conditional type to declare a type variable that is inferred from the matched structure. Consider: 'type UnwrapPromise<T> = T extends Promise<infer R> ? R : T'. Here, if T is Promise<string>, then R is inferred as 'string' and the result is 'string'. If T is not a Promise, the result is T itself. This pattern is used throughout the TypeScript standard library. Understanding it unlocks the ability to write your own utility types that extract return types, parameter types, array element types, and much more."
+            }
+          ],
+          "interactionSequence": [
+            {
+              "interactionId": "interact-01-01",
+              "interactionType": "prediction",
+              "prompt": "What type does 'UnwrapPromise<Promise<{ userId: string }>>' resolve to?",
+              "required": true,
+              "responseFormat": "short-answer",
+              "revealCondition": "after-response",
+              "confidencePrompt": {
+                "enabled": true,
+                "scaleMin": 1,
+                "scaleMax": 5,
+                "prompt": "How confident are you?"
+              }
+            },
+            {
+              "interactionId": "interact-01-02",
+              "interactionType": "compare-responses",
+              "responseModels": {
+                "expertResponse": {
+                  "answer": "{ userId: string }. The conditional type sees that Promise<{ userId: string }> extends Promise<infer R>, so R is inferred as { userId: string }, which becomes the result.",
+                  "reasoningSteps": [
+                    "Check if input extends Promise<infer R>",
+                    "Infer R from the Promise's type parameter",
+                    "Return R as the resolved type"
+                  ]
+                },
+                "strongLearnerResponse": {
+                  "answer": "An object with a userId string property."
+                },
+                "weakResponse": {
+                  "answer": "Promise<string>",
+                  "diagnosis": [
+                    "Confused about what the conditional type extracts",
+                    "Did not follow the infer keyword logic"
+                  ]
+                }
+              }
+            },
+            {
+              "interactionId": "interact-01-03",
+              "interactionType": "reflection",
+              "prompt": "Think about a place in your current codebase where you have repeated type definitions. Could a mapped or conditional type eliminate that duplication?",
+              "timing": "post-feedback"
+            }
+          ],
+          "workedExamples": [
+            {
+              "exampleId": "we-01-01",
+              "problem": "Your startup's event system emits events like 'user:created', 'order:placed', and 'payment:failed'. You want a type that maps each event name to its payload type, and a typed emit function that enforces the correct payload for each event.",
+              "steps": [
+                "Define an EventMap interface mapping string keys to payload shapes: 'interface EventMap { \"user:created\": { userId: string; email: string }; \"order:placed\": { orderId: string; total: number }; \"payment:failed\": { orderId: string; reason: string }; }'",
+                "Write a generic emit function: 'function emit<K extends keyof EventMap>(event: K, payload: EventMap[K]): void'",
+                "This uses a mapped type lookup (EventMap[K]) to constrain the payload type based on the event name key",
+                "Now calling emit('user:created', { userId: '123', email: 'a@b.com' }) compiles but emit('user:created', { orderId: '456' }) produces a type error",
+                "Extend this with a type-safe listener: 'function on<K extends keyof EventMap>(event: K, handler: (payload: EventMap[K]) => void): void'"
+              ],
+              "conclusion": "By combining a mapped interface with generic keyof lookups, you get a fully type-safe event system where the payload type is automatically inferred from the event name. This is the pattern used by libraries like Socket.IO's typed events."
+            }
+          ],
+          "retrievalPractice": [
+            {
+              "retrievalItemId": "rp-01-01",
+              "retrievalType": "free-recall",
+              "prompt": "Explain in your own words how 'infer' works inside a conditional type.",
+              "difficulty": 3,
+              "schedule": {
+                "initialReviewDays": 1,
+                "subsequentReviewDays": [3, 7, 14, 30]
+              }
+            },
+            {
+              "retrievalItemId": "rp-01-02",
+              "retrievalType": "application",
+              "prompt": "Write a type 'ReturnTypeOf<T>' that extracts the return type of any function type T.",
+              "difficulty": 4,
+              "schedule": {
+                "initialReviewDays": 1,
+                "subsequentReviewDays": [3, 7, 14]
+              }
+            }
+          ],
+          "transferExercises": [
+            {
+              "exerciseId": "te-01-01",
+              "context": "startup-api",
+              "scenario": "Your startup has a REST API with 50+ endpoints. Each endpoint has a request type and a response type defined separately. You are asked to create a type-safe API client where calling client.get('/users/:id') automatically infers the response type as UserResponse without any manual annotation.",
+              "task": "Design the type system for this API client. Define the route map, the generic fetch function signature, and show how TypeScript resolves the response type automatically.",
+              "successCriteria": [
+                "Defines a RouteMap interface mapping path strings to request/response types",
+                "Uses keyof and generic lookup types to constrain the response",
+                "Shows a concrete usage example that compiles correctly"
+              ]
+            }
+          ],
+          "masteryVerification": {
+            "assessmentIds": ["assessment-advanced-types"],
+            "requiredPerformance": {
+              "minimumAccuracy": 0.8,
+              "minimumTransferScore": 0.75
+            }
+          }
+        },
+        {
+          "experienceId": "exp-01-mapped-types",
+          "title": "Mapped Types and Template Literal Types",
+          "experienceType": "guided-analysis",
+          "difficultyProfile": {
+            "overall": 4,
+            "conceptualComplexity": 4,
+            "ambiguity": 3
+          },
+          "estimatedDurationMinutes": 30,
+          "linkedCompetencies": ["advanced-types-01"],
+          "desiredCognitiveActions": ["analysis", "application", "retrieval"],
+          "contentBlocks": [
+            {
+              "blockId": "cb-01-03",
+              "type": "text",
+              "content": "Mapped types allow you to create new types by iterating over the keys of an existing type. The syntax '{ [K in keyof T]: SomeTransformation<T[K]> }' creates a new type with the same keys as T but with transformed value types. TypeScript's built-in utilities like Partial<T>, Required<T>, Readonly<T>, and Record<K, V> are all implemented using mapped types. Understanding how to write your own opens enormous possibilities for DRY type definitions in your startup codebase. For example, you can create a 'Nullable<T>' type that makes all properties of T nullable, or a 'DeepReadonly<T>' that recursively applies Readonly down nested object hierarchies."
+            },
+            {
+              "blockId": "cb-01-04",
+              "type": "text",
+              "content": "Template literal types, introduced in TypeScript 4.1, allow you to construct string types programmatically by combining string literals and type parameters. The syntax is identical to JavaScript template literals but operates at the type level: type EventName<T extends string> = `${T}:created` | `${T}:updated` | `${T}:deleted`. This is enormously useful for modeling API route patterns, event namespaces, environment variable names, and CSS class name conventions. When combined with mapped types, you can generate entire families of related string types from a single source of truth, eliminating manual duplication and the bugs it causes."
+            }
+          ],
+          "interactionSequence": [
+            {
+              "interactionId": "interact-01-04",
+              "interactionType": "prediction",
+              "prompt": "Given 'type Entity = \"user\" | \"order\"', what string literal union does 'type Events = `${Entity}:created` | `${Entity}:deleted`' produce?",
+              "required": true,
+              "responseFormat": "short-answer",
+              "revealCondition": "after-response",
+              "confidencePrompt": {
+                "enabled": true,
+                "scaleMin": 1,
+                "scaleMax": 5,
+                "prompt": "How confident are you?"
+              }
+            },
+            {
+              "interactionId": "interact-01-05",
+              "interactionType": "reflection",
+              "prompt": "Where in a startup codebase might having exhaustive, auto-generated string union types prevent a bug that a human reviewer would likely miss?",
+              "timing": "post-feedback"
+            }
+          ],
+          "workedExamples": [
+            {
+              "exampleId": "we-01-02",
+              "problem": "Your startup's database layer returns raw snake_case column names from PostgreSQL (e.g., 'user_id', 'created_at'), but your application code uses camelCase. You want a type that transforms a database row type into a camelCase application type automatically.",
+              "steps": [
+                "Define a helper type: 'type CamelCase<S extends string> = S extends `${infer Head}_${infer Tail}` ? `${Head}${Capitalize<CamelCase<Tail>>}` : S'",
+                "This uses recursive conditional types with infer to split on underscores and capitalize each subsequent segment",
+                "Then create a mapped type: 'type ToCamelCase<T> = { [K in keyof T as CamelCase<string & K>]: T[K] }'",
+                "The 'as' clause in the mapped type renames each key by applying CamelCase to it",
+                "Now 'ToCamelCase<{ user_id: string; created_at: Date }>' resolves to '{ userId: string; createdAt: Date }' automatically"
+              ],
+              "conclusion": "By combining template literal types for string manipulation and mapped types with key remapping, you can build a compile-time transformation layer between your database schema and application model without writing any runtime transformation code. This pattern eliminates an entire class of property-name-mismatch bugs."
+            }
+          ],
+          "retrievalPractice": [
+            {
+              "retrievalItemId": "rp-01-03",
+              "retrievalType": "free-recall",
+              "prompt": "Describe the syntax of a mapped type and explain what the 'as' clause does.",
+              "difficulty": 3,
+              "schedule": {
+                "initialReviewDays": 1,
+                "subsequentReviewDays": [3, 7, 14, 30]
+              }
+            }
+          ],
+          "transferExercises": [
+            {
+              "exerciseId": "te-01-02",
+              "context": "startup-config",
+              "scenario": "Your startup reads configuration from environment variables. You have a type 'AppConfig' with keys like 'databaseUrl', 'jwtSecret', and 'redisPort'. You want a type that automatically generates the expected environment variable names as a union: 'DATABASE_URL' | 'JWT_SECRET' | 'REDIS_PORT'.",
+              "task": "Write the TypeScript type transformation that converts camelCase config keys to SCREAMING_SNAKE_CASE environment variable names.",
+              "successCriteria": [
+                "Uses template literal types to insert underscores before uppercase letters",
+                "Applies Uppercase<> to produce the final screaming snake case",
+                "Produces the correct string union from a given AppConfig interface"
+              ]
+            }
+          ],
+          "masteryVerification": {
+            "assessmentIds": ["assessment-advanced-types"],
+            "requiredPerformance": {
+              "minimumAccuracy": 0.8,
+              "minimumTransferScore": 0.75
+            }
+          }
+        }
+      ],
+      "quiz": {
+        "quizId": "quiz-section-01",
+        "title": "Section 1 Quiz: Advanced Type System",
+        "passingScore": 80,
+        "attemptsAllowed": 3,
+        "interleaved": true,
+        "questions": [
+          {
+            "questionId": "q-01-01",
+            "difficulty": 3,
+            "prompt": "What does the 'infer' keyword do in a TypeScript conditional type?",
+            "questionType": "multiple-choice",
+            "explanation": "The 'infer' keyword declares a new type variable within the extends clause of a conditional type, capturing the matched portion of the structure for use in the true branch.",
+            "options": [
+              {
+                "optionId": "q-01-01-a",
+                "text": "It tells TypeScript to automatically infer the type of a variable from its initial value.",
+                "correct": false,
+                "explanation": "This describes normal type inference for variable declarations, not the 'infer' keyword which is specific to conditional types."
+              },
+              {
+                "optionId": "q-01-01-b",
+                "text": "It declares a type variable inside the 'extends' clause that captures part of the matched type, usable in the true branch.",
+                "correct": true,
+                "explanation": "Correct. 'infer R' within 'T extends Promise<infer R>' binds R to the resolved type of the Promise when T matches, making R available in the true branch."
+              },
+              {
+                "optionId": "q-01-01-c",
+                "text": "It prevents TypeScript from widening a literal type to its base type.",
+                "correct": false,
+                "explanation": "That behavior is achieved with 'as const' or explicit literal type annotations, not the 'infer' keyword."
+              },
+              {
+                "optionId": "q-01-01-d",
+                "text": "It enables automatic type casting between compatible primitive types.",
+                "correct": false,
+                "explanation": "TypeScript does not perform implicit type casting. 'infer' is for extracting type information inside conditional types, not casting."
+              }
+            ]
+          },
+          {
+            "questionId": "q-01-02",
+            "difficulty": 2,
+            "prompt": "Using 'any' as a type annotation in a shared utility function is an acceptable practice when generics are too complex.",
+            "questionType": "true-false",
+            "explanation": "Using 'any' removes all type checking for that value and propagates unsafety to all callers. 'unknown' combined with type narrowing is always the correct alternative.",
+            "options": [
+              {
+                "optionId": "q-01-02-true",
+                "text": "True",
+                "correct": false,
+                "explanation": "False. 'any' disables type checking entirely and silently undermines the safety guarantees of TypeScript throughout the codebase. 'unknown' is the correct choice when the type is genuinely not known."
+              },
+              {
+                "optionId": "q-01-02-false",
+                "text": "False",
+                "correct": true,
+                "explanation": "Correct. 'any' is an escape hatch, not a solution. It disables TypeScript's safety for that value and every value derived from it, making refactoring dangerous and bugs harder to catch."
+              }
+            ]
+          },
+          {
+            "questionId": "q-01-03",
+            "difficulty": 4,
+            "prompt": "Write a TypeScript type 'PromiseReturn<T>' that, given a function type T, extracts the resolved value of the Promise it returns. For example, given a function '() => Promise<string>', the type should resolve to 'string'.",
+            "questionType": "short-answer",
+            "explanation": "This requires two levels of conditional types: one to extract the return type of the function, and one to unwrap the Promise.",
+            "answer": "type PromiseReturn<T extends (...args: any[]) => any> = T extends (...args: any[]) => Promise<infer R> ? R : never;",
+            "options": []
+          },
+          {
+            "questionId": "q-01-04",
+            "difficulty": 3,
+            "prompt": "Which TypeScript built-in utility type is implemented using a mapped type?",
+            "questionType": "multiple-choice",
+            "explanation": "Partial<T> is implemented as '{ [P in keyof T]?: T[P] }', a mapped type that makes all properties optional. The others are not implemented using mapped types.",
+            "options": [
+              {
+                "optionId": "q-01-04-a",
+                "text": "Partial<T>",
+                "correct": true,
+                "explanation": "Correct. Partial<T> is '{ [P in keyof T]?: T[P] }' â it maps over every key of T and marks it optional."
+              },
+              {
+                "optionId": "q-01-04-b",
+                "text": "Awaited<T>",
+                "correct": false,
+                "explanation": "Awaited<T> is implemented using a recursive conditional type with 'infer', not a mapped type."
+              },
+              {
+                "optionId": "q-01-04-c",
+                "text": "Parameters<T>",
+                "correct": false,
+                "explanation": "Parameters<T> is a conditional type using 'infer' to extract the parameter tuple from a function type."
+              },
+              {
+                "optionId": "q-01-04-d",
+                "text": "ReturnType<T>",
+                "correct": false,
+                "explanation": "ReturnType<T> uses a conditional type with 'infer' to extract the return type of a function, not a mapped type."
+              }
+            ]
+          },
+          {
+            "questionId": "q-01-05",
+            "difficulty": 3,
+            "prompt": "Template literal types can be combined with mapped types to rename keys. Given type 'T = { name: string }', what does '{ [K in keyof T as `get${Capitalize<string & K>}`]: T[K] }' produce?",
+            "questionType": "short-answer",
+            "explanation": "The 'as' clause renames each key using a template literal type. 'name' becomes 'getName' because Capitalize<'name'> is 'Name' and the template produces 'getName'.",
+            "answer": "{ getName: string }",
+            "options": []
+          }
+        ]
+      },
+      "practicalActivity": {
+        "title": "Build a Type-Safe Domain Model for a SaaS Startup",
+        "description": "Apply advanced TypeScript types to model a SaaS billing domain in a way that makes invalid states unrepresentable.",
+        "scenario": "You are the first TypeScript engineer at a SaaS startup. The product has three user tiers: Free, Pro, and Enterprise. A Free user cannot have a billing address. A Pro user must have a payment method. An Enterprise user must have both a payment method and a contract ID. Model these constraints in the type system so the compiler enforces them.",
+        "steps": [
+          "Define a discriminated union for UserTier: 'type UserTier = \"free\" | \"pro\" | \"enterprise\"'",
+          "Create a base user type with shared fields: id, email, tier, createdAt",
+          "Use conditional types or discriminated union interfaces to attach tier-specific fields: FreeUser has no billing fields, ProUser has paymentMethodId, EnterpriseUser has paymentMethodId and contractId",
+          "Write a union type: 'type User = FreeUser | ProUser | EnterpriseUser'",
+          "Write a function 'getInvoice(user: User)' that uses type narrowing (via 'user.tier') to safely access billing fields only when they exist, without any type assertions",
+          "Test that attempting to access 'contractId' on a FreeUser produces a compile-time error"
+        ],
+        "successCriteria": [
+          "Each user tier is a separate interface with tier as a literal type discriminant",
+          "The union type User correctly aggregates all three interfaces",
+          "The getInvoice function narrows the type without using 'as' or 'any'",
+          "Accessing tier-specific properties on the wrong tier produces a compile error"
+        ],
+        "downloadableTemplate": ""
+      },
+      "summary": [
+        "Conditional types ('T extends U ? X : Y') evaluate differently depending on the type argument, enabling powerful type-level logic.",
+        "The 'infer' keyword captures a portion of a matched type into a new type variable, used to build utilities like ReturnType<T> and Awaited<T>.",
+        "Mapped types iterate over the keys of an existing type to produce a transformed new type, powering utilities like Partial<T> and Readonly<T>.",
+        "Template literal types construct string union types programmatically, useful for event names, API routes, and environment variable names.",
+        "Replacing 'any' with 'unknown' plus type narrowing is always the correct approach for values of uncertain type."
+      ]
+    },
+    {
+      "sectionId": "section-02-architecture",
+      "title": "Section 2: Scalable TypeScript Architecture",
+      "description": "Learn to structure a startup TypeScript codebase using layered architecture, dependency injection, module boundaries, and SOLID principles that scale gracefully from one engineer to twenty.",
+      "whyThisMatters": "The architecture decisions you make in a startup's first months compound over years. A well-structured TypeScript codebase with clear module boundaries, dependency injection, and typed interfaces between layers lets you onboard new engineers in days instead of weeks, and refactor with confidence instead of fear.",
+      "reviewContent": [
+        "What are the three core layers in a typical backend architecture, and what is each responsible for?",
+        "What is dependency injection, and why does it improve testability?",
+        "What is the Dependency Inversion Principle, and how do TypeScript interfaces implement it?",
+        "What is a barrel file (index.ts), and what are the risks of overusing it?",
+        "What is the difference between a repository pattern and a service layer?"
+      ],
+      "learningObjectives": [
+        {
+          "objectiveId": "obj-02-01",
+          "description": "Design a three-layer architecture (controller, service, repository) with typed interfaces between each layer.",
+          "linkedCompetencies": ["architecture-patterns-02"]
+        },
+        {
+          "objectiveId": "obj-02-02",
+          "description": "Implement constructor-based dependency injection using TypeScript interfaces and avoid concrete coupling.",
+          "linkedCompetencies": ["architecture-patterns-02"]
+        },
+        {
+          "objectiveId": "obj-02-03",
+          "description": "Define module boundaries with explicit public APIs using barrel files and path aliases.",
+          "linkedCompetencies": ["architecture-patterns-02"]
+        },
+        {
+          "objectiveId": "obj-02-04",
+          "description": "Apply SOLID principles to TypeScript class design and identify violations in existing code.",
+          "linkedCompetencies": ["architecture-patterns-02"]
+        }
+      ],
+      "motivationHooks": [
+        {
+          "type": "real-world-stakes",
+          "prompt": "Linear, the project management tool, is known for its extraordinarily fast codebase iteration speed. They attribute this partly to strict module boundaries that prevent engineers from accidentally creating circular dependencies or coupling unrelated subsystems."
+        },
+        {
+          "type": "prediction-gap",
+          "prompt": "Look at this: 'import { db } from \"../../db\"' inside a controller file. How many architectural principles does this single line violate? Most engineers say one or twoâthe actual answer is four."
+        }
+      ],
+      "learningExperiences": [
+        {
+          "experienceId": "exp-02-layered-arch",
+          "title": "Layered Architecture and the Repository Pattern",
+          "experienceType": "guided-analysis",
+          "difficultyProfile": {
+            "overall": 4,
+            "conceptualComplexity": 4,
+            "ambiguity": 3
+          },
+          "estimatedDurationMinutes": 35,
+          "linkedCompetencies": ["architecture-patterns-02"],
+          "desiredCognitiveActions": ["analysis", "application", "reflection"],
+          "contentBlocks": [
+            {
+              "blockId": "cb-02-01",
+              "type": "text",
+              "content": "A layered architecture divides your application into three primary horizontal slices: the presentation layer (controllers, route handlers), the business logic layer (services), and the data access layer (repositories). Each layer may only communicate with the layer directly below it. Controllers call services; services call repositories; repositories call the database. This constraint might seem arbitrary, but it creates enormous practical value: you can swap out your database driver without touching a single service, you can test your business logic without a real database connection, and you can change your API shape without rewriting your domain logic. In TypeScript, the contract between layers is enforced through interfacesâeach layer depends on an interface, not a concrete implementation."
+            },
+            {
+              "blockId": "cb-02-02",
+              "type": "text",
+              "content": "The repository pattern specifically abstracts data access behind a typed interface. Instead of calling 'db.query(\"SELECT * FROM users WHERE id = $1\", [id])' directly in a service, you define 'interface UserRepository { findById(id: string): Promise<User | null>; save(user: User): Promise<void>; }'. The service receives an instance of this interface through its constructor. You can then have a PostgresUserRepository for production and an InMemoryUserRepository for testsâboth implementing the same interfaceâwithout the service knowing or caring which it receives. This is the Dependency Inversion Principle in action: high-level modules (services) depend on abstractions (interfaces), not low-level modules (database drivers)."
+            }
+          ],
+          "interactionSequence": [
+            {
+              "interactionId": "interact-02-01",
+              "interactionType": "prediction",
+              "prompt": "A controller directly imports and calls a Prisma client query. Name at least three problems this causes for long-term maintainability.",
+              "required": true,
+              "responseFormat": "short-answer",
+              "revealCondition": "after-response",
+              "confidencePrompt": {
+                "enabled": true,
+                "scaleMin": 1,
+                "scaleMax": 5,
+                "prompt": "How confident are you?"
+              }
+            },
+            {
+              "interactionId": "interact-02-02",
+              "interactionType": "compare-responses",
+              "responseModels": {
+                "expertResponse": {
+                  "answer": "1. It violates the single responsibility principleâcontrollers should handle HTTP concerns, not database logic. 2. It makes the controller untestable in isolationâyou need a live database to test any behavior. 3. It creates tight couplingâswitching ORMs requires changes in every controller. 4. It leaks implementation details across layers, making the codebase harder to reason about.",
+                  "reasoningSteps": [
+                    "Identify what the controller's responsibility should be",
+                    "Consider what is required to write a unit test for it",
+                    "Consider what changes when you switch database libraries",
+                    "Evaluate what other engineers need to understand to modify it"
+                  ]
+                },
+                "strongLearnerResponse": {
+                  "answer": "It's hard to test and the controller knows too much about the database."
+                },
+                "weakResponse": {
+                  "answer": "It's a bit messy but works fine for small apps.",
+                  "diagnosis": [
+                    "Does not identify the testability problem",
+                    "Does not recognize the coupling issue or its long-term cost"
+                  ]
+                }
+              }
+            },
+            {
+              "interactionId": "interact-02-03",
+              "interactionType": "reflection",
+              "prompt": "Think about a service or codebase you have worked on. Which layer violations were most common, and what bugs did they cause?",
+              "timing": "post-feedback"
+            }
+          ],
+          "workedExamples": [
+            {
+              "exampleId": "we-02-01",
+              "problem": "A startup has a UserController that directly imports Prisma and executes database queries inline. The team wants to add tests and is also considering switching from Prisma to Drizzle. Refactor to a proper layered architecture.",
+              "steps": [
+                "Define the repository interface in a shared types file: 'interface IUserRepository { findById(id: string): Promise<User | null>; create(data: CreateUserDto): Promise<User>; }'",
+                "Create a PrismaUserRepository class implementing IUserRepository: it receives a PrismaClient in its constructor and delegates to it",
+                "Create a UserService class: its constructor accepts 'private readonly userRepo: IUserRepository'. It contains all business logic such as checking for duplicate emails before creating a user",
+                "Create a UserController class: its constructor accepts 'private readonly userService: UserService'. It handles HTTP request parsing and delegates to the service",
+                "Wire everything together in a composition root (e.g., server.ts): 'const repo = new PrismaUserRepository(prisma); const service = new UserService(repo); const controller = new UserController(service);'",
+                "For tests, replace PrismaUserRepository with an InMemoryUserRepositoryâthe service code does not change at all"
+              ],
+              "conclusion": "The refactored architecture allows you to test the service in complete isolation, swap the database layer without touching business logic, and reason about each layer independently. The TypeScript interface is the contract that makes all of this possible without runtime overhead."
+            }
+          ],
+          "retrievalPractice": [
+            {
+              "retrievalItemId": "rp-02-01",
+              "retrievalType": "free-recall",
+              "prompt": "From memory, describe the three layers of a backend architecture and what each one is responsible for.",
+              "difficulty": 2,
+              "schedule": {
+                "initialReviewDays": 1,
+                "subsequentReviewDays": [3, 7, 14, 30]
+              }
+            },
+            {
+              "retrievalItemId": "rp-02-02",
+              "retrievalType": "application",
+              "prompt": "Write the TypeScript interface for a ProductRepository that supports finding by ID, listing with pagination, and deleting.",
+              "difficulty": 3,
+              "schedule": {
+                "initialReviewDays": 1,
+                "subsequentReviewDays": [3, 7, 14]
+              }
+            }
+          ],
+          "transferExercises": [
+            {
+              "exerciseId": "te-02-01",
+              "context": "startup-payments",
+              "scenario": "Your startup's payment processing currently calls Stripe's SDK directly inside the order controller. The CEO wants to evaluate switching to Paddle. You need to refactor so that the payment provider can be swapped with zero changes to business logic.",
+              "task": "Design the IPaymentProvider interface, a StripePaymentProvider implementation, and show how the OrderService consumes the interface. Sketch the composition root.",
+              "successCriteria": [
+                "IPaymentProvider interface covers charge, refund, and getTransaction operations",
+                "StripePaymentProvider wraps Stripe SDK and implements the interface",
+                "OrderService receives IPaymentProvider via constructor injection",
+                "Switching to Paddle only requires a new PaddlePaymentProvider class and a change in the composition root"
+              ]
+            }
+          ],
+          "masteryVerification": {
+            "assessmentIds": ["assessment-architecture"],
+            "requiredPerformance": {
+              "minimumAccuracy": 0.8,
+              "minimumTransferScore": 0.75
+            }
+          }
+        },
+        {
+          "experienceId": "exp-02-module-boundaries",
+          "title": "Module Boundaries, Path Aliases, and SOLID Principles",
+          "experienceType": "guided-analysis",
+          "difficultyProfile": {
+            "overall": 4,
+            "conceptualComplexity": 4,
+            "ambiguity": 4
+          },
+          "estimatedDurationMinutes": 30,
+          "linkedCompetencies": ["architecture-patterns-02"],
+          "desiredCognitiveActions": ["analysis", "application", "retrieval"],
+          "contentBlocks": [
+            {
+              "blockId": "cb-02-03",
+              "type": "text",
+              "content": "Module boundaries define which parts of your codebase are public API and which are internal implementation details. The most common way to enforce this in TypeScript is through barrel filesâindex.ts files at the root of each module that explicitly re-export only the public surface. For example, a 'users' module might export 'UserService' and 'IUserRepository' but not 'UserRepository' (the Prisma implementation). Any code outside the module imports from '@/users' (the barrel) rather than '@/users/infrastructure/prisma-user-repository'. If you later restructure internals, no external import paths break. Path aliases in tsconfig.json (e.g., '@/users' mapping to 'src/users/index.ts') make this ergonomic and self-documenting."
+            },
+            {
+              "blockId": "cb-02-04",
+              "type": "text",
+              "content": "The SOLID principles translate directly into practical TypeScript patterns. The Single Responsibility Principle means a UserService handles user business logicâit does not also send emails, process payments, or format API responses. When a class does too much, split it. The Open/Closed Principle means you add new behavior through new classes implementing existing interfaces rather than modifying existing working code. The Liskov Substitution Principle means every implementation of an interface must fulfill the full contractâif InMemoryUserRepository behaves differently from PrismaUserRepository in ways the service depends on, your tests will pass but production will fail. The Interface Segregation Principle means your IUserRepository should not include methods that half of its consumers will never use. The Dependency Inversion Principle, already covered, is the backbone of testability."
+            }
+          ],
+          "interactionSequence": [
+            {
+              "interactionId": "interact-02-04",
+              "interactionType": "prediction",
+              "prompt": "A single UserService class has methods: createUser, sendWelcomeEmail, chargePaymentMethod, generateInvoicePdf, and logUserActivity. Which SOLID principle does this violate most severely?",
+              "required": true,
+              "responseFormat": "short-answer",
+              "revealCondition": "after-response",
+              "confidencePrompt": {
+                "enabled": true,
+                "scaleMin": 1,
+                "scaleMax": 5,
+                "prompt": "How confident are you?"
+              }
+            },
+            {
+              "interactionId": "interact-02-05",
+              "interactionType": "reflection",
+              "prompt": "If this UserService needed a change to how invoices are generated, which other seemingly unrelated behaviors would you risk breaking?",
+              "timing": "post-feedback"
+            }
+          ],
+          "workedExamples": [
+            {
+              "exampleId": "we-02-02",
+              "problem": "Your startup's codebase has deeply nested relative imports like '../../../shared/utils/format-date' scattered across dozens of files. When the team moved the utils folder, 47 import paths broke. Set up path aliases and module boundaries to prevent this.",
+              "steps": [
+                "In tsconfig.json, add 'paths' under 'compilerOptions': { \"@/*\": [\"src/*\"] }",
+                "If using a bundler like esbuild or Vite, configure the same alias mapping there",
+                "Create src/shared/index.ts that explicitly exports: 'export { formatDate } from \"./utils/format-date\"; export type { PaginationParams } from \"./types/pagination\";'",
+                "Update all imports to use '@/shared' instead of relative paths",
+                "For domain modules, create src/users/index.ts, src/orders/index.ts, etc., each exporting only the public API",
+                "Add an ESLint rule (e.g., no-restricted-imports) to prevent modules from importing from each other's internal paths directly"
+              ],
+              "conclusion": "Path aliases eliminate fragile relative import chains. Barrel files make module public APIs explicit and allow internal restructuring without breaking consumers. Together they create a codebase where 'where do I import X from?' always has a clear, stable answer."
+            }
+          ],
+          "retrievalPractice": [
+            {
+              "retrievalItemId": "rp-02-03",
+              "retrievalType": "free-recall",
+              "prompt": "Name the five SOLID principles and give a one-sentence description of each.",
+              "difficulty": 3,
+              "schedule": {
+                "initialReviewDays": 1,
+                "subsequentReviewDays": [3, 7, 14, 30]
+              }
+            }
+          ],
+          "transferExercises": [
+            {
+              "exerciseId": "te-02-02",
+              "context": "startup-notifications",
+              "scenario": "Your startup needs to send notifications via email, SMS, and push. Currently a single NotificationService handles all three with if/else branches for each channel. Adding a new channel requires modifying the existing class, which has caused two regressions.",
+              "task": "Redesign using the Open/Closed Principle. Define an INotificationChannel interface, implement EmailChannel, SmsChannel, and PushChannel, and show how NotificationService becomes closed for modification but open for extension.",
+              "successCriteria": [
+                "INotificationChannel interface defined with a 'send' method",
+                "Each channel is a separate class implementing the interface",
+                "NotificationService receives an array of INotificationChannel via constructor",
+                "Adding a new channel requires zero changes to NotificationService"
+              ]
+            }
+          ],
+          "masteryVerification": {
+            "assessmentIds": ["assessment-architecture"],
+            "requiredPerformance": {
+              "minimumAccuracy": 0.8,
+              "minimumTransferScore": 0.75
+            }
+          }
+        }
+      ],
+      "quiz": {
+        "quizId": "quiz-section-02",
+        "title": "Section 2 Quiz: Scalable Architecture",
+        "passingScore": 80,
+        "attemptsAllowed": 3,
+        "interleaved": true,
+        "questions": [
+          {
+            "questionId": "q-02-01",
+            "difficulty": 2,
+            "prompt": "In a layered architecture, which of the following is a correct dependency direction?",
+            "questionType": "multiple-choice",
+            "explanation": "In a layered architecture, dependency flows downward: Controller â Service â Repository. The database/infrastructure layer is at the bottom and knows nothing about the layers above it.",
+            "options": [
+              {
+                "optionId": "q-02-01-a",
+                "text": "Repository imports from Service to trigger cache invalidation.",
+                "correct": false,
+                "explanation": "This is an upward dependencyâthe data layer depending on the business layerâwhich violates the layered architecture principle."
+              },
+              {
+                "optionId": "q-02-01-b",
+                "text": "Controller imports from Service, Service imports from Repository.",
+                "correct": true,
+                "explanation": "Correct. This is the standard downward dependency flow. Each layer depends only on the layer directly below it."
+              },
+              {
+                "optionId": "q-02-01-c",
+                "text": "Service imports directly from the database client without a repository abstraction.",
+                "correct": false,
+                "explanation": "This bypasses the repository layer and couples business logic directly to the database driver, violating both DIP and layered architecture."
+              },
+              {
+                "optionId": "q-02-01-d",
+                "text": "Controller imports from Repository directly for read operations since it's faster.",
+                "correct": false,
+                "explanation": "Skipping the service layer couples the controller to data access and moves business logic decisions into the wrong layer."
+              }
+            ]
+          },
+          {
+            "questionId": "q-02-02",
+            "difficulty": 3,
+            "prompt": "Dependency injection means a class creates its own dependencies using 'new' internally so they are always available.",
+            "questionType": "true-false",
+            "explanation": "Dependency injection is the opposite: dependencies are provided to the class from the outside (via constructor, method, or property injection) rather than created internally. This decouples the class from concrete implementations.",
+            "options": [
+              {
+                "optionId": "q-02-02-true",
+                "text": "True",
+                "correct": false,
+                "explanation": "False. Creating dependencies internally with 'new' is the pattern DI replaces. Internal instantiation tightly couples a class to a specific implementation, making it impossible to swap for testing or alternate configurations."
+              },
+              {
+                "optionId": "q-02-02-false",
+                "text": "False",
+                "correct": true,
+                "explanation": "Correct. Dependency injection means dependencies are provided externally. The class declares what it needs (via interface types in its constructor), and the composition root wires them together."
+              }
+            ]
+          },
+          {
+            "questionId": "q-02-03",
+            "difficulty": 3,
+            "prompt": "Describe what a TypeScript barrel file (index.ts) is and explain one benefit and one risk of using it.",
+            "questionType": "short-answer",
+            "explanation": "Barrel files aggregate and re-export a module's public API. The benefit is stable import paths; the risk is circular dependencies when barrel files import from each other in a cycle.",
+            "answer": "A barrel file is an index.ts that re-exports selected symbols from a module, defining its public API. Benefit: consumers import from a stable path regardless of internal file structure. Risk: barrel files can create circular dependency issues if modules import from each other's barrels in a cycle.",
+            "options": []
+          },
+          {
+            "questionId": "q-02-04",
+            "difficulty": 4,
+            "prompt": "Which SOLID principle is most directly violated when a UserService class contains methods for user management, email sending, and PDF invoice generation?",
+            "questionType": "multiple-choice",
+            "explanation": "The Single Responsibility Principle states that a class should have only one reason to change. A class handling user management, email, and PDF generation has at least three independent reasons to change.",
+            "options": [
+              {
+                "optionId": "q-02-04-a",
+                "text": "Open/Closed Principle",
+                "correct": false,
+                "explanation": "The Open/Closed Principle is about being open for extension and closed for modification. The described violation is about having too many responsibilities, not about modification patterns."
+              },
+              {
+                "optionId": "q-02-04-b",
+                "text": "Single Responsibility Principle",
+                "correct": true,
+                "explanation": "Correct. The class has at least three distinct responsibilities (and three separate reasons to change), violating SRP. Each responsibility should be its own class."
+              },
+              {
+                "optionId": "q-02-04-c",
+                "text": "Liskov Substitution Principle",
+                "correct": false,
+                "explanation": "LSP is about subtype behavior compatibility. The described issue is about a class doing too many things, which is a SRP violation."
+              },
+              {
+                "optionId": "q-02-04-d",
+                "text": "Interface Segregation Principle",
+                "correct": false,
+                "explanation": "ISP is about keeping interfaces narrow and focused. While related, the primary violation here is a class with too many responsibilities, which is SRP."
+              }
+            ]
+          },
+          {
+            "questionId": "q-02-05",
+            "difficulty": 3,
+            "prompt": "Path aliases configured in tsconfig.json are automatically recognized by Node.js at runtime without any additional configuration.",
+            "questionType": "true-false",
+            "explanation": "tsconfig.json path aliases are a TypeScript compiler feature only. Node.js does not read tsconfig.json and will throw 'Cannot find module' errors unless you also configure the runtime or bundler (e.g., using tsconfig-paths, esbuild alias, or Vite resolve.alias).",
+            "options": [
+              {
+                "optionId": "q-02-05-true",
+                "text": "True",
+                "correct": false,
+                "explanation": "False. TypeScript path aliases are compile-time only. Node.js runtime does not honor them. You must configure your build tool (esbuild, tsc + tsconfig-paths, etc.) to resolve them at runtime."
+              },
+              {
+                "optionId": "q-02-05-false",
+                "text": "False",
+                "correct": true,
+                "explanation": "Correct. Path aliases in tsconfig.json only tell the TypeScript compiler how to resolve imports for type checking. You need a separate runtime or bundler configuration to resolve them when the code actually runs."
+              }
+            ]
+          }
+        ]
+      },
+      "practicalActivity": {
+        "title": "Refactor a Monolithic Express Handler into a Layered Architecture",
+        "description": "Take a realistic but poorly structured Express route handler and refactor it into a proper three-layer architecture with TypeScript interfaces between each layer.",
+        "scenario": "You have inherited a startup's user registration endpoint. The single route handler does everything: validates the request body, hashes the password, queries the database directly with a raw SQL string, sends a welcome email by calling the SMTP library directly, and logs the event. Your job is to refactor this into a layered architecture that could be tested in isolation and extended without regression.",
+        "steps": [
+          "Identify and list all responsibilities in the current handler",
+          "Define a CreateUserDto type and use Zod to validate the incoming request body at the controller layer",
+          "Define the IUserRepository interface with 'findByEmail' and 'create' methods",
+          "Define an IEmailService interface with a 'sendWelcome' method",
+          "Implement PostgresUserRepository and SmtpEmailService as concrete classes",
+          "Implement UserService with constructor injection of IUserRepository and IEmailService. Move the business logic (duplicate email check, password hashing) here",
+          "Refactor the Express handler (UserController) to only parse/validate the request and delegate to UserService",
+          "Create a composition root file that wires the concrete implementations together",
+          "Verify that UserService can be tested with an InMemoryUserRepository and a MockEmailService with zero real I/O"
+        ],
+        "successCriteria": [
+          "Controller has no direct database or email library imports",
+          "Service contains all business logic and depends only on interfaces",
+          "Repository and EmailService are swappable without changing the service",
+          "Unit tests for UserService run without a real database or SMTP server"
+        ],
+        "downloadableTemplate": ""
+      },
+      "summary": [
+        "A layered architecture (Controller â Service â Repository) separates HTTP concerns, business logic, and data access into distinct, independently testable units.",
+        "The repository pattern abstracts data access behind a TypeScript interface, enabling database swaps and in-memory test doubles.",
+        "Constructor-based dependency injection is the most common and idiomatic DI pattern in TypeScript; it makes dependencies explicit and testable.",
+        "Barrel files (index.ts) define a module's public API and keep internal implementation details private, enabling fearless internal refactoring.",
+        "Path aliases in tsconfig.json improve ergonomics and stability of import paths but require corresponding configuration in your build tool or runtime.",
+        "SOLID principles are practical TypeScript guidelines: SRP, OCP, LSP, ISP, and DIP each reduce coupling and increase testability in measurable ways."
+      ]
+    },
+    {
+      "sectionId": "section-03-backend-services",
+      "title": "Section 3: Building Type-Safe Backend Services",
+      "description": "Build production-grade API endpoints, database access layers, and authentication flows using TypeScript from HTTP handler to database query, with runtime validation at every external boundary.",
+      "whyThisMatters": "A startup's backend is where money flows, user data lives, and security vulnerabilities hide. End-to-end TypeScript type safetyâfrom validated request bodies through typed database queries to typed API responsesâeliminates entire categories of bugs (null pointer errors, invalid field names, type mismatches) before they reach production.",
+      "reviewContent": [
+        "What is Zod and why is runtime validation necessary even when TypeScript types are defined?",
+        "What is tRPC and how does it differ from a traditional REST API?",
+        "What is an ORM and how does Drizzle or Prisma provide TypeScript safety for database queries?",
+        "What is a JWT and what should and should not be stored in its payload?",
+        "What is the difference between authentication and authorization?"
+      ],
+      "learningObjectives": [
+        {
+          "objectiveId": "obj-03-01",
+          "description": "Build a type-safe REST API with Zod-validated request bodies and typed response shapes using Express or Fastify.",
+          "linkedCompetencies": ["backend-services-03"]
+        },
+        {
+          "objectiveId": "obj-03-02",
+          "description": "Implement a tRPC router with typed procedures, middleware, and context to share types between server and client.",
+          "linkedCompetencies": ["backend-services-03"]
+        },
+        {
+          "objectiveId": "obj-03-03",
+          "description": "Write typed database queries using Drizzle ORM with a schema-first approach and understand how types flow from schema to query result.",
+          "linkedCompetencies": ["backend-services-03"]
+        },
+        {
+          "objectiveId": "obj-03-04",
+          "description": "Implement a JWT-based authentication flow with typed middleware that attaches the verified user to the request context.",
+          "linkedCompetencies": ["backend-services-03"]
+        }
+      ],
+      "motivationHooks": [
+        {
+          "type": "real-world-stakes",
+          "prompt": "The 2022 Twitter breach exposed 5.4 million user records partly due to a lack of input validation on an API endpoint. A Zod schema validating every external input would have rejected the malformed request before any damage was done."
+        },
+        {
+          "type": "prediction-gap",
+          "prompt": "Your TypeScript API receives a user ID from a request parameter. You have 'const userId: string = req.params.id'. Is this actually type-safe? The answer reveals why you always need runtime validationâand most engineers get this wrong."
+        }
+      ],
+      "learningExperiences": [
+        {
+          "experienceId": "exp-03-rest-zod",
+          "title": "Type-Safe REST APIs with Zod Validation",
+          "experienceType": "guided-analysis",
+          "difficultyProfile": {
+            "overall": 4,
+            "conceptualComplexity": 3,
+            "ambiguity": 2
+          },
+          "estimatedDurationMinutes": 30,
+          "linkedCompetencies": ["backend-services-03"],
+          "desiredCognitiveActions": ["application", "analysis", "retrieval"],
+          "contentBlocks": [
+            {
+              "blockId": "cb-03-01",
+              "type": "text",
+              "content": "Express and Fastify are the dominant Node.js HTTP frameworks, and both work exceptionally well with TypeScript when configured correctly. The critical insight is that TypeScript types are erased at runtimeâwhen an HTTP request arrives, Node.js sees raw JavaScript objects with no type information. A request body typed as 'CreateUserDto' in your TypeScript code is actually just 'any' at runtime; the TypeScript type annotation was a lie. Zod solves this by providing runtime schema validation that also generates TypeScript types. You define your schema once: 'const createUserSchema = z.object({ email: z.string().email(), password: z.string().min(8) })'. Then validate: 'const result = createUserSchema.safeParse(req.body)'. If parsing succeeds, 'result.data' is fully typed. If it fails, 'result.error' contains structured error details you can return to the client. The TypeScript type 'z.infer<typeof createUserSchema>' gives you the corresponding TypeScript type, ensuring your Zod schema and your TypeScript type are always in sync."
+            },
+            {
+              "blockId": "cb-03-02",
+              "type": "text",
+              "content": "tRPC takes type safety further by eliminating the REST contract entirely. In tRPC, you define procedures on the serverâqueries (GET-like) and mutations (POST-like)âand the client calls them as if they were regular TypeScript functions. The type information flows from server to client through a shared type export. Because both server and client share the same TypeScript process (or the types are in a shared package), there is no OpenAPI spec, no code generation, and no schema drift between what the server sends and what the client expects. A server procedure 'createUser.mutate({ email: string, password: string })' is called on the client with exactly those typesâif the server changes the return shape, the TypeScript compiler tells you everywhere the client breaks. This is the most powerful type-safety story available for TypeScript full-stack development."
+            }
+          ],
+          "interactionSequence": [
+            {
+              "interactionId": "interact-03-01",
+              "interactionType": "prediction",
+              "prompt": "An Express handler has: 'const body: CreateUserDto = req.body'. A malicious client sends '{ email: null, password: 12345 }'. What happens and why?",
+              "required": true,
+              "responseFormat": "short-answer",
+              "revealCondition": "after-response",
+              "confidencePrompt": {
+                "enabled": true,
+                "scaleMin": 1,
+                "scaleMax": 5,
+                "prompt": "How confident are you?"
+              }
+            },
+            {
+              "interactionId": "interact-03-02",
+              "interactionType": "compare-responses",
+              "responseModels": {
+                "expertResponse": {
+                  "answer": "The TypeScript annotation 'CreateUserDto' is erased at runtime. The assignment succeeds silently because req.body is 'any'. The handler proceeds with null as the email and 12345 as the password. Downstream code that calls email.toLowerCase() will throw a runtime TypeError at best; at worst, null or invalid data will be persisted to the database. Runtime validation with Zod would have caught this before any business logic ran.",
+                  "reasoningSteps": [
+                    "Recognize that TypeScript types are erased at runtime",
+                    "Understand that req.body is typed as 'any' by Express",
+                    "Trace the malformed data through the handler",
+                    "Identify the failure point and the fix"
+                  ]
+                },
+                "strongLearnerResponse": {
+                  "answer": "The type annotation is erased so the malformed data passes through and causes a runtime error."
+                },
+                "weakResponse": {
+                  "answer": "TypeScript will catch this and throw an error.",
+                  "diagnosis": [
+                    "Does not understand that TypeScript types are compile-time only",
+                    "Conflates static type checking with runtime validation"
+                  ]
+                }
+              }
+            },
+            {
+              "interactionId": "interact-03-03",
+              "interactionType": "reflection",
+              "prompt": "Which of your current API endpoints accept external input without runtime validation? What is the worst-case scenario if a malformed payload reaches your database?",
+              "timing": "post-feedback"
+            }
+          ],
+          "workedExamples": [
+            {
+              "exampleId": "we-03-01",
+              "problem": "Build a type-safe POST /users endpoint in Express that validates the request body, creates a user, and returns a typed response. The endpoint should return a structured error if validation fails.",
+              "steps": [
+                "Install Zod: 'npm install zod'",
+                "Define the schema and infer the type: 'const createUserSchema = z.object({ email: z.string().email(), name: z.string().min(2), role: z.enum([\"admin\", \"member\"]) }); type CreateUserDto = z.infer<typeof createUserSchema>;'",
+                "Write a reusable validation middleware: 'function validate<T>(schema: ZodSchema<T>) { return (req: Request, res: Response, next: NextFunction) => { const result = schema.safeParse(req.body); if (!result.success) { res.status(400).json({ errors: result.error.flatten() }); return; } req.body = result.data; next(); }; }'",
+                "Define a typed response: 'type CreateUserResponse = { user: { id: string; email: string; name: string; role: string }; }'",
+                "Register the route with middleware: 'router.post(\"/users\", validate(createUserSchema), userController.create)'",
+                "In the controller, 'req.body' is now fully typed as CreateUserDtoâno assertions needed"
+              ],
+              "conclusion": "Combining Zod schemas with a generic validation middleware gives you runtime safety and compile-time types from a single source of truth. The schema defines both; you never write a separate TypeScript interface for validated input."
+            }
+          ],
+          "retrievalPractice": [
+            {
+              "retrievalItemId": "rp-03-01",
+              "retrievalType": "free-recall",
+              "prompt": "Explain why TypeScript type annotations on req.body are not sufficient for production API safety.",
+              "difficulty": 2,
+              "schedule": {
+                "initialReviewDays": 1,
+                "subsequentReviewDays": [3, 7, 14, 30]
+              }
+            },
+            {
+              "retrievalItemId": "rp-03-02",
+              "retrievalType": "application",
+              "prompt": "Write a Zod schema for a pagination query: page (positive integer), limit (between 1 and 100), and an optional sort field from a fixed enum of 'createdAt' | 'name'.",
+              "difficulty": 3,
+              "schedule": {
+                "initialReviewDays": 1,
+                "subsequentReviewDays": [3, 7, 14]
+              }
+            }
+          ],
+          "transferExercises": [
+            {
+              "exerciseId": "te-03-01",
+              "context": "startup-orders",
+              "scenario": "Your startup's order creation endpoint currently does no input validation. A bug was filed: a customer placed an order with a negative quantity, which passed to the database and caused an accounting error. The order payload includes productId (UUID), quantity (positive integer), shippingAddress (object with street, city, postalCode strings), and an optional couponCode (alphanumeric string, 6â12 characters).",
+              "task": "Write the complete Zod schema for this order payload, including nested validation for shippingAddress and regex validation for couponCode.",
+              "successCriteria": [
+                "productId validated as UUID string",
+                "quantity validated as positive integer (min 1)",
+                "shippingAddress validated as nested object with all required string fields",
+                "couponCode optional but when present validated as alphanumeric and 6-12 characters",
+                "Schema exported and TypeScript type inferred from it"
+              ]
+            }
+          ],
+          "masteryVerification": {
+            "assessmentIds": ["assessment-backend"],
+            "requiredPerformance": {
+              "minimumAccuracy": 0.8,
+              "minimumTransferScore": 0.75
+            }
+          }
+        },
+        {
+          "experienceId": "exp-03-database-auth",
+          "title": "Typed Database Access with Drizzle ORM and JWT Authentication",
+          "experienceType": "guided-analysis",
+          "difficultyProfile": {
+            "overall": 4,
+            "conceptualComplexity": 4,
+            "ambiguity": 3
+          },
+          "estimatedDurationMinutes": 35,
+          "linkedCompetencies": ["backend-services-03"],
+          "desiredCognitiveActions": ["application", "analysis", "retrieval"],
+          "contentBlocks": [
+            {
+              "blockId": "cb-03-03",
+              "type": "text",
+              "content": "Drizzle ORM is a TypeScript-first ORM that defines your database schema as TypeScript objects and derives query types directly from that schema. Unlike Prisma, which generates types from a separate .prisma schema file, Drizzle keeps the schema in TypeScript, making it trivially compatible with existing TypeScript tooling. A table is defined as: 'export const users = pgTable(\"users\", { id: uuid(\"id\").primaryKey().defaultRandom(), email: text(\"email\").notNull().unique(), createdAt: timestamp(\"created_at\").defaultNow() })'. From this definition, Drizzle infers both the insert type (fields required for inserts) and the select type (what queries return). When you write 'db.select().from(users).where(eq(users.id, id))', the return type is automatically 'typeof users.$inferSelect[]'âa strongly typed array matching exactly your schema columns. There is no mismatch possible between your database shape and your TypeScript types."
+            },
+            {
+              "blockId": "cb-03-04",
+              "type": "text",
+              "content": "JWT authentication in TypeScript requires particular care because the JWT payload is decoded at runtime from a string, meaning TypeScript has no knowledge of its actual shape. The correct pattern is to define a type for your token payload, then validate the decoded token against that type after verification. Using the 'jsonwebtoken' library: define 'interface JwtPayload { userId: string; role: \"admin\" | \"member\"; iat: number; exp: number }'. After calling 'jwt.verify(token, secret)', cast the result with a Zod parse or a type guard rather than a simple 'as JwtPayload' assertion. Then attach the verified payload to the Express request using module augmentation: 'declare module \"express-serve-static-core\" { interface Request { user?: JwtPayload } }'. This makes 'req.user' available with the correct type in all downstream handlers without any casting."
+            }
+          ],
+          "interactionSequence": [
+            {
+              "interactionId": "interact-03-04",
+              "interactionType": "prediction",
+              "prompt": "After 'const decoded = jwt.verify(token, secret) as JwtPayload', a developer accesses 'decoded.userId'. What is the risk of using 'as JwtPayload' here?",
+              "required": true,
+              "responseFormat": "short-answer",
+              "revealCondition": "after-response",
+              "confidencePrompt": {
+                "enabled": true,
+                "scaleMin": 1,
+                "scaleMax": 5,
+                "prompt": "How confident are you?"
+              }
+            },
+            {
+              "interactionId": "interact-03-05",
+              "interactionType": "reflection",
+              "prompt": "In your experience, which runtime bugs have you seen that would have been caught by proper JWT payload validation?",
+              "timing": "post-feedback"
+            }
+          ],
+          "workedExamples": [
+            {
+              "exampleId": "we-03-02",
+              "problem": "Build a complete authentication middleware for an Express app that verifies a JWT from the Authorization header, validates its payload shape using Zod, and attaches the typed user to req.user.",
+              "steps": [
+                "Define the JWT payload Zod schema: 'const jwtPayloadSchema = z.object({ userId: z.string().uuid(), role: z.enum([\"admin\", \"member\"]), iat: z.number(), exp: z.number() }); type JwtPayload = z.infer<typeof jwtPayloadSchema>;'",
+                "Augment the Express Request type: 'declare module \"express-serve-static-core\" { interface Request { user?: JwtPayload } }'",
+                "Write the middleware: extract the Bearer token from the Authorization header, return 401 if missing",
+                "Call 'jwt.verify(token, process.env.JWT_SECRET!)' inside a try/catch to handle expired or malformed tokens",
+                "Validate the decoded payload with Zod: 'const payload = jwtPayloadSchema.parse(decoded)'. This throws if the token payload does not match the expected shape",
+                "Assign 'req.user = payload' and call 'next()'",
+                "In protected route handlers, 'req.user' is fully typed as JwtPayload without any assertions"
+              ],
+              "conclusion": "This pattern combines runtime JWT verification with Zod payload validation and TypeScript module augmentation to achieve end-to-end type safety for authentication. Every layer of security is validated: the signature (jwt.verify), the shape (Zod), and the usage (TypeScript type from module augmentation)."
+            }
+          ],
+          "retrievalPractice": [
+            {
+              "retrievalItemId": "rp-03-03",
+              "retrievalType": "free-recall",
+              "prompt": "Describe how Drizzle ORM derives TypeScript types from a table definition and what '$inferSelect' gives you.",
+              "difficulty": 3,
+              "schedule": {
+                "initialReviewDays": 1,
+                "subsequentReviewDays": [3, 7, 14, 30]
+              }
+            }
+          ],
+          "transferExercises": [
+            {
+              "exerciseId": "te-03-02",
+              "context": "startup-rbac",
+              "scenario": "Your startup adds role-based access control. Admins can delete users; members can only read. You need an Express middleware 'requireRole(role: \"admin\" | \"member\")' that checks req.user (set by JWT middleware) and returns 403 if the user's role does not match.",
+              "task": "Write the 'requireRole' middleware factory. It should be composable with the JWT middleware and use TypeScript to prevent calling it with an invalid role string.",
+              "successCriteria": [
+                "requireRole is a higher-order function returning a RequestHandler",
+                "It reads req.user.role (using the typed augmentation) without any type assertions",
+                "It returns 403 with a structured error body when the role does not match",
+                "The role parameter is typed as the literal union, not a plain string"
+              ]
+            }
+          ],
+          "masteryVerification": {
+            "assessmentIds": ["assessment-backend"],
+            "requiredPerformance": {
+              "minimumAccuracy": 0.8,
+              "minimumTransferScore": 0.75
+            }
+          }
+        }
+      ],
+      "quiz": {
+        "quizId": "quiz-section-03",
+        "title": "Section 3 Quiz: Type-Safe Backend Services",
+        "passingScore": 80,
+        "attemptsAllowed": 3,
+        "interleaved": true,
+        "questions": [
+          {
+            "questionId": "q-03-01",
+            "difficulty": 2,
+            "prompt": "TypeScript type annotations on Express's req.body provide sufficient type safety for production API endpoints.",
+            "questionType": "true-false",
+            "explanation": "TypeScript types are erased at runtime. req.body is typed as 'any' by Express at runtime, meaning any incoming JSON passes through regardless of your TypeScript annotations. Runtime validation with Zod or similar is required.",
+            "options": [
+              {
+                "optionId": "q-03-01-true",
+                "text": "True",
+                "correct": false,
+                "explanation": "False. TypeScript annotations are compile-time only. At runtime, req.body is any JavaScript value. A malicious or malformed payload can have any shape and will pass the TypeScript check silently."
+              },
+              {
+                "optionId": "q-03-01-false",
+                "text": "False",
+                "correct": true,
+                "explanation": "Correct. You must use a runtime validation library like Zod to actually validate the shape of incoming data. TypeScript types alone offer no runtime protection."
+              }
+            ]
+          },
+          {
+            "questionId": "q-03-02",
+            "difficulty": 3,
+            "prompt": "What does 'z.infer<typeof mySchema>' give you in a Zod context?",
+            "questionType": "multiple-choice",
+            "explanation": "z.infer<> extracts the TypeScript type that a Zod schema describes, letting you use a single schema definition as both the runtime validator and the source of the TypeScript type.",
+            "options": [
+              {
+                "optionId": "q-03-02-a",
+                "text": "A function that validates data at runtime against the schema.",
+                "correct": false,
+                "explanation": "Validation is done by calling 'mySchema.parse()' or 'mySchema.safeParse()'. z.infer<> is a TypeScript type-level operation, not a runtime function."
+              },
+              {
+                "optionId": "q-03-02-b",
+                "text": "The TypeScript type corresponding to the shape described by the Zod schema.",
+                "correct": true,
+                "explanation": "Correct. z.infer<typeof mySchema> extracts the TypeScript type from the Zod schema, keeping your runtime validation and static types in sync automatically."
+              },
+              {
+                "optionId": "q-03-02-c",
+                "text": "A JSON Schema representation of the Zod schema for use in OpenAPI documentation.",
+                "correct": false,
+                "explanation": "z.infer<> produces a TypeScript type, not a JSON Schema. Separate libraries (like zod-to-json-schema) handle JSON Schema generation."
+              },
+              {
+                "optionId": "q-03-02-d",
+                "text": "A stringified version of the schema for serialization.",
+                "correct": false,
+                "explanation": "z.infer<> is a compile-time TypeScript type extraction; it produces no runtime value and cannot be serialized."
+              }
+            ]
+          },
+          {
+            "questionId": "q-03-03",
+            "difficulty": 4,
+            "prompt": "Describe the risk of using 'as' type assertion after decoding a JWT payload and explain the safer alternative.",
+            "questionType": "short-answer",
+            "explanation": "A type assertion bypasses TypeScript's structural checking, letting invalid shapes through if the token was tampered with or generated by a different version of the code. Zod validation ensures the actual runtime shape matches the expected type.",
+            "answer": "Using 'as JwtPayload' tells TypeScript to trust the shape without verifying it. If the token contains an unexpected shape (tampered, legacy format, or generated by different code), the assertion succeeds but properties like userId may be undefined or the wrong type, causing silent bugs. The safer alternative is to validate the decoded payload with a Zod schema using 'jwtPayloadSchema.parse(decoded)', which throws a typed error if the shape doesn't match.",
+            "options": []
+          },
+          {
+            "questionId": "q-03-04",
+            "difficulty": 3,
+            "prompt": "Which of the following is the primary advantage of tRPC over a traditional REST API for TypeScript full-stack teams?",
+            "questionType": "multiple-choice",
+            "explanation": "tRPC's primary advantage is that the server's procedure types are automatically shared with the client through TypeScript, eliminating schema drift between server and client without code generation.",
+            "options": [
+              {
+                "optionId": "q-03-04-a",
+                "text": "tRPC is faster at runtime than REST because it uses binary serialization.",
+                "correct": false,
+                "explanation": "tRPC by default uses JSON over HTTP, the same as REST. Performance is comparable. The advantage is type safety, not runtime speed."
+              },
+              {
+                "optionId": "q-03-04-b",
+                "text": "The server's procedure types are automatically available on the client, preventing client-server type mismatches without code generation.",
+                "correct": true,
+                "explanation": "Correct. Because both ends share TypeScript, the client always knows the exact shape of every server procedure's input and output. There is no OpenAPI spec to keep in sync and no codegen step to run."
+              },
+              {
+                "optionId": "q-03-04-c",
+                "text": "tRPC enforces authentication automatically without any middleware.",
+                "correct": false,
+                "explanation": "tRPC has a context and middleware system for authentication but it still requires the developer to implement authentication logic. It does not enforce authentication automatically."
+              },
+              {
+                "optionId": "q-03-04-d",
+                "text": "tRPC generates OpenAPI documentation automatically.",
+                "correct": false,
+                "explanation": "tRPC does not generate OpenAPI documentation by default. There are community adapters for this, but it is not a primary feature or advantage."
+              }
+            ]
+          },
+          {
+            "questionId": "q-03-05",
+            "difficulty": 3,
+            "prompt": "In Drizzle ORM, 'typeof users.$inferSelect' gives you the TypeScript type for a value returned from a SELECT query on the users table.",
+            "questionType": "true-false",
+            "explanation": "Drizzle infers two types from a table schema: $inferSelect (the shape of a SELECT result) and $inferInsert (the shape required for INSERT, with optional fields for those with defaults).",
+            "options": [
+              {
+                "optionId": "q-03-05-true",
+                "text": "True",
+                "correct": true,
+                "explanation": "Correct. '$inferSelect' gives you the TypeScript type matching a full SELECT result row for the table, derived directly from your schema definition."
+              },
+              {
+                "optionId": "q-03-05-false",
+                "text": "False",
+                "correct": false,
+                "explanation": "This is true. Drizzle's $inferSelect utility type is how you get the TypeScript type for query results without separately defining it."
+              }
+            ]
+          }
+        ]
+      },
+      "practicalActivity": {
+        "title": "Build a Type-Safe User Authentication API",
+        "description": "Build a complete authentication flowâregistration, login, and a protected profile endpointâusing Express, Zod, Drizzle ORM, and JWT, with full end-to-end type safety.",
+        "scenario": "Your startup needs a working user authentication API before launching. You will build POST /auth/register (validates body, hashes password, stores user), POST /auth/login (validates credentials, returns JWT), and GET /auth/me (protected, returns the authenticated user's profile). All inputs must be validated with Zod; all database access must go through a typed Drizzle schema.",
+        "steps": [
+          "Define the Drizzle users table schema with id, email, passwordHash, role, and createdAt columns",
+          "Derive the User type from the schema using $inferSelect",
+          "Write Zod schemas for the registration body (email, password) and login body (email, password)",
+          "Implement the register handler: parse body with Zod, check for existing user, hash password with bcrypt, insert with Drizzle, return 201 with user (excluding passwordHash)",
+          "Implement the login handler: parse body, find user by email, compare password with bcrypt, sign and return a JWT",
+          "Implement the JWT middleware as described in the worked example, attaching req.user",
+          "Implement the GET /auth/me handler: use req.user.userId to fetch the full user from the database and return it",
+          "Test all three endpoints with curl or Postman and verify that malformed inputs return 400 with structured Zod errors"
+        ],
+        "successCriteria": [
+          "Registration rejects duplicate emails and invalid email formats",
+          "Login returns a signed JWT with userId and role in the payload",
+          "GET /auth/me returns 401 without a valid token",
+          "All database queries use the Drizzle schema types with no raw SQL strings",
+          "No 'as' type assertions appear anywhere in the codebase"
+        ],
+        "downloadableTemplate": ""
+      },
+      "summary": [
+        "TypeScript type annotations are erased at runtime; every external input boundary (HTTP requests, JWT payloads, environment variables) must be validated at runtime with Zod or equivalent.",
+        "Zod schemas serve as the single source of truth for both runtime validation and TypeScript types, using z.infer<typeof schema> to derive the type.",
+        "tRPC shares server procedure types with the client automatically, eliminating schema drift and codegen steps for TypeScript full-stack teams.",
+        "Drizzle ORM defines the database schema as TypeScript objects and derives query result types directly, making the type system and database schema a single source of truth.",
+        "JWT authentication requires runtime payload validation (not just a type assertion) and Express module augmentation to safely attach the typed user to the request context."
+      ]
+    },
+    {
+      "sectionId": "section-04-testing-quality",
+      "title": "Section 4: Testing and Maintaining TypeScript Codebases",
+      "description": "Write comprehensive unit and integration tests using Vitest, apply typed mocking patterns, enforce code quality through strict TypeScript configuration, and automate quality gates in CI/CD pipelines.",
+      "whyThisMatters": "At a startup, you often move fast and break thingsâbut only on purpose. A solid test suite and strict TypeScript configuration let you refactor aggressively with confidence, catch regressions before they reach production, and onboard new engineers without fear of breaking existing behavior. These practices are what separate startups that move fast sustainably from those that pile up debt until they can't ship at all.",
+      "reviewContent": [
+        "What is the difference between a unit test and an integration test?",
+        "What is a mock and what is the difference between a mock and a stub?",
+        "What does 'strict: true' enable in tsconfig.json and why does it matter?",
+        "What is a type predicate and how does it enable type narrowing?",
+        "What is the purpose of a CI/CD pipeline in a TypeScript project?"
+      ],
+      "learningObjectives": [
+        {
+          "objectiveId": "obj-04-01",
+          "description": "Write unit tests for TypeScript services using Vitest with typed in-memory stubs in place of real dependencies.",
+          "linkedCompetencies": ["testing-quality-04"]
+        },
+        {
+          "objectiveId": "obj-04-02",
+          "description": "Apply typed mocking patterns using vi.fn() and interface-based test doubles without losing type safety.",
+          "linkedCompetencies": ["testing-quality-04"]
+        },
+        {
+          "objectiveId": "obj-04-03",
+          "description": "Configure a strict tsconfig.json appropriate for a production startup codebase and understand the effect of each key option.",
+          "linkedCompetencies": ["testing-quality-04"]
+        },
+        {
+          "objectiveId": "obj-04-04",
+          "description": "Set up a GitHub Actions CI pipeline that runs TypeScript type-checking, linting, and tests on every pull request.",
+          "linkedCompetencies": ["testing-quality-04"]
+        }
+      ],
+      "motivationHooks": [
+        {
+          "type": "real-world-stakes",
+          "prompt": "Netflix reported that migrating to strict TypeScript configuration caught over 200 pre-existing bugs that had been silently lurking in their JavaScript-era codebaseâbefore any code was even changed."
+        },
+        {
+          "type": "prediction-gap",
+          "prompt": "You have a function typed as '(user: User) => string'. You write a test that passes a complete User object. The test passes. Does this mean the function is correct? Think about what the test does NOT verify before reading on."
+        }
+      ],
+      "learningExperiences": [
+        {
+          "experienceId": "exp-04-vitest-mocking",
+          "title": "Unit Testing TypeScript Services with Vitest",
+          "experienceType": "guided-analysis",
+          "difficultyProfile": {
+            "overall": 4,
+            "conceptualComplexity": 3,
+            "ambiguity": 3
+          },
+          "estimatedDurationMinutes": 30,
+          "linkedCompetencies": ["testing-quality-04"],
+          "desiredCognitiveActions": ["application", "analysis", "retrieval"],
+          "contentBlocks": [
+            {
+              "blockId": "cb-04-01",
+              "type": "text",
+              "content": "Vitest is the recommended test runner for modern TypeScript projects due to its native ESM support, built-in TypeScript transformation (no separate Babel or ts-jest configuration required), and Jest-compatible API. Writing a unit test for a TypeScript service means testing the service's behavior in complete isolation from its dependencies. Since we have used dependency injection, this is straightforward: we provide in-memory test doubles that implement the same interface as the real dependency. A test double for IUserRepository might be: 'class InMemoryUserRepository implements IUserRepository { private users: User[] = []; async findByEmail(email: string) { return this.users.find(u => u.email === email) ?? null; } async create(data: CreateUserDto) { const user = { id: crypto.randomUUID(), ...data }; this.users.push(user); return user; } }'. Because InMemoryUserRepository implements IUserRepository, TypeScript will tell you immediately if your test double goes out of sync with the real interfaceâa huge advantage over untyped mocking."
+            },
+            {
+              "blockId": "cb-04-02",
+              "type": "text",
+              "content": "For cases where you need to verify that a dependency was called with specific argumentsârather than just observe its effectâuse Vitest's vi.fn() to create typed mock functions. The pattern for a typed mock of an interface method is: 'const mockSendEmail = vi.fn<[string, string], Promise<void>>()'. The generic parameters specify the argument types and return type, giving you full type safety on assertions like 'expect(mockSendEmail).toHaveBeenCalledWith(\"user@example.com\", expect.stringContaining(\"Welcome\"))'. For entire interface mocks, create a helper: 'function createMockEmailService(): IEmailService { return { sendWelcome: vi.fn(), sendPasswordReset: vi.fn() }; }'. TypeScript will validate that the returned object satisfies the interface, preventing your mocks from having a different signature than your production code."
+            }
+          ],
+          "interactionSequence": [
+            {
+              "interactionId": "interact-04-01",
+              "interactionType": "prediction",
+              "prompt": "A UserService.createUser test uses an untyped mock object: '{ findByEmail: jest.fn(), create: jest.fn() }'. The IUserRepository interface later adds a 'findAll' method. What happens to the test and why is this a problem?",
+              "required": true,
+              "responseFormat": "short-answer",
+              "revealCondition": "after-response",
+              "confidencePrompt": {
+                "enabled": true,
+                "scaleMin": 1,
+                "scaleMax": 5,
+                "prompt": "How confident are you?"
+              }
+            },
+            {
+              "interactionId": "interact-04-02",
+              "interactionType": "compare-responses",
+              "responseModels": {
+                "expertResponse": {
+                  "answer": "The test continues to pass because the untyped mock satisfies the runtime checkâit has the methods the service calls. But the mock silently no longer satisfies the IUserRepository interface. If the service is later updated to call findAll, the test will fail at runtime with 'is not a function' rather than at compile time. With a typed mock implementing the interface, TypeScript would show an error the moment findAll was added to the interface, prompting you to update the mock immediately.",
+                  "reasoningSteps": [
+                    "Determine whether TypeScript checks the untyped mock against the interface",
+                    "Consider what happens at runtime vs compile time",
+                    "Identify the consequence for test reliability"
+                  ]
+                },
+                "strongLearnerResponse": {
+                  "answer": "The test still passes but it's no longer correctly implementing the interface, so it could miss bugs."
+                },
+                "weakResponse": {
+                  "answer": "TypeScript will show an error.",
+                  "diagnosis": [
+                    "Assumes TypeScript checks untyped objects against the interface without explicit typing",
+                    "Does not distinguish between compile-time and runtime behavior"
+                  ]
+                }
+              }
+            },
+            {
+              "interactionId": "interact-04-03",
+              "interactionType": "reflection",
+              "prompt": "In your current test suite, are your mocks typed against their interfaces? What would change if you enforced this as a team standard?",
+              "timing": "post-feedback"
+            }
+          ],
+          "workedExamples": [
+            {
+              "exampleId": "we-04-01",
+              "problem": "Write a complete Vitest unit test for UserService.createUser that tests: successful creation, rejection of duplicate emails, and verification that the welcome email is sent. All dependencies are mocked.",
+              "steps": [
+                "Create InMemoryUserRepository implementing IUserRepository with an in-memory array",
+                "Create a mock email service: 'const mockEmailService: IEmailService = { sendWelcome: vi.fn().mockResolvedValue(undefined) }'",
+                "In a beforeEach, instantiate fresh instances: 'repo = new InMemoryUserRepository(); service = new UserService(repo, mockEmailService)'",
+                "Test 1 (success): Call service.createUser({ email: 'a@b.com', password: 'secure123' }), assert the returned user has the correct email, assert mockEmailService.sendWelcome was called once with 'a@b.com'",
+                "Test 2 (duplicate): Pre-populate the repo with a user having email 'a@b.com', call createUser again with the same email, assert it throws an error (e.g., 'UserAlreadyExistsError')",
+                "Test 3 (invalid input): Assert that createUser with an empty password throws a validation error before touching the repo",
+                "Verify that all assertions use typed matchers from Vitest's expect API"
+              ],
+              "conclusion": "With dependency injection and typed in-memory implementations, these tests run in microseconds with no I/O, no database setup, and no environment variables. They are fully deterministic and document the service's behavior contract precisely."
+            }
+          ],
+          "retrievalPractice": [
+            {
+              "retrievalItemId": "rp-04-01",
+              "retrievalType": "free-recall",
+              "prompt": "What is the difference between using an InMemoryRepository (a stub) and vi.fn() (a mock), and when should you use each?",
+              "difficulty": 3,
+              "schedule": {
+                "initialReviewDays": 1,
+                "subsequentReviewDays": [3, 7, 14, 30]
+              }
+            }
+          ],
+          "transferExercises": [
+            {
+              "exerciseId": "te-04-01",
+              "context": "startup-billing",
+              "scenario": "Your startup's BillingService has two dependencies: IPaymentProvider and IInvoiceRepository. The chargeCustomer method checks if the customer has a valid payment method, calls the payment provider, and saves the invoice. You need to test three scenarios: successful charge, payment provider failure (should throw and not save invoice), and missing payment method (should throw before calling provider).",
+              "task": "Write the complete Vitest test suite for BillingService.chargeCustomer using typed mocks for both dependencies. Include all three scenarios.",
+              "successCriteria": [
+                "Both mocks are typed against their interfaces using vi.fn()",
+                "Each test resets mock state in beforeEach",
+                "The payment provider failure test asserts the invoice repository was NOT called",
+                "Tests use specific assertion methods like toHaveBeenCalledTimes and toHaveBeenCalledWith"
+              ]
+            }
+          ],
+          "masteryVerification": {
+            "assessmentIds": ["assessment-testing"],
+            "requiredPerformance": {
+              "minimumAccuracy": 0.8,
+              "minimumTransferScore": 0.75
+            }
+          }
+        },
+        {
+          "experienceId": "exp-04-tsconfig-ci",
+          "title": "Strict TypeScript Configuration and CI/CD Quality Gates",
+          "experienceType": "guided-analysis",
+          "difficultyProfile": {
+            "overall": 3,
+            "conceptualComplexity": 3,
+            "ambiguity": 2
+          },
+          "estimatedDurationMinutes": 25,
+          "linkedCompetencies": ["testing-quality-04"],
+          "desiredCognitiveActions": ["application", "analysis", "retrieval"],
+          "contentBlocks": [
+            {
+              "blockId": "cb-04-03",
+              "type": "text",
+              "content": "TypeScript's strictness is controlled by a hierarchy of flags in tsconfig.json. The top-level 'strict: true' enables a bundle of the most important checks: 'strictNullChecks' (null and undefined are not assignable to other types unless explicitly allowed), 'strictFunctionTypes' (function parameter types are checked contravariantly), 'noImplicitAny' (disallows variables with an inferred 'any' type), 'strictPropertyInitialization' (class properties must be initialized in the constructor), and others. For a startup production codebase, you should also add: 'noUncheckedIndexedAccess' (array index access returns T | undefined rather than T, forcing you to handle the case where an index doesn't exist), 'exactOptionalPropertyTypes' (optional properties cannot be explicitly set to undefined), and 'noImplicitReturns' (all code paths in a function must return a value). Each of these catches a distinct class of runtime bug at compile time with zero performance cost."
+            },
+            {
+              "blockId": "cb-04-04",
+              "type": "text",
+              "content": "A CI/CD pipeline for a TypeScript startup project should run at minimum three checks on every pull request: 'tsc --noEmit' (type checking without producing output files), ESLint with TypeScript-aware rules (stylistic and safety rules not enforced by the compiler), and the test suite with coverage thresholds. The pipeline should fail the PR if any check fails, preventing broken or poorly-typed code from entering main. A basic GitHub Actions workflow uses 'actions/setup-node' with the correct Node.js version, caches npm dependencies (using 'actions/cache' keyed on package-lock.json hash), and runs the three checks in parallel jobs so they complete in the minimum time. Adding 'concurrency' configuration to cancel in-progress runs when a new commit is pushed prevents wasted CI minutes on superseded code."
+            }
+          ],
+          "interactionSequence": [
+            {
+              "interactionId": "interact-04-04",
+              "interactionType": "prediction",
+              "prompt": "Without 'noUncheckedIndexedAccess', what happens when you write 'const first = items[0].name' and items is an empty array? What does the flag change?",
+              "required": true,
+              "responseFormat": "short-answer",
+              "revealCondition": "after-response",
+              "confidencePrompt": {
+                "enabled": true,
+                "scaleMin": 1,
+                "scaleMax": 5,
+                "prompt": "How confident are you?"
+              }
+            },
+            {
+              "interactionId": "interact-04-05",
+              "interactionType": "reflection",
+              "prompt": "What is the single TypeScript compiler flag whose addition to your current project would surface the most existing bugs?",
+              "timing": "post-feedback"
+            }
+          ],
+          "workedExamples": [
+            {
+              "exampleId": "we-04-02",
+              "problem": "Set up a production-grade tsconfig.json and a GitHub Actions CI workflow for a TypeScript Express startup API that runs type checking, linting, and tests on every PR.",
+              "steps": [
+                "Create tsconfig.json with: 'target: ES2022', 'module: Node16', 'moduleResolution: Node16', 'strict: true', 'noUncheckedIndexedAccess: true', 'noImplicitReturns: true', 'exactOptionalPropertyTypes: true', 'paths: { \"@/*\": [\"src/*\"] }'",
+                "Install ESLint with typescript-eslint: 'npm install -D eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin'",
+                "Configure .eslintrc with '@typescript-eslint/no-explicit-any': 'error' and '@typescript-eslint/no-floating-promises': 'error'",
+                "Create .github/workflows/ci.yml with a 'pull_request' trigger",
+                "Add a 'setup' job: checkout, setup-node (version from .nvmrc), cache dependencies",
+                "Add three parallel jobs depending on setup: 'typecheck' running 'tsc --noEmit', 'lint' running 'eslint src', 'test' running 'vitest run --coverage'",
+                "Add 'concurrency: group: ${{ github.workflow }}-${{ github.ref }}, cancel-in-progress: true' to cancel stale runs"
+              ],
+              "conclusion": "This CI configuration catches three distinct categories of defects automatically: TypeScript type errors (tsc), code style and safety issues (ESLint), and behavioral regressions (Vitest). No code with any of these issues can be merged to main without explicit override, creating a quality baseline that scales with the team."
+            }
+          ],
+          "retrievalPractice": [
+            {
+              "retrievalItemId": "rp-04-02",
+              "retrievalType": "free-recall",
+              "prompt": "Name at least five TypeScript compiler flags that 'strict: true' enables, and explain what each one catches.",
+              "difficulty": 3,
+              "schedule": {
+                "initialReviewDays": 1,
+                "subsequentReviewDays": [3, 7, 14, 30]
+              }
+            }
+          ],
+          "transferExercises": [
+            {
+              "exerciseId": "te-04-02",
+              "context": "startup-onboarding",
+              "scenario": "A new engineer joins your startup and introduces a PR that passes all existing tests but has 14 TypeScript errors hidden by scattered 'as any' casts, three unhandled Promise rejections, and a function that sometimes returns undefined where string is expected. Your CI pipeline currently only runs 'npm test'.",
+              "task": "Design the expanded CI pipeline that would have caught all three categories of defects before the PR was reviewed. Specify the exact commands and which defect each catches.",
+              "successCriteria": [
+                "tsc --noEmit catches the 14 TypeScript errors",
+                "ESLint with @typescript-eslint/no-explicit-any catches the 'as any' casts",
+                "ESLint with @typescript-eslint/no-floating-promises catches unhandled Promises",
+                "noImplicitReturns in tsconfig catches the missing return",
+                "All checks run on pull_request events before merge"
+              ]
+            }
+          ],
+          "masteryVerification": {
+            "assessmentIds": ["assessment-testing"],
+            "requiredPerformance": {
+              "minimumAccuracy": 0.8,
+              "minimumTransferScore": 0.75
+            }
+          }
+        }
+      ],
+      "quiz": {
+        "quizId": "quiz-section-04",
+        "title": "Section 4 Quiz: Testing and Code Quality",
+        "passingScore": 80,
+        "attemptsAllowed": 3,
+        "interleaved": true,
+        "questions": [
+          {
+            "questionId": "q-04-01",
+            "difficulty": 2,
+            "prompt": "TypeScript's compile-time checking eliminates the need for unit tests because it catches all behavioral errors.",
+            "questionType": "true-false",
+            "explanation": "TypeScript only validates structural type correctness at compile time. Logic errors, incorrect business rules, edge case behavior, and integration failures are only caught by tests.",
+            "options": [
+              {
+                "optionId": "q-04-01-true",
+                "text": "True",
+                "correct": false,
+                "explanation": "False. TypeScript catches type mismatchesâit says nothing about whether your business logic is correct. A function can be perfectly typed and still return the wrong value, skip an edge case, or mishandle an error."
+              },
+              {
+                "optionId": "q-04-01-false",
+                "text": "False",
+                "correct": true,
+                "explanation": "Correct. Tests and types are complementary. TypeScript validates structure; tests validate behavior. You need both."
+              }
+            ]
+          },
+          {
+            "questionId": "q-04-02",
+            "difficulty": 3,
+            "prompt": "What does 'noUncheckedIndexedAccess' do when you access an array element by index?",
+            "questionType": "multiple-choice",
+            "explanation": "With noUncheckedIndexedAccess, TypeScript adds '| undefined' to the type of any array index access, forcing you to handle the case where the index is out of bounds.",
+            "options": [
+              {
+                "optionId": "q-04-02-a",
+                "text": "It throws a runtime error if the index is out of bounds.",
+                "correct": false,
+                "explanation": "This is a compile-time TypeScript flag, not a runtime check. JavaScript still returns undefined silently; the flag just forces you to handle that possibility in the types."
+              },
+              {
+                "optionId": "q-04-02-b",
+                "text": "It makes the type of array[n] be 'T | undefined' instead of 'T', forcing explicit handling of missing elements.",
+                "correct": true,
+                "explanation": "Correct. The flag widens the type of index access from T to T | undefined, so you must explicitly handle the undefined case (e.g., with an if-check or optional chaining) before using the value."
+              },
+              {
+                "optionId": "q-04-02-c",
+                "text": "It disables index access on arrays entirely, requiring the use of .at() instead.",
+                "correct": false,
+                "explanation": "The flag does not disable index access. It changes the inferred type of index access to include undefined, it does not prevent the syntax."
+              },
+              {
+                "optionId": "q-04-02-d",
+                "text": "It limits array access to index 0 only.",
+                "correct": false,
+                "explanation": "The flag has nothing to do with which index you access. It affects the TypeScript type of any index access expression."
+              }
+            ]
+          },
+          {
+            "questionId": "q-04-03",
+            "difficulty": 4,
+            "prompt": "Explain the difference between a stub and a mock in the context of unit testing a TypeScript service, and give an example of when you would use each.",
+            "questionType": "short-answer",
+            "explanation": "Stubs provide canned return values for state-based testing (asserting on what the service produced). Mocks additionally record calls for behavior verification (asserting on what the service called and how).",
+            "answer": "A stub is a test double that returns predefined values when calledâyou use it when you need a dependency to behave a certain way so you can test the system under test's output. Example: InMemoryUserRepository returns a pre-seeded user for findByEmail. A mock additionally records how it was called and allows you to assert on those calls. Example: vi.fn() for IEmailService lets you assert that sendWelcome was called exactly once with the correct email address. Use stubs for state-based testing (what did the service return?) and mocks for behavior verification (did the service call its dependencies correctly?).",
+            "options": []
+          },
+          {
+            "questionId": "q-04-04",
+            "difficulty": 3,
+            "prompt": "Which GitHub Actions feature prevents wasted CI resources when multiple commits are pushed rapidly to the same branch?",
+            "questionType": "multiple-choice",
+            "explanation": "The 'concurrency' setting with 'cancel-in-progress: true' cancels any running workflow for the same ref when a newer commit triggers a new run, preventing resource waste on superseded code.",
+            "options": [
+              {
+                "optionId": "q-04-04-a",
+                "text": "The 'timeout-minutes' setting on each job.",
+                "correct": false,
+                "explanation": "timeout-minutes limits how long a single job runs but does not cancel older runs when new commits are pushed."
+              },
+              {
+                "optionId": "q-04-04-b",
+                "text": "The 'concurrency' key with 'cancel-in-progress: true'.",
+                "correct": true,
+                "explanation": "Correct. Setting 'concurrency: group: workflow-ref, cancel-in-progress: true' ensures that when a new commit triggers the workflow, any currently running workflow for the same branch is cancelled immediately."
+              },
+              {
+                "optionId": "q-04-04-c",
+                "text": "The 'strategy: max-parallel: 1' matrix setting.",
+                "correct": false,
+                "explanation": "max-parallel controls parallelism within a matrix job, not cancellation of in-progress workflow runs for the same branch."
+              },
+              {
+                "optionId": "q-04-04-d",
+                "text": "The 'if: github.event_name == \"push\"' condition.",
+                "correct": false,
+                "explanation": "Event filters control when a workflow triggers, not whether to cancel previous runs. They do not solve the resource waste problem."
+              }
+            ]
+          },
+          {
+            "questionId": "q-04-05",
+            "difficulty": 3,
+            "prompt": "Describe what '@typescript-eslint/no-floating-promises' catches and why it matters in a Node.js startup backend.",
+            "questionType": "short-answer",
+            "explanation": "Unhandled Promise rejections in Node.js can crash the process or silently swallow errors. The lint rule forces explicit handling (await, .catch(), or explicit void) for every Promise expression.",
+            "answer": "The rule catches Promise expressions that are not awaited, not caught with .catch(), and not explicitly discarded with 'void'. In a Node.js backend, a floating promise (e.g., calling an async function without await) means any rejection is an unhandled Promise rejection, which in modern Node.js terminates the process. In older versions it could silently swallow errors. Examples include: calling 'sendEmail()' without await in a request handler, or 'cache.invalidate()' without any error handling. The rule forces you to be explicit about every Promise, preventing silent failures in production.",
+            "options": []
+          }
+        ]
+      },
+      "practicalActivity": {
+        "title": "Write a Complete Test Suite and CI Pipeline for the User Authentication API",
+        "description": "Take the authentication API built in Section 3 and add a complete test suite using Vitest plus a GitHub Actions CI pipeline that enforces quality on every pull request.",
+        "scenario": "Your startup is preparing for its first external beta. The engineering lead has mandated that the authentication service must have 80% test coverage, all TypeScript errors must be zero, and no PR can be merged without CI passing. You will implement the test suite and CI configuration from scratch.",
+        "steps": [
+          "Write unit tests for UserService: test createUser success, duplicate email rejection, and password hashing verification. Use InMemoryUserRepository and a vi.fn() mock for IEmailService",
+          "Write unit tests for the JWT middleware: test valid token (req.user is set), missing token (401 returned), expired token (401 returned), and malformed payload (400 returned)",
+          "Write integration tests for the /auth/register and /auth/login endpoints using supertest against a real Express app wired with in-memory dependencies",
+          "Enable coverage reporting in vitest.config.ts and set 80% branch and line thresholds",
+          "Create tsconfig.json with strict: true, noUncheckedIndexedAccess: true, and noImplicitReturns: true",
+          "Create .github/workflows/ci.yml with three parallel jobs: typecheck (tsc --noEmit), lint (eslint src), test (vitest run --coverage)",
+          "Verify the pipeline fails on a deliberately introduced TypeScript error and passes after fixing it"
+        ],
+        "successCriteria": [
+          "All unit tests pass with typed mocks implementing the correct interfaces",
+          "Coverage report shows 80%+ line and branch coverage",
+          "tsc --noEmit reports zero errors with the strict configuration",
+          "GitHub Actions CI runs all three checks in parallel on pull_request events",
+          "A PR with a deliberate type error fails the CI typecheck job"
+        ],
+        "downloadableTemplate": ""
+      },
+      "summary": [
+        "Vitest is the recommended test runner for TypeScript projects due to native ESM support and zero-config TypeScript transformation.",
+        "Typed in-memory stubs implementing your domain interfaces are the correct pattern for isolating services in unit tests; TypeScript will alert you when the stub goes out of sync with the interface.",
+        "vi.fn() with explicit type parameters creates typed mock functions that give you type-safe assertions on how dependencies were called.",
+        "A production tsconfig.json for a startup should include strict: true, noUncheckedIndexedAccess, noImplicitReturns, and exactOptionalPropertyTypes at minimum.",
+        "A CI pipeline with tsc --noEmit, ESLint, and Vitest as parallel jobs catches three distinct categories of defects before code enters the main branch.",
+        "The concurrency setting with cancel-in-progress: true prevents wasted CI resources when commits are pushed rapidly."
+      ]
+    }
+  ],
+
+  "assessments": [
+    {
+      "assessmentId": "assessment-advanced-types",
+      "title": "Advanced Type System Assessment",
+      "assessmentType": "scenario-analysis",
+      "linkedCompetencies": ["advanced-types-01"],
+      "adaptiveDifficulty": true,
+      "questions": [
+        {
+          "questionId": "aq-01-01",
+          "difficulty": 4,
+          "prompt": "Write a TypeScript utility type 'DeepPartial<T>' that recursively makes all properties of T optional, including nested objects. Arrays should remain as-is.",
+          "questionType": "short-answer",
+          "successCriteria": [
+            "Uses conditional types to check if T is an object",
+            "Applies mapped type recursively using DeepPartial<T[K]> for each property",
+            "Handles arrays without recursing into their element types",
+            "Handles primitive types by returning them unchanged"
+          ],
+          "rubric": {
+            "excellent": "Correctly handles objects recursively, arrays as-is, and primitives unchanged. Uses 'extends object' to distinguish.",
+            "adequate": "Handles the simple recursive case but does not correctly handle arrays or non-object types.",
+            "weak": "Applies Partial<T> without recursion or conflates with the built-in Partial."
+          }
+        },
+        {
+          "questionId": "aq-01-02",
+          "difficulty": 5,
+          "prompt": "A colleague suggests: 'Just use any for the third-party library return type and cast it to our domain type.' Write a response explaining the safer alternative using 'unknown' and type guards, with a code example.",
+          "questionType": "short-answer",
+          "successCriteria": [
+            "Explains that 'any' disables checking for all code derived from it",
+            "Proposes 'unknown' as the correct type for uncertain values",
+            "Shows a type guard function (using 'is' predicate) that narrows 'unknown' to the domain type",
+            "Demonstrates that the type guard can be tested unlike a cast"
+          ],
+          "rubric": {
+            "excellent": "Explains propagation of 'any' unsafety, shows a complete typed type guard with 'is' predicate, and addresses testability.",
+            "adequate": "Recommends 'unknown' and shows narrowing but does not explain propagation or testability.",
+            "weak": "Accepts 'any' as reasonable or shows an 'as' cast as the alternative."
+          }
+        }
+      ]
+    },
+    {
+      "assessmentId": "assessment-architecture",
+      "title": "Scalable Architecture Assessment",
+      "assessmentType": "scenario-analysis",
+      "linkedCompetencies": ["architecture-patterns-02"],
+      "adaptiveDifficulty": true,
+      "questions": [
+        {
+          "questionId": "aq-02-01",
+          "difficulty": 4,
+          "prompt": "A startup's codebase has an OrderController that imports Stripe, PostgreSQL, and Sendgrid directly. List the specific SOLID violations and describe the refactored structure with all necessary interfaces and classes.",
+          "questionType": "short-answer",
+          "successCriteria": [
+            "Identifies SRP violation (too many responsibilities in one class)",
+            "Identifies DIP violation (depends on concrete libraries, not abstractions)",
+            "Proposes IPaymentProvider, IOrderRepository, IEmailService interfaces",
+            "Shows OrderService depending on the interfaces via constructor injection",
+            "Describes the composition root wiring concrete implementations"
+          ],
+          "rubric": {
+            "excellent": "Identifies all violations, names all three interfaces, shows typed constructor injection, and describes composition root.",
+            "adequate": "Identifies violations and proposes abstractions but composition root is missing or incomplete.",
+            "weak": "Identifies violations but suggests moving imports without introducing abstractions."
+          }
+        },
+        {
+          "questionId": "aq-02-02",
+          "difficulty": 3,
+          "prompt": "Explain how barrel files and path aliases work together to enforce module boundaries in a TypeScript startup codebase. What specific problem does each solve?",
+          "questionType": "short-answer",
+          "successCriteria": [
+            "Explains barrel files as explicit public API exports",
+            "Explains path aliases as stable import path references",
+            "Notes that barrel files hide internal implementation details",
+            "Notes that path aliases prevent fragile relative import chains"
+          ],
+          "rubric": {
+            "excellent": "Clearly explains both mechanisms, notes that barrel files define API while aliases stabilize paths, and addresses internal restructuring safety.",
+            "adequate": "Explains one mechanism well but conflates or omits the other.",
+            "weak": "Describes barrel files as just 'an index.ts' without explaining the public API enforcement role."
+          }
+        }
+      ]
+    },
+    {
+      "assessmentId": "assessment-backend",
+      "title": "Type-Safe Backend Services Assessment",
+      "assessmentType": "scenario-analysis",
+      "linkedCompetencies": ["backend-services-03"],
+      "adaptiveDifficulty": true,
+      "questions": [
+        {
+          "questionId": "aq-03-01",
+          "difficulty": 4,
+          "prompt": "Design the complete Zod schema for a subscription creation endpoint. The payload includes: planId (string, must be one of 'starter' | 'pro' | 'enterprise'), seats (integer between 1 and 500), billingCycle ('monthly' | 'annual'), and an optional promoCode (7-character alphanumeric string). Show the schema, the inferred TypeScript type, and the validation middleware usage.",
+          "questionType": "short-answer",
+          "successCriteria": [
+            "planId validated with z.enum",
+            "seats validated with z.number().int().min(1).max(500)",
+            "billingCycle validated with z.enum",
+            "promoCode optional with z.string().regex for 7-character alphanumeric",
+            "TypeScript type derived with z.infer",
+            "Used in a validation middleware or shown being passed to safeParse"
+          ],
+          "rubric": {
+            "excellent": "All fields correctly validated, type correctly inferred, middleware shown and correctly typed.",
+            "adequate": "All fields present but regex or enum validation is missing or incorrect.",
+            "weak": "Uses z.string() for enum fields or does not infer the TypeScript type."
+          }
+        },
+        {
+          "questionId": "aq-03-02",
+          "difficulty": 4,
+          "prompt": "Explain why 'const decoded = jwt.verify(token, secret) as MyPayload' is unsafe and demonstrate the correct approach using Zod.",
+          "questionType": "short-answer",
+          "successCriteria": [
+            "Explains that 'as' assertion bypasses TypeScript structural checking",
+            "Notes that jwt.verify returns 'string | JwtPayload' (library types) and the actual shape is unknown at compile time",
+            "Demonstrates defining a Zod schema for the payload",
+            "Shows using jwtPayloadSchema.parse(decoded) after jwt.verify",
+            "Notes that Zod throws with a typed error on shape mismatch"
+          ],
+          "rubric": {
+            "excellent": "Fully explains the assertion danger, shows complete Zod-based alternative with error handling.",
+            "adequate": "Identifies the issue and suggests Zod but does not show the complete implementation.",
+            "weak": "Accepts the assertion as 'fine for production use' or suggests a different assertion."
+          }
+        }
+      ]
+    },
+    {
+      "assessmentId": "assessment-testing",
+      "title": "Testing and Quality Assessment",
+      "assessmentType": "scenario-analysis",
+      "linkedCompetencies": ["testing-quality-04"],
+      "adaptiveDifficulty": true,
+      "questions": [
+        {
+          "questionId": "aq-04-01",
+          "difficulty": 4,
+          "prompt": "A NotificationService has one method 'notify(userId: string, message: string)' that calls IUserRepository to get the user's preferred channel and INotificationChannel to send the message. Write the complete Vitest test for a scenario where the repository returns 'email' as the preferred channel, asserting that the email channel's send method was called with the correct userId and message.",
+          "questionType": "short-answer",
+          "successCriteria": [
+            "Creates typed mock for IUserRepository with vi.fn() returning 'email'",
+            "Creates typed mock for INotificationChannel",
+            "Instantiates NotificationService with both mocks",
+            "Calls notify and awaits the result",
+            "Asserts INotificationChannel.send was called with userId and message",
+            "Mocks are typed against their interfaces"
+          ],
+          "rubric": {
+            "excellent": "All mocks correctly typed, correct assertion methods used, setup in beforeEach.",
+            "adequate": "Correct test logic but mocks are untyped or assertions use generic matchers.",
+            "weak": "Tests using the real implementations instead of mocks."
+          }
+        },
+        {
+          "questionId": "aq-04-02",
+          "difficulty": 3,
+          "prompt": "What are the three checks a TypeScript startup CI pipeline should run on every pull request, and what specific category of defect does each catch that the others do not?",
+          "questionType": "short-answer",
+          "successCriteria": [
+            "Names tsc --noEmit for type errors",
+            "Names ESLint for style and safety rules not caught by tsc",
+            "Names test runner (Vitest/Jest) for behavioral regressions",
+            "Correctly distinguishes what each catches"
+          ],
+          "rubric": {
+            "excellent": "Names all three, clearly distinguishes what each catches, notes they are complementary not redundant.",
+            "adequate": "Names all three but conflates what ESLint and tsc catch.",
+            "weak": "Mentions only tests, missing tsc and linting entirely."
+          }
+        }
+      ]
+    }
+  ],
+
+  "retrievalSystem": {
+    "algorithm": "spaced-repetition",
+    "confidenceWeighting": true,
+    "interleavingEnabled": true,
+    "retrievalModes": [
+      "free-recall",
+      "application",
+      "scenario-analysis",
+      "contrast"
+    ]
+  },
+
+  "masterySystem": {
+    "masteryLevels": [
+      "novice",
+      "developing",
+      "proficient",
+      "mastered"
+    ],
+    "decayModelEnabled": true,
+    "reverificationRequired": true
+  },
+
+  "learnerState": {
+    "completedExperiences": [],
+    "competencyProgress": [],
+    "retrievalStrength": {},
+    "confidenceCalibration": {},
+    "masteryState": {}
+  },
+
+  "analytics": {
+    "track": [
+      "accuracy",
+      "confidence",
+      "time-on-task",
+      "retrieval-strength",
+      "transfer-performance",
+      "misconception-frequency"
+    ]
+  },
+
+  "glossary": [
+    {
+      "term": "Conditional Type",
+      "definition": "A TypeScript type expression 'T extends U ? X : Y' that resolves to X if T is assignable to U, and Y otherwise. Evaluated lazily when type parameters are supplied."
+    },
+    {
+      "term": "infer",
+      "definition": "A keyword used exclusively inside the 'extends' clause of a conditional type to declare and capture a type variable from the matched structure."
+    },
+    {
+      "term": "Mapped Type",
+      "definition": "A TypeScript type that creates a new type by iterating over the keys of an existing type, optionally transforming the key names and value types."
+    },
+    {
+      "term": "Template Literal Type",
+      "definition": "A TypeScript type constructed using template literal syntax to produce string union types programmatically from other string or union types."
+    },
+    {
+      "term": "Discriminated Union",
+      "definition": "A TypeScript pattern where a union of types shares a common literal property (the discriminant) used by the compiler to narrow the type in switch/if branches."
+    },
+    {
+      "term": "Dependency Injection",
+      "definition": "A design pattern where a class receives its dependencies from the outside (via constructor, method, or property) rather than creating them internally, enabling decoupling and testability."
+    },
+    {
+      "term": "Repository Pattern",
+      "definition": "An architectural pattern that abstracts data access behind a typed interface, decoupling business logic from the specific database or ORM implementation."
+    },
+    {
+      "term": "Barrel File",
+      "definition": "An index.ts file that re-exports selected symbols from a module, defining its public API and hiding internal implementation details from consumers."
+    },
+    {
+      "term": "Path Alias",
+      "definition": "A tsconfig.json 'paths' mapping that replaces long relative import paths with short, stable identifiers (e.g., '@/users' instead of '../../../src/users/index')."
+    },
+    {
+      "term": "Zod",
+      "definition": "A TypeScript-first runtime validation library that defines schemas as objects and infers corresponding TypeScript types, serving as a single source of truth for both validation and type safety."
+    },
+    {
+      "term": "tRPC",
+      "definition": "A TypeScript RPC framework that shares server procedure types with the client automatically, eliminating schema drift and code generation steps for full-stack TypeScript teams."
+    },
+    {
+      "term": "Drizzle ORM",
+      "definition": "A TypeScript-first ORM that defines database schemas as TypeScript objects and derives query result types directly from those schema definitions."
+    },
+    {
+      "term": "Module Augmentation",
+      "definition": "A TypeScript technique for adding new properties to existing types from external modules, commonly used to add typed properties like req.user to Express's Request interface."
+    },
+    {
+      "term": "Type Guard",
+      "definition": "A function with return type 'arg is T' that TypeScript uses to narrow the type of a variable within the true branch of a conditional, enabling safe use of values typed as 'unknown'."
+    },
+    {
+      "term": "strictNullChecks",
+      "definition": "A TypeScript compiler flag (enabled by 'strict: true') that makes null and undefined their own types, preventing them from being assigned to other types without explicit handling."
+    },
+    {
+      "term": "noUncheckedIndexedAccess",
+      "definition": "A TypeScript compiler flag that adds '| undefined' to the type of any array index access, forcing the developer to handle the case where an index is out of bounds."
+    },
+    {
+      "term": "Vitest",
+      "definition": "A modern JavaScript/TypeScript test runner with native ESM support, built-in TypeScript transformation, and a Jest-compatible API."
+    },
+    {
+      "term": "Test Double",
+      "definition": "A general term for any object used in place of a real dependency during testing, including stubs (canned responses), mocks (call recording), and fakes (simplified real implementations)."
+    },
+    {
+      "term": "Composition Root",
+      "definition": "A single location in an application where all concrete implementations are instantiated and wired together, separating construction concerns from business logic."
+    },
+    {
+      "term": "SOLID",
+      "definition": "An acronym for five object-oriented design principles: Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion."
+    }
+  ]
+}
+
+
+// ── LEARNER STATE (in-memory) ─────────────────────────────────────────────────
+const state = {
+  screen: 'intro',
+  currentSectionIdx: 0,
+  currentExpIdx: 0,
+  completedExperiences: new Set(),
+  completedAssessments: new Set(),
+  interactionAnswers: {},   // expId -> { interactionId -> {answer, confidence} }
+  assessmentAnswers: {},    // assessmentId -> { questionId -> answer }
+  assessmentSubmitted: {},  // assessmentId -> bool
+  confidenceLog: {},        // interactionId -> value
+  competencyProgress: {},   // competencyId -> 0..1
+  revealedInteractions: {}  // expId -> Set of revealed interactionIds
+};
+
+// Initialise competency progress
+COURSE.competencies.forEach(c => { state.competencyProgress[c.competencyId] = 0; });
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+function goScreen(id, sIdx, eIdx) {
+  if (sIdx !== undefined) state.currentSectionIdx = sIdx;
+  if (eIdx !== undefined) state.currentExpIdx = eIdx;
+  state.screen = id;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  render(id);
+  updateSidebar();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── RENDER DISPATCHER ─────────────────────────────────────────────────────────
+function render(id) {
+  if (id === 'intro')   renderIntro();
+  if (id === 'section') renderSection();
+  if (id === 'exp')     renderExp();
+  if (id === 'assess')  renderAssess();
+}
+
+// ── SIDEBAR ───────────────────────────────────────────────────────────────────
+function buildSidebar() {
+  document.getElementById('sidebar-title').textContent = COURSE.courseMetadata.title;
+  renderGlossary();
+  updateSidebar();
+}
+
+function updateSidebar() {
+  // Competency bars
+  const barsEl = document.getElementById('competency-bars');
+  barsEl.innerHTML = COURSE.competencies.map(c => {
+    const pct = Math.round((state.competencyProgress[c.competencyId] || 0) * 100);
+    return `<div class="comp-badge">
+      <span style="font-size:12px;color:var(--text-secondary);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.title}</span>
+      <div class="comp-bar-wrap"><div class="comp-bar" style="width:${pct}%"></div></div>
+      <span class="comp-pct">${pct}%</span>
+    </div>`;
+  }).join('');
+
+  // Section nav
+  const navEl = document.getElementById('sidebar-nav');
+  navEl.innerHTML = '';
+  COURSE.sections.forEach((sec, sIdx) => {
+    const allExpDone = (sec.learningExperiences || []).every(e => state.completedExperiences.has(e.experienceId));
+    const isOpen = sIdx === state.currentSectionIdx;
+
+    const item = document.createElement('div');
+    item.className = 'section-nav-item' + (isOpen ? ' open' : '');
+
+    const header = document.createElement('div');
+    header.className = 'section-nav-header' + (isOpen ? ' active' : '');
+    header.innerHTML = `
+      <span class="section-check ${allExpDone ? 'done' : (isOpen ? 'active' : '')}">${allExpDone ? '✓' : sIdx + 1}</span>
+      <span style="flex:1">${sec.title}</span>
+      <span class="section-nav-arrow">›</span>`;
+    header.onclick = () => goScreen('section', sIdx, 0);
+
+    const exps = document.createElement('div');
+    exps.className = 'section-nav-experiences';
+
+    (sec.learningExperiences || []).forEach((exp, eIdx) => {
+      const done = state.completedExperiences.has(exp.experienceId);
+      const isActive = state.screen === 'exp' && sIdx === state.currentSectionIdx && eIdx === state.currentExpIdx;
+      const div = document.createElement('div');
+      div.className = `exp-nav-item ${isActive ? 'active' : ''} ${done ? 'done' : ''}`;
+      div.innerHTML = `<span class="exp-dot"></span>${exp.title}`;
+      div.onclick = () => goScreen('exp', sIdx, eIdx);
+      exps.appendChild(div);
+    });
+
+    // Assessment links
+    const linkedAssessIds = new Set();
+    (sec.learningExperiences || []).forEach(exp => {
+      ((exp.masteryVerification || {}).assessmentIds || []).forEach(id => linkedAssessIds.add(id));
+    });
+    linkedAssessIds.forEach(aId => {
+      const assess = COURSE.assessments.find(a => a.assessmentId === aId);
+      if (!assess) return;
+      const done = state.completedAssessments.has(aId);
+      const isActive = state.screen === 'assess' && state._assessId === aId;
+      const div = document.createElement('div');
+      div.className = `assess-nav-item ${isActive ? 'active' : ''}`;
+      div.innerHTML = `<span class="exp-dot"></span>${assess.title} ${done ? '✓' : ''}`;
+      div.onclick = () => { state._assessId = aId; goScreen('assess', sIdx); };
+      exps.appendChild(div);
+    });
+
+    item.appendChild(header);
+    item.appendChild(exps);
+    navEl.appendChild(item);
+  });
+
+  updateProgress();
+}
+
+function updateProgress() {
+  const totalExp = COURSE.sections.reduce((a, s) => a + (s.learningExperiences || []).length, 0);
+  const totalAssess = COURSE.assessments.length;
+  const total = totalExp + totalAssess;
+  const done = state.completedExperiences.size + state.completedAssessments.size;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${pct}% complete`;
+}
+
+// ── INTRO SCREEN ──────────────────────────────────────────────────────────────
+function renderIntro() {
+  const m = COURSE.courseMetadata;
+  const lm = COURSE.learningModel;
+  const durationHours = Math.round(m.estimatedDurationMinutes / 60 * 10) / 10;
+
+  const heroContent = m.thumbnailImage
+    ? `<img src="${m.thumbnailImage}" alt="${m.title}">`
+    : `<div class="hero-icon">🧠</div>`;
+
+  const lmPills = [
+    ['retrievalPracticeEnabled',   'Retrieval Practice'],
+    ['confidenceCalibrationEnabled','Confidence Calibration'],
+    ['adaptiveDifficultyEnabled',  'Adaptive Difficulty'],
+    ['interleavingEnabled',        'Interleaving'],
+    ['spacedRepetitionEnabled',    'Spaced Repetition'],
+  ].map(([key, label]) => `<div class="lm-pill ${lm[key] ? 'on' : ''}"><span class="dot"></span>${label}</div>`).join('');
+
+  const outcomes = COURSE.competencies.map(c =>
+    `<li>${c.description} <span class="tag tag-${taxonomyColor(c.taxonomyLevel)}" style="margin-left:6px">${c.taxonomyLevel}</span></li>`
+  ).join('');
+
+  const prereqs = (m.prerequisites || []).map(p => `<li>${p.description}</li>`).join('');
+
+  document.getElementById('screen-intro').innerHTML = `
+    <div class="course-hero">${heroContent}</div>
+    <div style="margin-bottom:10px">
+      <span class="tag tag-${diffColor(m.difficultyLevel)}">${m.difficultyLevel}</span>
+      ${m.tags.map(t => `<span class="tag tag-gray" style="margin-left:4px">${t}</span>`).join('')}
+    </div>
+    <h1 style="font-size:34px;margin-bottom:12px">${m.title}</h1>
+    <p style="color:var(--text-secondary);font-size:15px;margin-bottom:24px">${m.description}</p>
+
+    <div class="meta-grid">
+      <div class="meta-cell"><strong>${durationHours}h</strong><span>Duration</span></div>
+      <div class="meta-cell"><strong>${COURSE.sections.length}</strong><span>Sections</span></div>
+      <div class="meta-cell"><strong>${COURSE.sections.reduce((a,s)=>a+(s.learningExperiences||[]).length,0)}</strong><span>Experiences</span></div>
+      <div class="meta-cell"><strong>v${m.version}</strong><span>Version</span></div>
+    </div>
+
+    <h3 style="font-size:16px;margin-bottom:10px">Learning Model</h3>
+    <div class="lm-grid">${lmPills}</div>
+
+    <h3 style="font-size:16px;margin-bottom:8px">What you'll be able to do</h3>
+    <ul class="outcomes-list">${outcomes}</ul>
+
+    ${prereqs ? `<h3 style="font-size:16px;margin-bottom:8px">Prerequisites</h3><ul class="outcomes-list">${prereqs}</ul>` : ''}
+
+    <button class="btn btn-primary" onclick="goScreen('section',0,0)">Begin Course →</button>
+  `;
+}
+
+// ── SECTION SCREEN ────────────────────────────────────────────────────────────
+function renderSection() {
+  const sec = COURSE.sections[state.currentSectionIdx];
+  const sIdx = state.currentSectionIdx;
+  const prevAction = sIdx > 0 ? `goScreen('section',${sIdx-1},0)` : `goScreen('intro')`;
+
+  const hooks = (sec.motivationHooks || []).map(h => {
+    const cls = h.type === 'real-world-stakes' ? 'hook-stakes' : 'hook-gap';
+    const icon = h.type === 'real-world-stakes' ? '⚠️' : '🎯';
+    return `<div class="hook-box ${cls}"><span class="hook-icon">${icon}</span><span>${h.prompt}</span></div>`;
+  }).join('');
+
+  const objectives = (sec.learningObjectives || []).map(o => {
+    const comps = (o.linkedCompetencies || []).map(cId => {
+      const c = COURSE.competencies.find(x => x.competencyId === cId);
+      return c ? `<span class="tag tag-green" style="margin-left:6px;font-size:10px">${c.title}</span>` : '';
+    }).join('');
+    return `<li>${o.description}${comps}</li>`;
+  }).join('');
+
+  document.getElementById('screen-section').innerHTML = `
+    <div class="section-eyebrow">Section ${sIdx + 1} of ${COURSE.sections.length}</div>
+    <h1 style="font-size:30px;margin-bottom:10px">${sec.title}</h1>
+    <p style="color:var(--text-secondary);font-size:14px;margin-bottom:22px">${sec.description}</p>
+    ${hooks}
+    <h3 style="font-size:16px;margin:20px 0 8px">Learning Objectives</h3>
+    <ul class="objectives-list">${objectives}</ul>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="${prevAction}">← Back</button>
+      <button class="btn btn-primary" onclick="goScreen('exp',${sIdx},0)">Start Section →</button>
+    </div>
+  `;
+}
+
+// ── EXPERIENCE SCREEN ─────────────────────────────────────────────────────────
+function renderExp() {
+  const sec = COURSE.sections[state.currentSectionIdx];
+  const exp = sec.learningExperiences[state.currentExpIdx];
+  const sIdx = state.currentSectionIdx;
+  const eIdx = state.currentExpIdx;
+  const isLastExp = eIdx === sec.learningExperiences.length - 1;
+
+  // Initialise reveal tracking
+  if (!state.revealedInteractions[exp.experienceId]) state.revealedInteractions[exp.experienceId] = new Set();
+  if (!state.interactionAnswers[exp.experienceId]) state.interactionAnswers[exp.experienceId] = {};
+
+  const diffDots = renderDiffDots(exp.difficultyProfile.overall);
+  const cogTags = (exp.desiredCognitiveActions || []).map(a => `<span class="tag tag-${cogColor(a)}">${a}</span>`).join('');
+
+  const contentHTML = (exp.contentBlocks || []).map(b => {
+    if (b.type === 'text') return `<p class="content-block-text">${b.content}</p>`;
+    if (b.type === 'image') {
+      return b.url
+        ? `<div class="content-block-image"><img src="${b.url}" alt="${b.altText||''}"><p class="img-caption">${b.altText||''}</p></div>`
+        : `<div class="content-block-image" style="background:var(--border);border-radius:var(--radius);height:140px;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:13px">${b.altText||'[image]'}</div>`;
+    }
+    return '';
+  }).join('');
+
+  const workedHTML = (exp.workedExamples || []).map(we => `
+    <div class="worked-example">
+      <div class="we-label">Worked Example</div>
+      <div class="we-problem">${we.problem}</div>
+      <ol class="we-steps">${(we.steps||[]).map(s=>`<li>${s}</li>`).join('')}</ol>
+      ${we.conclusion ? `<div class="we-conclusion">${we.conclusion}</div>` : ''}
+    </div>`).join('');
+
+  const interactionsHTML = (exp.interactionSequence || []).map(int => renderInteraction(int, exp)).join('');
+
+  const retrievalHTML = (exp.retrievalPractice || []).map(r => renderRetrieval(r, exp)).join('');
+  const transferHTML  = (exp.transferExercises  || []).map(t => renderTransfer(t,  exp)).join('');
+
+  // Assessment links for this experience
+  const assessIds = ((exp.masteryVerification || {}).assessmentIds || []);
+  const assessLinks = assessIds.map(aId => {
+    const a = COURSE.assessments.find(x => x.assessmentId === aId);
+    return a ? `<button class="btn btn-secondary btn-sm" onclick="state._assessId='${aId}';goScreen('assess',${sIdx})">Open Assessment: ${a.title} →</button>` : '';
+  }).join('');
+
+  // next action
+  const nextLabel = isLastExp ? 'Complete Section →' : 'Next Experience →';
+  const nextAction = isLastExp ? `completeExp('${exp.experienceId}');finishSection(${sIdx})` : `completeExp('${exp.experienceId}');goScreen('exp',${sIdx},${eIdx+1})`;
+  const prevAction = eIdx > 0 ? `goScreen('exp',${sIdx},${eIdx-1})` : `goScreen('section',${sIdx})`;
+
+  document.getElementById('screen-exp').innerHTML = `
+    <div class="exp-header">
+      <div class="section-eyebrow">${sec.title} · ${expTypeLabel(exp.experienceType)}</div>
+      <h2>${exp.title}</h2>
+      <div class="exp-meta">
+        <span class="exp-meta-item">⏱ ${exp.estimatedDurationMinutes} min</span>
+        <span class="exp-meta-item">Difficulty ${diffDots}</span>
+      </div>
+      <div class="cognitive-actions">${cogTags}</div>
+    </div>
+    ${contentHTML}
+    ${workedHTML}
+    ${interactionsHTML}
+    ${retrievalHTML}
+    ${transferHTML}
+    ${assessLinks ? `<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">${assessLinks}</div>` : ''}
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="${prevAction}">← Back</button>
+      <button class="btn btn-primary" onclick="${nextAction}">${nextLabel}</button>
+    </div>
+  `;
+}
+
+function renderInteraction(int, exp) {
+  const expId = exp.experienceId;
+  const answered = !!(state.interactionAnswers[expId] && state.interactionAnswers[expId][int.interactionId]);
+  const revealed = state.revealedInteractions[expId] && state.revealedInteractions[expId].has(int.interactionId);
+
+  if (int.interactionType === 'prediction') {
+    const ans = (state.interactionAnswers[expId]||{})[int.interactionId]?.answer || '';
+    const conf = (state.interactionAnswers[expId]||{})[int.interactionId]?.confidence || 3;
+    const lm = COURSE.learningModel;
+    const confBlock = lm.confidenceCalibrationEnabled ? `
+      <div class="confidence-block">
+        <div class="confidence-label">🎯 ${int.confidencePrompt?.prompt || 'How confident are you?'}</div>
+        <div class="confidence-row">
+          <input type="range" class="confidence-slider" min="${int.confidencePrompt?.scaleMin||1}" max="${int.confidencePrompt?.scaleMax||5}" value="${conf}" id="conf-${int.interactionId}" oninput="document.getElementById('confval-${int.interactionId}').textContent=this.value">
+          <span class="confidence-value" id="confval-${int.interactionId}">${conf}</span>
+        </div>
+        <div class="confidence-anchors"><span>Not confident</span><span>Very confident</span></div>
+      </div>` : '';
+
+    return `<div class="interaction-block int-prediction" id="int-${int.interactionId}">
+      <div class="interaction-label">🔮 Prediction</div>
+      <div class="interaction-prompt">${int.prompt}</div>
+      <textarea class="sa-textarea" id="sa-${int.interactionId}" placeholder="Write your initial reasoning here…" ${revealed?'disabled':''}>${ans}</textarea>
+      ${confBlock}
+      ${!revealed ? `<div class="submit-row">
+        <button class="btn btn-primary btn-sm" onclick="submitPrediction('${expId}','${int.interactionId}')">Submit & See Analysis</button>
+      </div>` : '<div style="margin-top:8px;font-size:12px;color:var(--accent);font-weight:600">✓ Response recorded — compare with the analysis below</div>'}
+    </div>`;
+  }
+
+  if (int.interactionType === 'compare-responses') {
+    const models = int.responseModels;
+    const expertSteps = (models.expertResponse.reasoningSteps || []).map(s => `<li>${s}</li>`).join('');
+    const weakDiag = (models.weakResponse.diagnosis || []).map(d => `<div>· ${d}</div>`).join('');
+    return `<div class="interaction-block int-compare" id="int-${int.interactionId}">
+      <div class="interaction-label">⚖️ Compare Responses</div>
+      <p style="font-size:14px;color:var(--text-secondary);margin-bottom:14px">Read each response below. Consider how yours compares.</p>
+      <div class="compare-grid">
+        <div class="compare-card compare-expert">
+          <div class="compare-card-label">Expert Response</div>
+          <div>${models.expertResponse.answer}</div>
+          ${expertSteps ? `<div class="compare-reasoning"><ul style="margin-top:8px">${expertSteps}</ul></div>` : ''}
+        </div>
+        <div class="compare-card compare-strong">
+          <div class="compare-card-label">Strong Learner</div>
+          <div>${models.strongLearnerResponse.answer}</div>
+        </div>
+      </div>
+      <div class="compare-card compare-weak" style="margin-top:10px">
+        <div class="compare-card-label">Weak Response — Avoid This</div>
+        <div>${models.weakResponse.answer}</div>
+        ${weakDiag ? `<div class="compare-diagnosis">${weakDiag}</div>` : ''}
+      </div>
+    </div>`;
+  }
+
+  if (int.interactionType === 'reflection') {
+    const ans = (state.interactionAnswers[expId]||{})[int.interactionId]?.answer || '';
+    const gated = int.timing === 'post-feedback';
+    // show reflection only once a prediction in this sequence has been answered
+    const hasPriorAnswer = Object.keys(state.interactionAnswers[expId]||{}).length > 0;
+    if (gated && !hasPriorAnswer) return `<div class="interaction-block int-reflection" id="int-${int.interactionId}">
+      <div class="interaction-label">🪞 Reflection</div>
+      <div class="reflection-gate">Complete the prediction above to unlock this reflection.</div>
+    </div>`;
+
+    return `<div class="interaction-block int-reflection" id="int-${int.interactionId}">
+      <div class="interaction-label">🪞 Reflection</div>
+      <div class="interaction-prompt">${int.prompt}</div>
+      <textarea class="sa-textarea" id="sa-${int.interactionId}" placeholder="Reflect openly — this is for your benefit…">${ans}</textarea>
+      <div class="submit-row">
+        <button class="btn btn-primary btn-sm" onclick="submitReflection('${expId}','${int.interactionId}')">Save Reflection</button>
+        <span id="ref-saved-${int.interactionId}" style="font-size:12px;color:var(--accent);display:none">✓ Saved</span>
+      </div>
+    </div>`;
+  }
+
+  return '';
+}
+
+function renderRetrieval(r, exp) {
+  const expId = exp.experienceId;
+  const ans = (state.interactionAnswers[expId]||{})[r.retrievalItemId]?.answer || '';
+  const revealed = state.revealedInteractions[expId] && state.revealedInteractions[expId].has(r.retrievalItemId);
+  const dots = Array.from({length:5},(_,i)=>`<span class="${i<r.difficulty?'filled':''} "></span>`).join('');
+  const scheduleInfo = `Review scheduled: Day ${r.schedule.initialReviewDays}, then ${r.schedule.subsequentReviewDays.join(', ')} days`;
+
+  return `<div class="interaction-block int-retrieval" id="int-${r.retrievalItemId}">
+    <div class="retrieval-prompt-box">
+      <div class="retrieval-prompt-label">
+        ↩ Retrieval Practice
+        <span class="retrieval-difficulty">${Array.from({length:5},(_,i)=>`<span class="${i<r.difficulty?'filled':''}" style="background:${i<r.difficulty?'var(--accent)':'var(--border)'};display:inline-block;width:8px;height:8px;border-radius:2px;margin-left:1px"></span>`).join('')}</span>
+      </div>
+      <div class="interaction-prompt" style="margin-bottom:0">${r.prompt}</div>
+    </div>
+    <textarea class="sa-textarea" id="sa-${r.retrievalItemId}" placeholder="Retrieve from memory — resist the urge to look back." ${revealed?'disabled':''}>${ans}</textarea>
+    ${!revealed ? `<div class="submit-row">
+      <button class="btn btn-primary btn-sm" onclick="submitRetrieval('${expId}','${r.retrievalItemId}')">Submit</button>
+    </div>` : `<div style="margin-top:8px;font-size:12px;color:var(--text-secondary)">📅 ${scheduleInfo}</div>`}
+  </div>`;
+}
+
+function renderTransfer(t, exp) {
+  const expId = exp.experienceId;
+  const ans = (state.interactionAnswers[expId]||{})[t.exerciseId]?.answer || '';
+  const saved = state.revealedInteractions[expId] && state.revealedInteractions[expId].has(t.exerciseId);
+  const criteria = (t.successCriteria||[]).map(c=>`<li>${c}</li>`).join('');
+
+  return `<div class="interaction-block int-transfer" id="int-${t.exerciseId}">
+    <div class="interaction-label">🔀 Transfer Exercise · ${t.context}</div>
+    <div class="transfer-scenario">
+      <div class="transfer-scenario-label">Scenario</div>
+      <div>${t.scenario}</div>
+    </div>
+    <div class="interaction-prompt" style="margin-bottom:10px">${t.task}</div>
+    <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px">Success Criteria</div>
+    <ul class="transfer-criteria">${criteria}</ul>
+    <textarea class="sa-textarea" id="sa-${t.exerciseId}" placeholder="Apply your reasoning here…" ${saved?'disabled':''}>${ans}</textarea>
+    ${!saved ? `<div class="submit-row">
+      <button class="btn btn-primary btn-sm" onclick="submitTransfer('${expId}','${t.exerciseId}')">Submit Exercise</button>
+    </div>` : `<div style="margin-top:8px;font-size:12px;color:var(--accent);font-weight:600">✓ Exercise recorded</div>`}
+  </div>`;
+}
+
+// ── ASSESSMENT SCREEN ─────────────────────────────────────────────────────────
+function renderAssess() {
+  const aId = state._assessId;
+  const assess = COURSE.assessments.find(a => a.assessmentId === aId);
+  if (!assess) return;
+  const submitted = !!state.assessmentSubmitted[aId];
+  if (!state.assessmentAnswers[aId]) state.assessmentAnswers[aId] = {};
+
+  const questionsHTML = (assess.questions || []).map((q, qIdx) => {
+    const ans = state.assessmentAnswers[aId][q.questionId] || '';
+    const rubric = q.rubric || {};
+    const rubricHTML = submitted ? `
+      <div class="assess-rubric">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-secondary);margin-bottom:10px">Rubric — evaluate your own response</div>
+        <div class="rubric-row rubric-excellent"><span class="rubric-level">Excellent</span><span class="rubric-desc">${rubric.excellent||''}</span></div>
+        <div class="rubric-row rubric-adequate"><span class="rubric-level">Adequate</span><span class="rubric-desc">${rubric.adequate||''}</span></div>
+        <div class="rubric-row rubric-weak"><span class="rubric-level">Weak</span><span class="rubric-desc">${rubric.weak||''}</span></div>
+      </div>
+      ${(q.successCriteria||[]).length ? `
+        <div style="margin-top:12px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-secondary);margin-bottom:6px">Success Criteria</div>
+          <ul class="transfer-criteria">${(q.successCriteria||[]).map(c=>`<li>${c}</li>`).join('')}</ul>
+        </div>` : ''}
+    ` : '';
+
+    return `<div class="card">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-secondary);margin-bottom:8px">
+        Question ${qIdx+1} · ${q.questionType} · Difficulty ${q.difficulty}/5
+      </div>
+      <div class="interaction-prompt">${q.prompt}</div>
+      <textarea class="sa-textarea" id="aq-${aId}-${q.questionId}" placeholder="Write your response…" ${submitted?'disabled':''}>${ans}</textarea>
+      ${rubricHTML}
+    </div>`;
+  }).join('');
+
+  const linkedComps = (assess.linkedCompetencies||[]).map(cId => {
+    const c = COURSE.competencies.find(x => x.competencyId === cId);
+    return c ? `<span class="tag tag-green" style="margin-left:4px">${c.title}</span>` : '';
+  }).join('');
+
+  document.getElementById('screen-assess').innerHTML = `
+    <div class="assess-intro">
+      <div class="section-eyebrow">${assess.assessmentType}</div>
+      <h2 style="font-size:26px;margin-bottom:8px">${assess.title}</h2>
+      <div style="margin-bottom:16px">Competencies: ${linkedComps}</div>
+      ${assess.adaptiveDifficulty ? `<div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">⚡ Adaptive difficulty is enabled for this assessment.</div>` : ''}
+    </div>
+    ${questionsHTML}
+    ${!submitted ? `<button class="btn btn-primary" onclick="submitAssessment('${aId}')">Submit Assessment</button>` : ''}
+    ${submitted ? `
+      <div class="card" style="background:var(--accent-light);border-color:#b8d9c2;margin-top:8px">
+        <h3 style="font-size:18px;margin-bottom:6px">Assessment Submitted ✓</h3>
+        <p style="font-size:14px;color:var(--text-secondary)">Use the rubric above each question to self-evaluate your response. Your competency progress has been updated.</p>
+      </div>` : ''}
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goScreen('exp',${state.currentSectionIdx},${state.currentExpIdx})">← Back to Experience</button>
+    </div>
+  `;
+}
+
+// ── INTERACTION HANDLERS ──────────────────────────────────────────────────────
+function submitPrediction(expId, intId) {
+  const ta = document.getElementById('sa-' + intId);
+  const confEl = document.getElementById('conf-' + intId);
+  if (!ta || !ta.value.trim()) return;
+  if (!state.interactionAnswers[expId]) state.interactionAnswers[expId] = {};
+  state.interactionAnswers[expId][intId] = { answer: ta.value, confidence: confEl ? +confEl.value : null };
+  state.revealedInteractions[expId] = state.revealedInteractions[expId] || new Set();
+  state.revealedInteractions[expId].add(intId);
+  // advance competency progress slightly
+  advanceCompetency(expId, 0.15);
+  renderExp();
+}
+
+function submitReflection(expId, intId) {
+  const ta = document.getElementById('sa-' + intId);
+  if (!state.interactionAnswers[expId]) state.interactionAnswers[expId] = {};
+  state.interactionAnswers[expId][intId] = { answer: ta ? ta.value : '' };
+  const saved = document.getElementById('ref-saved-' + intId);
+  if (saved) saved.style.display = 'inline';
+  advanceCompetency(expId, 0.1);
+}
+
+function submitRetrieval(expId, itemId) {
+  const ta = document.getElementById('sa-' + itemId);
+  if (!ta || !ta.value.trim()) return;
+  if (!state.interactionAnswers[expId]) state.interactionAnswers[expId] = {};
+  state.interactionAnswers[expId][itemId] = { answer: ta.value };
+  state.revealedInteractions[expId] = state.revealedInteractions[expId] || new Set();
+  state.revealedInteractions[expId].add(itemId);
+  advanceCompetency(expId, 0.1);
+  renderExp();
+}
+
+function submitTransfer(expId, exId) {
+  const ta = document.getElementById('sa-' + exId);
+  if (!ta || !ta.value.trim()) return;
+  if (!state.interactionAnswers[expId]) state.interactionAnswers[expId] = {};
+  state.interactionAnswers[expId][exId] = { answer: ta.value };
+  state.revealedInteractions[expId] = state.revealedInteractions[expId] || new Set();
+  state.revealedInteractions[expId].add(exId);
+  advanceCompetency(expId, 0.2);
+  renderExp();
+}
+
+function submitAssessment(aId) {
+  // Capture all textarea values
+  const assess = COURSE.assessments.find(a => a.assessmentId === aId);
+  (assess.questions || []).forEach(q => {
+    const ta = document.getElementById(`aq-${aId}-${q.questionId}`);
+    if (ta) state.assessmentAnswers[aId][q.questionId] = ta.value;
+  });
+  state.assessmentSubmitted[aId] = true;
+  state.completedAssessments.add(aId);
+  // Advance competency for linked competencies
+  (assess.linkedCompetencies || []).forEach(cId => {
+    state.competencyProgress[cId] = Math.min(1, (state.competencyProgress[cId] || 0) + 0.3);
+  });
+  updateSidebar();
+  renderAssess();
+}
+
+function completeExp(expId) {
+  state.completedExperiences.add(expId);
+  advanceCompetency(expId, 0.15);
+  updateSidebar();
+}
+
+function finishSection(sIdx) {
+  const sec = COURSE.sections[sIdx];
+  const isLastSection = sIdx === COURSE.sections.length - 1;
+  if (isLastSection) {
+    goScreen('complete');
+  } else {
+    goScreen('section', sIdx + 1, 0);
+  }
+}
+
+function advanceCompetency(expId, delta) {
+  // Find which competencies this experience is linked to
+  COURSE.sections.forEach(sec => {
+    (sec.learningExperiences || []).forEach(exp => {
+      if (exp.experienceId === expId) {
+        (exp.linkedCompetencies || []).forEach(cId => {
+          state.competencyProgress[cId] = Math.min(1, (state.competencyProgress[cId] || 0) + delta);
+        });
+      }
+    });
+  });
+  updateSidebar();
+}
+
+// ── GLOSSARY ──────────────────────────────────────────────────────────────────
+function renderGlossary() {
+  const body = document.getElementById('glossary-body');
+  const terms = COURSE.glossary || [];
+  if (!terms.length) { body.innerHTML = '<p style="padding:14px;font-size:13px;color:var(--text-secondary)">No glossary terms.</p>'; return; }
+  body.innerHTML = terms.map(g => `<dl class="glossary-term"><dt>${g.term}</dt><dd>${g.definition}</dd></dl>`).join('');
+}
+function toggleGlossary() { document.getElementById('glossary-drawer').classList.toggle('open'); }
+
+// ── UTILITIES ─────────────────────────────────────────────────────────────────
+function diffColor(d) { return d === 'beginner' ? 'green' : d === 'advanced' ? 'warn' : 'gold'; }
+function taxonomyColor(t) {
+  const map = { remember:'gray', understand:'gray', apply:'blue', analyze:'violet', evaluate:'gold', create:'green' };
+  return map[t] || 'gray';
+}
+function cogColor(a) {
+  const map = { prediction:'blue', analysis:'violet', reflection:'gold', retrieval:'green', application:'blue', contrast:'gold' };
+  return map[a] || 'gray';
+}
+function expTypeLabel(t) {
+  const map = { 'guided-analysis':'Guided Analysis', 'worked-example':'Worked Example', 'practice':'Practice', 'exploration':'Exploration' };
+  return map[t] || t;
+}
+function renderDiffDots(n) {
+  return Array.from({length:5},(_,i)=>`<span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:2px;background:${i<n?'var(--accent)':'var(--border)'}"></span>`).join('');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+buildSidebar();
+renderIntro();
+</script>
+</body>
+</html>

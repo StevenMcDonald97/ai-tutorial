@@ -1,0 +1,321 @@
+{
+  "courseMetadata": {
+    "courseId": "string",
+    "title": "string",
+    "description": "string",
+    "thumbnailImage": "url",
+    "estimatedDurationMinutes": "integer",
+    "difficultyLevel": "string (novice | intermediate | advanced)",
+    "version": "string",
+    "lastUpdated": "ISO-8601 date",
+    "language": "string (BCP-47 language tag)",
+    "tags": ["string"],
+    "prerequisites": [
+      {
+        "type": "string (knowledge | course | assessment)",
+        "description": "string"
+      }
+    ]
+  },
+
+  "learningModel": {
+    "masteryThreshold": "float (0–1)",
+    "passingThreshold": "float (0–1)",
+    "retrievalPracticeEnabled": "boolean",
+    "confidenceCalibrationEnabled": "boolean",
+    "adaptiveDifficultyEnabled": "boolean",
+    "interleavingEnabled": "boolean",
+    "interleavingGroups": [
+      {
+        "groupId": "string",
+        "competencyIds": ["string"],
+        "experienceIds": ["string"],
+        "rationaleNote": "string (optional — e.g. 'contrast near-transfer items')"
+      }
+    ],
+    "spacedRepetitionEnabled": "boolean"
+  },
+
+  "priorKnowledgeCheck": {
+    "enabled": "boolean",
+    "placement": "string (before-course | before-section)",
+    "probeQuestions": [
+      {
+        "probeId": "string",
+        "prompt": "string",
+        "questionType": "string (multiple-choice | short-answer | scenario-analysis)",
+        "linkedCompetencies": ["string (competencyId)"],
+        "scoringCriteria": ["string"],
+        "routingRules": [
+          {
+            "condition": "string (e.g. score >= 0.85)",
+            "action": "string (e.g. skip-to-section | unlock-advanced | flag-for-review)"
+          }
+        ]
+      }
+    ]
+  },
+
+  "competencies": [
+    {
+      "competencyId": "string",
+      "title": "string",
+      "description": "string",
+      "taxonomyLevel": "string (remember | understand | apply | analyze | evaluate | create)",
+      "difficultyProfile": {
+        "overall": "integer (1–5)",
+        "conceptualComplexity": "integer (1–5)",
+        "ambiguity": "integer (1–5)",
+        "technicalSkill": "integer (1–5)",
+        "readingDemand": "integer (1–5)"
+      },
+      "transferRequired": "boolean",
+      "masteryThreshold": "float (0–1)",
+
+      "desiredOutcomes": [
+        {
+          "outcomeId": "string",
+          "description": "string",
+          "verifiedBy": ["string (assessmentId | exerciseId)"],
+          "verificationCriteria": {
+            "minimumAccuracy": "float (0–1)",
+            "minimumConfidenceCalibration": "float (0–1)",
+            "requiresTransferSuccess": "boolean"
+          }
+        }
+      ],
+
+      "commonMisconceptions": [
+        {
+          "misconceptionId": "string",
+          "misconception": "string",
+          "whyIncorrect": "string",
+          "remediationStrategy": "string",
+          "linkedErrorPatterns": ["string (maps to analytics errorPatternId)"]
+        }
+      ]
+    }
+  ],
+
+  "sections": [
+    {
+      "sectionId": "string",
+      "title": "string",
+      "description": "string",
+      "learningObjectives": [
+        {
+          "objectiveId": "string",
+          "description": "string",
+          "linkedCompetencies": ["string (competencyId)"]
+        }
+      ],
+
+      "motivationHooks": [
+        {
+          "type": "string (real-world-stakes | prediction-gap | curiosity-prompt | relevance-anchor)",
+          "prompt": "string"
+        }
+      ],
+
+      "furtherReading": [
+        {
+          "resourceId": "string",
+          "title": "string",
+          "resourceType": "string (article | book | paper | video | website | other)",
+          "url": "url (optional)",
+          "citation": "string (optional — for non-linkable sources such as books)",
+          "author": "string (optional)",
+          "rationaleNote": "string (optional — why this resource is worth reading)",
+          "linkedCompetencies": ["string (competencyId, optional)"]
+        }
+      ],
+
+      "learningExperiences": [
+        {
+          "experienceId": "string",
+          "title": "string",
+          "experienceType": "string (guided-analysis | worked-example | case-study | simulation | discussion | self-guided-exercise)",
+          "difficultyProfile": {
+            "overall": "integer (1–5)",
+            "conceptualComplexity": "integer (1–5)",
+            "ambiguity": "integer (1–5)"
+          },
+          "estimatedDurationMinutes": "integer",
+          "linkedCompetencies": ["string (competencyId)"],
+          "desiredCognitiveActions": [
+            "string (prediction | analysis | reflection | retrieval | comparison | synthesis)"
+          ],
+
+          "contentBlocks": [
+            {
+              "blockId": "string",
+              "type": "string (text | image | video | audio | interactive)",
+              "content": "string (for text type)",
+              "url": "url (for media types)",
+              "altText": "string (for image type)",
+              "captionOrTranscript": "string (for video/audio types)"
+            }
+          ],
+
+          "interactionSequence": [
+            {
+              "interactionId": "string",
+              "interactionType": "string (prediction | compare-responses | reflection | multiple-choice | drag-drop | scenario-analysis)",
+              "prompt": "string",
+              "required": "boolean",
+              "responseFormat": "string (short-answer | multiple-choice | ranking | likert)",
+              "revealCondition": "string (after-response | after-attempt | on-request)",
+
+              "feedback": {
+                "type": "string (elaborative | corrective | hint-only | socratic)",
+                "elaborativeFeedback": "string (explains why answer is correct/incorrect with reasoning)",
+                "correctiveFeedback": "string (direct correction statement)",
+                "hints": ["string (progressive hints revealed on request)"]
+              },
+
+              "confidencePrompt": {
+                "enabled": "boolean",
+                "scaleMin": "integer",
+                "scaleMax": "integer",
+                "prompt": "string"
+              }
+            }
+          ],
+
+          "workedExamples": [
+            {
+              "exampleId": "string",
+              "problem": "string",
+              "steps": ["string"],
+              "conclusion": "string"
+            }
+          ],
+
+          "selfGuidedExercise": {
+            "exerciseId": "string",
+            "realWorldContext": "string (the authentic setting the learner applies the material in — e.g. 'attend an open mic night')",
+            "objective": "string (what applying the material should accomplish)",
+            "instructions": ["string (ordered steps guiding the learner through the real-world application)"],
+            "estimatedRealWorldDurationMinutes": "integer (optional — time outside the engine)",
+            "materialsOrPrerequisites": ["string (optional — anything the learner needs beforehand)"],
+            "reflectionPrompts": ["string (prompts answered on return to consolidate the experience)"],
+            "verification": {
+              "mode": "string (self-attested | reflection-submission | none)",
+              "isGating": "boolean (must be false — self-guided exercises are formative and do not block mastery progression)",
+              "selfAssessmentCriteria": ["string (optional — criteria for the learner to judge their own application)"]
+            },
+            "linkedCompetencies": ["string (competencyId, optional)"]
+          },
+
+          "retrievalPractice": [
+            {
+              "retrievalItemId": "string",
+              "retrievalType": "string (free-recall | cued-recall | application | scenario-analysis | contrast)",
+              "prompt": "string",
+              "difficulty": "integer (1–5)",
+              "schedule": {
+                "initialReviewDays": "integer",
+                "subsequentReviewDays": ["integer"],
+                "decayParameters": {
+                  "decayRate": "float (rate of forgetting; higher = faster decay)",
+                  "strengthMultiplier": "float (scales interval after successful recall)",
+                  "minimumIntervalDays": "integer",
+                  "maximumIntervalDays": "integer"
+                }
+              }
+            }
+          ],
+
+          "transferExercises": [
+            {
+              "exerciseId": "string",
+              "context": "string (domain the scenario is drawn from)",
+              "scenario": "string",
+              "task": "string",
+              "successCriteria": ["string"]
+            }
+          ],
+
+          "masteryVerification": {
+            "assessmentIds": ["string"],
+            "requiredPerformance": {
+              "minimumAccuracy": "float (0–1)",
+              "minimumTransferScore": "float (0–1)"
+            }
+          }
+        }
+      ]
+    }
+  ],
+
+  "assessments": [
+    {
+      "assessmentId": "string",
+      "title": "string",
+      "assessmentType": "string (scenario-analysis | multiple-choice | short-answer | performance-task)",
+      "linkedCompetencies": ["string (competencyId)"],
+      "adaptiveDifficulty": "boolean",
+
+      "questions": [
+        {
+          "questionId": "string",
+          "difficulty": "integer (1–5)",
+          "prompt": "string",
+          "questionType": "string (short-answer | multiple-choice | scenario-analysis)",
+          "successCriteria": ["string"],
+
+          "rubric": {
+            "excellent": "string",
+            "adequate": "string",
+            "weak": "string"
+          },
+
+          "errorPatterns": [
+            {
+              "errorPatternId": "string",
+              "description": "string (observable wrong-answer pattern)",
+              "linkedMisconceptionId": "string (competency.commonMisconceptions.misconceptionId)",
+              "remediationAction": "string (e.g. resurface worked-example-01 | flag for instructor review)"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "retrievalSystem": {
+    "algorithm": "string (spaced-repetition | fixed-interval | performance-adaptive)",
+    "confidenceWeighting": "boolean",
+    "interleavingEnabled": "boolean",
+    "retrievalModes": [
+      "string (free-recall | cued-recall | application | scenario-analysis | contrast)"
+    ]
+  },
+
+  "masterySystem": {
+    "masteryLevels": [
+      "string (novice | developing | proficient | mastered)"
+    ],
+    "decayModelEnabled": "boolean",
+    "reverificationRequired": "boolean"
+  },
+
+  "analytics": {
+    "track": [
+      "string (accuracy | confidence | time-on-task | retrieval-strength | transfer-performance | misconception-frequency)"
+    ],
+    "errorAnalysis": {
+      "enabled": "boolean",
+      "errorPatternTracking": "boolean",
+      "misconceptionFrequencyLogging": "boolean",
+      "linkedToMisconceptionIds": ["string"]
+    }
+  },
+
+  "glossary": [
+    {
+      "term": "string",
+      "definition": "string"
+    }
+  ]
+}

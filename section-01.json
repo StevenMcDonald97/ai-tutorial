@@ -1,0 +1,471 @@
+{
+  "sectionId": "s01",
+  "title": "React Internals: Rendering, Fiber, and the Reconciliation Contract",
+  "description": "Rebuilds learners' mental model of React from the engine level — fiber, scheduling, reconciliation, and commit phases — establishing the mechanical substrate that makes every later discussion of memoization, state design, and concurrent features legible.",
+  "learningObjectives": [
+    {
+      "objectiveId": "s01-obj-01",
+      "description": "Explain the three phases of a React render cycle (render, reconcile, commit) and what work happens in each.",
+      "linkedCompetencies": ["react-rendering-model"]
+    },
+    {
+      "objectiveId": "s01-obj-02",
+      "description": "Predict which components re-render given a specific state or context change, and justify the prediction using reconciliation rules.",
+      "linkedCompetencies": ["react-rendering-model"]
+    },
+    {
+      "objectiveId": "s01-obj-03",
+      "description": "Distinguish between React 18/19 concurrent rendering behaviors and the legacy synchronous model, and explain the implications for component design.",
+      "linkedCompetencies": ["react-rendering-model"]
+    },
+    {
+      "objectiveId": "s01-obj-04",
+      "description": "Diagnose a provided component tree for unnecessary re-renders and identify the correct mitigation strategy (memo, useMemo, useCallback, or structural refactoring).",
+      "linkedCompetencies": ["react-rendering-model", "component-design-patterns"]
+    }
+  ],
+  "motivationHooks": [
+    {
+      "type": "real-world-stakes",
+      "prompt": "Most experienced React developers have a working model that gets them through 90% of their work. That model breaks down exactly when they need it most: debugging a dashboard that renders hundreds of times per second, explaining to a client why a feature feels sluggish despite 'no unnecessary re-renders,' or reasoning about what concurrent mode actually changes. This section rebuilds your mental model from the engine level — because the architectural decisions you'll make in every subsequent section are only coherent if you understand why React works the way it does."
+    },
+    {
+      "type": "prediction-gap",
+      "prompt": "Before we start: predict which of these statements is true. (A) Re-rendering means the real DOM is fully updated. (B) useEffect runs after every render. (C) React 18 concurrent mode requires you to rewrite your components. Hold your prediction — by the end of this section you'll know exactly why all three are false, and why developers with years of React experience still get them wrong."
+    }
+  ],
+  "furtherReading": [
+    {
+      "resourceId": "s01-fr-01",
+      "title": "React Docs: Render and Commit",
+      "resourceType": "website",
+      "url": "https://react.dev/learn/render-and-commit",
+      "author": "React Team",
+      "rationaleNote": "The official explanation of the render → commit pipeline, with diagrams. Read after the lecture to reinforce the three-phase model with React's own framing.",
+      "linkedCompetencies": ["react-rendering-model"]
+    },
+    {
+      "resourceId": "s01-fr-02",
+      "title": "React Fiber Architecture (Acdlite)",
+      "resourceType": "article",
+      "url": "https://github.com/acdlite/react-fiber-architecture",
+      "author": "Andrew Clark",
+      "rationaleNote": "The original design document for the Fiber reconciler. Dense but authoritative — read sections 1-3 for the incremental rendering motivation and the fiber data structure.",
+      "linkedCompetencies": ["react-rendering-model"]
+    },
+    {
+      "resourceId": "s01-fr-03",
+      "title": "Before You memo() — Overreacted",
+      "resourceType": "article",
+      "url": "https://overreacted.io/before-you-memo/",
+      "author": "Dan Abramov",
+      "rationaleNote": "A short, precise argument for structural refactoring over memoization. Directly supports objective 1.4 and the measure-first principle from the worked example.",
+      "linkedCompetencies": ["react-rendering-model", "component-design-patterns"]
+    }
+  ],
+  "learningExperiences": [
+    {
+      "experienceId": "s01-exp-01",
+      "title": "The Three Phases: Render, Reconcile, Commit",
+      "experienceType": "guided-analysis",
+      "difficultyProfile": {
+        "overall": 3,
+        "conceptualComplexity": 3,
+        "ambiguity": 2
+      },
+      "estimatedDurationMinutes": 30,
+      "linkedCompetencies": ["react-rendering-model"],
+      "desiredCognitiveActions": ["prediction", "analysis", "retrieval"],
+      "contentBlocks": [
+        {
+          "blockId": "s01-cb-01",
+          "type": "text",
+          "content": "WHY THIS MATTERS\n\nMost experienced React developers have a working model that gets them through 90% of their work. They know that state changes trigger re-renders, that useEffect runs after the render, and that memo can stop unnecessary renders. That working model breaks down exactly when they need it most: debugging a dashboard that renders hundreds of times per second, explaining to a client why a feature feels sluggish despite 'no unnecessary re-renders,' or reasoning about what concurrent mode actually changes in their application.\n\nThis section rebuilds your mental model from the engine level. Not because you need to read the React source code, but because the architectural decisions you'll make in every subsequent section — where to place Suspense boundaries, how to design state topology, when to reach for useMemo — are only coherent if you understand why React works the way it does.\n\nKnowing React's rendering model is the difference between guessing at optimizations and reasoning about them."
+        },
+        {
+          "blockId": "s01-cb-02",
+          "type": "text",
+          "content": "LEARNING OBJECTIVES\n\nBy the end of this section, you will be able to:\n1. Explain the three phases of a React render cycle (render, reconcile, commit) and what work happens in each.\n2. Predict which components re-render given a specific state or context change, and justify the prediction using reconciliation rules.\n3. Distinguish between React 18/19 concurrent rendering behaviors and the legacy synchronous model, and explain the implications for component design.\n4. Diagnose a provided component tree for unnecessary re-renders and identify the correct mitigation strategy (memo, useMemo, useCallback, or structural refactoring)."
+        },
+        {
+          "blockId": "s01-cb-03",
+          "type": "text",
+          "content": "KEY TERMS & DEFINITIONS\n\nFiber — React's internal unit of work. Each component instance in your tree corresponds to a fiber node. The fiber stores the component's type, props, state, and the output from its last render. The fiber tree is what React actually works with during reconciliation — not your JSX.\n\nReconciliation — The process by which React compares the output of the current render to the previous fiber tree and determines the minimal set of DOM mutations required. Often called 'diffing.'\n\nCommit phase — The phase where React applies the mutations determined during reconciliation to the actual DOM. Side effects (useEffect, useLayoutEffect) are scheduled and flushed here.\n\nWork loop — The scheduler's mechanism for processing fiber units of work. In concurrent mode, the work loop can be interrupted between fibers to yield to higher-priority work.\n\nRe-render — A JavaScript function call: React calls your component function again to get a new element tree. It does not mean the DOM is updated — that only happens if reconciliation finds a difference.\n\nBailout — React's optimization where it skips re-rendering a subtree because props and state haven't changed. React.memo, PureComponent, and shouldComponentUpdate all trigger bailouts.\n\nLanes — React 18's internal priority model. Each update is assigned a lane (e.g. SyncLane for urgent updates, TransitionLane for non-urgent). The scheduler processes higher-priority lanes first.\n\nConcurrent mode — The React 18+ rendering model where the work loop can be paused and resumed, allowing React to keep the UI responsive by yielding to urgent updates mid-render."
+        },
+        {
+          "blockId": "s01-cb-04",
+          "type": "text",
+          "content": "PART 1: THE THREE PHASES OF A REACT RENDER\n\nEvery React update — whether triggered by setState, a context change, or a parent re-render — goes through three sequential phases.\n\nPHASE 1: RENDER\nReact calls your component function. Your function receives its current props and returns a React element tree (JSX). React does this for every component that needs to be evaluated in the current update.\n\nCritical properties:\n- It is pure. Your function should return the same output for the same inputs. React may call your component function multiple times in concurrent mode, so side effects in the render body create bugs.\n- It is not the DOM. Nothing in the browser changes during this phase.\n- It cascades. When a component re-renders, all of its children re-render by default — not because their props changed, but because React needs to evaluate what they would return given the new parent output.\n\nPHASE 2: RECONCILE\nReact compares the element tree produced in the render phase against the existing fiber tree. The reconciler applies a set of heuristics:\n1. Elements of different types produce different trees. If a <div> is replaced with a <span>, React tears down the entire subtree.\n2. Elements of the same type are updated in place. Props are diffed and the fiber is updated with the delta.\n3. Keys tell React which children are which across re-renders. Without keys, React uses positional matching — a common source of subtle bugs in dynamic lists.\n\nThe output of reconciliation is a set of effects: which DOM nodes to create, update, or delete; which refs to attach; which effects to fire.\n\nPHASE 3: COMMIT\nReact applies the effects from reconciliation to the DOM. This phase is synchronous and cannot be interrupted — once React starts committing, it finishes before the browser can paint. This is why large commit phases cause jank.\n\nThe commit phase has three sub-phases:\n- Before mutation: getSnapshotBeforeUpdate lifecycle fires.\n- Mutation: DOM nodes are created, updated, deleted. Refs are attached.\n- Layout: useLayoutEffect runs synchronously. useEffect callbacks are scheduled to run after the browser has had a chance to paint.\n\nKEY INSIGHT: useEffect runs after the browser paint, not synchronously after the commit. This makes it safe for non-visual side effects (data fetching, subscriptions). useLayoutEffect runs synchronously before paint — use it only when you need to read DOM layout measurements to avoid visual flicker."
+        },
+        {
+          "blockId": "s01-cb-05",
+          "type": "text",
+          "content": "PART 2: THE FIBER ARCHITECTURE\n\nBefore React 16, React's reconciler was a recursive, synchronous algorithm. It walked the component tree, diffed it, and committed — all in one synchronous call. A 200ms reconciliation meant 200ms of blocked JavaScript, visible as a dropped frame.\n\nFiber replaced this with an incremental, interruptible model.\n\nHow Fiber works: Instead of a single recursive call, React maintains a linked list of fiber nodes. Each fiber node represents one unit of work (one component). The work loop processes fibers one at a time. Between fibers, the scheduler can check whether higher-priority work has arrived and yield if so.\n\nEach fiber stores:\n- type: the component function or class\n- key and props: the current props\n- stateNode: the DOM node or component instance\n- child, sibling, return: pointers forming the fiber tree\n- alternate: a pointer to the previous version of this fiber\n\nReact maintains two fiber trees simultaneously: the current tree (what's on screen) and the work-in-progress tree (what React is computing). When a commit finishes, the work-in-progress tree becomes the current tree.\n\nWhy this matters architecturally: In concurrent mode, React can render the work-in-progress tree, discover that a higher-priority update arrived, discard the in-progress work, and start over. This is safe because the current tree is never mutated until commit. The implication: render functions must be pure and free of side effects, because React may call them multiple times before committing any output."
+        },
+        {
+          "blockId": "s01-cb-06",
+          "type": "text",
+          "content": "PART 3: WHEN DO COMPONENTS RE-RENDER?\n\nA component re-renders in exactly four situations:\n1. Its own state changes via useState or useReducer dispatch.\n2. Its parent re-renders — React calls all children of a re-rendering component by default, regardless of whether their props changed. This is the most frequently overlooked trigger.\n3. A context it consumes changes — specifically, when the value passed to Context.Provider changes by reference equality.\n4. A hook it uses triggers a re-render — e.g., useSelector in Redux detects a state change.\n\nCRITICAL MENTAL MODEL: A re-render is not expensive by itself. Calling a function that returns a small JSX tree is cheap. What can be expensive is (a) the work inside the render function itself, and (b) the reconciliation of a very large subtree. Over-applying memo to avoid 'unnecessary' re-renders adds memoization overhead that often costs more than the re-renders it prevents.\n\nThe bailout mechanism: When React processes a fiber, it can bail out — skip re-rendering and reuse the previous output — if it determines nothing has changed. Bailouts happen:\n- For components wrapped in React.memo, when props pass a shallow equality check.\n- For class components implementing shouldComponentUpdate or extending PureComponent.\n- Internally, when React detects that useState's new value is identical to the current value.\n\nWhat bailout does NOT do: A bailout does not skip reconciliation of a component's children if the component itself did re-render. Bailout applies at the subtree level only when the parent's output indicates the child's props are unchanged."
+        },
+        {
+          "blockId": "s01-cb-07",
+          "type": "text",
+          "content": "PART 4: CONCURRENT RENDERING AND REACT 18/19\n\nThe key change in React 18 is not what components do — it's when and how often React calls them.\n\nThe legacy synchronous model: Every setState call triggered a synchronous, uninterruptible render → reconcile → commit pipeline.\n\nThe concurrent model: Updates are assigned priorities (lanes). React can:\n- Pause rendering mid-tree and yield to the browser for input events.\n- Abandon a low-priority render in progress if a high-priority update arrives.\n- Prepare multiple versions of the UI simultaneously (used by useTransition and Suspense).\n\nWhat this changes for component design: Almost nothing, deliberately. React's concurrent features were designed to be backward-compatible. The main implications:\n- Components may render more times than in the legacy model — React may render a component, discard the output, and render it again. Any side effects in the render body will fire multiple times.\n- The order of renders is not guaranteed. Don't rely on render-phase side effects for sequencing.\n- useEffect cleanup and re-run behavior is the same — but strict mode in development intentionally double-invokes effects to expose non-idempotent cleanup.\n\nCOMMON MISCONCEPTION: Concurrent mode does not require you to rewrite your components. It changes React's scheduler behavior, not the component contract. Components that were correct before React 18 are correct after it — assuming they were pure."
+        },
+        {
+          "blockId": "s01-cb-08",
+          "type": "text",
+          "content": "COMMON ERRORS\n\nError 1: Assuming re-render = DOM update\nRe-rendering is a JavaScript function call. The DOM is only updated if reconciliation finds a difference. A component that re-renders 50 times but always returns the same output causes zero DOM updates. The cost is the function call and diffing, not DOM manipulation.\n\nError 2: Using useMemo/useCallback everywhere as a 'safety net'\nEvery useMemo and useCallback call adds memory overhead and a comparison on every render. If the wrapped computation is cheap (e.g. an array filter over 10 items), the memoization overhead can exceed the cost it's preventing. Reserve them for genuinely expensive computations and stable references that are dependencies of other memos or effects.\n\nError 3: Writing side effects in render functions\nReact's concurrent renderer may call your component function multiple times before committing. Side effects in the render body (API calls, subscriptions, mutations) will fire multiple times unpredictably. All side effects belong in useEffect or event handlers.\n\nError 4: Misreading useEffect dependency arrays\nuseEffect runs after renders where the dependency values have changed by reference equality for objects and arrays. [user] where user is a new object literal on every render will cause the effect to run on every render. This is the most common source of infinite loops in React."
+        }
+      ],
+      "interactionSequence": [
+        {
+          "interactionId": "s01-int-01",
+          "interactionType": "prediction",
+          "prompt": "Before reading about the three phases: When React 'updates' a component, at which point do you think the actual browser DOM changes? Choose the option closest to your current understanding.\n\nA) Immediately when setState is called\nB) During the render phase, as React calls component functions\nC) During the commit phase, after reconciliation determines what changed\nD) The DOM updates continuously throughout all three phases",
+          "required": true,
+          "responseFormat": "multiple-choice",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "The correct answer is C — the commit phase. This distinction matters enormously for performance reasoning. During the render phase, React is only calling JavaScript functions and building descriptions of the UI. No DOM operation happens yet. During reconciliation, React computes a minimal diff. Only in the commit phase does React touch the actual browser DOM. This is why a component can re-render hundreds of times without causing browser repaints, and why large commit phases (not large render phases) are the true source of visible jank.",
+            "correctiveFeedback": "The DOM changes only in the commit phase — not during render or reconciliation. Render is pure JavaScript; reconciliation is diffing; commit is the only phase where the browser is touched.",
+            "hints": ["Think about when the browser would need to be involved.", "React builds a description of the UI first, then applies it."]
+          },
+          "confidencePrompt": {
+            "enabled": true,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How confident are you in your answer? (1 = guessing, 5 = certain)"
+          }
+        },
+        {
+          "interactionId": "s01-int-02",
+          "interactionType": "multiple-choice",
+          "prompt": "A <Modal> component is wrapped in React.memo. Its parent re-renders. The Modal's props are identical to the previous render. What happens?\n\nA) Modal re-renders because its parent re-rendered.\nB) Modal skips re-rendering because React.memo performs a shallow prop comparison and finds no change.\nC) Modal re-renders because React.memo only prevents re-renders when shouldComponentUpdate returns false.\nD) Modal skips re-rendering because React always bails out when a parent re-renders with the same JSX.",
+          "required": true,
+          "responseFormat": "multiple-choice",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "B is correct. React.memo wraps a component and performs a shallow comparison of its props on every parent re-render. If all props are shallowly equal (same primitive values, same object/function references), React bails out and reuses the previous render output — it does not call the component function again. Note: this is different from D — React does not automatically bail out based on JSX structure; it requires the memo wrapper to perform the comparison. Also note: memo has a cost. The shallow comparison runs on every parent re-render regardless of whether it prevents a re-render.",
+            "correctiveFeedback": "React.memo performs a shallow prop comparison on every parent re-render and bails out if props are unchanged. It does not rely on shouldComponentUpdate — that is a class component API.",
+            "hints": ["React.memo is specifically about prop comparison.", "Think about what 'shallow equality' means for object references."]
+          },
+          "confidencePrompt": {
+            "enabled": true,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How confident are you in this answer?"
+          }
+        },
+        {
+          "interactionId": "s01-int-03",
+          "interactionType": "multiple-choice",
+          "prompt": "A useEffect has dependency array [user] where user is declared as: const user = { id: userId, name }. The effect fires on every render despite userId and name not changing. What is the most likely cause?\n\nA) The user object is being recreated on every render, so its reference changes each time.\nB) useEffect always runs on every render when the dependency is an object.\nC) The dependency array is being ignored because user is a non-primitive.\nD) React 18 changed useEffect to always re-run for object dependencies.",
+          "required": true,
+          "responseFormat": "multiple-choice",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "A is correct. useEffect uses reference equality (===) to compare dependency values. An object literal { id: userId, name } creates a new JavaScript object on every render — even if userId and name haven't changed, the object is a different reference in memory. React sees a changed dependency and re-runs the effect. Fixes: (1) use primitive dependencies [userId, name] instead of the object, (2) memoize the object with useMemo, or (3) move the object outside the component. This is the most common cause of infinite loops in React — an effect that fetches data and sets state, with a dependency that's a new object every render.",
+            "correctiveFeedback": "useEffect uses reference equality. An inline object literal creates a new reference every render, so the effect sees a changed dependency every time. Use primitive dependencies or memoize the object.",
+            "hints": ["What does === return when comparing two objects with identical properties?", "Where is the user object created relative to the render cycle?"]
+          },
+          "confidencePrompt": {
+            "enabled": true,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How confident are you in this answer?"
+          }
+        },
+        {
+          "interactionId": "s01-int-04",
+          "interactionType": "scenario-analysis",
+          "prompt": "A dashboard has 12 chart components that all re-render when a single filter changes. React DevTools Profiler shows each chart renders in 1.5ms. Total re-render cost: ~18ms. A developer proposes wrapping all 12 charts in React.memo 'just to be safe.' Evaluate this proposal: should you do it? What reasoning model should drive the decision?",
+          "required": true,
+          "responseFormat": "short-answer",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "The correct answer is: probably not, and certainly not without measuring the memo overhead first. Here's the reasoning model: React.memo adds a shallow prop comparison on every render. If the charts receive the filters object as a prop, that prop changes reference on every filter change anyway — meaning memo fails to prevent the re-render and only adds comparison overhead. If they receive primitive slices, memo may help, but 1.5ms per chart × 12 charts = 18ms total, which is close to one frame (16.6ms). Whether this causes visible jank depends on whether these renders are synchronous and blocking. The correct approach: profile first, identify whether 18ms is causing dropped frames, then measure whether memo on the measured bottleneck actually helps. Speculative memo is an anti-pattern.",
+            "correctiveFeedback": "Apply the measure-first principle. React.memo adds overhead; speculative application is not 'safe' — it can be net negative. Profile, then optimize the measured bottleneck.",
+            "hints": ["What does React.memo do on every parent re-render, even when it prevents the child re-render?", "Is 18ms guaranteed to be visible as jank?"]
+          },
+          "confidencePrompt": {
+            "enabled": false,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How confident are you in your reasoning?"
+          }
+        },
+        {
+          "interactionId": "s01-int-05",
+          "interactionType": "reflection",
+          "prompt": "In 2-3 sentences: what does React 18 concurrent mode change about React's rendering behavior, and what does it NOT change about how you write component functions?",
+          "required": true,
+          "responseFormat": "short-answer",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "Model answer: Concurrent mode changes React's scheduler so that rendering work can be paused, abandoned, and resumed — allowing the browser to remain responsive to high-priority user input during long renders. It does not change what component functions do or their contract: they still receive props and return JSX. The implication is that render functions must be side-effect-free (they were always supposed to be), because React may call them multiple times before committing. Components written correctly for React 17 are correct in React 18 without modification.",
+            "correctiveFeedback": "Concurrent mode changes the scheduler — when and how often React calls components. It does not change the component contract. Pure render functions are correct in both models.",
+            "hints": ["Focus on what changes in React's scheduler behavior.", "What does 'backward-compatible' mean in this context?"]
+          },
+          "confidencePrompt": {
+            "enabled": true,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How well do you feel you've captured the key distinction?"
+          }
+        }
+      ],
+      "workedExamples": [
+        {
+          "exampleId": "s01-we-01",
+          "problem": "A SaaS analytics dashboard has a <Dashboard> component at the top level that holds a filters state object. It renders a <Sidebar> (filter controls) and a <ChartGrid> (12 chart components). Every time a user adjusts a filter, all 12 charts re-render — even the ones whose data is unaffected by the changed filter. Diagnose the cause and identify the correct mitigation.",
+          "steps": [
+            "Step 1 — Map the re-render triggers. Dashboard owns filters state. When filters changes, Dashboard re-renders. Because ChartGrid is a child of Dashboard, it re-renders (trigger: parent re-rendered). Because all 12 charts are children of ChartGrid, they all re-render — even if only filters.dateRange changed and UserChart only depends on filters.segment.",
+            "Step 2 — Identify mitigation options. Option A: Wrap each chart in React.memo with a custom comparison function that only re-renders when its specific filter slice changes. Option B (structural): Lift each chart's filter slice out and pass only the relevant slice as a prop. A chart needing only filters.dateRange should receive dateRange directly, not the whole filters object. Then React.memo with default shallow equality correctly bails out. Option C (often best): If charts fetch their own data via TanStack Query, the filter is just a query key. The charts re-render on prop change, but each re-render is cheap (just a cache lookup). Measure before optimizing.",
+            "Step 3 — Apply the diagnosis. Profile first. In React DevTools Profiler, record a filter change. If RevenueChart's render time is 2ms, the 12 re-renders cost 24ms — likely below the 16ms frame budget once spread across the event loop. If one chart takes 40ms, that's the one to optimize, not all 12.",
+            "Step 4 — Select mitigation. If profiling confirms a problem, apply Option B (structural refactoring) before Option A (memo). Structural fixes eliminate the re-render entirely rather than adding a comparison cost. If the charts are data-fetching components, Option C (measure first, accept the re-render) is often correct."
+          ],
+          "conclusion": "Re-render cascades are often benign. The correct response is always: measure, then optimize the measured bottleneck — not add memo preemptively to every component. The measure-first rule applies even when the re-render tree looks expensive on paper."
+        }
+      ],
+      "retrievalPractice": [
+        {
+          "retrievalItemId": "s01-retrieval-01",
+          "retrievalType": "free-recall",
+          "prompt": "From memory: name the three phases of a React render cycle and describe one specific thing that happens in each phase.",
+          "difficulty": 2,
+          "schedule": {
+            "initialReviewDays": 1,
+            "subsequentReviewDays": [3, 7, 14, 30],
+            "decayParameters": {
+              "decayRate": 0.3,
+              "strengthMultiplier": 2.0,
+              "minimumIntervalDays": 1,
+              "maximumIntervalDays": 60
+            }
+          }
+        },
+        {
+          "retrievalItemId": "s01-retrieval-02",
+          "retrievalType": "cued-recall",
+          "prompt": "List the four conditions that cause a React component to re-render. For each, give a one-sentence explanation of why it triggers a re-render.",
+          "difficulty": 2,
+          "schedule": {
+            "initialReviewDays": 1,
+            "subsequentReviewDays": [4, 10, 21, 45],
+            "decayParameters": {
+              "decayRate": 0.3,
+              "strengthMultiplier": 2.0,
+              "minimumIntervalDays": 1,
+              "maximumIntervalDays": 60
+            }
+          }
+        },
+        {
+          "retrievalItemId": "s01-retrieval-03",
+          "retrievalType": "application",
+          "prompt": "A component has this useEffect: useEffect(() => { fetchData(config); }, [config]). The config object is defined as const config = { endpoint: url, timeout: 5000 } inside the component body. Will this effect run on every render? Explain using the reference equality model.",
+          "difficulty": 3,
+          "schedule": {
+            "initialReviewDays": 2,
+            "subsequentReviewDays": [5, 14, 30],
+            "decayParameters": {
+              "decayRate": 0.35,
+              "strengthMultiplier": 1.8,
+              "minimumIntervalDays": 2,
+              "maximumIntervalDays": 45
+            }
+          }
+        },
+        {
+          "retrievalItemId": "s01-retrieval-04",
+          "retrievalType": "contrast",
+          "prompt": "Contrast useEffect and useLayoutEffect: when does each run relative to the browser paint, and give one concrete use case where the timing difference determines which one is correct.",
+          "difficulty": 3,
+          "schedule": {
+            "initialReviewDays": 2,
+            "subsequentReviewDays": [6, 14, 30],
+            "decayParameters": {
+              "decayRate": 0.3,
+              "strengthMultiplier": 2.0,
+              "minimumIntervalDays": 2,
+              "maximumIntervalDays": 45
+            }
+          }
+        },
+        {
+          "retrievalItemId": "s01-retrieval-05",
+          "retrievalType": "scenario-analysis",
+          "prompt": "React 18 concurrent mode: a team member says 'we need to audit all our components before upgrading because concurrent mode changes how they work.' Is this correct? What specifically changes, and what doesn't?",
+          "difficulty": 3,
+          "schedule": {
+            "initialReviewDays": 3,
+            "subsequentReviewDays": [7, 21, 45],
+            "decayParameters": {
+              "decayRate": 0.25,
+              "strengthMultiplier": 2.2,
+              "minimumIntervalDays": 3,
+              "maximumIntervalDays": 60
+            }
+          }
+        },
+        {
+          "retrievalItemId": "s01-retrieval-06",
+          "retrievalType": "application",
+          "prompt": "INTERLEAVING — connecting rendering mechanics to memoization strategy (bridges to async UI and performance sections): A component wrapped in React.memo receives a callback prop: onFilter={({ id }) => applyFilter(id)}. Will React.memo prevent re-renders when the parent re-renders? Why or why not, and what is the correct fix?",
+          "difficulty": 4,
+          "schedule": {
+            "initialReviewDays": 3,
+            "subsequentReviewDays": [8, 21, 45],
+            "decayParameters": {
+              "decayRate": 0.3,
+              "strengthMultiplier": 2.0,
+              "minimumIntervalDays": 3,
+              "maximumIntervalDays": 60
+            }
+          }
+        }
+      ],
+      "transferExercises": [
+        {
+          "exerciseId": "s01-transfer-01",
+          "context": "Collaborative document editing application",
+          "scenario": "A collaborative document editor has the following component structure:\n\nEditorApp (owns documentState — a large object with all page content)\n├── Toolbar (reads documentState.formatting, dispatches formatting changes)\n├── PageCanvas (reads documentState.pages, renders all pages)\n│   └── [PageComponent × N] (one per page)\n└── CommentPanel (reads documentState.comments)\n\nEvery time a user makes a formatting change (e.g. bolds a word), documentState is replaced with a new object, triggering a full re-render of the tree including all N PageComponent instances.",
+          "task": "1. Using the re-render trigger model from this section, explain precisely why all PageComponent instances re-render when only the formatting slice changed.\n2. Propose two different architectural approaches to prevent PageComponent from re-rendering unnecessarily — one using memoization, one using structural refactoring.\n3. Which approach would you recommend for a production application, and why? Consider maintainability, not just performance.",
+          "successCriteria": [
+            "Correctly traces the re-render cascade: documentState change → EditorApp re-renders → PageCanvas re-renders (parent trigger) → all PageComponents re-render (parent trigger) — not because their pages prop changed",
+            "Memoization approach: React.memo on PageComponent with a custom comparison that checks only the specific page slice, or passes page ID + useSelector pattern",
+            "Structural approach: Split documentState into separate state atoms (formattingState, pagesState, commentsState) so PageCanvas only re-renders when pagesState changes",
+            "Recommendation is justified with explicit trade-off reasoning (structural is more maintainable; memo with custom comparison is fragile and easy to get wrong)"
+          ]
+        }
+      ],
+      "masteryVerification": {
+        "assessmentIds": ["assess-rendering-model"],
+        "requiredPerformance": {
+          "minimumAccuracy": 0.85,
+          "minimumTransferScore": 0.80
+        }
+      }
+    },
+    {
+      "experienceId": "s01-exp-02",
+      "title": "Re-render Archaeology: Practical Diagnostic Activity",
+      "experienceType": "guided-analysis",
+      "difficultyProfile": {
+        "overall": 3,
+        "conceptualComplexity": 2,
+        "ambiguity": 3
+      },
+      "estimatedDurationMinutes": 20,
+      "linkedCompetencies": ["react-rendering-model", "component-design-patterns"],
+      "desiredCognitiveActions": ["analysis", "reflection", "retrieval"],
+      "contentBlocks": [
+        {
+          "blockId": "s01-cb-09",
+          "type": "text",
+          "content": "PRACTICAL ACTIVITY: RE-RENDER ARCHAEOLOGY\n\nTake any medium-complexity React component tree you've worked with recently (a client project, a personal project, or a public GitHub repository). Open it in development mode with React DevTools installed.\n\n1. Enable 'Highlight updates when components render' in React DevTools settings.\n2. Perform one user interaction (click a button, type in a field, change a dropdown).\n3. Note every component that highlighted. For each highlighted component, answer: why did it re-render? Map it to one of the four re-render triggers from the lecture.\n4. Identify one component that re-rendered but whose output you believe didn't change. Is that re-render expensive or benign? How would you verify?\n5. Write a one-paragraph diagnosis: what is the rendering behavior of this tree, and is it a problem?\n\nThere is no 'correct' answer — the goal is developing the habit of reasoning about re-render causality rather than reacting to symptoms."
+        }
+      ],
+      "interactionSequence": [
+        {
+          "interactionId": "s01-int-06",
+          "interactionType": "reflection",
+          "prompt": "After completing the Re-render Archaeology activity: describe one component you found that re-rendered but whose output appeared unchanged. What triggered the re-render? Is it a problem worth fixing? How did you determine that?",
+          "required": false,
+          "responseFormat": "short-answer",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "Good re-render archaeology findings typically fall into three categories: (1) Benign — the re-render is triggered by a parent update, the component renders in <2ms, and the DOM diff produces no mutations. No action needed. (2) Wasteful but cheap — the component re-renders often, the output rarely changes, but the render is fast. Consider memo if it has many children that bail out. (3) Genuinely expensive — the component does expensive work in its render body or produces large DOM diffs. This is the one to fix. The profiler's 'Ranked' view shows render durations; the 'Flamegraph' view shows which component caused the cascade. The diagnostic skill is distinguishing category 1 from category 3 — most developers conflate them.",
+            "correctiveFeedback": "The key question is always: is the re-render expensive, or just frequent? Frequency alone is not a problem. Measure render duration before deciding to optimize.",
+            "hints": ["Use React DevTools Profiler's Ranked view to see actual render durations.", "Ask: did the DOM change after this re-render?"]
+          },
+          "confidencePrompt": {
+            "enabled": false,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How confident are you in your diagnosis?"
+          }
+        }
+      ],
+      "workedExamples": [],
+      "retrievalPractice": [],
+      "transferExercises": [],
+      "masteryVerification": {
+        "assessmentIds": ["assess-rendering-model"],
+        "requiredPerformance": {
+          "minimumAccuracy": 0.80,
+          "minimumTransferScore": 0.75
+        }
+      }
+    },
+    {
+      "experienceId": "s01-exp-03",
+      "title": "Self-Guided: Rendering Audit of a Real Open-Source Project",
+      "experienceType": "self-guided-exercise",
+      "difficultyProfile": {
+        "overall": 4,
+        "conceptualComplexity": 3,
+        "ambiguity": 4
+      },
+      "estimatedDurationMinutes": 35,
+      "linkedCompetencies": ["react-rendering-model", "component-design-patterns"],
+      "desiredCognitiveActions": ["analysis", "synthesis", "reflection"],
+      "contentBlocks": [],
+      "interactionSequence": [],
+      "workedExamples": [],
+      "selfGuidedExercise": {
+        "exerciseId": "s01-sge-01",
+        "realWorldContext": "An open-source React application on GitHub — a task manager, dashboard, form-heavy app, or any meaningful React project with at least 50 stars. Cloned and run locally in development mode.",
+        "objective": "Apply the re-render trigger model and React DevTools Profiler to diagnose a real codebase's rendering behavior, then communicate findings as a professional audit deliverable.",
+        "instructions": [
+          "Find an open-source React application on GitHub with at least 50 stars and a meaningful feature set. Good options: a task manager, a dashboard, a multi-step form app, a data table-heavy tool.",
+          "Clone it and run it locally in development mode (npm run dev or equivalent).",
+          "Install React DevTools browser extension if not already installed.",
+          "Open the Profiler tab in React DevTools. Enable 'Record why each component rendered while profiling' in the Profiler settings.",
+          "Record 3-5 distinct user interactions (e.g. clicking a button, typing in a field, changing a dropdown, navigating between views).",
+          "For each interaction, examine the Flamegraph and Ranked views. For each component that rendered: identify which of the four re-render triggers caused it.",
+          "Identify one component that re-rendered but whose visible output appeared unchanged. Estimate whether this is benign or worth addressing.",
+          "Write a one-page rendering audit as if delivering it to the client who owns this codebase. Include: what you found, your assessment of whether it is a problem, and one concrete recommendation with reasoning."
+        ],
+        "estimatedRealWorldDurationMinutes": 90,
+        "materialsOrPrerequisites": [
+          "React DevTools browser extension installed",
+          "Node.js environment for running the project locally",
+          "A chosen open-source React project cloned and running"
+        ],
+        "reflectionPrompts": [
+          "Which of the four re-render triggers was most common in the codebase you examined?",
+          "Did you find any cases where memo or useMemo was applied speculatively (without obvious justification)? What was the effect?",
+          "If you were to present your rendering audit to the project's maintainers, what would your top recommendation be and how would you justify it?",
+          "How did the real codebase compare to your expectations going in? Were there more or fewer unnecessary re-renders than you predicted?"
+        ],
+        "verification": {
+          "mode": "reflection-submission",
+          "isGating": false,
+          "selfAssessmentCriteria": [
+            "I identified the re-render trigger for at least 5 distinct component re-renders",
+            "I found at least one component that re-rendered without visible output change and classified it as benign or worth fixing",
+            "I produced a written audit with a concrete recommendation supported by profiler evidence"
+          ]
+        },
+        "linkedCompetencies": ["react-rendering-model", "component-design-patterns"]
+      },
+      "retrievalPractice": [],
+      "transferExercises": [],
+      "masteryVerification": {
+        "assessmentIds": ["assess-rendering-model"],
+        "requiredPerformance": {
+          "minimumAccuracy": 0.80,
+          "minimumTransferScore": 0.80
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,476 @@
+{
+  "sectionId": "s07",
+  "title": "Forms Architecture: State, Validation & Server Mutation Design",
+  "description": "Treats form architecture as a distinct design domain — covering the controlled vs. uncontrolled render cost trade-off, React Hook Form + Zod as a single source of truth for types and validation, the three-phase form submission lifecycle, and how form state fits in the Section 5 state topology map.",
+  "learningObjectives": [
+    {
+      "objectiveId": "s07-obj-01",
+      "description": "Explain the architectural trade-offs between fully controlled forms and React Hook Form's register pattern in terms of render performance and coupling.",
+      "linkedCompetencies": ["forms-architecture", "react-rendering-model"]
+    },
+    {
+      "objectiveId": "s07-obj-02",
+      "description": "Implement a React Hook Form + Zod schema that generates TypeScript types and runtime validators from a single source of truth.",
+      "linkedCompetencies": ["forms-architecture", "typescript-react-contracts"]
+    },
+    {
+      "objectiveId": "s07-obj-03",
+      "description": "Design the state lifecycle of a form submission — from ephemeral input state through validation to async mutation state — and map each phase to the correct React mechanism.",
+      "linkedCompetencies": ["forms-architecture", "state-topology", "async-ui-architecture"]
+    },
+    {
+      "objectiveId": "s07-obj-04",
+      "description": "Classify form state in a state topology map and explain why it is architecturally distinct from general client UI state and server cache state.",
+      "linkedCompetencies": ["forms-architecture", "state-topology"]
+    }
+  ],
+  "motivationHooks": [
+    {
+      "type": "real-world-stakes",
+      "prompt": "Forms are the primary way users write data in a SaaS application. Yet form architecture is routinely under-designed — scattered useState calls, validation logic duplicated between front end and API, mutation state bolted on as an afterthought. The result is brittle, hard-to-test form code that breaks in predictable ways: stale error messages, double submissions, lost input on network errors. A well-designed form architecture treats form state, validation, and mutation as three distinct but connected concerns, each with its own mechanism."
+    },
+    {
+      "type": "prediction-gap",
+      "prompt": "Before reading: a developer defines this interface — interface InvoiceFormData { amount: number; dueDate: string; } — and separately a Zod schema with the same shape. Three months later, a new required field is added to the schema but not the interface. TypeScript says nothing is wrong. What is the architectural problem? And separately: a user submits a form, the server returns { error: 'postcode_invalid', field: 'postcode' }, and the developer shows a toast then clears the form. What UX problem did this create, and what would the correct implementation look like?"
+    }
+  ],
+  "furtherReading": [
+    {
+      "resourceId": "s07-fr-01",
+      "title": "React Hook Form Documentation",
+      "resourceType": "website",
+      "url": "https://react-hook-form.com/",
+      "author": "React Hook Form Team",
+      "rationaleNote": "The official RHF docs. The 'API' section covers register, handleSubmit, formState, setError, and watch with full type signatures. The 'Advanced Usage' section covers multi-step forms and dynamic fields — directly relevant to the multi-step exception in Part 4.",
+      "linkedCompetencies": ["forms-architecture"]
+    },
+    {
+      "resourceId": "s07-fr-02",
+      "title": "Zod Documentation",
+      "resourceType": "website",
+      "url": "https://zod.dev/",
+      "author": "Colin McDonnell",
+      "rationaleNote": "The canonical Zod reference. Pay particular attention to z.infer, .refine() for cross-field validation, and .transform() for converting input strings to typed values (e.g. string to number). These are the most commonly misunderstood Zod features in React form integration.",
+      "linkedCompetencies": ["forms-architecture", "typescript-react-contracts"]
+    },
+    {
+      "resourceId": "s07-fr-03",
+      "title": "@hookform/resolvers — Zod Integration",
+      "resourceType": "website",
+      "url": "https://github.com/react-hook-form/resolvers",
+      "author": "React Hook Form Team",
+      "rationaleNote": "The official integration package connecting Zod schemas to RHF via zodResolver. Shows exactly how the schema's parse errors map to RHF's field errors object — useful for debugging unexpected validation behavior.",
+      "linkedCompetencies": ["forms-architecture", "typescript-react-contracts"]
+    },
+    {
+      "resourceId": "s07-fr-04",
+      "title": "TanStack Query: Mutations",
+      "resourceType": "website",
+      "url": "https://tanstack.com/query/latest/docs/framework/react/guides/mutations",
+      "author": "TanStack Team",
+      "rationaleNote": "The definitive reference for useMutation — covering onSuccess, onError, onSettled, isPending, and the relationship between mutations and cache invalidation. The Phase 3 lifecycle wiring in Part 3 is built on these primitives.",
+      "linkedCompetencies": ["forms-architecture", "async-ui-architecture", "library-ecosystem"]
+    }
+  ],
+  "learningExperiences": [
+    {
+      "experienceId": "s07-exp-01",
+      "title": "Forms Architecture: Controlled vs. Uncontrolled, Zod + RHF, and the Submission Lifecycle",
+      "experienceType": "guided-analysis",
+      "difficultyProfile": {
+        "overall": 3,
+        "conceptualComplexity": 3,
+        "ambiguity": 3
+      },
+      "estimatedDurationMinutes": 40,
+      "linkedCompetencies": ["forms-architecture", "react-rendering-model", "typescript-react-contracts", "state-topology", "async-ui-architecture"],
+      "desiredCognitiveActions": ["prediction", "analysis", "comparison", "retrieval", "synthesis"],
+      "contentBlocks": [
+        {
+          "blockId": "s07-cb-01",
+          "type": "text",
+          "content": "WHY THIS MATTERS\n\nForms are the primary way users write data in a SaaS application. Yet form architecture is routinely under-designed — scattered useState calls, validation logic duplicated between front end and API, mutation state bolted on as an afterthought. The result is brittle, hard-to-test form code that breaks in predictable ways: stale error messages, double submissions, lost input on network errors. A well-designed form architecture treats form state, validation, and mutation as three distinct but connected concerns, each with its own mechanism."
+        },
+        {
+          "blockId": "s07-cb-02",
+          "type": "text",
+          "content": "LEARNING OBJECTIVES\n\nBy the end of this section, you will be able to:\n1. Explain the trade-offs between fully controlled forms and RHF's register pattern in terms of render performance and coupling.\n2. Implement a React Hook Form + Zod schema generating TypeScript types and runtime validators from a single source of truth.\n3. Design the state lifecycle of a form submission from ephemeral input through validation to async mutation state.\n4. Classify form state in a state topology map and explain why it is architecturally distinct from general client UI state and server cache state."
+        },
+        {
+          "blockId": "s07-cb-03",
+          "type": "text",
+          "content": "KEY TERMS & DEFINITIONS\n\nControlled input — An input whose value is driven by React state. Every keystroke calls setState, causing a re-render. The component is the source of truth.\n\nUncontrolled input — An input that manages its own value in the DOM. React reads the value via a ref only when needed (e.g. on submit). The DOM is the source of truth.\n\nReact Hook Form (RHF) — A form library using uncontrolled inputs via refs. Avoids per-keystroke re-renders. Provides register, handleSubmit, formState, and watch.\n\nZod — A TypeScript-first schema validation library. A Zod schema is both a runtime validator and a TypeScript type source. z.infer<typeof schema> extracts the static type.\n\nSchema resolver — RHF's integration point with validation libraries. zodResolver(schema) wires a Zod schema into RHF's validation pipeline.\n\nMutation state — The async lifecycle of a write operation: idle → pending → success | error. Distinct from form input state.\n\nOptimistic update — Updating UI state immediately on user action, before the server confirms, then reconciling with the server response. Reduces perceived latency."
+        },
+        {
+          "blockId": "s07-cb-04",
+          "type": "text",
+          "content": "PART 1: CONTROLLED VS. UNCONTROLLED — THE RENDER COST TRADE-OFF\n\nEvery fully controlled form re-renders on every keystroke:\n\n  // Fully controlled — re-renders entire form on every key press\n  function InvoiceForm() {\n    const [amount, setAmount]   = useState('');\n    const [dueDate, setDueDate] = useState('');\n    const [notes, setNotes]     = useState('');\n    // Each keystroke re-renders all three fields + validation\n  }\n\nFor simple forms, this is fine. For complex forms — 20+ fields, expensive validation, heavy subtrees — per-keystroke re-renders are a real performance and coupling liability.\n\nReact Hook Form's register pattern keeps inputs uncontrolled:\n\n  // RHF — inputs are uncontrolled; no re-render per keystroke\n  function InvoiceForm() {\n    const { register, handleSubmit, formState: { errors } } = useForm<InvoiceSchema>();\n    return (\n      <form onSubmit={handleSubmit(onSubmit)}>\n        <input {...register('amount')} />\n        <input {...register('dueDate')} />\n        <textarea {...register('notes')} />\n      </form>\n    );\n  }\n\nregister attaches a ref and event handlers. RHF reads values from the DOM only on submit and on validation triggers — not on every keystroke.\n\nTHE ARCHITECTURAL TRADE-OFF:\n\n  Property                                  | Controlled    | RHF (Uncontrolled)\n  ------------------------------------------|---------------|--------------------\n  Re-renders per keystroke                  | Yes           | No\n  Real-time derived UI (character count)    | Easy          | Requires watch\n  Integration with external state           | Natural       | Awkward\n  Form complexity sweet spot                | Simple-medium | Medium-complex\n\nRULE OF THUMB: Use controlled inputs for simple forms where real-time reactivity matters. Use RHF for any form with 5+ fields, complex validation, or submission mutation state."
+        },
+        {
+          "blockId": "s07-cb-05",
+          "type": "text",
+          "content": "PART 2: ZOD + RHF — SINGLE SOURCE OF TRUTH\n\nThe classic form validation problem: validation logic defined three times — in the UI, in the API request, and in the API handler. They drift apart. Zod solves this by making the schema the single source of truth for both the TypeScript type and the runtime validator.\n\n  import { z } from 'zod';\n  import { useForm } from 'react-hook-form';\n  import { zodResolver } from '@hookform/resolvers/zod';\n\n  // Schema is the source of truth — defines shape, types, and validation rules\n  const invoiceSchema = z.object({\n    clientId: z.string().uuid('Invalid client'),\n    amount:   z.number().positive('Amount must be positive').max(1_000_000),\n    dueDate:  z.string().datetime('Invalid date format'),\n    notes:    z.string().max(500).optional(),\n  });\n\n  // TypeScript type derived from schema — NOT written separately\n  type InvoiceFormData = z.infer<typeof invoiceSchema>;\n\n  function InvoiceForm() {\n    const {\n      register,\n      handleSubmit,\n      formState: { errors, isSubmitting },\n    } = useForm<InvoiceFormData>({\n      resolver: zodResolver(invoiceSchema), // wires schema into RHF validation\n    });\n\n    return (\n      <form onSubmit={handleSubmit(onSubmit)}>\n        <input {...register('amount', { valueAsNumber: true })} />\n        {errors.amount && <span>{errors.amount.message}</span>}\n        <button type=\"submit\" disabled={isSubmitting}>\n          {isSubmitting ? 'Saving...' : 'Create Invoice'}\n        </button>\n      </form>\n    );\n  }\n\nTHE CONTRACT BENEFIT: invoiceSchema can be exported and used in the API route handler for server-side validation. Same rules, one definition, both layers validated. If the schema changes, both layers update together."
+        },
+        {
+          "blockId": "s07-cb-06",
+          "type": "text",
+          "content": "PART 3: THE FORM SUBMISSION LIFECYCLE\n\nA form submission passes through three distinct state phases. Each has a different mechanism:\n\n  Phase 1: Input (ephemeral)\n    → RHF / local state owns this\n    → Lives until submission; discarded after success\n\n  Phase 2: Validation\n    → Triggered by RHF on submit (or on blur/change if configured)\n    → Synchronous (Zod) or async (server-side uniqueness checks)\n    → Errors surface back into Phase 1 state\n\n  Phase 3: Mutation (async)\n    → TanStack Query useMutation / server action\n    → idle → pending → success | error\n    → Distinct from form input state\n\nWIRING THE PHASES:\n\n  const createInvoice = useMutation({\n    mutationFn: (data: InvoiceFormData) => api.post('/invoices', data),\n    onSuccess: () => {\n      queryClient.invalidateQueries({ queryKey: ['invoices'] });\n      toast.success('Invoice created');\n      reset(); // clear form — Phase 1 state discarded\n    },\n    onError: (error) => {\n      toast.error(error.message);\n      // optionally: setError('root', { message: error.message })\n    },\n  });\n\n  const onSubmit = (data: InvoiceFormData) => createInvoice.mutate(data);\n\nWHAT CONNECTS THE PHASES:\n- handleSubmit bridges Phase 1 → 2: runs validation, calls onSubmit with typed data only if valid.\n- onSubmit bridges Phase 2 → 3: passes validated, typed data to the mutation.\n- onSuccess/onError closes the loop: mutation result flows back into the form (reset, error display).\n\nPREVENTING DOUBLE SUBMISSION:\n  <button\n    type=\"submit\"\n    disabled={isSubmitting || createInvoice.isPending}\n  >\n\nBoth RHF's isSubmitting and the mutation's isPending must gate the button — they cover different parts of the lifecycle."
+        },
+        {
+          "blockId": "s07-cb-07",
+          "type": "text",
+          "content": "PART 4: FORM STATE IN THE TOPOLOGY MAP\n\nRevisiting Section 5's classification: form state is architecturally distinct from all other state kinds.\n\n  Property           | General client UI state          | Form state\n  -------------------|----------------------------------|------------------------------------------\n  Lifetime           | Persistent while feature mounted | Ephemeral until submission\n  Structure          | Relatively flat                  | Field-level + form-level validity\n  Update pattern     | Discrete events                  | Continuous input stream\n  Success terminal   | State persists                   | State is discarded\n  Error handling     | Component-level                  | Field-level + form-level + server errors\n\nTHE CLASSIFICATION CONSEQUENCE: form state does not belong in a global store. Putting it in Redux or Zustand adds boilerplate for an ephemeral structure that will be discarded on submit success. RHF is the right owner — it is purpose-built for this specific lifecycle.\n\nTHE MULTI-STEP EXCEPTION: when step state must survive navigation, RHF manages each step's field state, but step progression and accumulated valid data across steps may live in a local useReducer or a scoped Context — not a global store."
+        },
+        {
+          "blockId": "s07-cb-08",
+          "type": "text",
+          "content": "COMMON ERRORS\n\nError 1: Using watch for every field\nwatch('fieldName') re-subscribes the component to per-keystroke updates — it recreates the controlled input problem. Use watch only when you genuinely need real-time derived UI (live preview, character count). For validation feedback, use errors from formState instead.\n\nError 2: Storing form state in a global store\nForm state is ephemeral and field-structured. A Redux slice for a form adds actions for every field change, every validation state, and every submission phase — all code that RHF handles internally. The maintenance cost is high with no architectural benefit.\n\nError 3: Defining TypeScript types separately from Zod schemas\ninterface InvoiceFormData { amount: number; ... } written alongside a Zod schema is a synchronization hazard. Use z.infer<typeof schema> to derive the type. One definition, zero drift.\n\nError 4: Not handling server validation errors in the form\nDisplaying server errors in a toast and clearing them on the next render leaves users without field-level guidance. Use setError to route server errors back into RHF's field error state — they appear inline, adjacent to the field they describe.\n\nError 5: Forgetting to disable submit during mutation pending\nRHF's isSubmitting covers only the synchronous validation phase. Once handleSubmit calls onSubmit and the mutation is in flight, isSubmitting may be false while createX.isPending is true. Both must gate the submit button."
+        }
+      ],
+      "interactionSequence": [
+        {
+          "interactionId": "s07-int-01",
+          "interactionType": "prediction",
+          "prompt": "Before reading: a developer defines both a TypeScript interface and a Zod schema with the same shape. Three months later, a new required field is added to the Zod schema but the interface is not updated. TypeScript reports no error. What is the architectural problem — and what is the one-line fix?\n\nA) The Zod schema and TypeScript interface are identical, so there is no problem.\nB) The interface and schema can drift independently — the type system enforces the interface, not the schema. Fix: use z.infer<typeof schema> instead of a separate interface.\nC) TypeScript should catch this — the error means the Zod library version is outdated.\nD) The interface needs to extend the Zod schema to stay in sync.",
+          "required": true,
+          "responseFormat": "multiple-choice",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "B is correct. When you maintain a TypeScript interface alongside a Zod schema, you have two independent sources of truth. TypeScript validates code against the interface — it knows nothing about the Zod schema. If the schema adds a required field that the interface lacks, TypeScript happily accepts code that passes an object conforming to the interface (missing the new field) to a function that calls schema.parse() — which will fail at runtime. The fix: type InvoiceFormData = z.infer<typeof invoiceSchema>. This derives the TypeScript type directly from the schema. They can never drift because they're one definition. The schema is the single source of truth for both shape and validation rules.",
+            "correctiveFeedback": "B: the interface and schema drift independently. TypeScript only knows about the interface. Fix: z.infer<typeof schema> derives the type from the schema — one source of truth, zero drift.",
+            "hints": ["Does TypeScript know what rules a Zod schema enforces?", "What would happen if you called schema.parse(data) where data satisfies the interface but is missing the new field?"]
+          },
+          "confidencePrompt": {
+            "enabled": true,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How confident are you in your answer? (1 = guessing, 5 = certain)"
+          }
+        },
+        {
+          "interactionId": "s07-int-02",
+          "interactionType": "multiple-choice",
+          "prompt": "A form has 15 fields and live character counts on two text areas. Which approach is architecturally correct?\n\nA) Use fully controlled inputs for all 15 fields to keep everything consistent.\nB) Use RHF with register for all fields; use watch only on the two text area fields that need live character counts.\nC) Use RHF for the 13 simple fields and controlled inputs for the two text areas.\nD) Use RHF's watch on all fields to enable future real-time features.",
+          "required": true,
+          "responseFormat": "multiple-choice",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "B is correct. RHF's register avoids per-keystroke re-renders for all 15 fields. watch is used surgically only on the two fields that genuinely need real-time reactivity (the character count display). Option A creates per-keystroke re-renders of the entire 15-field form — the exact problem RHF solves. Option C creates an inconsistent approach (two different form state mechanisms in one form) with no benefit — RHF's watch handles the character count need cleanly. Option D's watch on all fields recreates the controlled input re-render problem for all 15 fields while only 2 need it — the textbook case of over-engineering for hypothetical future requirements.",
+            "correctiveFeedback": "B: register for all fields (no keystroke re-renders), watch surgically on the two that need live character counts. Consistent approach, minimal re-renders.",
+            "hints": ["What does watch() do to a component's render frequency?", "Which approach uses the minimum re-renders needed for the actual requirements?"]
+          },
+          "confidencePrompt": {
+            "enabled": true,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How confident are you in this answer?"
+          }
+        },
+        {
+          "interactionId": "s07-int-03",
+          "interactionType": "multiple-choice",
+          "prompt": "A Zod schema validation fails client-side on submit. The handleSubmit callback is:\n\nA) Called with partial data, and the developer must check errors manually.\nB) Not called — RHF populates errors in formState and stops execution.\nC) Called with undefined data to signal failure.\nD) Called regardless; Zod errors are surfaced via a separate zodErrors state.",
+          "required": true,
+          "responseFormat": "multiple-choice",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "B is correct. handleSubmit is RHF's validation gate. When you pass a resolver (zodResolver(schema)), RHF runs the schema's parse before calling the submit handler. If validation fails, RHF populates formState.errors with field-level error messages and does not invoke the callback. Your onSubmit function only receives fully validated, schema-typed data — TypeScript's type inference reflects this: the data parameter is InvoiceFormData, not InvoiceFormData | undefined. This is the architectural payoff of the zodResolver pattern: by the time your onSubmit code runs, you have a guarantee that the data is valid.",
+            "correctiveFeedback": "B: handleSubmit is not called on validation failure. RHF populates formState.errors and stops. Your onSubmit only runs with valid, typed data.",
+            "hints": ["What is the job of a resolver in RHF?", "If handleSubmit is called with typed data, what must be true about the data at that point?"]
+          },
+          "confidencePrompt": {
+            "enabled": true,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How confident are you in this answer?"
+          }
+        },
+        {
+          "interactionId": "s07-int-04",
+          "interactionType": "scenario-analysis",
+          "prompt": "A server returns { error: 'postcode_invalid', field: 'postcode' } after form submission. The current implementation shows a toast notification and clears the form. What is wrong with this, and what is the correct implementation using RHF?",
+          "required": true,
+          "responseFormat": "short-answer",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "What's wrong: showing a toast and clearing the form forces the user to re-enter all their data just to fix one field. The server error contains field-specific information (field: 'postcode') that belongs inline next to the postcode field — not in a transient toast that disappears.\n\nThe correct implementation:\n\n  onError: (error) => {\n    if (error.field === 'postcode') {\n      setError('postcode', {\n        type: 'server',\n        message: 'Invalid postcode for the selected country'\n      });\n    } else {\n      setError('root', { message: 'Something went wrong. Please try again.' });\n    }\n  }\n\nsetError('postcode', ...) routes the error into RHF's field error state — it appears inline at errors.postcode.message without resetting or touching any other field values. The form stays open. The user sees exactly which field is wrong and why. The errors.root pattern handles non-field server errors (e.g. rate limit, server outage) that don't map to a specific field.",
+            "correctiveFeedback": "setError('postcode', { type: 'server', message: '...' }) routes the server error inline without resetting the form. Clearing the form for a single field error is a UX failure — the user loses all their other input.",
+            "hints": ["What information does the server response give you that a toast throws away?", "What does setError() do to other field values?"]
+          },
+          "confidencePrompt": {
+            "enabled": true,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How completely did you capture the setError pattern and the reason the current approach fails?"
+          }
+        },
+        {
+          "interactionId": "s07-int-05",
+          "interactionType": "reflection",
+          "prompt": "REINFORCING SECTIONS 1, 3 & 5 — connecting forms to rendering mechanics, TypeScript contracts, and state topology (bridges ig-forms-library group): In 2-3 sentences, explain how the three-phase submission lifecycle (input → validation → mutation) maps onto the Section 5 state topology. Which state kind is each phase? And how does the Zod schema from Section 3's type-as-contract principle appear in this lifecycle — at which phase does it operate, and what does it guarantee at the boundary between phases?",
+          "required": true,
+          "responseFormat": "short-answer",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "State topology mapping:\n- Phase 1 (input): form state — ephemeral, field-structured, owned by RHF. Not client UI state, not server cache.\n- Phase 2 (validation): still form state, but at the form-level validity layer. Zod runs here.\n- Phase 3 (mutation): this transitions to async UI architecture (Section 2) territory — the useMutation lifecycle (idle → pending → success | error) is exactly the discriminated union from Section 3 applied to an async operation. It's not form state; it's the bridge to the server.\n\nZod's role across the boundary: Zod operates at the Phase 1 → Phase 2 boundary. It parses the raw DOM values RHF has collected and either produces a fully typed InvoiceFormData (Section 3's trust boundary pattern) or surfaces errors back into Phase 1 state. The TypeScript type guarantee: everything that enters Phase 3 (onSubmit's data parameter) has been validated by Zod — the mutation function receives a value TypeScript knows is schema-valid, not a raw form value. This is Section 3's 'trust boundary with unknown → KnownType narrowing' applied to form data.",
+            "correctiveFeedback": "Phase 1: form state (ephemeral). Phase 2: form state (validity layer, Zod runs here). Phase 3: async mutation state — no longer form state. Zod is the trust boundary between Phase 1 and Phase 3: data that enters the mutation is guaranteed schema-valid.",
+            "hints": ["Which of the six state kinds from Section 5 is the input phase? The mutation phase?", "Where in the lifecycle does Zod convert raw DOM values to typed data?"]
+          },
+          "confidencePrompt": {
+            "enabled": true,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How clearly did you map all three phases and Zod's boundary role?"
+          }
+        }
+      ],
+      "workedExamples": [
+        {
+          "exampleId": "s07-we-01",
+          "problem": "A SaaS onboarding form collects company name (must be unique — server-validated), admin email, and plan selection. Build the complete form with Zod schema, RHF integration, mutation, and server error handling.",
+          "steps": [
+            "Step 1 — Define the Zod schema as the single source of truth. z.object({ companyName: z.string().min(2).max(100), adminEmail: z.string().email(), plan: z.enum(['starter', 'growth', 'enterprise']) }). Derive the TypeScript type: type OnboardingData = z.infer<typeof onboardingSchema>. No separate interface.",
+            "Step 2 — Set up RHF with the resolver. const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm<OnboardingData>({ resolver: zodResolver(onboardingSchema) }). The resolver wires Zod into RHF's validation pipeline. handleSubmit will only invoke onSubmit with data that satisfies the schema.",
+            "Step 3 — Wire the mutation. useMutation({ mutationFn: (data: OnboardingData) => api.post('/organisations', data), onSuccess: (org) => navigate(`/dashboard/${org.id}`), onError: (error) => { if (error.field === 'companyName') { setError('companyName', { message: 'This company name is already taken' }); } else { setError('root', { message: 'Something went wrong. Please try again.' }); } } }). Server field errors map back into RHF via setError; non-field errors go to errors.root.",
+            "Step 4 — Gate the submit button against both RHF and mutation pending states. disabled={isSubmitting || createOrg.isPending}. isSubmitting is true during the synchronous validation and the brief period before the mutation fires. isPending is true during the async network request. Both must block submission.",
+            "Step 5 — Verify the key design invariants. (a) The TypeScript type is derived from the schema — zero drift. (b) The onSubmit callback only receives schema-valid data — TypeScript enforces this. (c) Server errors appear inline at the field level, not as transient toasts. (d) The form cannot be double-submitted regardless of network speed."
+          ],
+          "conclusion": "The onboarding form demonstrates all four objectives in a single example: RHF's uncontrolled approach for the form fields, Zod as the single source of truth for both types and validation, three-phase lifecycle wiring from input to mutation, and server error routing via setError. Each piece is replaceable independently — swap the mutation library, the schema, or the component library without touching the others."
+        }
+      ],
+      "retrievalPractice": [
+        {
+          "retrievalItemId": "s07-retrieval-01",
+          "retrievalType": "contrast",
+          "prompt": "Contrast a fully controlled 15-field form with the same form using RHF's register pattern. For each: how many re-renders occur per keystroke, and what is the architectural consequence for validation coupling?",
+          "difficulty": 2,
+          "schedule": {
+            "initialReviewDays": 1,
+            "subsequentReviewDays": [3, 7, 14, 30],
+            "decayParameters": {
+              "decayRate": 0.3,
+              "strengthMultiplier": 2.0,
+              "minimumIntervalDays": 1,
+              "maximumIntervalDays": 60
+            }
+          }
+        },
+        {
+          "retrievalItemId": "s07-retrieval-02",
+          "retrievalType": "application",
+          "prompt": "A developer writes: interface ContactFormData { name: string; email: string } alongside a Zod schema with the same fields. Six months later a phone field is added to the schema. How does z.infer prevent the drift bug, and what exactly would go wrong without it?",
+          "difficulty": 2,
+          "schedule": {
+            "initialReviewDays": 1,
+            "subsequentReviewDays": [4, 10, 21],
+            "decayParameters": {
+              "decayRate": 0.3,
+              "strengthMultiplier": 2.0,
+              "minimumIntervalDays": 1,
+              "maximumIntervalDays": 45
+            }
+          }
+        },
+        {
+          "retrievalItemId": "s07-retrieval-03",
+          "retrievalType": "cued-recall",
+          "prompt": "Name the three phases of a form submission lifecycle. For each phase: what mechanism owns it, what is its input, and what is its output?",
+          "difficulty": 2,
+          "schedule": {
+            "initialReviewDays": 2,
+            "subsequentReviewDays": [5, 14, 30],
+            "decayParameters": {
+              "decayRate": 0.3,
+              "strengthMultiplier": 2.0,
+              "minimumIntervalDays": 2,
+              "maximumIntervalDays": 45
+            }
+          }
+        },
+        {
+          "retrievalItemId": "s07-retrieval-04",
+          "retrievalType": "application",
+          "prompt": "A server returns a field-specific validation error after submission. What RHF API call surfaces it inline at the field level? What are the two arguments, and what happens to the other field values?",
+          "difficulty": 2,
+          "schedule": {
+            "initialReviewDays": 2,
+            "subsequentReviewDays": [6, 14, 30],
+            "decayParameters": {
+              "decayRate": 0.28,
+              "strengthMultiplier": 2.1,
+              "minimumIntervalDays": 2,
+              "maximumIntervalDays": 45
+            }
+          }
+        },
+        {
+          "retrievalItemId": "s07-retrieval-05",
+          "retrievalType": "application",
+          "prompt": "Why does double-submission prevention require checking both isSubmitting and mutationX.isPending? What specific lifecycle window does each cover, and what happens if you only check one?",
+          "difficulty": 3,
+          "schedule": {
+            "initialReviewDays": 3,
+            "subsequentReviewDays": [7, 21, 45],
+            "decayParameters": {
+              "decayRate": 0.3,
+              "strengthMultiplier": 2.0,
+              "minimumIntervalDays": 3,
+              "maximumIntervalDays": 60
+            }
+          }
+        },
+        {
+          "retrievalItemId": "s07-retrieval-06",
+          "retrievalType": "scenario-analysis",
+          "prompt": "INTERLEAVING — connecting forms to state topology, rendering mechanics, and library ecosystem (bridges ig-forms-library group, reinforces S05, S01, and previews S08): A team proposes putting all form state in a Redux slice 'so all components can see the current form values.' Apply the Section 5 state classification framework to form state. Why does the classification make a global store architecturally incorrect here? And using the Section 1 rendering model: what additional re-render cost does a global store introduce compared to RHF's uncontrolled approach?",
+          "difficulty": 4,
+          "schedule": {
+            "initialReviewDays": 3,
+            "subsequentReviewDays": [8, 21, 45],
+            "decayParameters": {
+              "decayRate": 0.28,
+              "strengthMultiplier": 2.2,
+              "minimumIntervalDays": 3,
+              "maximumIntervalDays": 60
+            }
+          }
+        }
+      ],
+      "transferExercises": [
+        {
+          "exerciseId": "s07-transfer-01",
+          "context": "Medical appointment booking system",
+          "scenario": "A patient books an appointment: selects a clinic (dropdown, options fetched from API), a doctor (filtered by the selected clinic, also fetched), a date (calendar picker, must be a future date), and a reason for visit (textarea, max 300 characters). On submit, the API may reject the slot as already taken by another patient.",
+          "task": "1. Write the Zod schema. The doctor field should only be valid if a clinic is selected — model the cross-field dependency with .refine() or a discriminated union. Include appropriate constraints for the date (future only) and reason (max 300 chars).\n2. The doctor dropdown options depend on the selected clinic value. Does this require watch? Explain why or why not, and what the alternative is.\n3. Design the mutation's error handling for a 'slot already taken' rejection. Should this be a root error or a field-level error on the date field? Defend your choice.\n4. The form is inside a multi-step wizard. Step 1 collects clinic + doctor; Step 2 collects date + reason. How does this change the state architecture? What mechanism owns the accumulated valid data between steps, and why is a global store the wrong choice?",
+          "successCriteria": [
+            "Zod schema uses .refine() or superRefine to make doctorId conditional on clinicId being selected; date field uses z.string().refine(d => new Date(d) > new Date(), 'Must be a future date'); reason uses z.string().max(300)",
+            "Doctor dropdown requires watch('clinicId') — the options list is derived from the selected clinic value, which changes in real time as the user selects. Without watch, the component can't react to the clinic selection change to re-fetch or re-filter doctors.",
+            "Slot already taken: a root error or a field error on the date field are both defensible. Field error on date is preferable if the API implies the specific date/time slot is taken — it directs the user to change that specific input. Root error if the API is ambiguous about which slot. The key: don't clear the form; use setError to keep all other values intact.",
+            "Multi-step wizard: RHF owns each step's field state (field-level ephemeral). Between steps, accumulated valid data from completed steps lives in a local useReducer or a scoped Context — not a global Redux store. Global store is wrong because the accumulated data is ephemeral to this wizard flow, structured at the field level, and discarded on successful submission — all characteristics that disqualify global client state."
+          ]
+        }
+      ],
+      "masteryVerification": {
+        "assessmentIds": ["assess-forms-architecture"],
+        "requiredPerformance": {
+          "minimumAccuracy": 0.82,
+          "minimumTransferScore": 0.78
+        }
+      }
+    },
+    {
+      "experienceId": "s07-exp-02",
+      "title": "Form Architecture Design: Practical Activity",
+      "experienceType": "guided-analysis",
+      "difficultyProfile": {
+        "overall": 3,
+        "conceptualComplexity": 3,
+        "ambiguity": 3
+      },
+      "estimatedDurationMinutes": 20,
+      "linkedCompetencies": ["forms-architecture", "typescript-react-contracts"],
+      "desiredCognitiveActions": ["analysis", "synthesis", "reflection"],
+      "contentBlocks": [
+        {
+          "blockId": "s07-cb-09",
+          "type": "text",
+          "content": "PRACTICAL ACTIVITY: FORM ARCHITECTURE DESIGN\n\nGiven this feature brief:\n\n'Users can edit their billing address. The form has 6 fields: name, line 1, line 2 (optional), city, country (dropdown, 200 options), postcode. On save, the API may return a validation error if the postcode format doesn't match the country. The form should not close on error.'\n\nWork through the following:\n1. Write the Zod schema. Mark optional fields. Add appropriate string constraints.\n2. Derive the TypeScript type from the schema using z.infer.\n3. Sketch the RHF setup: useForm, resolver, and handleSubmit structure.\n4. Design the mutation's onError handler: how do you route a postcode/country mismatch error back into the form as a field-level error?\n5. Identify which fields benefit from valueAsNumber or valueAsDate transforms in register."
+        }
+      ],
+      "interactionSequence": [
+        {
+          "interactionId": "s07-int-06",
+          "interactionType": "scenario-analysis",
+          "prompt": "For the billing address form: the country dropdown has 200 options fetched from an API. A developer proposes storing the selected country value in useState so other components in the page can read it. Using the Section 5 state classification framework and the forms architecture from this section, evaluate this proposal. What is the correct state classification for the country value while the form is in progress, and when (if ever) would it be correct to expose it outside the form?",
+          "required": true,
+          "responseFormat": "short-answer",
+          "revealCondition": "after-response",
+          "feedback": {
+            "type": "elaborative",
+            "elaborativeFeedback": "While the form is in progress, the country selection is form state — ephemeral field-level state owned by RHF. The developer's proposal (useState alongside RHF) creates two owners for the same value, which is a synchronization hazard: if RHF's country field and the useState copy get out of sync, components reading the copy see stale data.\n\nThe correct approach for in-form access: use RHF's watch('country') if a sibling component within the form needs to react to the selection (e.g. to filter postcode validation rules). watch is the correct read mechanism within RHF's ownership boundary.\n\nFor exposing it outside the form: this only makes sense after submission succeeds — at that point, the submitted country value becomes server cache state (it's now on the server and owned by TanStack Query). During form editing, the value is strictly form state and should not leak to external consumers. If another page component needs the country (e.g. for currency formatting), it should read the server-stored value via useQuery, not the in-progress form state.",
+            "correctiveFeedback": "During form progress: form state (ephemeral, owned by RHF). Two owners = synchronization hazard. For in-form access: watch('country'). For post-submit access: server cache state via TanStack Query — not the form state.",
+            "hints": ["What happens if the RHF field value and the useState copy diverge?", "After the form is successfully submitted, where does the country value live?"]
+          },
+          "confidencePrompt": {
+            "enabled": false,
+            "scaleMin": 1,
+            "scaleMax": 5,
+            "prompt": "How clearly did you apply the state classification to the in-progress vs. post-submit distinction?"
+          }
+        }
+      ],
+      "workedExamples": [],
+      "retrievalPractice": [],
+      "transferExercises": [],
+      "masteryVerification": {
+        "assessmentIds": ["assess-forms-architecture"],
+        "requiredPerformance": {
+          "minimumAccuracy": 0.78,
+          "minimumTransferScore": 0.75
+        }
+      }
+    },
+    {
+      "experienceId": "s07-exp-03",
+      "title": "Self-Guided: Form Architecture Audit in a Real Codebase",
+      "experienceType": "self-guided-exercise",
+      "difficultyProfile": {
+        "overall": 3,
+        "conceptualComplexity": 3,
+        "ambiguity": 3
+      },
+      "estimatedDurationMinutes": 20,
+      "linkedCompetencies": ["forms-architecture", "typescript-react-contracts", "state-topology"],
+      "desiredCognitiveActions": ["analysis", "reflection", "synthesis"],
+      "contentBlocks": [],
+      "interactionSequence": [],
+      "workedExamples": [],
+      "selfGuidedExercise": {
+        "exerciseId": "s07-sge-01",
+        "realWorldContext": "A form in a real codebase you have access to — ideally one with validation and a submission that hits an API. A billing form, a settings form, a registration form, or any multi-field form that calls a mutation on submit.",
+        "objective": "Apply the form architecture checklist to a real form, identify each gap using the principles from this section, and write one concrete code-level improvement for each gap found.",
+        "instructions": [
+          "Find a form in a real codebase — ideally one with at least 4 fields, some validation, and an API submission. Good candidates: registration/onboarding forms, settings edit forms, billing address forms, or any form that calls a POST or PATCH endpoint.",
+          "Apply this audit checklist:\n(a) Is the TypeScript type derived from the validation schema via z.infer, or defined separately? If separately, check whether they currently match.\n(b) Is form state stored in a global store (Redux, Zustand, Context)? Count the lines of store code that RHF would eliminate.\n(c) Does the mutation's error handler surface field-level server errors back into the form via setError, or does it only show a toast?\n(d) Is the submit button correctly disabled during both the RHF validation phase (isSubmitting) and the mutation pending phase (mutation.isPending)?\n(e) Is watch used speculatively on all fields, or surgically only where real-time reactivity is needed?",
+          "For each gap you find, write the specific code change needed. Be concrete: show the before and after for at least one gap.",
+          "Estimate: if you fixed all the gaps, how many lines of custom state management code would be eliminated?"
+        ],
+        "estimatedRealWorldDurationMinutes": 60,
+        "materialsOrPrerequisites": [
+          "A React codebase with at least one form that performs API submission",
+          "Access to read the form component, its validation logic, and its mutation handler"
+        ],
+        "reflectionPrompts": [
+          "Which gap was most common in the form you audited — type drift, global store usage, missing server error routing, or incorrect submit gating?",
+          "If the form had a separate TypeScript interface and Zod schema, have they drifted? What field differences did you find?",
+          "After fixing the gaps, how many lines of custom state management or validation code would be eliminated? What would the net change in lines of code be?",
+          "Is there any behavior in the original form that RHF + Zod cannot model? If yes, describe what it is and why it falls outside RHF's scope."
+        ],
+        "verification": {
+          "mode": "reflection-submission",
+          "isGating": false,
+          "selfAssessmentCriteria": [
+            "I applied all five checklist items to the form and recorded findings for each",
+            "I found at least one gap and wrote a concrete before/after code change",
+            "I estimated the lines of eliminated code if all gaps were fixed"
+          ]
+        },
+        "linkedCompetencies": ["forms-architecture", "typescript-react-contracts", "state-topology"]
+      },
+      "retrievalPractice": [],
+      "transferExercises": [],
+      "masteryVerification": {
+        "assessmentIds": ["assess-forms-architecture"],
+        "requiredPerformance": {
+          "minimumAccuracy": 0.78,
+          "minimumTransferScore": 0.78
+        }
+      }
+    }
+  ]
+}

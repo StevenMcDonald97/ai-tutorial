@@ -1,0 +1,115 @@
+Course Engine JSON Schema
+Technical Reference Documentation
+Version 1.0  |  Learning Engine Schema
+Overview
+This document describes the JSON schema used to define online learning courses for the adaptive course engine. The schema covers course metadata, learning model configuration, competencies, section content, assessments, retrieval scheduling, and analytics tracking.
+The schema is designed around evidence-based learning principles: spaced retrieval practice, confidence calibration, mastery-based progression, elaborative feedback, and transfer-focused assessment.
+
+Top-Level Structure
+The root object contains the following top-level keys:
+
+
+
+courseMetadata
+Descriptive and administrative information identifying the course.
+
+
+
+learningModel
+Controls global learning science behaviours applied across the course.
+
+
+
+interleavingGroups[]
+
+
+priorKnowledgeCheck
+An optional pre-assessment that probes existing knowledge before course or section content is presented. Results drive adaptive routing, allowing learners to skip content they already know or be directed to remediation.
+
+
+
+probeQuestions[]
+
+
+competencies
+Competencies define the skills or knowledge the course develops. Each competency has its own mastery threshold, difficulty profile, desired outcomes, and misconception registry.
+
+
+
+desiredOutcomes[]
+
+
+commonMisconceptions[]
+
+
+sections
+Sections group related learning experiences. Each section has learning objectives, motivation hooks, and an ordered list of experiences.
+
+
+
+learningExperiences[]
+A learning experience is the primary instructional unit. It contains content blocks, interactions, worked examples, retrieval practice, and transfer exercises.
+
+
+
+contentBlocks[]
+
+
+interactionSequence[]
+Defines each learner interaction step, including the prompt, response format, feedback configuration, and optional confidence rating.
+
+
+
+feedback (within interactionSequence)
+Note: Elaborative feedback — which explains the reasoning behind correct and incorrect answers — produces significantly better retention than simple corrective feedback.
+
+
+
+workedExamples[]
+
+
+retrievalPractice[]
+Retrieval items are scheduled using spaced repetition. Decay parameters allow the engine to adapt intervals per learner based on recall strength.
+
+
+
+transferExercises[]
+
+
+assessments
+Formal assessments are linked to competencies and used to verify mastery. Questions include rubrics and error pattern mappings.
+
+
+
+questions[]
+
+
+errorPatterns[] (within questions)
+Note: Error patterns bridge assessment responses to the competency misconception registry, enabling targeted remediation rather than generic retry loops.
+
+
+
+retrievalSystem
+Global configuration for the retrieval practice scheduling algorithm. Item-level schedules in retrievalPractice[] take precedence over these defaults.
+
+
+
+masterySystem
+Defines mastery progression levels and whether mastery can decay over time.
+
+
+
+analytics
+Controls what learner data is collected and how error analysis is structured.
+
+
+
+glossary
+Optional list of term definitions surfaced contextually to learners. Each entry has a term (string) and definition (string).
+
+ID Linking Reference
+The schema uses string IDs to create relationships across objects. The table below summarises key linkages.
+
+
+
+Course Engine Schema v1.0  —  All IDs must be unique within their collection. String IDs are case-sensitive.

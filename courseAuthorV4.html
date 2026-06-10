@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Course Editor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,900;1,9..144,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Spline+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --paper:#f4f1ea;
+  --paper-deep:#ece7dc;
+  --surface:#fbf9f4;
+  --surface-raised:#ffffff;
+  --ink:#23211c;
+  --ink-soft:#5f5a4f;
+  --ink-faint:#928c7d;
+  --line:#ddd6c7;
+  --line-soft:#e8e2d5;
+  --accent:#7a2e1d;
+  --accent-deep:#5e2114;
+  --accent-wash:#f3e4df;
+  --accent-line:#e3c4ba;
+  --moss:#4a5d3a;
+  --moss-wash:#e8ecdf;
+  --gold:#9a6a18;
+  --gold-wash:#f6ecd6;
+  --indigo:#33457a;
+  --indigo-wash:#e3e7f2;
+  --plum:#5a3566;
+  --plum-wash:#efe6f2;
+  --rust:#9c4a26;
+  --rust-wash:#f6e6dc;
+  --good:#3f6d4e;
+  --good-wash:#e6efe7;
+  --warn:#9c3527;
+  --warn-wash:#f7e4e0;
+  --radius:4px;
+  --radius-lg:8px;
+  --shadow-sm:0 1px 2px rgba(47,40,28,.06);
+  --shadow:0 6px 28px -12px rgba(47,40,28,.28);
+  --shadow-lg:0 20px 60px -24px rgba(47,40,28,.4);
+  --serif:'Fraunces',Georgia,serif;
+  --read:'Newsreader',Georgia,serif;
+  --sans:'Spline Sans',-apple-system,sans-serif;
+  --mono:'Spline Sans Mono',ui-monospace,monospace;
+}
+
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--sans);background:var(--paper);color:var(--ink);
+  min-height:100vh;font-size:15px;line-height:1.6;
+  background-image:
+    radial-gradient(circle at 12% 8%, rgba(122,46,29,.04), transparent 38%),
+    radial-gradient(circle at 88% 92%, rgba(74,93,58,.045), transparent 42%);
+}
+.grain{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.35;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply}
+
+.wrap{max-width:1000px;margin:0 auto;padding:0 28px;position:relative;z-index:2}
+
+/* Header */
+header{padding:48px 0 28px;border-bottom:2px solid var(--ink);position:relative}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+h1{font-family:var(--serif);font-weight:900;font-size:clamp(34px,5.5vw,60px);line-height:.98;letter-spacing:-.02em}
+h1 .it{font-style:italic;font-weight:500;color:var(--accent)}
+.lede{margin-top:16px;font-family:var(--read);font-size:19px;max-width:54ch;color:var(--ink-soft);font-style:italic}
+
+/* Upload zone */
+.dropzone{margin:40px 0;border:2px dashed var(--line);border-radius:var(--radius-lg);background:var(--surface);
+  padding:54px 32px;text-align:center;cursor:pointer;transition:all .2s}
+.dropzone:hover{border-color:var(--accent-line);background:var(--surface-raised)}
+.dropzone.drag{border-color:var(--accent);background:var(--accent-wash)}
+.dz-ico{font-size:38px;margin-bottom:14px;opacity:.65}
+.dz-title{font-family:var(--serif);font-size:22px;margin-bottom:6px}
+.dz-sub{font-size:14px;color:var(--ink-faint)}
+.dz-actions{margin-top:22px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+/* Buttons */
+.btn{font-family:var(--sans);font-weight:600;font-size:14px;border:none;border-radius:var(--radius);
+  padding:11px 22px;cursor:pointer;transition:all .18s;letter-spacing:.01em;display:inline-flex;align-items:center;gap:8px}
+.btn-primary{background:var(--ink);color:var(--paper)}
+.btn-primary:hover{background:var(--accent);transform:translateY(-1px)}
+.btn-secondary{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn-secondary:hover{border-color:var(--ink-soft);background:var(--surface-raised)}
+.btn-accent{background:var(--accent);color:#fff}
+.btn-accent:hover{background:var(--accent-deep);transform:translateY(-1px)}
+.btn-sm{padding:7px 14px;font-size:12.5px}
+.btn-ghost{background:transparent;color:var(--accent);border:1px solid var(--accent-line);padding:6px 13px;font-size:12px;border-radius:100px}
+.btn-ghost:hover{background:var(--accent-wash)}
+.btn-danger{background:transparent;color:var(--warn);border:1px solid transparent;padding:5px 10px;font-size:12px;border-radius:var(--radius)}
+.btn-danger:hover{background:var(--warn-wash)}
+
+/* Editor shell */
+.editor{display:none}
+.editor.show{display:block;animation:rise .5s ease}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.toolbar{position:sticky;top:0;z-index:10;background:var(--paper);border-bottom:1.5px solid var(--line);
+  padding:14px 0;margin-bottom:6px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.toolbar .file-name{font-family:var(--mono);font-size:13px;color:var(--ink-soft);flex:1;min-width:160px}
+.toolbar .file-name b{color:var(--ink)}
+.toolbar-spacer{flex:1}
+
+/* Sections / accordions */
+.block{background:var(--surface-raised);border:1px solid var(--line);border-radius:var(--radius-lg);
+  margin-bottom:18px;box-shadow:var(--shadow-sm);overflow:hidden}
+.block-head{padding:18px 22px;display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none}
+.block-head:hover{background:var(--surface)}
+.block-head .chev{transition:transform .2s;color:var(--ink-faint);font-size:13px}
+.block.open .block-head .chev{transform:rotate(90deg)}
+.block-head h3{font-family:var(--serif);font-size:19px;font-weight:600;flex:1}
+.block-head .meta{font-family:var(--mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.08em}
+.block-body{padding:4px 22px 22px;display:none}
+.block.open .block-body{display:block}
+
+.eyebrow-sm{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);
+  margin:22px 0 12px;display:flex;align-items:center;gap:12px;font-weight:600}
+.eyebrow-sm::after{content:'';flex:1;height:1px;background:var(--line-soft)}
+.eyebrow-sm:first-child{margin-top:6px}
+
+/* Form fields */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px 22px}
+.field{display:flex;flex-direction:column}
+.field.full{grid-column:1/-1}
+label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);
+  margin-bottom:7px;font-weight:500}
+input,textarea,select{font-family:var(--read);font-size:16px;color:var(--ink);background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--radius);padding:9px 11px;transition:all .18s;resize:vertical;width:100%}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent);background:var(--surface-raised);box-shadow:0 0 0 3px var(--accent-wash)}
+input::placeholder,textarea::placeholder{color:#b3a994;font-style:italic}
+select{cursor:pointer;font-family:var(--sans);font-size:14px}
+textarea{min-height:64px;line-height:1.5}
+.field-hint{font-size:12px;color:var(--ink-faint);font-style:italic;margin-top:5px}
+
+/* Nested item cards */
+.item-card{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;
+  padding:16px 18px;margin-bottom:14px;background:var(--surface)}
+.item-card.exp{border-left-color:var(--moss)}
+.item-card.further{border-left-color:var(--indigo);background:var(--indigo-wash)}
+.item-card.selfg{border-left-color:var(--plum);background:var(--plum-wash)}
+.item-card-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.item-card-head .ic-title{font-family:var(--serif);font-size:16px;font-weight:600;flex:1}
+.item-card-head .ic-tag{font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;
+  padding:2px 8px;border-radius:4px;background:var(--accent);color:#fff}
+.item-card.exp .ic-tag{background:var(--moss)}
+.item-card.further .ic-tag{background:var(--indigo)}
+.item-card.selfg .ic-tag{background:var(--plum)}
+
+.add-row{margin-top:6px;display:flex;gap:10px;flex-wrap:wrap}
+.string-list{display:flex;flex-direction:column;gap:8px}
+.string-list-item{display:flex;gap:8px;align-items:flex-start}
+.string-list-item input,.string-list-item textarea{flex:1}
+.mini-x{background:transparent;border:none;color:var(--ink-faint);cursor:pointer;font-size:18px;line-height:1;padding:6px 4px;flex-shrink:0}
+.mini-x:hover{color:var(--warn)}
+
+.empty-note{font-size:13px;color:var(--ink-faint);font-style:italic;padding:8px 0}
+
+/* JSON preview */
+.preview-wrap{display:none;margin-top:8px}
+.preview-wrap.show{display:block}
+.preview{font-family:var(--mono);font-size:12px;line-height:1.6;background:#2a2620;color:#e8e0d0;
+  border-radius:var(--radius-lg);padding:22px;max-height:480px;overflow:auto;white-space:pre;tab-size:2}
+
+/* Toast */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--ink);color:var(--paper);padding:13px 24px;border-radius:100px;font-size:14px;font-weight:500;
+  box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:all .3s;z-index:100}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err{background:var(--warn)}
+
+footer{border-top:2px solid var(--ink);padding:24px 0 50px;margin-top:40px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+
+@media(max-width:720px){.fgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Course Engine · Editor</div>
+    <h1>Open, refine, <span class="it">re-export.</span></h1>
+    <p class="lede">Upload a course object, edit its content — sections, experiences, further reading, self-guided exercises — and save the revised schema back out.</p>
+  </header>
+
+  <!-- UPLOAD -->
+  <div id="uploadView">
+    <div class="dropzone" id="dropzone">
+      <div class="dz-ico">⇪</div>
+      <div class="dz-title">Drop a course <code>.json</code> here</div>
+      <div class="dz-sub">or choose a file — your course object stays entirely in your browser</div>
+      <div class="dz-actions">
+        <button class="btn btn-primary" id="chooseBtn">Choose file</button>
+        <button class="btn btn-secondary" id="blankBtn">Start from blank template</button>
+      </div>
+      <input type="file" id="fileInput" accept=".json,application/json" style="display:none">
+    </div>
+  </div>
+
+  <!-- EDITOR -->
+  <div class="editor" id="editor">
+    <div class="toolbar">
+      <span class="file-name">Editing <b id="fileName">course.json</b></span>
+      <span class="toolbar-spacer"></span>
+      <button class="btn btn-secondary btn-sm" id="togglePreview">View JSON</button>
+      <button class="btn btn-secondary btn-sm" id="closeBtn">Close</button>
+      <button class="btn btn-accent btn-sm" id="saveBtn">⤓ Save course</button>
+    </div>
+
+    <div class="preview-wrap" id="previewWrap">
+      <pre class="preview" id="preview"></pre>
+    </div>
+
+    <div id="editorBody"></div>
+  </div>
+
+  <footer>
+    <span>Course Engine Schema · Editor v1</span>
+    <span>Local-only · nothing uploaded</span>
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════════════════════
+let course = null;          // the working course object
+let fileName = 'course.json';
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?'':s);
+
+function toast(msg, isErr){
+  const t=$('toast'); t.textContent=msg; t.className='toast show'+(isErr?' err':'');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.className='toast',2200);
+}
+
+// A minimal valid skeleton for "start blank"
+function blankCourse(){
+  return {
+    courseMetadata:{courseId:"new-course",title:"Untitled Course",description:"",thumbnailImage:"",
+      estimatedDurationMinutes:0,difficultyLevel:"intermediate",version:"1.0",
+      lastUpdated:new Date().toISOString().slice(0,10),language:"en",tags:[],prerequisites:[]},
+    learningModel:{masteryThreshold:0.85,passingThreshold:0.7,retrievalPracticeEnabled:true,
+      confidenceCalibrationEnabled:true,adaptiveDifficultyEnabled:true,interleavingEnabled:false,
+      interleavingGroups:[],spacedRepetitionEnabled:true},
+    competencies:[],
+    sections:[],
+    assessments:[],
+    glossary:[]
+  };
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  UPLOAD HANDLING
+// ════════════════════════════════════════════════════════════════════════
+const dz=$('dropzone');
+$('chooseBtn').addEventListener('click',e=>{e.stopPropagation();$('fileInput').click();});
+dz.addEventListener('click',()=>$('fileInput').click());
+$('blankBtn').addEventListener('click',e=>{e.stopPropagation();loadCourse(blankCourse(),'untitled-course.json');});
+$('fileInput').addEventListener('change',e=>{ if(e.target.files[0]) readFile(e.target.files[0]); });
+
+['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag');}));
+['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('drag');}));
+dz.addEventListener('drop',e=>{ const f=e.dataTransfer.files[0]; if(f) readFile(f); });
+
+function readFile(file){
+  if(!/\.json$/i.test(file.name) && file.type!=='application/json'){ toast('Please choose a .json file',true); return; }
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const obj=JSON.parse(r.result);
+      loadCourse(obj,file.name);
+    }catch(err){ toast('Could not parse JSON: '+err.message,true); }
+  };
+  r.onerror=()=>toast('Could not read file',true);
+  r.readAsText(file);
+}
+
+function loadCourse(obj,name){
+  course=obj; fileName=name||'course.json';
+  $('fileName').textContent=fileName;
+  $('uploadView').style.display='none';
+  $('editor').classList.add('show');
+  buildEditor();
+  toast('Course loaded');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+$('closeBtn').addEventListener('click',()=>{
+  if(!confirm('Close this course? Unsaved edits will be lost.')) return;
+  course=null; $('editor').classList.remove('show'); $('uploadView').style.display='block';
+  $('fileInput').value='';
+});
+
+// ════════════════════════════════════════════════════════════════════════
+//  GENERIC HELPERS — read/write into the course object by path
+// ════════════════════════════════════════════════════════════════════════
+function ensure(obj,key,def){ if(obj[key]==null) obj[key]=def; return obj[key]; }
+
+// text input bound to an object property
+function bindInput(el,obj,key){ el.addEventListener('input',()=>{obj[key]=el.value;refreshPreview();}); }
+function bindNum(el,obj,key){ el.addEventListener('input',()=>{obj[key]=el.value===''?null:Number(el.value);refreshPreview();}); }
+
+function field(labelText,value,opts={}){
+  const wrap=document.createElement('div');
+  wrap.className='field'+(opts.full?' full':'');
+  const lab=document.createElement('label'); lab.textContent=labelText; wrap.appendChild(lab);
+  let inp;
+  if(opts.type==='textarea'){ inp=document.createElement('textarea'); if(opts.rows)inp.rows=opts.rows; }
+  else if(opts.type==='select'){
+    inp=document.createElement('select');
+    (opts.options||[]).forEach(o=>{ const op=document.createElement('option'); op.value=o; op.textContent=o; inp.appendChild(op); });
+  }
+  else { inp=document.createElement('input'); inp.type=opts.type||'text'; }
+  if(opts.placeholder) inp.placeholder=opts.placeholder;
+  inp.value=value==null?'':value;
+  wrap.appendChild(inp);
+  if(opts.hint){ const h=document.createElement('div'); h.className='field-hint'; h.textContent=opts.hint; wrap.appendChild(h); }
+  return {wrap,inp};
+}
+
+// Editable list of plain strings stored in arr (a real array reference)
+function stringList(arr,placeholder,opts={}){
+  const container=document.createElement('div');
+  function render(){
+    container.innerHTML='';
+    const list=document.createElement('div'); list.className='string-list';
+    arr.forEach((val,i)=>{
+      const row=document.createElement('div'); row.className='string-list-item';
+      const inp = opts.textarea ? document.createElement('textarea') : document.createElement('input');
+      if(opts.textarea) inp.rows=2;
+      inp.value=val==null?'':val; inp.placeholder=placeholder||'';
+      inp.addEventListener('input',()=>{arr[i]=inp.value;refreshPreview();});
+      const x=document.createElement('button'); x.className='mini-x'; x.innerHTML='×'; x.title='Remove';
+      x.addEventListener('click',()=>{arr.splice(i,1);render();refreshPreview();});
+      row.appendChild(inp); row.appendChild(x); list.appendChild(row);
+    });
+    container.appendChild(list);
+    const add=document.createElement('button'); add.className='btn btn-ghost'; add.textContent='+ Add';
+    add.style.marginTop='8px';
+    add.addEventListener('click',()=>{arr.push('');render();refreshPreview();});
+    container.appendChild(add);
+    if(!arr.length){ const e=document.createElement('div'); e.className='empty-note'; e.textContent='None yet.'; container.insertBefore(e,list); }
+  }
+  render();
+  return container;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  BUILD EDITOR
+// ════════════════════════════════════════════════════════════════════════
+function block(title,metaText,openByDefault){
+  const b=document.createElement('div'); b.className='block'+(openByDefault?' open':'');
+  const head=document.createElement('div'); head.className='block-head';
+  head.innerHTML=`<span class="chev">▶</span><h3>${esc(title)}</h3>${metaText?`<span class="meta">${esc(metaText)}</span>`:''}`;
+  const body=document.createElement('div'); body.className='block-body';
+  head.addEventListener('click',()=>b.classList.toggle('open'));
+  b.appendChild(head); b.appendChild(body);
+  return {b,body,head};
+}
+
+function fgrid(){ const g=document.createElement('div'); g.className='fgrid'; return g; }
+function eyebrow(text){ const e=document.createElement('div'); e.className='eyebrow-sm'; e.textContent=text; return e; }
+
+function buildEditor(){
+  const root=$('editorBody'); root.innerHTML='';
+
+  root.appendChild(buildMetadata());
+  root.appendChild(buildSections());
+
+  refreshPreview();
+}
+
+// ---- Course metadata ----
+function buildMetadata(){
+  const m=ensure(course,'courseMetadata',{});
+  const {b,body}=block('Course Metadata', m.courseId||'', true);
+  const g=fgrid();
+  const add=(l,k,o={})=>{const {wrap,inp}=field(l,m[k],o); (o.num?bindNum:bindInput)(inp,m,k); g.appendChild(wrap);};
+  add('Course ID','courseId',{placeholder:'my-course-101'});
+  add('Title','title',{placeholder:'Course title'});
+  add('Description','description',{type:'textarea',full:true,placeholder:'Short summary of the course'});
+  add('Difficulty','difficultyLevel',{type:'select',options:['novice','intermediate','advanced']});
+  add('Estimated duration (min)','estimatedDurationMinutes',{type:'number',num:true});
+  add('Version','version',{placeholder:'1.0'});
+  add('Language (BCP-47)','language',{placeholder:'en'});
+  add('Last updated','lastUpdated',{placeholder:'YYYY-MM-DD'});
+  add('Thumbnail image URL','thumbnailImage',{placeholder:'https://…'});
+  body.appendChild(g);
+
+  body.appendChild(eyebrow('Tags'));
+  body.appendChild(stringList(ensure(m,'tags',[]),'e.g. statistics'));
+  return b;
+}
+
+// ---- Sections ----
+function buildSections(){
+  const sections=ensure(course,'sections',[]);
+  const {b,body}=block('Sections', sections.length+' section'+(sections.length!==1?'s':''), true);
+
+  const listWrap=document.createElement('div');
+  function renderList(){
+    listWrap.innerHTML='';
+    if(!sections.length){ const e=document.createElement('div'); e.className='empty-note'; e.textContent='No sections yet. Add one below.'; listWrap.appendChild(e); }
+    sections.forEach((sec,si)=>listWrap.appendChild(sectionCard(sec,si,sections,renderList,b)));
+  }
+  renderList();
+  body.appendChild(listWrap);
+
+  const addRow=document.createElement('div'); addRow.className='add-row';
+  const addBtn=document.createElement('button'); addBtn.className='btn btn-ghost'; addBtn.textContent='+ Add section';
+  addBtn.addEventListener('click',()=>{
+    sections.push({sectionId:'section-'+(sections.length+1),title:'New section',description:'',
+      learningObjectives:[],motivationHooks:[],furtherReading:[],learningExperiences:[]});
+    renderList(); updateBlockMeta(b,sections.length+' sections'); refreshPreview();
+  });
+  addRow.appendChild(addBtn); body.appendChild(addRow);
+  return b;
+}
+
+function updateBlockMeta(blockEl,text){ const m=blockEl.querySelector('.block-head .meta'); if(m) m.textContent=text; }
+
+function sectionCard(sec,si,parentArr,rerender,parentBlock){
+  const card=document.createElement('div'); card.className='item-card';
+  const head=document.createElement('div'); head.className='item-card-head';
+  head.innerHTML=`<span class="ic-tag">Section ${si+1}</span><span class="ic-title">${esc(sec.title||'Untitled section')}</span>`;
+  const del=document.createElement('button'); del.className='btn btn-danger'; del.textContent='Delete';
+  del.addEventListener('click',()=>{ if(confirm('Delete this section?')){parentArr.splice(si,1);rerender();updateBlockMeta(parentBlock,parentArr.length+' sections');refreshPreview();} });
+  head.appendChild(del); card.appendChild(head);
+
+  const g=fgrid();
+  const fId=field('Section ID',sec.sectionId,{}); bindInput(fId.inp,sec,'sectionId'); g.appendChild(fId.wrap);
+  const fT=field('Title',sec.title,{}); bindInput(fT.inp,sec,'title'); fT.inp.addEventListener('input',()=>{head.querySelector('.ic-title').textContent=fT.inp.value||'Untitled section';}); g.appendChild(fT.wrap);
+  const fD=field('Description',sec.description,{type:'textarea',full:true}); bindInput(fD.inp,sec,'description'); g.appendChild(fD.wrap);
+  card.appendChild(g);
+
+  // Learning objectives
+  card.appendChild(eyebrow('Learning objectives'));
+  card.appendChild(objectiveList(ensure(sec,'learningObjectives',[])));
+
+  // Motivation hooks
+  card.appendChild(eyebrow('Motivation hooks'));
+  card.appendChild(hookList(ensure(sec,'motivationHooks',[])));
+
+  // Further reading
+  card.appendChild(eyebrow('Further reading'));
+  card.appendChild(furtherList(ensure(sec,'furtherReading',[])));
+
+  // Learning experiences
+  card.appendChild(eyebrow('Learning experiences'));
+  card.appendChild(experienceList(ensure(sec,'learningExperiences',[])));
+
+  return card;
+}
+
+// ---- Learning objectives ----
+function objectiveList(arr){
+  const wrap=document.createElement('div');
+  function render(){
+    wrap.innerHTML='';
+    arr.forEach((o,i)=>{
+      const row=document.createElement('div'); row.className='item-card';
+      const g=fgrid();
+      const a=field('Objective ID',o.objectiveId,{}); bindInput(a.inp,o,'objectiveId'); g.appendChild(a.wrap);
+      const b=field('Description',o.description,{type:'textarea',full:true}); bindInput(b.inp,o,'description'); g.appendChild(b.wrap);
+      row.appendChild(g);
+      const lc=document.createElement('div'); lc.innerHTML='<label style="display:block;margin-bottom:6px">Linked competencies</label>';
+      lc.appendChild(stringList(ensure(o,'linkedCompetencies',[]),'competencyId')); row.appendChild(lc);
+      const x=document.createElement('button'); x.className='btn btn-danger'; x.textContent='Remove objective';
+      x.addEventListener('click',()=>{arr.splice(i,1);render();refreshPreview();}); row.appendChild(x);
+      wrap.appendChild(row);
+    });
+    const add=document.createElement('button'); add.className='btn btn-ghost'; add.textContent='+ Add objective';
+    add.addEventListener('click',()=>{arr.push({objectiveId:'obj-'+(arr.length+1),description:'',linkedCompetencies:[]});render();refreshPreview();});
+    wrap.appendChild(add);
+  }
+  render(); return wrap;
+}
+
+// ---- Motivation hooks ----
+function hookList(arr){
+  const wrap=document.createElement('div');
+  function render(){
+    wrap.innerHTML='';
+    arr.forEach((h,i)=>{
+      const row=document.createElement('div'); row.className='item-card';
+      const g=fgrid();
+      const a=field('Type',h.type,{type:'select',options:['real-world-stakes','prediction-gap','curiosity-prompt','relevance-anchor']}); bindInput(a.inp,h,'type'); g.appendChild(a.wrap);
+      const b=field('Prompt',h.prompt,{type:'textarea',full:true}); bindInput(b.inp,h,'prompt'); g.appendChild(b.wrap);
+      row.appendChild(g);
+      const x=document.createElement('button'); x.className='btn btn-danger'; x.textContent='Remove hook';
+      x.addEventListener('click',()=>{arr.splice(i,1);render();refreshPreview();}); row.appendChild(x);
+      wrap.appendChild(row);
+    });
+    const add=document.createElement('button'); add.className='btn btn-ghost'; add.textContent='+ Add hook';
+    add.addEventListener('click',()=>{arr.push({type:'real-world-stakes',prompt:''});render();refreshPreview();});
+    wrap.appendChild(add);
+  }
+  render(); return wrap;
+}
+
+// ---- Further reading ----
+function furtherList(arr){
+  const wrap=document.createElement('div');
+  function render(){
+    wrap.innerHTML='';
+    if(!arr.length){ const e=document.createElement('div'); e.className='empty-note'; e.textContent='No further-reading resources yet.'; wrap.appendChild(e); }
+    arr.forEach((r,i)=>{
+      const card=document.createElement('div'); card.className='item-card further';
+      const head=document.createElement('div'); head.className='item-card-head';
+      head.innerHTML=`<span class="ic-tag">Reading</span><span class="ic-title">${esc(r.title||'Untitled resource')}</span>`;
+      const del=document.createElement('button'); del.className='btn btn-danger'; del.textContent='Remove';
+      del.addEventListener('click',()=>{arr.splice(i,1);render();refreshPreview();}); head.appendChild(del);
+      card.appendChild(head);
+      const g=fgrid();
+      const id=field('Resource ID',r.resourceId,{}); bindInput(id.inp,r,'resourceId'); g.appendChild(id.wrap);
+      const ty=field('Type',r.resourceType,{type:'select',options:['article','book','paper','video','website','other']}); bindInput(ty.inp,r,'resourceType'); g.appendChild(ty.wrap);
+      const ti=field('Title',r.title,{full:true}); bindInput(ti.inp,r,'title'); ti.inp.addEventListener('input',()=>head.querySelector('.ic-title').textContent=ti.inp.value||'Untitled resource'); g.appendChild(ti.wrap);
+      const ur=field('URL',r.url,{placeholder:'https://… (optional)'}); bindInput(ur.inp,r,'url'); g.appendChild(ur.wrap);
+      const au=field('Author',r.author,{placeholder:'optional'}); bindInput(au.inp,r,'author'); g.appendChild(au.wrap);
+      const ci=field('Citation',r.citation,{type:'textarea',full:true,placeholder:'For non-linkable sources such as books (optional)'}); bindInput(ci.inp,r,'citation'); g.appendChild(ci.wrap);
+      const ra=field('Why it is worth reading',r.rationaleNote,{type:'textarea',full:true,placeholder:'optional rationale note'}); bindInput(ra.inp,r,'rationaleNote'); g.appendChild(ra.wrap);
+      card.appendChild(g);
+      const lc=document.createElement('div'); lc.innerHTML='<label style="display:block;margin:12px 0 6px">Linked competencies (optional)</label>';
+      lc.appendChild(stringList(ensure(r,'linkedCompetencies',[]),'competencyId')); card.appendChild(lc);
+      wrap.appendChild(card);
+    });
+    const add=document.createElement('button'); add.className='btn btn-ghost'; add.textContent='+ Add further reading';
+    add.addEventListener('click',()=>{arr.push({resourceId:'fr-'+(arr.length+1),title:'',resourceType:'article',url:'',citation:'',author:'',rationaleNote:'',linkedCompetencies:[]});render();refreshPreview();});
+    wrap.appendChild(add);
+  }
+  render(); return wrap;
+}
+
+// ---- Learning experiences ----
+const EXP_TYPES=['guided-analysis','worked-example','case-study','simulation','discussion','self-guided-exercise'];
+function experienceList(arr){
+  const wrap=document.createElement('div');
+  function render(){
+    wrap.innerHTML='';
+    if(!arr.length){ const e=document.createElement('div'); e.className='empty-note'; e.textContent='No learning experiences yet.'; wrap.appendChild(e); }
+    arr.forEach((exp,i)=>wrap.appendChild(experienceCard(exp,i,arr,render)));
+    const add=document.createElement('button'); add.className='btn btn-ghost'; add.textContent='+ Add experience';
+    add.addEventListener('click',()=>{arr.push({experienceId:'exp-'+(arr.length+1),title:'New experience',experienceType:'guided-analysis',
+      difficultyProfile:{overall:2,conceptualComplexity:2,ambiguity:2},estimatedDurationMinutes:10,
+      linkedCompetencies:[],desiredCognitiveActions:[],contentBlocks:[],interactionSequence:[],workedExamples:[],
+      retrievalPractice:[],transferExercises:[]});render();refreshPreview();});
+    wrap.appendChild(add);
+  }
+  render(); return wrap;
+}
+
+function experienceCard(exp,i,arr,rerender){
+  const card=document.createElement('div'); card.className='item-card exp';
+  const head=document.createElement('div'); head.className='item-card-head';
+  head.innerHTML=`<span class="ic-tag">${esc(exp.experienceType||'experience')}</span><span class="ic-title">${esc(exp.title||'Untitled')}</span>`;
+  const del=document.createElement('button'); del.className='btn btn-danger'; del.textContent='Delete';
+  del.addEventListener('click',()=>{ if(confirm('Delete this experience?')){arr.splice(i,1);rerender();refreshPreview();} });
+  head.appendChild(del); card.appendChild(head);
+
+  const g=fgrid();
+  const id=field('Experience ID',exp.experienceId,{}); bindInput(id.inp,exp,'experienceId'); g.appendChild(id.wrap);
+  const ti=field('Title',exp.title,{}); bindInput(ti.inp,exp,'title'); ti.inp.addEventListener('input',()=>head.querySelector('.ic-title').textContent=ti.inp.value||'Untitled'); g.appendChild(ti.wrap);
+  const ty=field('Type',exp.experienceType,{type:'select',options:EXP_TYPES}); g.appendChild(ty.wrap);
+  const du=field('Duration (min)',exp.estimatedDurationMinutes,{type:'number'}); bindNum(du.inp,exp,'estimatedDurationMinutes'); g.appendChild(du.wrap);
+  card.appendChild(g);
+
+  // content blocks (text only simplified — full object preserved)
+  card.appendChild(eyebrow('Content blocks (text)'));
+  card.appendChild(contentBlockList(ensure(exp,'contentBlocks',[])));
+
+  // Self-guided section — shown when type is self-guided-exercise
+  const sgWrap=document.createElement('div');
+  function renderSG(){
+    sgWrap.innerHTML='';
+    if(exp.experienceType==='self-guided-exercise'){
+      sgWrap.appendChild(eyebrow('Self-guided exercise'));
+      sgWrap.appendChild(selfGuidedEditor(exp));
+    } else if(exp.selfGuidedExercise){
+      // keep data but note it
+      const note=document.createElement('div'); note.className='field-hint';
+      note.textContent='A selfGuidedExercise object is attached but the type is not "self-guided-exercise". Switch the type to edit it here.';
+      sgWrap.appendChild(note);
+    }
+  }
+  ty.inp.addEventListener('change',()=>{
+    exp.experienceType=ty.inp.value;
+    head.querySelector('.ic-tag').textContent=exp.experienceType;
+    if(exp.experienceType==='self-guided-exercise' && !exp.selfGuidedExercise){
+      exp.selfGuidedExercise={exerciseId:'sg-1',realWorldContext:'',objective:'',instructions:[],
+        reflectionPrompts:[],verification:{mode:'reflection-submission',isGating:false,selfAssessmentCriteria:[]},
+        linkedCompetencies:[]};
+    }
+    renderSG(); refreshPreview();
+  });
+  renderSG();
+  card.appendChild(sgWrap);
+  return card;
+}
+
+// ---- Content blocks (text) ----
+function contentBlockList(arr){
+  const wrap=document.createElement('div');
+  function render(){
+    wrap.innerHTML='';
+    arr.forEach((b,i)=>{
+      const type=b.type||'text';
+      const row=document.createElement('div'); row.className='item-card';
+      const head=document.createElement('div'); head.className='item-card-head';
+      head.innerHTML=`<span class="ic-tag">${esc(type)}</span><span class="ic-title">${esc(b.blockId||'block')}</span>`;
+      const x=document.createElement('button'); x.className='btn btn-danger'; x.textContent='Remove';
+      x.addEventListener('click',()=>{arr.splice(i,1);render();refreshPreview();}); head.appendChild(x);
+      row.appendChild(head);
+      const g=fgrid();
+      const id=field('Block ID',b.blockId,{}); bindInput(id.inp,b,'blockId'); g.appendChild(id.wrap);
+      const ty=field('Type',type,{type:'select',options:['text','image','video','audio','interactive']}); bindInput(ty.inp,b,'type'); ty.inp.addEventListener('change',()=>{head.querySelector('.ic-tag').textContent=ty.inp.value;}); g.appendChild(ty.wrap);
+      const ct=field('Content / text',b.content,{type:'textarea',full:true,placeholder:'For text blocks. HTML allowed.'}); bindInput(ct.inp,b,'content'); g.appendChild(ct.wrap);
+      const url=field('Media URL',b.url,{placeholder:'for image/video/audio'}); bindInput(url.inp,b,'url'); g.appendChild(url.wrap);
+      const alt=field('Alt / caption',b.altText!=null?b.altText:b.captionOrTranscript,{placeholder:'altText or caption'});
+      alt.inp.addEventListener('input',()=>{ if(type==='image') b.altText=alt.inp.value; else b.captionOrTranscript=alt.inp.value; refreshPreview(); });
+      g.appendChild(alt.wrap);
+      row.appendChild(g); wrap.appendChild(row);
+    });
+    const add=document.createElement('button'); add.className='btn btn-ghost'; add.textContent='+ Add content block';
+    add.addEventListener('click',()=>{arr.push({blockId:'cb-'+(arr.length+1),type:'text',content:''});render();refreshPreview();});
+    wrap.appendChild(add);
+  }
+  render(); return wrap;
+}
+
+// ---- Self-guided exercise editor ----
+function selfGuidedEditor(exp){
+  const sg=ensure(exp,'selfGuidedExercise',{verification:{mode:'reflection-submission',isGating:false,selfAssessmentCriteria:[]}});
+  const ver=ensure(sg,'verification',{mode:'reflection-submission',isGating:false,selfAssessmentCriteria:[]});
+  ver.isGating=false; // enforce formative invariant
+  const card=document.createElement('div'); card.className='item-card selfg';
+  const head=document.createElement('div'); head.className='item-card-head';
+  head.innerHTML='<span class="ic-tag">Self-guided</span><span class="ic-title">Real-world application</span>';
+  card.appendChild(head);
+
+  const g=fgrid();
+  const id=field('Exercise ID',sg.exerciseId,{}); bindInput(id.inp,sg,'exerciseId'); g.appendChild(id.wrap);
+  const rwd=field('Real-world duration (min)',sg.estimatedRealWorldDurationMinutes,{type:'number'}); bindNum(rwd.inp,sg,'estimatedRealWorldDurationMinutes'); g.appendChild(rwd.wrap);
+  const ctx=field('Real-world context',sg.realWorldContext,{type:'textarea',full:true,placeholder:"e.g. 'attend an open mic night'"}); bindInput(ctx.inp,sg,'realWorldContext'); g.appendChild(ctx.wrap);
+  const obj=field('Objective',sg.objective,{type:'textarea',full:true,placeholder:'What applying the material should accomplish'}); bindInput(obj.inp,sg,'objective'); g.appendChild(obj.wrap);
+  const vm=field('Verification mode',ver.mode,{type:'select',options:['self-attested','reflection-submission','none']}); bindInput(vm.inp,ver,'mode'); g.appendChild(vm.wrap);
+  card.appendChild(g);
+
+  const inv=document.createElement('div'); inv.className='field-hint';
+  inv.textContent='Formative by design — isGating is always false, so this never blocks mastery progression.';
+  card.appendChild(inv);
+
+  const i1=document.createElement('div'); i1.innerHTML='<label style="display:block;margin:14px 0 6px">Instructions (ordered steps)</label>';
+  i1.appendChild(stringList(ensure(sg,'instructions',[]),'A step the learner follows',{textarea:true})); card.appendChild(i1);
+
+  const i2=document.createElement('div'); i2.innerHTML='<label style="display:block;margin:14px 0 6px">Materials / prerequisites</label>';
+  i2.appendChild(stringList(ensure(sg,'materialsOrPrerequisites',[]),'Something to arrange beforehand')); card.appendChild(i2);
+
+  const i3=document.createElement('div'); i3.innerHTML='<label style="display:block;margin:14px 0 6px">Reflection prompts</label>';
+  i3.appendChild(stringList(ensure(sg,'reflectionPrompts',[]),'A prompt for when they return',{textarea:true})); card.appendChild(i3);
+
+  const i4=document.createElement('div'); i4.innerHTML='<label style="display:block;margin:14px 0 6px">Self-assessment criteria</label>';
+  i4.appendChild(stringList(ensure(ver,'selfAssessmentCriteria',[]),'How the learner judges their own work')); card.appendChild(i4);
+
+  const i5=document.createElement('div'); i5.innerHTML='<label style="display:block;margin:14px 0 6px">Linked competencies (optional)</label>';
+  i5.appendChild(stringList(ensure(sg,'linkedCompetencies',[]),'competencyId')); card.appendChild(i5);
+
+  return card;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  PREVIEW + SAVE
+// ════════════════════════════════════════════════════════════════════════
+function refreshPreview(){
+  if($('previewWrap').classList.contains('show')) $('preview').textContent=JSON.stringify(course,null,2);
+}
+$('togglePreview').addEventListener('click',()=>{
+  const w=$('previewWrap'); w.classList.toggle('show');
+  $('togglePreview').textContent=w.classList.contains('show')?'Hide JSON':'View JSON';
+  refreshPreview();
+});
+
+$('saveBtn').addEventListener('click',()=>{
+  if(!course) return;
+  // touch lastUpdated
+  if(course.courseMetadata) course.courseMetadata.lastUpdated=new Date().toISOString().slice(0,10);
+  const blob=new Blob([JSON.stringify(course,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=fileName.replace(/\.json$/i,'')+'.json';
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},100);
+  toast('Course saved');
+});
+</script>
+</body>
+</html>
