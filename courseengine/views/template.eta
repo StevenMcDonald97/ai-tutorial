@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= it.data.title %></title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="back-link">← Back to Home</a>
+
+    <h1><%= it.data.title %></h1>
+    <p class="description"><%= it.data.description %></p>
+
+    <!-- Render a list of items if the JSON includes one -->
+    <% if (it.data.items && it.data.items.length > 0) { %>
+      <h2>Items</h2>
+      <ul class="item-list">
+        <% it.data.items.forEach(function(item) { %>
+          <li>
+            <strong><%= item.name %></strong>
+            <% if (item.detail) { %>
+              — <%= item.detail %>
+            <% } %>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+
+    <!-- Render a CTA button if the JSON includes one -->
+    <% if (it.data.cta) { %>
+      <a href="<%= it.data.cta.url %>" class="btn"><%= it.data.cta.label %></a>
+    <% } %>
+
+    <p class="meta">Page: <code>/<%= it.pageName %></code> · Data source: <code>data/<%= it.pageName %>.json</code></p>
+  </div>
+</body>
+</html>

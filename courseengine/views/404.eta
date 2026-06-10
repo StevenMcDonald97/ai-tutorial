@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>404 – Not Found</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>404 – Page Not Found</h1>
+    <p>No data file found for <code>/<%= it.page %></code>.</p>
+    <p>Make sure <code>data/<%= it.page %>.json</code> exists.</p>
+    <a href="/" class="back-link">← Back to Home</a>
+  </div>
+</body>
+</html>

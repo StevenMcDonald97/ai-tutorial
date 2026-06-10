@@ -1,0 +1,13 @@
+{
+  "title": "Test Page",
+  "description": "This page was rendered from data/test.json using a shared EJS template.",
+  "items": [
+    { "name": "Item Alpha", "detail": "First test item" },
+    { "name": "Item Beta", "detail": "Second test item" },
+    { "name": "Item Gamma", "detail": "Third test item" }
+  ],
+  "cta": {
+    "label": "Learn More",
+    "url": "https://example.com"
+  }
+}

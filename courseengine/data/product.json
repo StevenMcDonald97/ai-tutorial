@@ -1,0 +1,13 @@
+{
+  "title": "Our Products",
+  "description": "This page was rendered from data/product.json — same template, different data.",
+  "items": [
+    { "name": "Widget Pro", "detail": "$49/mo" },
+    { "name": "Widget Max", "detail": "$99/mo" },
+    { "name": "Widget Enterprise", "detail": "Contact us" }
+  ],
+  "cta": {
+    "label": "Get Started",
+    "url": "https://example.com/signup"
+  }
+}
