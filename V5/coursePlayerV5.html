@@ -443,6 +443,43 @@ h1,h2,h3,h4{font-family:var(--serif);font-weight:500;line-height:1.12;letter-spa
 .mthresh{font-size:13px;color:var(--ink-soft)}
 .mthresh b{font-family:var(--mono);color:var(--accent);font-size:15px;display:block}
 
+/* ─── Further reading ─────────────────────────────────── */
+.further{background:var(--indigo-wash);border:1px solid var(--line);border-left:3px solid var(--indigo);border-radius:0 var(--radius-lg) var(--radius-lg) 0;padding:20px 24px;margin:6px 0 22px}
+.further-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--indigo);margin-bottom:4px;display:flex;align-items:center;gap:7px}
+.further-note{font-size:12.5px;color:var(--ink-soft);font-style:italic;margin-bottom:14px}
+.fr-item{padding:12px 0;border-top:1px dashed var(--line)}
+.fr-item:first-of-type{border-top:none}
+.fr-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.fr-title{font-family:var(--read);font-size:16.5px;font-weight:500;color:var(--ink)}
+.fr-title a{color:var(--indigo);text-decoration:none;border-bottom:1px solid var(--accent-line)}
+.fr-title a:hover{border-bottom-color:var(--indigo)}
+.fr-type{font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;background:var(--indigo);color:#fff;padding:2px 8px;border-radius:4px}
+.fr-author{font-size:13px;color:var(--ink-faint);margin-top:2px}
+.fr-cite{font-size:12.5px;color:var(--ink-faint);font-style:italic;margin-top:2px}
+.fr-rationale{font-family:var(--read);font-size:14.5px;color:var(--ink-soft);line-height:1.5;margin-top:6px}
+
+/* ─── Self-guided exercise ────────────────────────────── */
+.selfguided{background:var(--surface-raised);border:1px solid var(--line);border-radius:var(--radius-lg);padding:24px 26px;margin-bottom:18px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+.selfguided::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--plum)}
+.sg-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--plum);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.sg-formative{font-family:var(--mono);font-size:9.5px;background:var(--plum-wash);color:var(--plum);padding:2px 8px;border-radius:4px;text-transform:none;letter-spacing:0}
+.sg-context{background:var(--plum-wash);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;font-family:var(--read);font-size:15px;line-height:1.5;color:#4a2b55}
+.sg-objective{font-family:var(--read);font-size:17px;font-weight:500;margin-bottom:16px;color:var(--ink)}
+.sg-heading{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin:14px 0 8px}
+.sg-steps{list-style:none;counter-reset:sg;margin-bottom:6px}
+.sg-steps li{counter-increment:sg;padding:7px 0 7px 36px;position:relative;font-size:14.5px;color:var(--ink-soft);line-height:1.55}
+.sg-steps li::before{content:counter(sg);position:absolute;left:0;top:6px;width:24px;height:24px;background:var(--plum-wash);color:var(--plum);border-radius:50%;font-size:12px;font-weight:700;font-family:var(--sans);display:flex;align-items:center;justify-content:center}
+.sg-meta{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:8px;font-size:12.5px;color:var(--ink-faint)}
+.sg-prep{list-style:none}
+.sg-prep li{font-size:14px;color:var(--ink-soft);padding:4px 0 4px 20px;position:relative;line-height:1.45}
+.sg-prep li::before{content:'▪';position:absolute;left:0;color:var(--plum);font-size:11px;top:5px}
+.sg-reflect{list-style:none}
+.sg-reflect li{font-size:14.5px;color:var(--ink-soft);font-family:var(--read);padding:5px 0 5px 22px;position:relative;line-height:1.5}
+.sg-reflect li::before{content:'❀';position:absolute;left:0;color:var(--plum);font-size:11px;top:7px}
+.sg-criteria{list-style:none}
+.sg-criteria li{font-size:14px;color:var(--ink-soft);padding:5px 0 5px 24px;position:relative;line-height:1.45}
+.sg-criteria li::before{content:'☐';position:absolute;left:0;color:var(--plum);font-size:13px;top:4px}
+
 /* ─── Assessment ─────────────────────────────────────── */
 .assess-head{margin-bottom:26px}
 .assess-head h2{font-size:28px;margin:8px 0}
@@ -532,6 +569,30 @@ h1,h2,h3,h4{font-family:var(--serif);font-weight:500;line-height:1.12;letter-spa
   .nav-buttons{flex-direction:column-reverse;align-items:stretch}
   .nav-buttons .btn{justify-content:center}
 }
+
+/* ─── Review queue / self-grade / tools / loader ─────── */
+.due-badge{background:var(--accent);color:#fff;font-size:10px;font-weight:700;border-radius:99px;padding:1px 7px;margin-left:6px}
+#sidebar-tools{margin-top:auto;border-top:1px solid var(--line);padding:14px 24px 18px;display:flex;flex-direction:column;gap:8px}
+#sidebar-tools button{background:none;border:1px solid var(--line);border-radius:var(--radius);padding:8px 10px;font-size:11.5px;font-family:var(--sans);color:var(--ink-soft);cursor:pointer;text-align:left;transition:all .15s}
+#sidebar-tools button:hover{border-color:var(--accent);color:var(--accent)}
+.selfgrade{margin-top:14px;background:var(--paper-deep);border:1px solid var(--line);border-radius:var(--radius);padding:12px 16px}
+.selfgrade .sg-q{font-size:12px;font-weight:600;color:var(--ink-soft);display:block;margin-bottom:9px}
+.sg-btns{display:flex;gap:8px;flex-wrap:wrap}
+.sg-btn{border-radius:99px;padding:8px 16px;font-size:12.5px;font-weight:600;font-family:var(--sans);cursor:pointer;border:1.5px solid;background:var(--surface-raised);transition:all .15s}
+.sg-good{border-color:#bcd6c2;color:var(--good)} .sg-good:hover{background:var(--good-wash)}
+.sg-gold{border-color:#e6d3a6;color:var(--gold)} .sg-gold:hover{background:var(--gold-wash)}
+.sg-warn{border-color:#e8c4bd;color:var(--warn)} .sg-warn:hover{background:var(--warn-wash)}
+.review-item{margin-bottom:18px}
+.review-head-card{background:linear-gradient(120deg,var(--moss-wash),var(--surface-raised));border:1px solid #cdd8bd;border-radius:var(--radius-lg);padding:18px 22px;margin-bottom:24px;display:flex;gap:14px;align-items:flex-start}
+.review-head-card h3{font-size:16px;color:var(--moss);margin-bottom:4px}
+.review-head-card p{font-size:13.5px;color:var(--ink-soft)}
+.review-lesson-link{font-size:12px;color:var(--accent);background:none;border:none;cursor:pointer;border-bottom:1px solid var(--accent-line);padding:0;font-family:var(--sans)}
+#report-overlay{position:fixed;inset:0;background:rgba(35,33,28,.4);backdrop-filter:blur(2px);z-index:400;display:none;align-items:center;justify-content:center;padding:20px}
+#report-overlay.open{display:flex}
+#report-card{background:var(--surface-raised);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);max-width:560px;width:100%;max-height:80vh;overflow-y:auto;padding:26px 28px}
+#report-card h3{font-size:20px;margin-bottom:14px}
+.report-line{font-size:13.5px;color:var(--ink-soft);padding:7px 0;border-bottom:1px solid var(--line-soft);font-family:var(--mono);line-height:1.45}
+.report-line:last-child{border-bottom:none}
 </style>
 </head>
 <body>
@@ -559,6 +620,11 @@ h1,h2,h3,h4{font-family:var(--serif);font-weight:500;line-height:1.12;letter-spa
       <div id="competency-bars"></div>
     </div>
     <div id="sidebar-nav"></div>
+    <div id="sidebar-tools">
+      <button onclick="document.getElementById('course-file').click()">&#10515; Load course JSON</button>
+      <button onclick="exportProgress()">&#10548; Export progress</button>
+      <button onclick="document.getElementById('progress-file').click()">&#10549; Import progress</button>
+    </div>
   </nav>
 
   <!-- ─── Main ─── -->
@@ -573,6 +639,7 @@ h1,h2,h3,h4{font-family:var(--serif);font-weight:500;line-height:1.12;letter-spa
       <div id="screen-section"  class="screen"></div>
       <div id="screen-exp"      class="screen"></div>
       <div id="screen-assess"   class="screen"></div>
+      <div id="screen-review"   class="screen"></div>
       <div id="screen-complete" class="screen"></div>
     </main>
   </div>
@@ -594,13 +661,23 @@ h1,h2,h3,h4{font-family:var(--serif);font-weight:500;line-height:1.12;letter-spa
 
 <div id="toast"></div>
 
+<input type="file" id="course-file" accept=".json,application/json" style="display:none" onchange="handleCourseFile(this.files[0]);this.value=''">
+<input type="file" id="progress-file" accept=".json,application/json" style="display:none" onchange="handleProgressFile(this.files[0]);this.value=''">
+<div id="report-overlay">
+  <div id="report-card">
+    <h3 id="report-title"></h3>
+    <div id="report-body"></div>
+    <div style="text-align:right;margin-top:16px"><button class="btn btn-primary btn-sm" onclick="closeReport()">Close</button></div>
+  </div>
+</div>
+
 <script>
 /* ════════════════════════════════════════════════════════════════════════
    COURSE DATA — conforms to Course Engine JSON Schema v4 (v1.0 reference)
    Replace this object with your own course. Every field the player reads is
    optional-safe: missing arrays/objects degrade gracefully.
    ════════════════════════════════════════════════════════════════════════ */
-const COURSE = {
+let COURSE = {
   courseMetadata: {
     courseId: "critical-thinking-101",
     title: "Reading the Evidence",
@@ -652,6 +729,12 @@ const COURSE = {
           "Bookstores are declining, so the data is outdated"
         ],
         correctIndex: 1,
+        optionFeedback: [
+          { optionIndex: 0, feedback: "Sample size matters, but even a huge sample leaves the deeper problem: this design cannot separate cause from correlation." },
+          { optionIndex: 1, feedback: "Exactly — wealthier areas can afford more bookstores AND tend to have lower crime, so wealth confounds the link." },
+          { optionIndex: 2, feedback: "Crime statistics are imperfect, but measurement error is not what breaks this argument — the causal leap is." },
+          { optionIndex: 3, feedback: "Whether bookstores are declining says nothing about whether they cause lower crime." }
+        ],
         scoringCriteria: ["Identifies correlation-causation leap", "Names a plausible confounder"],
         routingRules: [
           { condition: "score >= 0.85", action: "unlock-advanced transfer items in Section 2" },
@@ -739,6 +822,26 @@ const COURSE = {
         { type: "real-world-stakes", prompt: "A health agency once urged millions to take hormone therapy based on correlational data. A later randomized trial found it raised the very risks it was meant to lower." },
         { type: "prediction-gap", prompt: "Ice cream sales and drowning deaths rise together almost perfectly. Before reading on — what do you think actually links them?" }
       ],
+      furtherReading: [
+        {
+          resourceId: "fr-spurious",
+          title: "Spurious Correlations",
+          resourceType: "website",
+          url: "https://www.tylervigen.com/spurious-correlations",
+          author: "Tyler Vigen",
+          rationaleNote: "A gallery of absurd real-world correlations (cheese consumption vs. bedsheet entanglements) that makes the correlation-causation gap impossible to forget.",
+          linkedCompetencies: ["causal-reasoning"]
+        },
+        {
+          resourceId: "fr-book-cause",
+          title: "The Book of Why: The New Science of Cause and Effect",
+          resourceType: "book",
+          citation: "Pearl, J. & Mackenzie, D. (2018). The Book of Why. Basic Books.",
+          author: "Judea Pearl & Dana Mackenzie",
+          rationaleNote: "The accessible, deeper treatment of how to reason about causation once you've internalised why correlation isn't enough.",
+          linkedCompetencies: ["causal-reasoning", "evidence-quality"]
+        }
+      ],
       learningExperiences: [
         {
           experienceId: "exp-correlation",
@@ -781,6 +884,12 @@ const COURSE = {
                 "A and B are unrelated"
               ],
               correctIndex: 2,
+              optionFeedback: [
+                { optionIndex: 0, feedback: "This is the classic leap — the correlation is equally consistent with B causing A, or a shared cause driving both.", linkedMisconceptionId: "mis-corr-cause" },
+                { optionIndex: 1, feedback: "Reversing the arrow is just as unsupported as the original claim — the data alone cannot pick a direction.", linkedMisconceptionId: "mis-corr-cause" },
+                { optionIndex: 2, feedback: "Right: correlation licenses prediction, nothing more, until other evidence rules out the alternatives." },
+                { optionIndex: 3, feedback: "A strong correlation means they ARE statistically related — the open question is why." }
+              ],
               feedback: {
                 type: "corrective",
                 correctiveFeedback: "Correlation is a statement about prediction, not mechanism. On its own it is equally consistent with A→B, B→A, a shared cause, or coincidence. Only additional evidence — an experiment, a ruled-out confounder, a mechanism — can choose among them."
@@ -875,6 +984,7 @@ const COURSE = {
                 "Higher scores cause laptop ownership"
               ],
               correctIndex: 0,
+              correctOrder: [0, 1, 3, 2],
               feedback: {
                 type: "elaborative",
                 elaborativeFeedback: "Income is the textbook confounder here: it independently raises both laptop ownership and test scores, so the laptop-score link can be almost entirely spurious. The laptop may add a little, but attributing the whole gap to it ignores who can afford one in the first place."
@@ -908,6 +1018,54 @@ const COURSE = {
               }
             }
           ],
+          transferExercises: [],
+          masteryVerification: {
+            assessmentIds: ["assess-causal"],
+            requiredPerformance: { minimumAccuracy: 0.8, minimumTransferScore: 0.7 }
+          }
+        },
+        {
+          experienceId: "exp-causal-field",
+          title: "Take It Into the Wild",
+          experienceType: "self-guided-exercise",
+          difficultyProfile: { overall: 3, conceptualComplexity: 3, ambiguity: 4 },
+          estimatedDurationMinutes: 10,
+          linkedCompetencies: ["causal-reasoning", "evidence-quality"],
+          desiredCognitiveActions: ["analysis", "synthesis", "reflection"],
+          contentBlocks: [
+            { blockId: "cb-sg-intro", type: "text", content: "Reasoning about causation only sticks once you catch it happening in the wild. This exercise sends you out to find a real causal claim and pressure-test it the way you would in here — no scenario provided, no answer key." }
+          ],
+          interactionSequence: [],
+          workedExamples: [],
+          selfGuidedExercise: {
+            exerciseId: "sg-causal-hunt",
+            realWorldContext: "Your own news feed, a podcast, or a conversation over the next week.",
+            objective: "Find a real causal claim in the wild and subject it to the alternative-explanations check you practised in this section.",
+            instructions: [
+              "Over the next few days, collect one causal claim you encounter naturally — a headline, an ad, a friend's confident 'X causes Y'.",
+              "Write down the exact association being claimed, and which direction the arrow is supposed to point.",
+              "Brainstorm at least two non-causal explanations: reverse causation, a confounder, or a selection effect.",
+              "Decide what single piece of evidence would most move you toward believing the causal claim is real.",
+              "Note whether, after this, you believe the claim more, less, or about the same."
+            ],
+            estimatedRealWorldDurationMinutes: 90,
+            materialsOrPrerequisites: ["A way to jot notes (phone or notebook)"],
+            reflectionPrompts: [
+              "Which was hardest to generate — a confounder, reverse causation, or a selection effect? What does that tell you about your default assumptions?",
+              "Did naming the alternatives change how strongly you held the claim?"
+            ],
+            verification: {
+              mode: "reflection-submission",
+              isGating: false,
+              selfAssessmentCriteria: [
+                "I stated the claimed association and its direction precisely.",
+                "I generated at least two genuine non-causal explanations.",
+                "I identified the evidence that would actually settle it."
+              ]
+            },
+            linkedCompetencies: ["causal-reasoning", "evidence-quality"]
+          },
+          retrievalPractice: [],
           transferExercises: [],
           masteryVerification: {
             assessmentIds: ["assess-causal"],
@@ -969,6 +1127,12 @@ const COURSE = {
                 "A viral social media thread with thousands of likes"
               ],
               correctIndex: 2,
+              optionFeedback: [
+                { optionIndex: 0, feedback: "Vivid, but a single unrepresentative case — exactly the anecdote trap.", linkedMisconceptionId: "mis-vivid" },
+                { optionIndex: 1, feedback: "Not independent: the seller grading its own homework is a textbook conflict of interest." },
+                { optionIndex: 2, feedback: "Correct — many independent trials, pooled, dilute any single source's bias." },
+                { optionIndex: 3, feedback: "Popularity measures spread, not truth — likes are not evidence." }
+              ],
               feedback: {
                 type: "elaborative",
                 elaborativeFeedback: "Independence and aggregation are what make the meta-analysis strongest: it pools many trials run by different teams, diluting any single source's bias. The testimonial is vivid but unrepresentative; the press release isn't independent of the seller; popularity isn't evidence at all."
@@ -1030,6 +1194,25 @@ const COURSE = {
       linkedCompetencies: ["causal-reasoning", "evidence-quality"],
       adaptiveDifficulty: true,
       questions: [
+        {
+          questionId: "q-0",
+          difficulty: 2,
+          prompt: "A city installs more streetlights and burglaries fall the following year. Which additional piece of evidence would do the MOST to support the claim that the streetlights caused the drop?",
+          questionType: "multiple-choice",
+          options: [
+            "A poll showing residents feel safer",
+            "Burglaries also fell in similar nearby cities that added no streetlights",
+            "Burglaries stayed flat in similar nearby cities that added no streetlights",
+            "A news story profiling a burglar who retired that year"
+          ],
+          correctIndex: 2,
+          optionFeedback: [
+            { optionIndex: 0, feedback: "Feeling safer is an outcome of perception, not evidence about what drove the burglary numbers." },
+            { optionIndex: 1, feedback: "If burglaries fell everywhere, the drop is probably a regional trend — that evidence would UNDERMINE the streetlight claim.", linkedMisconceptionId: "mis-corr-cause" },
+            { optionIndex: 2, feedback: "Right — a comparison group that lacked the intervention and did not improve is exactly what isolates the streetlights as the difference-maker." },
+            { optionIndex: 3, feedback: "A single vivid case can't carry a city-level causal claim.", linkedMisconceptionId: "mis-vivid" }
+          ]
+        },
         {
           questionId: "q-1",
           difficulty: 3,
@@ -1118,22 +1301,23 @@ const COURSE = {
 /* ════════════════════════════════════════════════════════════════════════
    COURSE PLAYER ENGINE
    ════════════════════════════════════════════════════════════════════════ */
-const C = COURSE; // shorthand
-const LM = C.learningModel || {};
+let C = COURSE; // shorthand
+let LM = C.learningModel || {};
 
 // ── State ───────────────────────────────────────────────────────────────
-const STORE_KEY = 'course-progress:' + (C.courseMetadata?.courseId || 'default');
+let STORE_KEY = 'course-progress:' + (C.courseMetadata?.courseId || 'default');
 let state = loadState();
 
 function freshState(){
   return {
     screen:'intro', sectionIdx:0, expIdx:0, assessId:null,
     completedExperiences:[], completedAssessments:[], completedProbes:[],
-    competencyProgress:{},            // competencyId -> 0..1
-    answers:{},                        // expId -> {interactionId:{answer,confidence}}
+    competencyEvidence:{},             // competencyId -> {attempts:[{s,w,t,k}]}
+    reviewSchedule:{},                 // retrievalItemId -> {expId,due,intervalDays,step,reps,lastScore,lastReviewed}
+    answers:{},                        // expId -> {interactionId:{answer,confidence,score}}
     revealed:{},                       // expId -> [ids]
-    assessAnswers:{},                  // assessId -> {questionId:answer}
-    assessSubmitted:[],
+    assessAnswers:{},                  // assessId -> {questionId:answer|choiceIndex}
+    assessSubmitted:[], assessSelfRatings:{},
     pkcDone:false, pkcAnswers:{}
   };
 }
@@ -1152,25 +1336,60 @@ const has = (arr,v)=> Array.isArray(arr) && arr.includes(v);
 const add = (arr,v)=>{ if(!arr.includes(v)) arr.push(v); };
 
 // ── Competency maths ──────────────────────────────────────────────────────
-function compLevel(p){
+// Evidence-based competency ledger.
+// Each scored event appends an attempt {s:score 0–1, w:weight, t:timestamp, k:kind}.
+// Progress = decay-weighted mean accuracy × evidence saturation, so a single
+// lucky answer can't reach mastery and unused knowledge drifts down when
+// masterySystem.decayModelEnabled is true.
+const EVIDENCE_W = {            // base evidence weight by kind
+  assessment:1.0, transfer:0.8, mc:0.5, ranking:0.5, retrieval:0.5,
+  pkc:0.4, participation:0.15
+};
+const EVIDENCE_TARGET = 3.0;    // total (decayed) weight needed for full credit
+const DECAY_HALF_LIFE = 30;     // days — evidence halves in influence
+
+function recordEvidence(compIds, score, kind, weightOverride){
+  const w = weightOverride!=null ? weightOverride : (EVIDENCE_W[kind] ?? 0.3);
+  (compIds||[]).forEach(id=>{
+    const ev = state.competencyEvidence[id] = state.competencyEvidence[id] || {attempts:[]};
+    ev.attempts.push({ s: Math.max(0, Math.min(1, score)), w, t: Date.now(), k: kind });
+  });
+  saveState(); updateSidebarProgress();
+}
+function compProgress(compId){
+  const ev = state.competencyEvidence[compId];
+  if(!ev || !ev.attempts.length) return 0;
+  const decayOn = C.masterySystem?.decayModelEnabled;
+  let sw=0, sws=0;
+  ev.attempts.forEach(a=>{
+    let w=a.w;
+    if(decayOn){ const days=(Date.now()-a.t)/86400000; w *= Math.pow(0.5, days/DECAY_HALF_LIFE); }
+    sw+=w; sws+=w*a.s;
+  });
+  if(!sw) return 0;
+  const accuracy = sws/sw;
+  const saturation = Math.min(1, sw/EVIDENCE_TARGET);
+  return accuracy*saturation;
+}
+function compThreshold(comp){
+  return (comp && comp.masteryThreshold!=null) ? comp.masteryThreshold
+       : (C.learningModel?.masteryThreshold ?? 0.85);
+}
+function compLevel(p, comp){
   const levels = C.masterySystem?.masteryLevels || ['novice','developing','proficient','mastered'];
-  if(p >= 0.85) return levels[3]||'mastered';
-  if(p >= 0.55) return levels[2]||'proficient';
-  if(p >= 0.25) return levels[1]||'developing';
+  const thr = compThreshold(comp);
+  if(p >= thr)      return levels[3]||'mastered';
+  if(p >= thr*0.65) return levels[2]||'proficient';
+  if(p >= thr*0.3)  return levels[1]||'developing';
   return levels[0]||'novice';
 }
 function levelClass(lvl){ return 'lvl-' + String(lvl).toLowerCase(); }
-function compColor(p){
-  if(p >= 0.85) return 'var(--good)';
-  if(p >= 0.55) return 'var(--indigo)';
-  if(p >= 0.25) return 'var(--gold)';
+function compColor(p, comp){
+  const thr = compThreshold(comp);
+  if(p >= thr)      return 'var(--good)';
+  if(p >= thr*0.65) return 'var(--indigo)';
+  if(p >= thr*0.3)  return 'var(--gold)';
   return 'var(--ink-faint)';
-}
-function advanceCompetency(compIds, delta){
-  (compIds||[]).forEach(id=>{
-    state.competencyProgress[id] = Math.min(1, (state.competencyProgress[id]||0) + delta);
-  });
-  saveState(); updateSidebarProgress();
 }
 function expCompetencies(expId){
   for(const sec of C.sections||[]) for(const e of sec.learningExperiences||[])
@@ -1200,6 +1419,7 @@ function goScreen(screen, sIdx, eIdx){
   else if(screen==='section') renderSection();
   else if(screen==='exp') renderExp();
   else if(screen==='assess') renderAssess();
+  else if(screen==='review') renderReview();
   else if(screen==='complete') renderComplete();
 
   el.classList.add('active');
@@ -1214,6 +1434,7 @@ function updateTopbar(){
   if(state.screen==='exp'){ const e=curExp(); if(e) t=e.title; }
   else if(state.screen==='section'){ const s=C.sections[state.sectionIdx]; if(s) t=s.title; }
   else if(state.screen==='assess'){ const a=findAssess(state.assessId); if(a) t=a.title; }
+  else if(state.screen==='review'){ t='Review queue'; }
   document.getElementById('tb-title').textContent = t;
 }
 function curSection(){ return C.sections?.[state.sectionIdx]; }
@@ -1233,14 +1454,14 @@ function buildSidebar(){
   // competency rail
   const rail = document.getElementById('competency-bars');
   rail.innerHTML = (C.competencies||[]).map(c=>{
-    const p = state.competencyProgress[c.competencyId]||0;
-    const lvl = compLevel(p);
+    const p = compProgress(c.competencyId);
+    const lvl = compLevel(p, c);
     return `<div class="comp-badge">
       <div class="comp-badge-top">
         <span class="comp-badge-title">${c.title}</span>
         <span class="comp-badge-level ${levelClass(lvl)}">${lvl}</span>
       </div>
-      <div class="comp-bar-wrap"><div class="comp-bar" style="width:${Math.round(p*100)}%;background:${compColor(p)}"></div></div>
+      <div class="comp-bar-wrap"><div class="comp-bar" style="width:${Math.round(p*100)}%;background:${compColor(p, c)}"></div></div>
     </div>`;
   }).join('');
 
@@ -1258,6 +1479,15 @@ function buildSidebar(){
         </div>
       </div>`;
   }
+  const dueCount = dueReviews().length;
+  html += `<div class="nav-section-label">Practice</div>
+    <div class="section-nav-item">
+      <div class="section-nav-header ${state.screen==='review'?'active':''}" onclick="goScreen('review')">
+        <span class="section-check ${state.screen==='review'?'active':''}">&#8635;</span>
+        <span class="section-nav-title">Review queue</span>
+        ${dueCount?`<span class="due-badge">${dueCount}</span>`:''}
+      </div>
+    </div>`;
   html += `<div class="nav-section-label">Sections</div>`;
   (C.sections||[]).forEach((sec,si)=>{
     const exps = sec.learningExperiences||[];
@@ -1308,10 +1538,10 @@ function updateSidebarProgress(){
   if(rail){
     rail.querySelectorAll('.comp-badge').forEach((node,i)=>{
       const c = C.competencies[i]; if(!c) return;
-      const p = state.competencyProgress[c.competencyId]||0;
-      const lvl = compLevel(p);
+      const p = compProgress(c.competencyId);
+      const lvl = compLevel(p, c);
       const bar = node.querySelector('.comp-bar');
-      bar.style.width = Math.round(p*100)+'%'; bar.style.background = compColor(p);
+      bar.style.width = Math.round(p*100)+'%'; bar.style.background = compColor(p, c);
       const lvlEl = node.querySelector('.comp-badge-level');
       lvlEl.textContent = lvl; lvlEl.className = 'comp-badge-level '+levelClass(lvl);
     });
@@ -1377,6 +1607,8 @@ function renderIntro(){
       <div class="meta-cell"><div class="mc-val">${(C.competencies||[]).length}</div><div class="mc-key">Competencies</div></div>
     </div>
 
+    ${reviewCardHTML()}
+
     <div class="eyebrow"><span class="rule"></span>Learning design</div>
     <div class="lm-grid">${lmPills}</div>
 
@@ -1386,8 +1618,9 @@ function renderIntro(){
     ${prereqs?`<div class="eyebrow" style="margin-top:30px"><span class="rule"></span>Before you start</div>
     <ul class="list-clean prereq-list">${prereqs}</ul>`:''}
 
-    <div style="margin-top:36px">
+    <div style="margin-top:36px;display:flex;gap:12px;flex-wrap:wrap">
       <button class="btn btn-primary" onclick="${startScreen}">${startLabel} →</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('course-file').click()">Load course JSON</button>
     </div>
    </div>`;
 }
@@ -1426,6 +1659,7 @@ function renderPKC(){
       <div class="int-prompt">${p.prompt}</div>
       <div style="margin-bottom:12px">${comps}</div>
       ${inputHTML}
+      ${saved?probeOptionFeedback(p,saved):''}
       <div class="probe-routing ${saved?'show':''}" id="routing-${p.probeId}">
         <div class="criteria-label">Scoring criteria</div>
         <ul class="criteria-list">${crit}</ul>
@@ -1459,7 +1693,7 @@ function answerProbeMC(probeId, choice, correct){
   state.pkcAnswers[probeId] = { choice, correct: choice===correct };
   // light competency credit for correct prior knowledge
   const pkc = C.priorKnowledgeCheck.probeQuestions.find(p=>p.probeId===probeId);
-  if(choice===correct) advanceCompetency(pkc.linkedCompetencies, 0.12);
+  recordEvidence(pkc.linkedCompetencies, choice===correct?1:0, 'pkc');
   saveState(); renderPKC();
 }
 function answerProbeSA(probeId){
@@ -1467,7 +1701,7 @@ function answerProbeSA(probeId){
   if(!ta || !ta.value.trim()){ toast('Write a short answer first'); return; }
   state.pkcAnswers[probeId] = { text: ta.value };
   const pkc = C.priorKnowledgeCheck.probeQuestions.find(p=>p.probeId===probeId);
-  advanceCompetency(pkc.linkedCompetencies, 0.06);
+  recordEvidence(pkc.linkedCompetencies, 1, 'participation');
   saveState(); renderPKC();
 }
 function finishPKC(){
@@ -1520,6 +1754,7 @@ function renderSection(){
     <ul class="list-clean objectives-list">${objectives}</ul>`:''}
     <div class="eyebrow" style="margin-top:30px"><span class="rule"></span>Experiences in this section</div>
     ${expList}
+    ${renderFurther(sec)}
     <div class="nav-buttons">
       <button class="btn btn-secondary" onclick="${prevAction}">← Back</button>
       <button class="btn btn-primary" onclick="goScreen('exp',${si},0)">Start section →</button>
@@ -1530,6 +1765,34 @@ function renderSection(){
 // ════════════════════════════════════════════════════════════════════════
 //  EXPERIENCE SCREEN
 // ════════════════════════════════════════════════════════════════════════
+function renderFurther(sec){
+  const items=(sec.furtherReading||[]);
+  if(!items.length) return '';
+  const rows=items.map(r=>{
+    const type=(r.resourceType||'resource');
+    const titleHTML = r.url
+      ? `<a href="${r.url}" target="_blank" rel="noopener">${r.title||'Untitled'}</a>`
+      : (r.title||'Untitled');
+    const comps=(r.linkedCompetencies||[]).map(cId=>{const c=findCompetency(cId);return c?`<span class="tag tag-line">${c.title}</span>`:'';}).join('');
+    return `<div class="fr-item">
+      <div class="fr-top">
+        <span class="fr-title">${titleHTML}</span>
+        <span class="fr-type">${type}</span>
+      </div>
+      ${r.author?`<div class="fr-author">${r.author}</div>`:''}
+      ${(!r.url && r.citation)?`<div class="fr-cite">${r.citation}</div>`:''}
+      ${r.rationaleNote?`<div class="fr-rationale">${r.rationaleNote}</div>`:''}
+      ${comps?`<div class="obj-comps" style="margin-top:8px">${comps}</div>`:''}
+    </div>`;
+  }).join('');
+  return `<div class="eyebrow" style="margin-top:30px"><span class="rule"></span>Further reading</div>
+    <div class="further">
+      <div class="further-label">📖 Optional · go deeper</div>
+      <div class="further-note">Supplementary resources for those who want more — never required to progress.</div>
+      ${rows}
+    </div>`;
+}
+
 function renderExp(){
   const sec = curSection(); const exp = curExp(); if(!exp) return;
   const si=state.sectionIdx, ei=state.expIdx;
@@ -1544,6 +1807,7 @@ function renderExp(){
 
   const content = (exp.contentBlocks||[]).map(renderContentBlock).join('');
   const worked  = (exp.workedExamples||[]).map(renderWorked).join('');
+  const selfGuided = renderSelfGuided(exp.selfGuidedExercise);
   const interactions = (exp.interactionSequence||[]).map(int=>renderInteraction(int,exp)).join('');
   const retrieval = (exp.retrievalPractice||[]).map(r=>renderRetrieval(r,exp)).join('');
   const transfer  = (exp.transferExercises||[]).map(t=>renderTransfer(t,exp)).join('');
@@ -1567,6 +1831,7 @@ function renderExp(){
    </div>
    ${content}
    ${worked}
+   ${selfGuided}
    ${interactions}
    ${retrieval}
    ${transfer}
@@ -1612,6 +1877,27 @@ function renderWorked(we){
   </div>`;
 }
 
+function renderSelfGuided(sg){
+  if(!sg) return '';
+  const steps=(sg.instructions||[]).map(s=>`<li>${s}</li>`).join('');
+  const reflect=(sg.reflectionPrompts||[]).map(p=>`<li>${p}</li>`).join('');
+  const prep=(sg.materialsOrPrerequisites||[]).map(m=>`<li>${m}</li>`).join('');
+  const crit=(sg.verification&&sg.verification.selfAssessmentCriteria||[]).map(c=>`<li>${c}</li>`).join('');
+  const meta=[];
+  if(sg.estimatedRealWorldDurationMinutes) meta.push(`◷ ~${sg.estimatedRealWorldDurationMinutes} min in the real world`);
+  if(sg.verification&&sg.verification.mode&&sg.verification.mode!=='none') meta.push(`✎ ${sg.verification.mode.replace(/-/g,' ')}`);
+  return `<div class="selfguided">
+    <div class="sg-label">⇲ Self-Guided Exercise <span class="sg-formative">formative · not graded</span></div>
+    ${sg.realWorldContext?`<div class="sg-context"><b>Where:</b> ${sg.realWorldContext}</div>`:''}
+    ${sg.objective?`<div class="sg-objective">${sg.objective}</div>`:''}
+    ${meta.length?`<div class="sg-meta">${meta.map(m=>`<span>${m}</span>`).join('')}</div>`:''}
+    ${steps?`<div class="sg-heading">What to do</div><ol class="sg-steps">${steps}</ol>`:''}
+    ${prep?`<div class="sg-heading">Before you start</div><ul class="sg-prep">${prep}</ul>`:''}
+    ${reflect?`<div class="sg-heading">When you return — reflect</div><ul class="sg-reflect">${reflect}</ul>`:''}
+    ${crit?`<div class="sg-heading">Judge your own work</div><ul class="sg-criteria">${crit}</ul>`:''}
+  </div>`;
+}
+
 // ── Interactions ──────────────────────────────────────────────────────────
 const INT_META = {
   'prediction':   {cls:'int-prediction', icon:'◎', label:'Prediction'},
@@ -1650,7 +1936,7 @@ function renderInteraction(int, exp){
     bodyHTML = `<ul class="rank-list" id="rank-${int.interactionId}">` +
       order.map((origIdx,pos)=>`<li class="rank-item" draggable="${!saved}" data-idx="${origIdx}">
         <span class="rank-num">${pos+1}</span><span class="rank-grip">⋮⋮</span><span>${int.options[origIdx]}</span></li>`).join('') +
-      `</ul>${!saved?`<div class="submit-row"><button class="btn btn-primary btn-sm" onclick="submitRanking('${expId}','${int.interactionId}',${int.correctIndex})">Lock in order</button></div>`:''}`;
+      `</ul>${!saved?`<div class="submit-row"><button class="btn btn-primary btn-sm" onclick="submitRanking('${expId}','${int.interactionId}')">Lock in order</button></div>`:''}`;
   }
   else if(int.interactionType==='reflection' && int.responseFormat==='likert' && int.options){
     bodyHTML = `<div class="likert">` + int.options.map((o,oi)=>`
@@ -1700,7 +1986,7 @@ function renderInteraction(int, exp){
 
   // feedback shown if revealed (or MC/ranking answered)
   const showFb = revealed || (saved && ['multiple-choice','drag-drop'].includes(int.interactionType));
-  if(showFb) feedbackHTML = renderFeedback(fb, saved, int);
+  if(showFb) feedbackHTML = renderFeedback(fb, saved, int) + optionFeedbackHTML(int, saved);
 
   return `<div class="interaction ${meta.cls}" id="int-${int.interactionId}">
     ${head}${bodyHTML}${confHTML}${hintHTML}${submitHTML}${feedbackHTML}
@@ -1733,29 +2019,35 @@ function submitText(expId,intId){
   const confEl=document.getElementById('conf-'+intId);
   ansStore(expId,intId,{answer:ta?ta.value:'',confidence:confEl?+confEl.value:null});
   reveal(expId,intId);
-  advanceCompetency(exp.linkedCompetencies, int.interactionType==='reflection'?0.05:0.1);
+  recordEvidence(exp.linkedCompetencies, 1, 'participation');
   renderExp(); toast(int.interactionType==='reflection'?'Reflection saved':'Response recorded');
 }
 function answerMC(expId,intId,choice){
   const exp=curExp(); const int=exp.interactionSequence.find(i=>i.interactionId===intId);
   ansStore(expId,intId,{choice}); reveal(expId,intId);
-  advanceCompetency(exp.linkedCompetencies, choice===int.correctIndex?0.14:0.05);
+  recordEvidence(exp.linkedCompetencies, choice===int.correctIndex?1:0, 'mc');
   renderExp();
 }
 function answerLikert(expId,intId,choice){
   const exp=curExp(); const int=exp.interactionSequence.find(i=>i.interactionId===intId);
   ansStore(expId,intId,{choice}); reveal(expId,intId);
-  advanceCompetency(exp.linkedCompetencies,0.05);
+  recordEvidence(exp.linkedCompetencies, 1, 'participation', 0.05);
   renderExp();
 }
-function submitRanking(expId,intId,correctIdx){
+function submitRanking(expId,intId){
   const list=document.getElementById('rank-'+intId);
   const order=[...list.querySelectorAll('.rank-item')].map(li=>+li.dataset.idx);
-  const exp=curExp();
+  const exp=curExp(); const int=exp.interactionSequence.find(i=>i.interactionId===intId);
   ansStore(expId,intId,{order}); reveal(expId,intId);
-  const topCorrect = order[0]===correctIdx;
-  advanceCompetency(exp.linkedCompetencies, topCorrect?0.14:0.06);
-  renderExp(); toast(topCorrect?'Top choice correct':'Order locked — see explanation');
+  let score;
+  if(Array.isArray(int.correctOrder) && int.correctOrder.length===order.length){
+    const hits = order.filter((v,i)=>v===int.correctOrder[i]).length;
+    score = hits/order.length;
+  } else {
+    score = order[0]===int.correctIndex ? 1 : 0.3;
+  }
+  recordEvidence(exp.linkedCompetencies, score, 'ranking');
+  renderExp(); toast(score>=0.99?'Perfect order':'Order locked — see explanation');
 }
 let _hintIdx={};
 function revealHint(intId){
@@ -1775,11 +2067,17 @@ function renderRetrieval(r,exp){
   const expId=exp.experienceId;
   const saved = state.answers[expId][r.retrievalItemId];
   const revealed = has(state.revealed[expId], r.retrievalItemId);
-  const sch=r.schedule||{};
-  const chips = [sch.initialReviewDays, ...(sch.subsequentReviewDays||[])].filter(d=>d!=null)
-    .map((d,i)=>`<span class="sched-chip">${i===0?'Day ':'+'}${d}${i===0?'':'d'}</span>`).join('');
-  const dp=sch.decayParameters;
-  const decay = dp ? `<div class="decay-meta">decay ${dp.decayRate} · ×${dp.strengthMultiplier} on recall · ${dp.minimumIntervalDays||1}–${dp.maximumIntervalDays||'∞'}d window</div>`:'';
+  const graded = saved && saved.score!=null;
+  const rec = state.reviewSchedule[r.retrievalItemId];
+
+  let footer;
+  if(!revealed){
+    footer = `<div class="submit-row"><button class="btn btn-primary btn-sm" onclick="submitRetrieval('${expId}','${r.retrievalItemId}')">Submit recall</button></div>`;
+  } else if(!graded){
+    footer = selfGradeRow(`gradeRetrieval('${expId}','${r.retrievalItemId}',SCORE)`, 'Be honest — how complete was your recall?');
+  } else {
+    footer = `<div class="schedule-strip"><span class="saved-flag">✓ ${gradeLabel(saved.score)}</span>${rec?`<span style="color:var(--ink-faint)">Next review:</span> <span class="sched-chip">${fmtDue(rec.due)}</span>`:''}</div>`;
+  }
 
   return `<div class="retrieval" id="rp-${r.retrievalItemId}">
     <div class="retrieval-banner">
@@ -1791,9 +2089,7 @@ function renderRetrieval(r,exp){
     </div>
     <div class="retrieval-body">
       <textarea class="sa-input" id="sa-${r.retrievalItemId}" placeholder="Retrieve from memory — resist looking back." ${revealed?'disabled':''}>${saved?saved.answer||'':''}</textarea>
-      ${!revealed
-        ? `<div class="submit-row"><button class="btn btn-primary btn-sm" onclick="submitRetrieval('${expId}','${r.retrievalItemId}')">Submit recall</button></div>`
-        : `<div class="schedule-strip"><span class="saved-flag">✓ Recalled</span> <span style="color:var(--ink-faint)">Next reviews:</span> ${chips}</div>${decay}`}
+      ${footer}
     </div>
   </div>`;
 }
@@ -1801,15 +2097,31 @@ function submitRetrieval(expId,itemId){
   const ta=document.getElementById('sa-'+itemId);
   if(!ta||!ta.value.trim()){ toast('Write what you remember first'); return; }
   ansStore(expId,itemId,{answer:ta.value}); reveal(expId,itemId);
-  advanceCompetency(expCompetencies(expId),0.1);
-  renderExp(); toast('Recall logged · review scheduled');
+  renderExp(); toast('Now grade your own recall');
+}
+function gradeRetrieval(expId,itemId,score){
+  const saved=state.answers[expId][itemId]||{}; saved.score=score; saved.gradedAt=Date.now();
+  ansStore(expId,itemId,saved);
+  recordEvidence(expCompetencies(expId), score, 'retrieval');
+  scheduleReview(itemId, expId, score);
+  renderExp(); toast('Recall logged · next review '+fmtDue(state.reviewSchedule[itemId].due));
 }
 
 // ── Transfer ───────────────────────────────────────────────────────────────
 function renderTransfer(t,exp){
   const expId=exp.experienceId;
   const saved=state.answers[expId][t.exerciseId];
+  const rated = saved && saved.score!=null;
   const crit=(t.successCriteria||[]).map(c=>`<li>${c}</li>`).join('');
+  let footer;
+  if(!saved){
+    footer=`<div class="submit-row"><button class="btn btn-primary btn-sm" onclick="submitTransfer('${expId}','${t.exerciseId}')">Submit transfer</button></div>`;
+  } else if(!rated){
+    footer=selfGradeRow(`rateTransfer('${expId}','${t.exerciseId}',SCORE)`, 'Check your answer against the success criteria above',
+      [['Met all criteria',1,'good'],['Met some',0.55,'gold'],['Missed',0.15,'warn']]);
+  } else {
+    footer=`<div class="submit-row"><span class="saved-flag">✓ Transfer recorded · self-rated</span></div>`;
+  }
   return `<div class="transfer" id="tr-${t.exerciseId}">
     <div class="transfer-label">⇄ Transfer Exercise <span class="transfer-ctx">${t.context||''}</span></div>
     <div class="transfer-scenario">${t.scenario||''}</div>
@@ -1817,18 +2129,19 @@ function renderTransfer(t,exp){
     <div class="criteria-label">Success criteria</div>
     <ul class="criteria-list">${crit}</ul>
     <textarea class="sa-input" id="sa-${t.exerciseId}" placeholder="Apply your reasoning to this new context…" ${saved?'disabled':''}>${saved?saved.answer||'':''}</textarea>
-    ${!saved
-      ? `<div class="submit-row"><button class="btn btn-primary btn-sm" onclick="submitTransfer('${expId}','${t.exerciseId}')">Submit transfer</button></div>`
-      : `<div class="submit-row"><span class="saved-flag">✓ Transfer recorded</span></div>`}
+    ${footer}
   </div>`;
 }
 function submitTransfer(expId,exId){
   const ta=document.getElementById('sa-'+exId);
   if(!ta||!ta.value.trim()){ toast('Write your applied answer first'); return; }
   ansStore(expId,exId,{answer:ta.value});
-  state.revealed[expId]=state.revealed[expId]||[]; add(state.revealed[expId],exId); saveState();
-  advanceCompetency(expCompetencies(expId),0.2);
-  renderExp(); toast('Transfer recorded — strong signal of mastery');
+  renderExp(); toast('Now rate yourself against the criteria');
+}
+function rateTransfer(expId,exId,score){
+  const saved=state.answers[expId][exId]||{}; saved.score=score; ansStore(expId,exId,saved);
+  recordEvidence(expCompetencies(expId), score, 'transfer');
+  renderExp(); toast('Transfer recorded — strong evidence toward mastery');
 }
 
 // ── Mastery verification block ─────────────────────────────────────────────
@@ -1849,7 +2162,7 @@ function renderMastery(exp){
 }
 
 // ── Completion of experiences/sections ──────────────────────────────────────
-function completeExp(expId){ add(state.completedExperiences,expId); advanceCompetency(expCompetencies(expId),0.12); saveState(); }
+function completeExp(expId){ add(state.completedExperiences,expId); recordEvidence(expCompetencies(expId), 1, 'participation'); saveState(); }
 function finishSection(si){
   if(si===C.sections.length-1) goScreen('complete');
   else goScreen('section',si+1,0);
@@ -1867,9 +2180,33 @@ function renderAssess(){
   const comps=(a.linkedCompetencies||[]).map(cId=>{const c=findCompetency(cId);return c?`<span class="tag tag-line">${c.title}</span>`:'';}).join('');
 
   const questions=(a.questions||[]).map((q,qi)=>{
-    const ans=state.assessAnswers[a.assessmentId][q.questionId]||'';
+    const isMC = q.questionType==='multiple-choice' && Array.isArray(q.options);
+    const ans=state.assessAnswers[a.assessmentId][q.questionId];
     const rubric=q.rubric||{};
-    const rubricHTML = submitted ? `
+
+    let inputHTML;
+    if(isMC){
+      inputHTML = `<div class="mc-options">` + q.options.map((o,oi)=>{
+        let cls='', click='';
+        if(submitted){
+          if(oi===q.correctIndex) cls='correct';
+          else if(ans===oi) cls='incorrect';
+          cls+=' locked';
+        } else {
+          if(ans===oi) cls='selected';
+          click=`onclick="answerAssessMC('${a.assessmentId}','${q.questionId}',${oi})"`;
+        }
+        return `<div class="mc-option ${cls}" ${click}><span class="mc-key">${String.fromCharCode(65+oi)}</span><span>${o}</span></div>`;
+      }).join('') + `</div>`;
+      if(submitted && ans!=null){
+        const of=(q.optionFeedback||[]).find(f=>f.optionIndex===ans);
+        if(of && of.feedback) inputHTML += `<div class="feedback show ${ans===q.correctIndex?'fb-correct':'fb-corrective'}" style="margin-top:10px"><div class="fb-head">✦ ${ans===q.correctIndex?'Correct':'Not quite'}</div>${of.feedback}</div>`;
+      }
+    } else {
+      inputHTML = `<textarea class="sa-input" id="aq-${a.assessmentId}-${q.questionId}" placeholder="Write your response…" ${submitted?'disabled':''}>${ans||''}</textarea>`;
+    }
+
+    const rubricHTML = (submitted && !isMC) ? `
       <div class="rubric">
         <div class="rubric-title">Self-assess against the rubric</div>
         <div class="rubric-row rubric-excellent"><span class="rubric-level">Excellent</span><span class="rubric-desc">${rubric.excellent||''}</span></div>
@@ -1879,11 +2216,22 @@ function renderAssess(){
       ${(q.successCriteria||[]).length?`<div style="margin-top:14px"><div class="criteria-label">Success criteria</div><ul class="criteria-list">${q.successCriteria.map(c=>`<li>${c}</li>`).join('')}</ul></div>`:''}
       ${renderErrorPatterns(q)}
     `:'';
+
+    let selfRate='';
+    if(submitted && !isMC){
+      const rated=(state.assessSelfRatings[a.assessmentId]||{})[q.questionId];
+      selfRate = rated
+        ? `<div class="submit-row"><span class="saved-flag">✓ Self-rated: ${rated.label}</span></div>`
+        : selfGradeRow(`rateAssessQ('${a.assessmentId}','${q.questionId}',SCORE,'LBL')`, 'Rate your answer against the rubric',
+            [['Excellent',1,'good'],['Adequate',0.6,'gold'],['Weak',0.25,'warn']]);
+    }
+
     return `<div class="q-card">
       <div class="q-meta">Q${qi+1} · ${q.questionType} · Difficulty ${renderDiffDots(q.difficulty,true)}</div>
       <div class="q-prompt">${q.prompt}</div>
-      <textarea class="sa-input" id="aq-${a.assessmentId}-${q.questionId}" placeholder="Write your response…" ${submitted?'disabled':''}>${ans}</textarea>
+      ${inputHTML}
       ${rubricHTML}
+      ${selfRate}
     </div>`;
   }).join('');
 
@@ -1899,7 +2247,7 @@ function renderAssess(){
     ${!submitted?`<button class="btn btn-primary" onclick="submitAssessment('${a.assessmentId}')">Submit assessment</button>`
       :`<div class="card" style="background:var(--good-wash);border-color:#bcd6c2">
           <h3 style="font-size:19px;margin-bottom:6px;color:var(--good)">Submitted ✓</h3>
-          <p style="font-family:var(--read);font-size:15px;color:var(--ink-soft)">Use each rubric to self-evaluate. Error patterns below show how specific mistakes map to misconceptions and what remediation the engine would trigger. Your competency progress has been updated.</p>
+          <p style="font-family:var(--read);font-size:15px;color:var(--ink-soft)">Multiple-choice answers were scored automatically. Rate each written answer against its rubric — your self-rating is recorded as mastery evidence. Error patterns show how specific mistakes map to misconceptions.</p>
         </div>`}
     <div class="nav-buttons">
       <button class="btn btn-secondary" onclick="goScreen('exp',${state.sectionIdx},${state.expIdx})">← Back to experience</button>
@@ -1924,17 +2272,40 @@ function findMisconception(id){
     if(m.misconceptionId===id) return m;
   return null;
 }
+function answerAssessMC(aId,qId,oi){
+  if(has(state.assessSubmitted,aId)) return;
+  state.assessAnswers[aId]=state.assessAnswers[aId]||{};
+  state.assessAnswers[aId][qId]=oi; saveState(); renderAssess();
+}
 function submitAssessment(aId){
   const a=findAssess(aId);
   let answered=0;
   (a.questions||[]).forEach(q=>{
-    const ta=document.getElementById(`aq-${aId}-${q.questionId}`);
-    if(ta){ state.assessAnswers[aId][q.questionId]=ta.value; if(ta.value.trim()) answered++; }
+    if(q.questionType==='multiple-choice' && Array.isArray(q.options)){
+      if(state.assessAnswers[aId][q.questionId]!=null) answered++;
+    } else {
+      const ta=document.getElementById(`aq-${aId}-${q.questionId}`);
+      if(ta){ state.assessAnswers[aId][q.questionId]=ta.value; if(ta.value.trim()) answered++; }
+    }
   });
   if(answered===0){ toast('Answer at least one question'); return; }
   add(state.assessSubmitted,aId); add(state.completedAssessments,aId);
-  advanceCompetency(a.linkedCompetencies||[],0.25);
-  saveState(); renderAssess(); toast('Assessment submitted');
+  // auto-score the objective questions; written ones await self-rating
+  (a.questions||[]).forEach(q=>{
+    if(q.questionType==='multiple-choice' && Array.isArray(q.options) && q.correctIndex!=null){
+      const ch=state.assessAnswers[aId][q.questionId];
+      if(ch!=null) recordEvidence(a.linkedCompetencies||[], ch===q.correctIndex?1:0, 'assessment');
+    }
+  });
+  saveState(); renderAssess(); toast('Submitted — self-rate your written answers below');
+}
+function rateAssessQ(aId,qId,score,label){
+  state.assessSelfRatings[aId]=state.assessSelfRatings[aId]||{};
+  if(state.assessSelfRatings[aId][qId]!=null) return;
+  state.assessSelfRatings[aId][qId]={score,label};
+  const a=findAssess(aId);
+  recordEvidence(a.linkedCompetencies||[], score, 'assessment');
+  saveState(); renderAssess(); toast('Self-rating recorded: '+label);
 }
 
 // ════════════════════════════════════════════════════════════════════════
@@ -1942,7 +2313,7 @@ function submitAssessment(aId){
 // ════════════════════════════════════════════════════════════════════════
 function renderComplete(){
   const m=C.courseMetadata||{};
-  const mastered=(C.competencies||[]).filter(c=>(state.competencyProgress[c.competencyId]||0)>=0.85).length;
+  const mastered=(C.competencies||[]).filter(c=>compProgress(c.competencyId)>=compThreshold(c)).length;
   document.getElementById('screen-complete').innerHTML=`
     <div class="complete-seal">${(m.version?'v'+m.version:'✦')}</div>
     <h1>Course complete</h1>
@@ -1985,7 +2356,7 @@ function attachGlossaryLinks(){
 //  UTILITIES
 // ════════════════════════════════════════════════════════════════════════
 function cogColor(a){ return {prediction:'indigo',analysis:'plum',reflection:'gold',retrieval:'moss',comparison:'rust',synthesis:'accent'}[a]||'line'; }
-function expTypeLabel(t){ return {'guided-analysis':'Guided Analysis','worked-example':'Worked Example','case-study':'Case Study','simulation':'Simulation','discussion':'Discussion'}[t]||t; }
+function expTypeLabel(t){ return {'guided-analysis':'Guided Analysis','worked-example':'Worked Example','case-study':'Case Study','simulation':'Simulation','discussion':'Discussion','self-guided-exercise':'Self-Guided Exercise'}[t]||t; }
 function renderDiffDots(n,inline){
   n=n||0;
   const dots=Array.from({length:5},(_,i)=>`<span class="diff-dot ${i<n?'on':''}"></span>`).join('');
@@ -2015,6 +2386,302 @@ document.addEventListener('dragover',e=>{
   if(after) list.insertBefore(dragging,after); else list.appendChild(dragging);
 });
 function renumberRanks(list){ if(!list) return; [...list.querySelectorAll('.rank-item')].forEach((li,i)=>{ const n=li.querySelector('.rank-num'); if(n)n.textContent=i+1; }); }
+
+// ════════════════════════════════════════════════════════════════════════
+//  SELF-GRADING + OPTION FEEDBACK HELPERS
+// ════════════════════════════════════════════════════════════════════════
+function selfGradeRow(fnTemplate, label, opts){
+  const o = opts || [['Recalled it',1,'good'],['Partially',0.5,'gold'],["Couldn't",0,'warn']];
+  return `<div class="selfgrade"><span class="sg-q">${label}</span><div class="sg-btns">${
+    o.map(([txt,score,tone])=>`<button class="sg-btn sg-${tone}" onclick="${fnTemplate.replace('SCORE',score).replace('LBL',txt)}">${txt}</button>`).join('')
+  }</div></div>`;
+}
+function gradeLabel(s){ return s>=0.75?'Recalled':s>=0.4?'Partial recall':'Missed — it will return sooner'; }
+
+function optionFeedbackHTML(int, saved){
+  if(!saved) return '';
+  let out='';
+  const ofs=int.optionFeedback||[];
+  const block=(of,head)=>{
+    if(!of||!of.feedback) return '';
+    const mis=of.linkedMisconceptionId?findMisconception(of.linkedMisconceptionId):null;
+    return `<div class="feedback show fb-elaborative" style="margin-top:10px"><div class="fb-head">✦ ${head}</div>${of.feedback}${mis?`<div style="margin-top:6px;font-size:13px;color:var(--ink-faint)">Common misconception: "${mis.misconception}"</div>`:''}</div>`;
+  };
+  if(int.interactionType==='multiple-choice' && saved.choice!=null){
+    out += block(ofs.find(f=>f.optionIndex===saved.choice),'About your choice');
+    if(saved.choice!==int.correctIndex){
+      out += block(ofs.find(f=>f.optionIndex===int.correctIndex),'Why '+String.fromCharCode(65+(int.correctIndex??0))+' is right');
+    }
+  }
+  if(int.interactionType==='drag-drop' && Array.isArray(int.correctOrder) && saved.order){
+    const hits=saved.order.filter((v,i)=>v===int.correctOrder[i]).length;
+    out += `<div class="feedback show fb-elaborative" style="margin-top:10px"><div class="fb-head">✦ Expert order · you matched ${hits}/${int.correctOrder.length}</div><ol style="margin:6px 0 0 18px">${int.correctOrder.map(i=>`<li>${int.options[i]}</li>`).join('')}</ol></div>`;
+  }
+  return out;
+}
+function probeOptionFeedback(p,saved){
+  if(!saved || saved.choice==null) return '';
+  const of=(p.optionFeedback||[]).find(f=>f.optionIndex===saved.choice);
+  if(!of||!of.feedback) return '';
+  return `<div class="feedback show ${saved.choice===p.correctIndex?'fb-correct':'fb-corrective'}" style="margin:12px 0 0"><div class="fb-head">✦ About your answer</div>${of.feedback}</div>`;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  SPACED-REPETITION SCHEDULER + REVIEW QUEUE
+//  The course JSON stays static; the engine owns all timestamps in
+//  state.reviewSchedule. Intervals come from each item's schedule block.
+// ════════════════════════════════════════════════════════════════════════
+function findRetrievalItem(itemId){
+  for(const sec of C.sections||[]) for(const e of sec.learningExperiences||[])
+    for(const r of e.retrievalPractice||[]) if(r.retrievalItemId===itemId) return {item:r, exp:e, sec};
+  return null;
+}
+function expIndices(expId){
+  for(let si=0;si<(C.sections||[]).length;si++){
+    const es=C.sections[si].learningExperiences||[];
+    for(let ei=0;ei<es.length;ei++) if(es[ei].experienceId===expId) return [si,ei];
+  }
+  return [0,0];
+}
+function scheduleReview(itemId, expId, score){
+  const found=findRetrievalItem(itemId); if(!found) return;
+  const sch=found.item.schedule||{};
+  const seq=[sch.initialReviewDays??1, ...((sch.subsequentReviewDays&&sch.subsequentReviewDays.length)?sch.subsequentReviewDays:[3,7,14,30])];
+  const dp=sch.decayParameters||{};
+  const minI=dp.minimumIntervalDays??1, maxI=dp.maximumIntervalDays??365;
+  const rec=state.reviewSchedule[itemId]||{expId, step:-1, intervalDays:0, reps:0};
+  rec.expId=expId; rec.reps=(rec.reps||0)+1;
+  let interval;
+  if(score>=0.75){                       // solid recall → advance the ladder
+    rec.step=Math.min((rec.step??-1)+1, seq.length);
+    interval = rec.step<seq.length
+      ? seq[rec.step]
+      : Math.round(Math.max(rec.intervalDays, seq[seq.length-1])*(dp.strengthMultiplier||2));
+  } else if(score>=0.4){                 // partial → shrink the interval
+    interval=Math.max(minI, Math.round((rec.intervalDays||seq[0])/2));
+  } else {                               // missed → restart the ladder
+    rec.step=0; interval=seq[0];
+  }
+  interval=Math.max(minI, Math.min(maxI, interval));
+  rec.intervalDays=interval;
+  rec.due=Date.now()+interval*86400000;
+  rec.lastScore=score; rec.lastReviewed=Date.now();
+  state.reviewSchedule[itemId]=rec; saveState();
+}
+function dueReviews(){
+  const now=Date.now();
+  return Object.entries(state.reviewSchedule||{})
+    .filter(([id,rec])=>rec.due<=now)
+    .map(([id,rec])=>({id,rec,found:findRetrievalItem(id)}))
+    .filter(x=>x.found);
+}
+function interleaveByCompetency(items){
+  // round-robin across each item's primary competency so adjacent items differ
+  const groups={};
+  items.forEach(x=>{
+    const k=(x.found.exp.linkedCompetencies||['_'])[0];
+    (groups[k]=groups[k]||[]).push(x);
+  });
+  Object.values(groups).forEach(g=>g.sort(()=>Math.random()-0.5));
+  const keys=Object.keys(groups); const out=[]; let added=true;
+  while(added){ added=false; keys.forEach(k=>{ if(groups[k].length){ out.push(groups[k].shift()); added=true; } }); }
+  return out;
+}
+function nextDueTs(){
+  const all=Object.values(state.reviewSchedule||{});
+  return all.length ? Math.min(...all.map(r=>r.due)) : null;
+}
+function fmtDue(ts){
+  const d=ts-Date.now();
+  if(d<=0) return 'due now';
+  const days=Math.ceil(d/86400000);
+  if(days===1) return 'tomorrow';
+  if(days<30) return 'in '+days+'d';
+  return new Date(ts).toLocaleDateString();
+}
+function reviewCardHTML(){
+  const scheduled=Object.keys(state.reviewSchedule||{}).length;
+  if(!scheduled) return '';
+  const due=dueReviews().length;
+  if(due) return `<div class="card" style="display:flex;align-items:center;gap:16px;border-left:3px solid var(--moss)">
+    <span style="font-size:22px">&#8635;</span>
+    <div style="flex:1"><b>${due} retrieval review${due>1?'s':''} due</b><div style="font-size:13px;color:var(--ink-soft)">Spaced recall is where the durable memory gets built.</div></div>
+    <button class="btn btn-primary btn-sm" onclick="goScreen('review')">Start reviews →</button></div>`;
+  const nd=nextDueTs();
+  return `<div class="card" style="display:flex;align-items:center;gap:16px"><span style="font-size:20px;color:var(--good)">✓</span><div style="flex:1"><b>Reviews up to date</b><div style="font-size:13px;color:var(--ink-soft)">Next review ${nd?fmtDue(nd):'—'}.</div></div></div>`;
+}
+function renderReview(){
+  const dueAll=interleaveByCompetency(dueReviews());
+  const scheduled=Object.keys(state.reviewSchedule||{}).length;
+  let body;
+  if(!scheduled){
+    body=`<div class="card"><b>Nothing scheduled yet.</b><p style="font-family:var(--read);color:var(--ink-soft);font-size:15px;margin-top:6px">Retrieval items enter this queue the first time you recall and grade them inside a lesson. The engine then schedules each next review from the item's spacing parameters.</p></div>`;
+  } else if(!dueAll.length){
+    body=`<div class="card" style="border-left:3px solid var(--good)"><b>All caught up ✓</b><p style="font-family:var(--read);color:var(--ink-soft);font-size:15px;margin-top:6px">Next review ${fmtDue(nextDueTs())}. The gap is the point — come back then.</p></div>`;
+  } else {
+    body=dueAll.map((x,i)=>renderReviewItem(x,i)).join('');
+  }
+  document.getElementById('screen-review').innerHTML=`
+   <div class="stagger">
+    <div class="eyebrow"><span class="rule"></span>Spaced retrieval</div>
+    <h1 style="font-size:32px;margin-bottom:14px">Review queue</h1>
+    <div class="review-head-card"><span style="font-size:22px">&#8635;</span><div>
+      <h3>${dueAll.length?dueAll.length+' item'+(dueAll.length>1?'s':'')+' due':'Review schedule'}</h3>
+      <p>Answer from memory before grading yourself — the source content stays hidden on purpose. Items are interleaved across competencies, and your self-grade sets the next interval.</p>
+    </div></div>
+    ${body}
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goScreen('intro')">← Back</button>
+    </div>
+   </div>`;
+  window.scrollTo({top:0});
+}
+function renderReviewItem(x,i){
+  const r=x.found.item, exp=x.found.exp;
+  const comps=(exp.linkedCompetencies||[]).map(cid=>{const c=findCompetency(cid);return c?`<span class="tag tag-line">${c.title}</span>`:'';}).join('');
+  const [si,ei]=expIndices(exp.experienceId);
+  return `<div class="retrieval review-item" id="review-${r.retrievalItemId}">
+    <div class="retrieval-banner">
+      <div class="retrieval-top">
+        <span class="retrieval-label">&#8635; Review ${i+1} ${renderDiffDots(r.difficulty,true)}</span>
+        <span class="retrieval-type">${r.retrievalType||''}</span>
+      </div>
+      <div class="retrieval-prompt">${r.prompt}</div>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">${comps}
+        <button class="review-lesson-link" onclick="goScreen('exp',${si},${ei})">revisit lesson ↗</button></div>
+    </div>
+    <div class="retrieval-body">
+      <textarea class="sa-input" placeholder="Retrieve from memory — write or rehearse it, then grade yourself."></textarea>
+      ${selfGradeRow(`gradeReview('${r.retrievalItemId}',SCORE)`,'How did the recall go?')}
+    </div>
+  </div>`;
+}
+function gradeReview(itemId,score){
+  const found=findRetrievalItem(itemId); if(!found) return;
+  recordEvidence(found.exp.linkedCompetencies||[], score, 'retrieval');
+  scheduleReview(itemId, found.exp.experienceId, score);
+  toast((score>=0.75?'Scheduled — next review ':'No problem — it returns ')+fmtDue(state.reviewSchedule[itemId].due));
+  renderReview(); buildSidebar();
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  COURSE LOADER + VALIDATION
+// ════════════════════════════════════════════════════════════════════════
+function handleCourseFile(file){
+  if(!file) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ loadCourse(JSON.parse(r.result)); }
+                 catch(e){ showReport('Could not load course',['Invalid JSON: '+e.message]); } };
+  r.readAsText(file);
+}
+function validateCourse(c){
+  const errors=[], warnings=[];
+  if(!c || typeof c!=='object' || Array.isArray(c)){ errors.push('Root must be a JSON object.'); return {errors,warnings}; }
+  if(!c.courseMetadata) errors.push('Missing courseMetadata.');
+  if(!Array.isArray(c.sections)||!c.sections.length) errors.push('sections[] missing or empty.');
+  if(errors.length) return {errors,warnings};
+  if(!Array.isArray(c.competencies)||!c.competencies.length) warnings.push('competencies[] missing or empty — mastery tracking will be inert.');
+
+  const compIds=new Set((c.competencies||[]).map(x=>x.competencyId));
+  const assessIds=new Set((c.assessments||[]).map(x=>x.assessmentId));
+  const misIds=new Set((c.competencies||[]).flatMap(x=>(x.commonMisconceptions||[]).map(m=>m.misconceptionId)));
+  const exerciseIds=new Set();
+  (c.sections||[]).forEach(s=>(s.learningExperiences||[]).forEach(e=>(e.transferExercises||[]).forEach(t=>exerciseIds.add(t.exerciseId))));
+  const badComp=(ids,where)=>(ids||[]).forEach(id=>{ if(!compIds.has(id)) warnings.push(`${where}: unresolved competencyId "${id}"`); });
+
+  (c.sections||[]).forEach(s=>{
+    (s.learningObjectives||[]).forEach(o=>badComp(o.linkedCompetencies,`section ${s.sectionId} objective ${o.objectiveId}`));
+    (s.furtherReading||[]).forEach(fr=>badComp(fr.linkedCompetencies,`furtherReading ${fr.resourceId}`));
+    (s.learningExperiences||[]).forEach(e=>{
+      badComp(e.linkedCompetencies,`experience ${e.experienceId}`);
+      ((e.masteryVerification||{}).assessmentIds||[]).forEach(id=>{
+        if(!assessIds.has(id)) warnings.push(`experience ${e.experienceId}: unresolved assessmentId "${id}"`);
+      });
+      (e.interactionSequence||[]).forEach(it=>{
+        if(['multiple-choice','drag-drop'].includes(it.interactionType)){
+          if(!Array.isArray(it.options)||!it.options.length)
+            warnings.push(`interaction ${it.interactionId}: ${it.interactionType} has no options[] — will fall back to free text.`);
+          else if(it.interactionType==='multiple-choice' && it.correctIndex==null)
+            warnings.push(`interaction ${it.interactionId}: options[] without correctIndex — cannot be scored.`);
+        }
+      });
+    });
+  });
+  (c.competencies||[]).forEach(cc=>(cc.desiredOutcomes||[]).forEach(o=>(o.verifiedBy||[]).forEach(id=>{
+    if(!assessIds.has(id)&&!exerciseIds.has(id))
+      warnings.push(`competency ${cc.competencyId} outcome ${o.outcomeId}: verifiedBy "${id}" matches no assessment or transfer exercise`);
+  })));
+  (c.assessments||[]).forEach(a=>{
+    badComp(a.linkedCompetencies,`assessment ${a.assessmentId}`);
+    (a.questions||[]).forEach(q=>{
+      (q.errorPatterns||[]).forEach(ep=>{
+        if(ep.linkedMisconceptionId && !misIds.has(ep.linkedMisconceptionId))
+          warnings.push(`question ${q.questionId}: errorPattern "${ep.errorPatternId}" links unknown misconception "${ep.linkedMisconceptionId}"`);
+      });
+      if(q.questionType==='multiple-choice' && (!Array.isArray(q.options)||q.correctIndex==null))
+        warnings.push(`question ${q.questionId}: multiple-choice without options/correctIndex — rendered as free text.`);
+    });
+  });
+  ((c.learningModel||{}).interleavingGroups||[]).forEach(g=>badComp(g.competencyIds,`interleavingGroup ${g.groupId}`));
+  ((c.priorKnowledgeCheck||{}).probeQuestions||[]).forEach(pq=>badComp(pq.linkedCompetencies,`probe ${pq.probeId}`));
+  return {errors,warnings};
+}
+function loadCourse(obj){
+  const {errors,warnings}=validateCourse(obj);
+  if(errors.length){ showReport('Course failed to load',errors); return; }
+  COURSE=obj; C=COURSE; LM=C.learningModel||{};
+  STORE_KEY='course-progress:'+(C.courseMetadata?.courseId||'default');
+  state=loadState();
+  buildSidebar(); renderGlossary(); goScreen('intro');
+  if(warnings.length) showReport(`Loaded with ${warnings.length} warning${warnings.length>1?'s':''}`, warnings);
+  else toast('Course loaded: '+(C.courseMetadata?.title||'untitled'));
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  PROGRESS EXPORT / IMPORT
+// ════════════════════════════════════════════════════════════════════════
+function exportProgress(){
+  const payload={ courseId:C.courseMetadata?.courseId||'default', exportedAt:new Date().toISOString(), state };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=(C.courseMetadata?.courseId||'course')+'-progress.json';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  toast('Progress exported');
+}
+function handleProgressFile(file){
+  if(!file) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{
+    const pr=JSON.parse(r.result);
+    if(!pr || typeof pr.state!=='object') throw new Error('No "state" object found in file.');
+    const curId=C.courseMetadata?.courseId||'default';
+    if(pr.courseId && pr.courseId!==curId &&
+       !confirm(`This progress file is for course "${pr.courseId}", but "${curId}" is loaded. Import anyway?`)) return;
+    state=Object.assign(freshState(), pr.state); saveState();
+    buildSidebar(); goScreen(state.screen||'intro', state.sectionIdx, state.expIdx);
+    toast('Progress imported');
+  }catch(e){ showReport('Could not import progress',[e.message]); } };
+  r.readAsText(file);
+}
+function showReport(title,lines){
+  document.getElementById('report-title').textContent=title;
+  document.getElementById('report-body').innerHTML=
+    (lines||[]).map(l=>`<div class="report-line">${String(l).replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>`).join('')
+    || '<div class="report-line">No details.</div>';
+  document.getElementById('report-overlay').classList.add('open');
+}
+function closeReport(){ document.getElementById('report-overlay').classList.remove('open'); }
+
+// drag & drop a course .json anywhere onto the window
+window.addEventListener('dragover',e=>{
+  if([...(e.dataTransfer?.types||[])].includes('Files')) e.preventDefault();
+});
+window.addEventListener('drop',e=>{
+  const f=e.dataTransfer?.files?.[0];
+  if(f && /\.json$/i.test(f.name)){ e.preventDefault(); handleCourseFile(f); }
+});
 
 // keyboard: Esc closes overlays
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeOverlays(); });

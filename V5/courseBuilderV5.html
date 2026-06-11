@@ -314,6 +314,8 @@
           <button type="button" class="pill" data-group="section" data-val="reflection-prompt">Reflection Prompt</button>
           <button type="button" class="pill" data-group="section" data-val="transfer-exercise">Transfer Exercise</button>
           <button type="button" class="pill" data-group="section" data-val="misconception-callout">Misconception Call-out</button>
+          <button type="button" class="pill" data-group="section" data-val="further-reading">Further Reading</button>
+          <button type="button" class="pill" data-group="section" data-val="self-guided-exercise">Self-Guided Exercise</button>
         </div>
       </div>
 
@@ -414,7 +416,7 @@
   </section>
 
   <footer>
-    <span>Course Engine Schema · v4</span>
+    <span>Course Engine Schema · v4.1</span>
     <span>Prompt Studio</span>
   </footer>
 </div>
@@ -422,23 +424,353 @@
 <script>
 // ---- The schema, embedded so Prompt 3 is fully self-contained ----
 const SCHEMA = `{
-  "courseMetadata": { "courseId","title","description","thumbnailImage","estimatedDurationMinutes","difficultyLevel (novice|intermediate|advanced)","version","lastUpdated (ISO-8601)","language (BCP-47)","tags[]","prerequisites[]{type (knowledge|course|assessment),description} },
-  "learningModel": { "masteryThreshold (0-1)","passingThreshold (0-1)","retrievalPracticeEnabled","confidenceCalibrationEnabled","adaptiveDifficultyEnabled","interleavingEnabled","interleavingGroups[]{groupId,competencyIds[],experienceIds[],rationaleNote},"spacedRepetitionEnabled" },
-  "priorKnowledgeCheck": { "enabled","placement (before-course|before-section)","probeQuestions[]{probeId,prompt,questionType (multiple-choice|short-answer|scenario-analysis),linkedCompetencies[],scoringCriteria[],routingRules[]{condition,action (skip-to-section|unlock-advanced|flag-for-review)}} },
-  "competencies": [{ "competencyId","title","description","taxonomyLevel (remember|understand|apply|analyze|evaluate|create)","difficultyProfile{overall,conceptualComplexity,ambiguity,technicalSkill,readingDemand (each 1-5)},"transferRequired","masteryThreshold (0-1)","desiredOutcomes[]{outcomeId,description,verifiedBy[],verificationCriteria{minimumAccuracy,minimumConfidenceCalibration,requiresTransferSuccess}},"commonMisconceptions[]{misconceptionId,misconception,whyIncorrect,remediationStrategy,linkedErrorPatterns[]} }],
-  "sections": [{ "sectionId","title","description","learningObjectives[]{objectiveId,description,linkedCompetencies[]},"motivationHooks[]{type (real-world-stakes|prediction-gap|curiosity-prompt|relevance-anchor),prompt},
-    "learningExperiences": [{ "experienceId","title","experienceType (guided-analysis|worked-example|case-study|simulation|discussion)","difficultyProfile{overall,conceptualComplexity,ambiguity},"estimatedDurationMinutes","linkedCompetencies[]","desiredCognitiveActions[] (prediction|analysis|reflection|retrieval|comparison|synthesis)",
-      "contentBlocks[]{blockId,type (text|image|video|audio|interactive),content,url,altText,captionOrTranscript},
-      "interactionSequence[]{interactionId,interactionType (prediction|compare-responses|reflection|multiple-choice|drag-drop|scenario-analysis),prompt,required,responseFormat (short-answer|multiple-choice|ranking|likert),revealCondition (after-response|after-attempt|on-request),feedback{type (elaborative|corrective|hint-only|socratic),elaborativeFeedback,correctiveFeedback,hints[]},confidencePrompt{enabled,scaleMin,scaleMax,prompt}},
-      "workedExamples[]{exampleId,problem,steps[],conclusion},
-      "retrievalPractice[]{retrievalItemId,retrievalType (free-recall|cued-recall|application|scenario-analysis|contrast),prompt,difficulty (1-5),schedule{initialReviewDays,subsequentReviewDays[],decayParameters{decayRate,strengthMultiplier,minimumIntervalDays,maximumIntervalDays}}},
-      "transferExercises[]{exerciseId,context,scenario,task,successCriteria[]},
-      "masteryVerification{assessmentIds[],requiredPerformance{minimumAccuracy,minimumTransferScore}} }] }],
-  "assessments": [{ "assessmentId","title","assessmentType (scenario-analysis|multiple-choice|short-answer|performance-task)","linkedCompetencies[]","adaptiveDifficulty","questions[]{questionId,difficulty (1-5),prompt,questionType,successCriteria[],rubric{excellent,adequate,weak},errorPatterns[]{errorPatternId,description,linkedMisconceptionId,remediationAction}} }],
-  "retrievalSystem": { "algorithm (spaced-repetition|fixed-interval|performance-adaptive)","confidenceWeighting","interleavingEnabled","retrievalModes[]" },
-  "masterySystem": { "masteryLevels[] (novice|developing|proficient|mastered)","decayModelEnabled","reverificationRequired" },
-  "analytics": { "track[] (accuracy|confidence|time-on-task|retrieval-strength|transfer-performance|misconception-frequency)","errorAnalysis{enabled,errorPatternTracking,misconceptionFrequencyLogging,linkedToMisconceptionIds} },
-  "glossary": [{ "term","definition" }]
+  "courseMetadata": {
+    "courseId": "string",
+    "title": "string",
+    "description": "string",
+    "thumbnailImage": "url",
+    "estimatedDurationMinutes": "integer",
+    "difficultyLevel": "string (novice | intermediate | advanced)",
+    "version": "string",
+    "lastUpdated": "ISO-8601 date",
+    "language": "string (BCP-47 language tag)",
+    "tags": ["string"],
+    "prerequisites": [
+      {
+        "type": "string (knowledge | course | assessment)",
+        "description": "string"
+      }
+    ]
+  },
+
+  "learningModel": {
+    "masteryThreshold": "float (0–1)",
+    "passingThreshold": "float (0–1)",
+    "retrievalPracticeEnabled": "boolean",
+    "confidenceCalibrationEnabled": "boolean",
+    "adaptiveDifficultyEnabled": "boolean",
+    "interleavingEnabled": "boolean",
+    "interleavingGroups": [
+      {
+        "groupId": "string",
+        "competencyIds": ["string"],
+        "experienceIds": ["string"],
+        "rationaleNote": "string (optional — e.g. 'contrast near-transfer items')"
+      }
+    ],
+    "spacedRepetitionEnabled": "boolean"
+  },
+
+  "priorKnowledgeCheck": {
+    "enabled": "boolean",
+    "placement": "string (before-course | before-section)",
+    "probeQuestions": [
+      {
+        "probeId": "string",
+        "prompt": "string",
+        "questionType": "string (multiple-choice | short-answer | scenario-analysis)",
+        "options": ["string (REQUIRED for multiple-choice probes — the choices shown)"],
+        "correctIndex": "integer (REQUIRED for multiple-choice probes — index of the correct option; lets the engine score prior knowledge)",
+        "optionFeedback": [
+          {
+            "optionIndex": "integer",
+            "feedback": "string (shown after answering)",
+            "linkedMisconceptionId": "string (optional)"
+          }
+        ],
+        "linkedCompetencies": ["string (competencyId)"],
+        "scoringCriteria": ["string"],
+        "routingRules": [
+          {
+            "condition": "string (e.g. score >= 0.85)",
+            "action": "string (e.g. skip-to-section | unlock-advanced | flag-for-review)"
+          }
+        ]
+      }
+    ]
+  },
+
+  "competencies": [
+    {
+      "competencyId": "string",
+      "title": "string",
+      "description": "string",
+      "taxonomyLevel": "string (remember | understand | apply | analyze | evaluate | create)",
+      "difficultyProfile": {
+        "overall": "integer (1–5)",
+        "conceptualComplexity": "integer (1–5)",
+        "ambiguity": "integer (1–5)",
+        "technicalSkill": "integer (1–5)",
+        "readingDemand": "integer (1–5)"
+      },
+      "transferRequired": "boolean",
+      "masteryThreshold": "float (0–1)",
+
+      "desiredOutcomes": [
+        {
+          "outcomeId": "string",
+          "description": "string",
+          "verifiedBy": ["string (assessmentId | exerciseId)"],
+          "verificationCriteria": {
+            "minimumAccuracy": "float (0–1)",
+            "minimumConfidenceCalibration": "float (0–1)",
+            "requiresTransferSuccess": "boolean"
+          }
+        }
+      ],
+
+      "commonMisconceptions": [
+        {
+          "misconceptionId": "string",
+          "misconception": "string",
+          "whyIncorrect": "string",
+          "remediationStrategy": "string",
+          "linkedErrorPatterns": ["string (maps to analytics errorPatternId)"]
+        }
+      ]
+    }
+  ],
+
+  "sections": [
+    {
+      "sectionId": "string",
+      "title": "string",
+      "description": "string",
+      "learningObjectives": [
+        {
+          "objectiveId": "string",
+          "description": "string",
+          "linkedCompetencies": ["string (competencyId)"]
+        }
+      ],
+
+      "motivationHooks": [
+        {
+          "type": "string (real-world-stakes | prediction-gap | curiosity-prompt | relevance-anchor)",
+          "prompt": "string"
+        }
+      ],
+
+      "furtherReading": [
+        {
+          "resourceId": "string",
+          "title": "string",
+          "resourceType": "string (article | book | paper | video | website | other)",
+          "url": "url (optional)",
+          "citation": "string (optional — for non-linkable sources such as books)",
+          "author": "string (optional)",
+          "rationaleNote": "string (optional — why this resource is worth reading)",
+          "linkedCompetencies": ["string (competencyId, optional)"]
+        }
+      ],
+
+      "learningExperiences": [
+        {
+          "experienceId": "string",
+          "title": "string",
+          "experienceType": "string (guided-analysis | worked-example | case-study | simulation | discussion | self-guided-exercise)",
+          "difficultyProfile": {
+            "overall": "integer (1–5)",
+            "conceptualComplexity": "integer (1–5)",
+            "ambiguity": "integer (1–5)"
+          },
+          "estimatedDurationMinutes": "integer",
+          "linkedCompetencies": ["string (competencyId)"],
+          "desiredCognitiveActions": [
+            "string (prediction | analysis | reflection | retrieval | comparison | synthesis)"
+          ],
+
+          "contentBlocks": [
+            {
+              "blockId": "string",
+              "type": "string (text | image | video | audio | interactive)",
+              "content": "string (for text type)",
+              "url": "url (for media types)",
+              "altText": "string (for image type)",
+              "captionOrTranscript": "string (for video/audio types)"
+            }
+          ],
+
+          "interactionSequence": [
+            {
+              "interactionId": "string",
+              "interactionType": "string (prediction | compare-responses | reflection | multiple-choice | drag-drop | scenario-analysis)",
+              "prompt": "string",
+              "required": "boolean",
+              "responseFormat": "string (short-answer | multiple-choice | ranking | likert)",
+              "revealCondition": "string (after-response | after-attempt | on-request)",
+              "options": ["string (REQUIRED for multiple-choice, drag-drop, and likert — the choices shown to the learner)"],
+              "correctIndex": "integer (REQUIRED for multiple-choice — index into options[] of the correct answer)",
+              "correctOrder": ["integer (for drag-drop ranking — option indices in best-to-worst order; enables positional scoring)"],
+              "optionFeedback": [
+                {
+                  "optionIndex": "integer (index into options[])",
+                  "feedback": "string (why this option is right or wrong — shown after the learner answers)",
+                  "linkedMisconceptionId": "string (optional — the misconceptionId this distractor embodies; wrong answers then surface the misconception)"
+                }
+              ],
+
+              "feedback": {
+                "type": "string (elaborative | corrective | hint-only | socratic)",
+                "elaborativeFeedback": "string (explains why answer is correct/incorrect with reasoning)",
+                "correctiveFeedback": "string (direct correction statement)",
+                "hints": ["string (progressive hints revealed on request)"]
+              },
+
+              "confidencePrompt": {
+                "enabled": "boolean",
+                "scaleMin": "integer",
+                "scaleMax": "integer",
+                "prompt": "string"
+              }
+            }
+          ],
+
+          "workedExamples": [
+            {
+              "exampleId": "string",
+              "problem": "string",
+              "steps": ["string"],
+              "conclusion": "string"
+            }
+          ],
+
+          "selfGuidedExercise": {
+            "exerciseId": "string",
+            "realWorldContext": "string (the authentic setting the learner applies the material in — e.g. 'attend an open mic night')",
+            "objective": "string (what applying the material should accomplish)",
+            "instructions": ["string (ordered steps guiding the learner through the real-world application)"],
+            "estimatedRealWorldDurationMinutes": "integer (optional — time outside the engine)",
+            "materialsOrPrerequisites": ["string (optional — anything the learner needs beforehand)"],
+            "reflectionPrompts": ["string (prompts answered on return to consolidate the experience)"],
+            "verification": {
+              "mode": "string (self-attested | reflection-submission | none)",
+              "isGating": "boolean (must be false — self-guided exercises are formative and do not block mastery progression)",
+              "selfAssessmentCriteria": ["string (optional — criteria for the learner to judge their own application)"]
+            },
+            "linkedCompetencies": ["string (competencyId, optional)"]
+          },
+
+          "retrievalPractice": [
+            {
+              "retrievalItemId": "string",
+              "retrievalType": "string (free-recall | cued-recall | application | scenario-analysis | contrast)",
+              "prompt": "string",
+              "difficulty": "integer (1–5)",
+              "schedule": {
+                "initialReviewDays": "integer",
+                "subsequentReviewDays": ["integer"],
+                "decayParameters": {
+                  "decayRate": "float (rate of forgetting; higher = faster decay)",
+                  "strengthMultiplier": "float (scales interval after successful recall)",
+                  "minimumIntervalDays": "integer",
+                  "maximumIntervalDays": "integer"
+                }
+              }
+            }
+          ],
+
+          "transferExercises": [
+            {
+              "exerciseId": "string",
+              "context": "string (domain the scenario is drawn from)",
+              "scenario": "string",
+              "task": "string",
+              "successCriteria": ["string"]
+            }
+          ],
+
+          "masteryVerification": {
+            "assessmentIds": ["string"],
+            "requiredPerformance": {
+              "minimumAccuracy": "float (0–1)",
+              "minimumTransferScore": "float (0–1)"
+            }
+          }
+        }
+      ]
+    }
+  ],
+
+  "assessments": [
+    {
+      "assessmentId": "string",
+      "title": "string",
+      "assessmentType": "string (scenario-analysis | multiple-choice | short-answer | performance-task)",
+      "linkedCompetencies": ["string (competencyId)"],
+      "adaptiveDifficulty": "boolean",
+
+      "questions": [
+        {
+          "questionId": "string",
+          "difficulty": "integer (1–5)",
+          "prompt": "string",
+          "questionType": "string (short-answer | multiple-choice | scenario-analysis)",
+          "options": ["string (REQUIRED for multiple-choice questions — the choices shown)"],
+          "correctIndex": "integer (REQUIRED for multiple-choice questions — index of the correct option; the engine auto-scores these on submit)",
+          "optionFeedback": [
+            {
+              "optionIndex": "integer",
+              "feedback": "string (per-option explanation shown after submission)",
+              "linkedMisconceptionId": "string (optional — maps the distractor to a competency misconception)"
+            }
+          ],
+          "successCriteria": ["string"],
+
+          "rubric": {
+            "excellent": "string",
+            "adequate": "string",
+            "weak": "string"
+          },
+
+          "errorPatterns": [
+            {
+              "errorPatternId": "string",
+              "description": "string (observable wrong-answer pattern)",
+              "linkedMisconceptionId": "string (competency.commonMisconceptions.misconceptionId)",
+              "remediationAction": "string (e.g. resurface worked-example-01 | flag for instructor review)"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "retrievalSystem": {
+    "algorithm": "string (spaced-repetition | fixed-interval | performance-adaptive)",
+    "confidenceWeighting": "boolean",
+    "interleavingEnabled": "boolean",
+    "retrievalModes": [
+      "string (free-recall | cued-recall | application | scenario-analysis | contrast)"
+    ]
+  },
+
+  "masterySystem": {
+    "masteryLevels": [
+      "string (novice | developing | proficient | mastered)"
+    ],
+    "decayModelEnabled": "boolean",
+    "reverificationRequired": "boolean"
+  },
+
+  "analytics": {
+    "track": [
+      "string (accuracy | confidence | time-on-task | retrieval-strength | transfer-performance | misconception-frequency)"
+    ],
+    "errorAnalysis": {
+      "enabled": "boolean",
+      "errorPatternTracking": "boolean",
+      "misconceptionFrequencyLogging": "boolean",
+      "linkedToMisconceptionIds": ["string"]
+    }
+  },
+
+  "glossary": [
+    {
+      "term": "string",
+      "definition": "string"
+    }
+  ]
 }`;
 
 const ID_LINKS = `KEY ID LINKAGES (every reference must resolve to a real ID defined elsewhere):
@@ -450,6 +782,12 @@ const ID_LINKS = `KEY ID LINKAGES (every reference must resolve to a real ID def
 - competencies[].commonMisconceptions[].linkedErrorPatterns[] -> assessments[].questions[].errorPatterns[].errorPatternId
 - learningModel.interleavingGroups[].competencyIds[] -> competencies[].competencyId
 - priorKnowledgeCheck.probeQuestions[].linkedCompetencies[] -> competencies[].competencyId
+- sections[].furtherReading[].linkedCompetencies[] (optional) -> competencies[].competencyId
+- sections[].learningExperiences[].selfGuidedExercise.linkedCompetencies[] (optional) -> competencies[].competencyId
+- interactionSequence[].optionFeedback[].linkedMisconceptionId (optional) -> competencies[].commonMisconceptions[].misconceptionId
+- assessments[].questions[].optionFeedback[].linkedMisconceptionId (optional) -> competencies[].commonMisconceptions[].misconceptionId
+- priorKnowledgeCheck.probeQuestions[].optionFeedback[].linkedMisconceptionId (optional) -> competencies[].commonMisconceptions[].misconceptionId
+- correctIndex, correctOrder[], and optionFeedback[].optionIndex all index into the SAME item's options[] (0-based, must be in range)
 All IDs unique within their collection and case-sensitive.`;
 
 function slugify(s) {
@@ -475,6 +813,8 @@ const FEATURE_LABELS = {
   'reflection-prompt':     'a reflection prompt asking the learner to connect the material to their own experience',
   'transfer-exercise':     'a transfer exercise set in a domain different from the teaching examples',
   'misconception-callout': 'an explicit misconception call-out with the correct reasoning',
+  'further-reading':       'a curated "further reading" list of optional supplementary resources (articles, books, papers, videos) for learners who want depth beyond the core path',
+  'self-guided-exercise':  'a self-guided exercise prompting the learner to apply the material in an authentic real-world context outside the course (e.g. attend an open mic night, build an open-ended personal project)',
   // quiz types
   'multiple-choice':       'multiple-choice questions',
   'true-false':            'true / false questions',
@@ -578,6 +918,7 @@ CORE KNOWLEDGE
 1. Lecture content — the core explanation a learner needs. Pitched to a ${d.difficulty} ${aud}. Progress from concrete to abstract. Define key terms on first use.
 2. Retrieval cues — 2-4 questions the learner should answer from memory after the section. These become spaced-retrieval items in the next step.
 3. Transfer prompts — 1-2 novel situations in a DIFFERENT domain than the teaching examples where the learner must apply the idea.
+4. Answer keys — for EVERY multiple-choice question you write (quizzes, checks, probes): list the exact options the learner will see (4 is ideal), mark which option is correct, and write one sentence of feedback PER OPTION explaining why it is right or wrong. Design each wrong option to embody one of the architecture's misconceptions where possible, and name that misconception's ID next to the option. For ranking questions, give the full correct order, best to worst. These keys become machine-scorable answer data in the next step — without them the engine cannot grade.
 
 REQUIRED CONTENT FEATURES (from course configuration):
 ${featureBlock(f)}
@@ -627,16 +968,18 @@ ${featureBlock(f)}
    - "reflection prompt" → an interactionSequence item of type "reflection"
    - "transfer exercise" → transferExercises[]
    - "misconception callout" → contentBlock type "text" with blockId ending "-misconception", referencing the relevant commonMisconceptions entry
+   - "further reading" → sections[].furtherReading[] — each entry needs resourceId, title, resourceType (article|book|paper|video|website|other), and either a url or a citation; add a short rationaleNote on why it is worth reading, and link to relevant competencies where applicable. These are optional/extension resources and never gate progression.
+   - "self-guided exercise" → a learningExperience with experienceType "self-guided-exercise" carrying a selfGuidedExercise object: realWorldContext, objective, ordered instructions[], optional estimatedRealWorldDurationMinutes and materialsOrPrerequisites[], reflectionPrompts[] for when the learner returns, and a verification object. Set verification.isGating=false ALWAYS (these are formative and must not block mastery); choose verification.mode from self-attested|reflection-submission|none.
    - quiz question types → map to questionType values in assessments[].questions[]
 1. Competencies: convert step-1 competencies verbatim (same IDs). Fill difficultyProfile honestly (1-5). Set transferRequired=true for anything a learner must apply, not just recall. Port every misconception into commonMisconceptions with a concrete remediationStrategy.
 2. Sections & experiences: for each section, create one or more learningExperiences from the step-2 content. Populate contentBlocks with the actual lecture text (type "text"). Choose experienceType to fit the material.
 3. desiredCognitiveActions: include active operations (prediction, retrieval, analysis, comparison, reflection) — not passive reading. Every experience should make the learner DO something.
-4. interactionSequence: build genuine retrieval and prediction interactions. Prefer asking the learner to PREDICT or EXPLAIN before revealing answers (revealCondition "after-response"). Provide ELABORATIVE feedback (type "elaborative") that explains the reasoning, not just right/wrong. Enable confidencePrompt on key items to drive calibration.
+4. interactionSequence: build genuine retrieval and prediction interactions. Prefer asking the learner to PREDICT or EXPLAIN before revealing answers (revealCondition "after-response"). Provide ELABORATIVE feedback (type "elaborative") that explains the reasoning, not just right/wrong. Enable confidencePrompt on key items to drive calibration. ANSWER KEYS ARE MANDATORY: every multiple-choice item carries options[] and correctIndex; every drag-drop item carries options[] and a full correctOrder[] (option indices, best to worst). Give every option an optionFeedback entry explaining why it is right or wrong, and set linkedMisconceptionId on each distractor that embodies one of the competency's commonMisconceptions — the engine uses these keys to score answers and surface misconception diagnoses.
 5. workedExamples: port the step-2 worked examples with explicit ordered steps and a conclusion.
 6. retrievalPractice: turn the step-2 retrieval cues into items. Use expanding spaced schedules (e.g. initialReviewDays 1, subsequentReviewDays [3,7,14,30]) and set sensible decayParameters so intervals adapt to recall strength. Vary retrievalType across free-recall, cued-recall, application, scenario-analysis, contrast.
 7. transferExercises: port step-2 transfer prompts; set context to a DIFFERENT domain than the teaching examples; give explicit successCriteria.
-8. assessments: create at least one assessment per competency with rubric-scored questions (excellent/adequate/weak). For each question, define errorPatterns that link to the relevant misconceptionId and specify a concrete remediationAction (e.g. resurface a specific worked example).
-9. priorKnowledgeCheck: include probe questions mapped to competencies, with routingRules that let proficient learners skip or unlock advanced material.
+8. assessments: create at least one assessment per competency, MIXING question types: auto-scorable multiple-choice questions (questionType "multiple-choice" with options[], correctIndex, and optionFeedback per option — linkedMisconceptionId on distractors) alongside rubric-scored written questions (excellent/adequate/weak descriptors a learner can honestly self-rate against). For each question, define errorPatterns that link to the relevant misconceptionId and specify a concrete remediationAction (e.g. resurface a specific worked example).
+9. priorKnowledgeCheck: include probe questions mapped to competencies, with routingRules that let proficient learners skip or unlock advanced material. Make most probes multiple-choice WITH options[], correctIndex, and optionFeedback so the engine can score prior knowledge; distractors should embody the competency's misconceptions (linkedMisconceptionId).
 10. learningModel & retrievalSystem & masterySystem: enable retrievalPractice, confidenceCalibration, adaptiveDifficulty, interleaving, and spacedRepetition. Define interleavingGroups that mix related competencies. Set decayModelEnabled and reverificationRequired so mastery must be maintained.
 11. analytics: track accuracy, confidence, time-on-task, retrieval-strength, transfer-performance, misconception-frequency; enable errorAnalysis fully.
 12. glossary: include all key terms defined in step 2.
@@ -646,6 +989,7 @@ CRITICAL OUTPUT RULES
 - Output ONLY the JSON object. No prose, no markdown fences, no commentary.
 - It MUST be valid, parseable JSON.
 - Every ID referenced anywhere MUST be defined somewhere (resolve all linkages above).
+- ANSWER-KEY COMPLETENESS: no multiple-choice item or question anywhere in the file may lack options[] + correctIndex, and no drag-drop item may lack correctOrder[]. correctIndex/correctOrder/optionFeedback[].optionIndex must be valid 0-based indices into that item's options[]. An item without its key cannot be scored by the engine.
 - Be rich and specific: real prompts, real feedback text, real rubric descriptors — never placeholders like "string" or "TODO".
 - Favour fewer, deeper, fully-realised experiences over many empty stubs.`;
 
@@ -672,9 +1016,9 @@ ${ID_LINKS}
 PRODUCE NOW — a single JSON object containing ONLY these top-level keys, fully populated:
 - "courseMetadata": courseId "${slug}", difficultyLevel "${d.difficulty}", language "${d.language}", estimatedDurationMinutes ${d.duration}, version "1.0", fitting title/description, sensible tags and prerequisites.
 - "learningModel": enable retrievalPractice, confidenceCalibration, adaptiveDifficulty, interleaving, spacedRepetition. Define interleavingGroups that deliberately mix related competencies ACROSS sections (this is the backbone of cross-section cohesion — be specific).
-- "priorKnowledgeCheck": probe questions mapped to competencies, with routingRules that let proficient learners skip or unlock advanced material.
+- "priorKnowledgeCheck": probe questions mapped to competencies, with routingRules that let proficient learners skip or unlock advanced material. Make most probes multiple-choice with options[], correctIndex, and per-option optionFeedback (linkedMisconceptionId on distractors) so the engine can score prior knowledge.
 - "competencies": convert step-1 competencies verbatim (same IDs). Fill difficultyProfile (1-5). Set transferRequired=true for anything a learner must apply. Port every misconception into commonMisconceptions with a concrete remediationStrategy and stable misconceptionId values.
-- "assessments": at least one assessment per competency with rubric-scored questions (excellent/adequate/weak). Each question defines errorPatterns linking to the relevant misconceptionId with a concrete remediationAction. (Assessments live here, at course level, so all sections can reference them.)
+- "assessments": at least one assessment per competency, mixing auto-scorable multiple-choice questions (options[], correctIndex, optionFeedback per option with linkedMisconceptionId on distractors) and rubric-scored written questions (excellent/adequate/weak). Each question defines errorPatterns linking to the relevant misconceptionId with a concrete remediationAction. (Assessments live here, at course level, so all sections can reference them.)
 - "retrievalSystem", "masterySystem", "analytics", "glossary": fully populate. Set decayModelEnabled and reverificationRequired. Track all analytics fields and enable errorAnalysis fully. Glossary holds ALL key terms from step 2.
 - "sections": include an EMPTY array for now: "sections": []
 
@@ -710,10 +1054,12 @@ SCHEMA FOR A SINGLE SECTION OBJECT (one element of the "sections" array):
 { "sectionId","title","description",
   "learningObjectives[]{objectiveId,description,linkedCompetencies[]},
   "motivationHooks[]{type (real-world-stakes|prediction-gap|curiosity-prompt|relevance-anchor),prompt},
-  "learningExperiences": [{ experienceId,title,experienceType (guided-analysis|worked-example|case-study|simulation|discussion),difficultyProfile{overall,conceptualComplexity,ambiguity},estimatedDurationMinutes,linkedCompetencies[],desiredCognitiveActions[] (prediction|analysis|reflection|retrieval|comparison|synthesis),
+  "furtherReading[]{resourceId,title,resourceType (article|book|paper|video|website|other),url (optional),citation (optional),author (optional),rationaleNote (optional),linkedCompetencies[] (optional)} (OPTIONAL — supplementary resources; never gates progression),
+  "learningExperiences": [{ experienceId,title,experienceType (guided-analysis|worked-example|case-study|simulation|discussion|self-guided-exercise),difficultyProfile{overall,conceptualComplexity,ambiguity},estimatedDurationMinutes,linkedCompetencies[],desiredCognitiveActions[] (prediction|analysis|reflection|retrieval|comparison|synthesis),
     contentBlocks[]{blockId,type (text|image|video|audio|interactive),content,url,altText,captionOrTranscript},
-    interactionSequence[]{interactionId,interactionType,prompt,required,responseFormat,revealCondition,feedback{type (elaborative|corrective|hint-only|socratic),elaborativeFeedback,correctiveFeedback,hints[]},confidencePrompt{enabled,scaleMin,scaleMax,prompt}},
+    interactionSequence[]{interactionId,interactionType,prompt,required,responseFormat,revealCondition,options[] (REQUIRED for multiple-choice/drag-drop/likert),correctIndex (REQUIRED for multiple-choice),correctOrder[] (REQUIRED for drag-drop — option indices best to worst),optionFeedback[]{optionIndex,feedback,linkedMisconceptionId (optional — must be a foundation misconceptionId)},feedback{type (elaborative|corrective|hint-only|socratic),elaborativeFeedback,correctiveFeedback,hints[]},confidencePrompt{enabled,scaleMin,scaleMax,prompt}},
     workedExamples[]{exampleId,problem,steps[],conclusion},
+    selfGuidedExercise{exerciseId,realWorldContext,objective,instructions[],estimatedRealWorldDurationMinutes (optional),materialsOrPrerequisites[] (optional),reflectionPrompts[],verification{mode (self-attested|reflection-submission|none),isGating (MUST be false),selfAssessmentCriteria[] (optional)},linkedCompetencies[] (optional)} (present when experienceType is self-guided-exercise),
     retrievalPractice[]{retrievalItemId,retrievalType,prompt,difficulty (1-5),schedule{initialReviewDays,subsequentReviewDays[],decayParameters{decayRate,strengthMultiplier,minimumIntervalDays,maximumIntervalDays}}},
     transferExercises[]{exerciseId,context,scenario,task,successCriteria[]},
     masteryVerification{assessmentIds[],requiredPerformance{minimumAccuracy,minimumTransferScore}} }] }
@@ -728,6 +1074,7 @@ LEARNING-MAXIMISING RULES FOR THIS SECTION
 - contentBlocks carry the actual lecture text from step 2 (type "text").
 - desiredCognitiveActions are active (prediction, retrieval, analysis, comparison, reflection) — never passive.
 - interactionSequence asks the learner to PREDICT or EXPLAIN before revealing (revealCondition "after-response"); feedback type "elaborative" explains the reasoning; enable confidencePrompt on key items.
+- ANSWER KEYS ARE MANDATORY: every multiple-choice item has options[] + correctIndex; every drag-drop item has options[] + a full correctOrder[]. Write optionFeedback for EVERY option (why it is right or wrong) and set linkedMisconceptionId on distractors that embody a foundation misconception — use only misconceptionIds that exist in the shared foundation.
 - workedExamples have explicit ordered steps and a conclusion.
 - retrievalPractice uses expanding spaced schedules (e.g. 1, then [3,7,14,30]) with sensible decayParameters; vary retrievalType.
 - transferExercises use a DIFFERENT domain than the teaching examples, with explicit successCriteria.

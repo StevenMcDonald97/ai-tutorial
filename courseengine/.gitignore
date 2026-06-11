@@ -166,5 +166,6 @@ dist
 !.env.example
 .wrangler/
 
+node_modules/
 src/registry.js
 

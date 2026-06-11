@@ -44,6 +44,15 @@
         "probeId": "string",
         "prompt": "string",
         "questionType": "string (multiple-choice | short-answer | scenario-analysis)",
+        "options": ["string (REQUIRED for multiple-choice probes — the choices shown)"],
+        "correctIndex": "integer (REQUIRED for multiple-choice probes — index of the correct option; lets the engine score prior knowledge)",
+        "optionFeedback": [
+          {
+            "optionIndex": "integer",
+            "feedback": "string (shown after answering)",
+            "linkedMisconceptionId": "string (optional)"
+          }
+        ],
         "linkedCompetencies": ["string (competencyId)"],
         "scoringCriteria": ["string"],
         "routingRules": [
@@ -117,11 +126,24 @@
         }
       ],
 
+      "furtherReading": [
+        {
+          "resourceId": "string",
+          "title": "string",
+          "resourceType": "string (article | book | paper | video | website | other)",
+          "url": "url (optional)",
+          "citation": "string (optional — for non-linkable sources such as books)",
+          "author": "string (optional)",
+          "rationaleNote": "string (optional — why this resource is worth reading)",
+          "linkedCompetencies": ["string (competencyId, optional)"]
+        }
+      ],
+
       "learningExperiences": [
         {
           "experienceId": "string",
           "title": "string",
-          "experienceType": "string (guided-analysis | worked-example | case-study | simulation | discussion)",
+          "experienceType": "string (guided-analysis | worked-example | case-study | simulation | discussion | self-guided-exercise)",
           "difficultyProfile": {
             "overall": "integer (1–5)",
             "conceptualComplexity": "integer (1–5)",
@@ -152,6 +174,16 @@
               "required": "boolean",
               "responseFormat": "string (short-answer | multiple-choice | ranking | likert)",
               "revealCondition": "string (after-response | after-attempt | on-request)",
+              "options": ["string (REQUIRED for multiple-choice, drag-drop, and likert — the choices shown to the learner)"],
+              "correctIndex": "integer (REQUIRED for multiple-choice — index into options[] of the correct answer)",
+              "correctOrder": ["integer (for drag-drop ranking — option indices in best-to-worst order; enables positional scoring)"],
+              "optionFeedback": [
+                {
+                  "optionIndex": "integer (index into options[])",
+                  "feedback": "string (why this option is right or wrong — shown after the learner answers)",
+                  "linkedMisconceptionId": "string (optional — the misconceptionId this distractor embodies; wrong answers then surface the misconception)"
+                }
+              ],
 
               "feedback": {
                 "type": "string (elaborative | corrective | hint-only | socratic)",
@@ -177,6 +209,22 @@
               "conclusion": "string"
             }
           ],
+
+          "selfGuidedExercise": {
+            "exerciseId": "string",
+            "realWorldContext": "string (the authentic setting the learner applies the material in — e.g. 'attend an open mic night')",
+            "objective": "string (what applying the material should accomplish)",
+            "instructions": ["string (ordered steps guiding the learner through the real-world application)"],
+            "estimatedRealWorldDurationMinutes": "integer (optional — time outside the engine)",
+            "materialsOrPrerequisites": ["string (optional — anything the learner needs beforehand)"],
+            "reflectionPrompts": ["string (prompts answered on return to consolidate the experience)"],
+            "verification": {
+              "mode": "string (self-attested | reflection-submission | none)",
+              "isGating": "boolean (must be false — self-guided exercises are formative and do not block mastery progression)",
+              "selfAssessmentCriteria": ["string (optional — criteria for the learner to judge their own application)"]
+            },
+            "linkedCompetencies": ["string (competencyId, optional)"]
+          },
 
           "retrievalPractice": [
             {
@@ -233,6 +281,15 @@
           "difficulty": "integer (1–5)",
           "prompt": "string",
           "questionType": "string (short-answer | multiple-choice | scenario-analysis)",
+          "options": ["string (REQUIRED for multiple-choice questions — the choices shown)"],
+          "correctIndex": "integer (REQUIRED for multiple-choice questions — index of the correct option; the engine auto-scores these on submit)",
+          "optionFeedback": [
+            {
+              "optionIndex": "integer",
+              "feedback": "string (per-option explanation shown after submission)",
+              "linkedMisconceptionId": "string (optional — maps the distractor to a competency misconception)"
+            }
+          ],
           "successCriteria": ["string"],
 
           "rubric": {
@@ -279,7 +336,7 @@
       "enabled": "boolean",
       "errorPatternTracking": "boolean",
       "misconceptionFrequencyLogging": "boolean",
-      "linkedToMisconceptionIds": "boolean"
+      "linkedToMisconceptionIds": ["string"]
     }
   },
 
