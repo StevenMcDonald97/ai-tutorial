@@ -1,0 +1,962 @@
+{
+  "courseMetadata": {
+    "courseId": "critical-thinking-101",
+    "title": "Reading the Evidence",
+    "description": "A practical course in evaluating causal claims, spotting weak reasoning, and applying disciplined judgment to the messy arguments you meet in the wild.",
+    "thumbnailImage": "",
+    "estimatedDurationMinutes": 540,
+    "difficultyLevel": "intermediate",
+    "version": "4.0",
+    "lastUpdated": "2026-05-30",
+    "language": "en",
+    "tags": [
+      "critical thinking",
+      "causal reasoning",
+      "evidence",
+      "decision making"
+    ],
+    "prerequisites": [
+      {
+        "type": "knowledge",
+        "description": "Comfortable reading nonfiction prose and news articles."
+      },
+      {
+        "type": "knowledge",
+        "description": "Basic familiarity with percentages and simple statistics."
+      }
+    ]
+  },
+  "learningModel": {
+    "masteryThreshold": 0.85,
+    "passingThreshold": 0.7,
+    "retrievalPracticeEnabled": true,
+    "confidenceCalibrationEnabled": true,
+    "adaptiveDifficultyEnabled": true,
+    "interleavingEnabled": true,
+    "interleavingGroups": [
+      {
+        "groupId": "near-transfer-causal",
+        "competencyIds": [
+          "causal-reasoning",
+          "evidence-quality"
+        ],
+        "experienceIds": [
+          "exp-correlation",
+          "exp-confounders"
+        ],
+        "rationaleNote": "Contrast near-transfer items so learners must discriminate confounding from weak evidence."
+      }
+    ],
+    "spacedRepetitionEnabled": true
+  },
+  "priorKnowledgeCheck": {
+    "enabled": true,
+    "placement": "before-course",
+    "probeQuestions": [
+      {
+        "probeId": "probe-01",
+        "prompt": "A study finds that cities with more bookstores have lower crime rates. A columnist concludes that opening bookstores reduces crime. What is the single biggest problem with that conclusion?",
+        "questionType": "multiple-choice",
+        "linkedCompetencies": [
+          "causal-reasoning"
+        ],
+        "options": [
+          "The study used too small a sample",
+          "It treats a correlation as if it proved causation, ignoring confounders like wealth",
+          "Crime is impossible to measure accurately",
+          "Bookstores are declining, so the data is outdated"
+        ],
+        "correctIndex": 1,
+        "optionFeedback": [
+          {
+            "optionIndex": 0,
+            "feedback": "Sample size matters, but even a huge sample leaves the deeper problem: this design cannot separate cause from correlation."
+          },
+          {
+            "optionIndex": 1,
+            "feedback": "Exactly — wealthier areas can afford more bookstores AND tend to have lower crime, so wealth confounds the link."
+          },
+          {
+            "optionIndex": 2,
+            "feedback": "Crime statistics are imperfect, but measurement error is not what breaks this argument — the causal leap is."
+          },
+          {
+            "optionIndex": 3,
+            "feedback": "Whether bookstores are declining says nothing about whether they cause lower crime."
+          }
+        ],
+        "scoringCriteria": [
+          "Identifies correlation-causation leap",
+          "Names a plausible confounder"
+        ],
+        "routingRules": [
+          {
+            "condition": "score >= 0.85",
+            "action": "unlock-advanced transfer items in Section 2"
+          },
+          {
+            "condition": "score < 0.5",
+            "action": "flag-for-review: start with the correlation worked example"
+          }
+        ]
+      },
+      {
+        "probeId": "probe-02",
+        "prompt": "In your own words: what makes a piece of evidence 'high quality' when you're trying to settle a factual dispute?",
+        "questionType": "short-answer",
+        "linkedCompetencies": [
+          "evidence-quality"
+        ],
+        "scoringCriteria": [
+          "Mentions source independence or expertise",
+          "Mentions relevance to the claim",
+          "Mentions reproducibility or corroboration"
+        ],
+        "routingRules": [
+          {
+            "condition": "score >= 0.7",
+            "action": "skip-to-section: Section 2"
+          }
+        ]
+      }
+    ]
+  },
+  "competencies": [
+    {
+      "competencyId": "causal-reasoning",
+      "title": "Evaluate causal claims",
+      "description": "Distinguish correlation from causation and surface plausible alternative explanations.",
+      "taxonomyLevel": "analyze",
+      "difficultyProfile": {
+        "overall": 3,
+        "conceptualComplexity": 4,
+        "ambiguity": 5,
+        "technicalSkill": 1,
+        "readingDemand": 2
+      },
+      "transferRequired": true,
+      "masteryThreshold": 0.85,
+      "desiredOutcomes": [
+        {
+          "outcomeId": "out-causal-1",
+          "description": "Learner identifies unsupported causal leaps in real news writing.",
+          "verifiedBy": [
+            "assess-causal",
+            "transfer-news"
+          ],
+          "verificationCriteria": {
+            "minimumAccuracy": 0.8,
+            "minimumConfidenceCalibration": 0.7,
+            "requiresTransferSuccess": true
+          }
+        }
+      ],
+      "commonMisconceptions": [
+        {
+          "misconceptionId": "mis-corr-cause",
+          "misconception": "If two things rise and fall together, one must be causing the other.",
+          "whyIncorrect": "Co-movement is equally consistent with reverse causation, a shared third cause, or coincidence.",
+          "remediationStrategy": "Force the learner to generate at least two non-causal explanations before accepting a causal one.",
+          "linkedErrorPatterns": [
+            "ep-leap"
+          ]
+        }
+      ]
+    },
+    {
+      "competencyId": "evidence-quality",
+      "title": "Judge evidence quality",
+      "description": "Weigh sources by independence, relevance, and corroboration rather than vividness.",
+      "taxonomyLevel": "evaluate",
+      "difficultyProfile": {
+        "overall": 3,
+        "conceptualComplexity": 3,
+        "ambiguity": 4,
+        "technicalSkill": 2,
+        "readingDemand": 3
+      },
+      "transferRequired": true,
+      "masteryThreshold": 0.8,
+      "desiredOutcomes": [
+        {
+          "outcomeId": "out-evid-1",
+          "description": "Learner ranks competing sources on a defensible quality ordering.",
+          "verifiedBy": [
+            "assess-causal"
+          ],
+          "verificationCriteria": {
+            "minimumAccuracy": 0.75,
+            "minimumConfidenceCalibration": 0.65,
+            "requiresTransferSuccess": false
+          }
+        }
+      ],
+      "commonMisconceptions": [
+        {
+          "misconceptionId": "mis-vivid",
+          "misconception": "A vivid anecdote is stronger evidence than a dry statistic.",
+          "whyIncorrect": "A single memorable case is unrepresentative; aggregate data captures the base rate the anecdote ignores.",
+          "remediationStrategy": "Pair every anecdote with the base rate it omits.",
+          "linkedErrorPatterns": [
+            "ep-anecdote"
+          ]
+        }
+      ]
+    }
+  ],
+  "sections": [
+    {
+      "sectionId": "sec-foundations",
+      "title": "When Two Things Move Together",
+      "description": "Correlation feels like causation. This section builds the reflex of stopping at the gap between them.",
+      "learningObjectives": [
+        {
+          "objectiveId": "obj-1",
+          "description": "Explain why correlation does not establish causation.",
+          "linkedCompetencies": [
+            "causal-reasoning"
+          ]
+        },
+        {
+          "objectiveId": "obj-2",
+          "description": "Generate alternative explanations for an observed association.",
+          "linkedCompetencies": [
+            "causal-reasoning"
+          ]
+        }
+      ],
+      "motivationHooks": [
+        {
+          "type": "real-world-stakes",
+          "prompt": "A health agency once urged millions to take hormone therapy based on correlational data. A later randomized trial found it raised the very risks it was meant to lower."
+        },
+        {
+          "type": "prediction-gap",
+          "prompt": "Ice cream sales and drowning deaths rise together almost perfectly. Before reading on — what do you think actually links them?"
+        }
+      ],
+      "furtherReading": [
+        {
+          "resourceId": "fr-spurious",
+          "title": "Spurious Correlations",
+          "resourceType": "website",
+          "url": "https://www.tylervigen.com/spurious-correlations",
+          "author": "Tyler Vigen",
+          "rationaleNote": "A gallery of absurd real-world correlations (cheese consumption vs. bedsheet entanglements) that makes the correlation-causation gap impossible to forget.",
+          "linkedCompetencies": [
+            "causal-reasoning"
+          ]
+        },
+        {
+          "resourceId": "fr-book-cause",
+          "title": "The Book of Why: The New Science of Cause and Effect",
+          "resourceType": "book",
+          "citation": "Pearl, J. & Mackenzie, D. (2018). The Book of Why. Basic Books.",
+          "author": "Judea Pearl & Dana Mackenzie",
+          "rationaleNote": "The accessible, deeper treatment of how to reason about causation once you've internalised why correlation isn't enough.",
+          "linkedCompetencies": [
+            "causal-reasoning",
+            "evidence-quality"
+          ]
+        }
+      ],
+      "learningExperiences": [
+        {
+          "experienceId": "exp-correlation",
+          "title": "The Gap Between Together and Because",
+          "experienceType": "guided-analysis",
+          "difficultyProfile": {
+            "overall": 2,
+            "conceptualComplexity": 3,
+            "ambiguity": 3
+          },
+          "estimatedDurationMinutes": 18,
+          "linkedCompetencies": [
+            "causal-reasoning"
+          ],
+          "desiredCognitiveActions": [
+            "prediction",
+            "analysis",
+            "reflection"
+          ],
+          "contentBlocks": [
+            {
+              "blockId": "cb-1",
+              "type": "text",
+              "content": "Two variables are <em>correlated</em> when they move together in a predictable way. That is all correlation tells you — that knowing one helps you predict the other. It says nothing about <em>why</em>. The word <span class='glossary-link' data-term='confounder'>confounder</span> names the most common reason a correlation misleads: a hidden third variable driving both."
+            },
+            {
+              "blockId": "cb-2",
+              "type": "text",
+              "content": "Consider ice cream and drowning. Both rise in summer. Heat is the shared cause; neither ice cream nor swimming drives the other. The correlation is real, the causal story invented."
+            },
+            {
+              "blockId": "cb-3",
+              "type": "image",
+              "url": "",
+              "altText": "A scatter plot of ice cream sales against drowning incidents, with a third arrow labelled 'summer heat' pointing at both — illustrating a confounding variable."
+            }
+          ],
+          "interactionSequence": [
+            {
+              "interactionId": "int-pred-1",
+              "interactionType": "prediction",
+              "prompt": "A town notices that neighborhoods with more streetlights report more crime. Before reading the analysis: write one causal story AND one non-causal story that could explain this.",
+              "required": true,
+              "responseFormat": "short-answer",
+              "revealCondition": "after-response",
+              "feedback": {
+                "type": "elaborative",
+                "elaborativeFeedback": "The tempting causal story — 'lights attract criminals' — is rarely the real one. The usual non-causal explanation is reverse selection: cities install more lights in areas that already have high crime. The streetlights are a <em>response</em> to crime, not a cause of it. Whenever you see an association, ask which direction the arrow actually points, and whether something chose to put the two together."
+              },
+              "confidencePrompt": {
+                "enabled": true,
+                "scaleMin": 1,
+                "scaleMax": 5,
+                "prompt": "How confident are you that you found a genuine alternative explanation?"
+              }
+            },
+            {
+              "interactionId": "int-mc-1",
+              "interactionType": "multiple-choice",
+              "prompt": "Which statement correctly describes what a strong positive correlation between A and B licenses you to conclude?",
+              "required": true,
+              "responseFormat": "multiple-choice",
+              "revealCondition": "after-response",
+              "options": [
+                "A causes B",
+                "B causes A",
+                "Knowing A improves your prediction of B — nothing more, on its own",
+                "A and B are unrelated"
+              ],
+              "correctIndex": 2,
+              "optionFeedback": [
+                {
+                  "optionIndex": 0,
+                  "feedback": "This is the classic leap — the correlation is equally consistent with B causing A, or a shared cause driving both.",
+                  "linkedMisconceptionId": "mis-corr-cause"
+                },
+                {
+                  "optionIndex": 1,
+                  "feedback": "Reversing the arrow is just as unsupported as the original claim — the data alone cannot pick a direction.",
+                  "linkedMisconceptionId": "mis-corr-cause"
+                },
+                {
+                  "optionIndex": 2,
+                  "feedback": "Right: correlation licenses prediction, nothing more, until other evidence rules out the alternatives."
+                },
+                {
+                  "optionIndex": 3,
+                  "feedback": "A strong correlation means they ARE statistically related — the open question is why."
+                }
+              ],
+              "feedback": {
+                "type": "corrective",
+                "correctiveFeedback": "Correlation is a statement about prediction, not mechanism. On its own it is equally consistent with A→B, B→A, a shared cause, or coincidence. Only additional evidence — an experiment, a ruled-out confounder, a mechanism — can choose among them."
+              }
+            },
+            {
+              "interactionId": "int-ref-1",
+              "interactionType": "reflection",
+              "prompt": "Think of a causal claim you currently believe based mostly on things 'going together.' How would you test whether it survives the alternative-explanations check?",
+              "required": false,
+              "responseFormat": "short-answer",
+              "revealCondition": "on-request",
+              "feedback": {
+                "type": "socratic",
+                "hints": [
+                  "What would you expect to see if the arrow pointed the other way?",
+                  "Is there a third factor that could plausibly drive both?",
+                  "What experiment, even a thought experiment, would separate the explanations?"
+                ]
+              }
+            }
+          ],
+          "workedExamples": [
+            {
+              "exampleId": "we-1",
+              "problem": "A headline reads: 'People who drink red wine live longer — so pour a glass for your health.' Evaluate the causal claim.",
+              "steps": [
+                "Identify the association: moderate wine drinkers show longer average lifespans in observational data.",
+                "Ask about direction: longevity can't cause past drinking, so reverse causation is unlikely here.",
+                "Hunt for confounders: moderate drinkers tend to be wealthier, more socially connected, and have steadier routines — all independently linked to longevity.",
+                "Check who was excluded: many studies lump lifelong abstainers with former heavy drinkers who quit due to illness, dragging down the 'no wine' group.",
+                "Weigh the evidence type: this is observational, not a randomized trial."
+              ],
+              "conclusion": "The longevity gap is plausibly explained by who chooses to drink moderately, not by the wine itself. The claim outruns its evidence."
+            }
+          ],
+          "retrievalPractice": [
+            {
+              "retrievalItemId": "rp-1",
+              "retrievalType": "cued-recall",
+              "prompt": "Name the three non-causal explanations that can produce a correlation between A and B.",
+              "difficulty": 2,
+              "schedule": {
+                "initialReviewDays": 1,
+                "subsequentReviewDays": [
+                  3,
+                  7,
+                  16
+                ],
+                "decayParameters": {
+                  "decayRate": 0.18,
+                  "strengthMultiplier": 2.1,
+                  "minimumIntervalDays": 1,
+                  "maximumIntervalDays": 60
+                }
+              }
+            }
+          ],
+          "transferExercises": [
+            {
+              "exerciseId": "transfer-news",
+              "context": "public health journalism",
+              "scenario": "A widely shared article reports that office workers who take the stairs instead of the elevator have 30% fewer sick days, and concludes that taking the stairs 'boosts your immune system.'",
+              "task": "Identify the causal leap and propose the two most plausible confounders. State what evidence would actually support the headline's claim.",
+              "successCriteria": [
+                "Names the correlation-causation leap explicitly",
+                "Proposes at least two plausible confounders (e.g. baseline fitness, overall conscientiousness about health)",
+                "Specifies that a randomized or longitudinal design would be needed"
+              ]
+            }
+          ],
+          "masteryVerification": {
+            "assessmentIds": [
+              "assess-causal"
+            ],
+            "requiredPerformance": {
+              "minimumAccuracy": 0.8,
+              "minimumTransferScore": 0.7
+            }
+          }
+        },
+        {
+          "experienceId": "exp-confounders",
+          "title": "Hunting the Hidden Variable",
+          "experienceType": "case-study",
+          "difficultyProfile": {
+            "overall": 3,
+            "conceptualComplexity": 4,
+            "ambiguity": 4
+          },
+          "estimatedDurationMinutes": 22,
+          "linkedCompetencies": [
+            "causal-reasoning",
+            "evidence-quality"
+          ],
+          "desiredCognitiveActions": [
+            "analysis",
+            "comparison",
+            "synthesis"
+          ],
+          "contentBlocks": [
+            {
+              "blockId": "cb-c1",
+              "type": "text",
+              "content": "A <span class='glossary-link' data-term='confounder'>confounder</span> is most dangerous when it's something everyone overlooks because it feels like background. The discipline is to ask, for any claimed cause, 'what kind of person or place ends up in each group, and why?'"
+            },
+            {
+              "blockId": "cb-c2",
+              "type": "video",
+              "url": "",
+              "captionOrTranscript": "A short screencast walks through the Berkeley admissions paradox, where aggregate data suggested bias against women but department-level data reversed the picture once you accounted for which programs each group applied to."
+            }
+          ],
+          "interactionSequence": [
+            {
+              "interactionId": "int-rank-1",
+              "interactionType": "drag-drop",
+              "prompt": "Rank these four explanations for 'students who own laptops score higher' from MOST to LEAST likely to be the real driver.",
+              "required": true,
+              "responseFormat": "ranking",
+              "revealCondition": "after-attempt",
+              "options": [
+                "Family income (buys laptops AND tutoring, books, stability)",
+                "The laptop itself improving learning",
+                "Pure coincidence in this sample",
+                "Higher scores cause laptop ownership"
+              ],
+              "correctIndex": 0,
+              "correctOrder": [
+                0,
+                1,
+                3,
+                2
+              ],
+              "feedback": {
+                "type": "elaborative",
+                "elaborativeFeedback": "Income is the textbook confounder here: it independently raises both laptop ownership and test scores, so the laptop-score link can be almost entirely spurious. The laptop may add a little, but attributing the whole gap to it ignores who can afford one in the first place."
+              }
+            },
+            {
+              "interactionId": "int-conf-1",
+              "interactionType": "scenario-analysis",
+              "prompt": "A hospital reports that patients treated in its newest wing have higher death rates than those in the old wing. An administrator wants to close the new wing. What's the most likely confounder, and what does it imply?",
+              "required": true,
+              "responseFormat": "short-answer",
+              "revealCondition": "after-response",
+              "feedback": {
+                "type": "elaborative",
+                "elaborativeFeedback": "The new wing is almost certainly where the sickest patients are sent — the ICU-grade equipment lives there. Severity of illness is the confounder: it drives both <em>which wing</em> and <em>death rate</em>. Closing the wing would be exactly backwards; the higher raw death rate may reflect harder cases, not worse care."
+              },
+              "confidencePrompt": {
+                "enabled": true,
+                "scaleMin": 1,
+                "scaleMax": 5,
+                "prompt": "How confident are you in the confounder you named?"
+              }
+            }
+          ],
+          "workedExamples": [],
+          "retrievalPractice": [
+            {
+              "retrievalItemId": "rp-2",
+              "retrievalType": "application",
+              "prompt": "Given any claim of the form 'Group X has outcome Y', what single question most quickly surfaces a confounder?",
+              "difficulty": 3,
+              "schedule": {
+                "initialReviewDays": 2,
+                "subsequentReviewDays": [
+                  5,
+                  12
+                ],
+                "decayParameters": {
+                  "decayRate": 0.22,
+                  "strengthMultiplier": 1.9,
+                  "minimumIntervalDays": 1,
+                  "maximumIntervalDays": 45
+                }
+              }
+            }
+          ],
+          "transferExercises": [],
+          "masteryVerification": {
+            "assessmentIds": [
+              "assess-causal"
+            ],
+            "requiredPerformance": {
+              "minimumAccuracy": 0.8,
+              "minimumTransferScore": 0.7
+            }
+          }
+        },
+        {
+          "experienceId": "exp-causal-field",
+          "title": "Take It Into the Wild",
+          "experienceType": "self-guided-exercise",
+          "difficultyProfile": {
+            "overall": 3,
+            "conceptualComplexity": 3,
+            "ambiguity": 4
+          },
+          "estimatedDurationMinutes": 10,
+          "linkedCompetencies": [
+            "causal-reasoning",
+            "evidence-quality"
+          ],
+          "desiredCognitiveActions": [
+            "analysis",
+            "synthesis",
+            "reflection"
+          ],
+          "contentBlocks": [
+            {
+              "blockId": "cb-sg-intro",
+              "type": "text",
+              "content": "Reasoning about causation only sticks once you catch it happening in the wild. This exercise sends you out to find a real causal claim and pressure-test it the way you would in here — no scenario provided, no answer key."
+            }
+          ],
+          "interactionSequence": [],
+          "workedExamples": [],
+          "selfGuidedExercise": {
+            "exerciseId": "sg-causal-hunt",
+            "realWorldContext": "Your own news feed, a podcast, or a conversation over the next week.",
+            "objective": "Find a real causal claim in the wild and subject it to the alternative-explanations check you practised in this section.",
+            "instructions": [
+              "Over the next few days, collect one causal claim you encounter naturally — a headline, an ad, a friend's confident 'X causes Y'.",
+              "Write down the exact association being claimed, and which direction the arrow is supposed to point.",
+              "Brainstorm at least two non-causal explanations: reverse causation, a confounder, or a selection effect.",
+              "Decide what single piece of evidence would most move you toward believing the causal claim is real.",
+              "Note whether, after this, you believe the claim more, less, or about the same."
+            ],
+            "estimatedRealWorldDurationMinutes": 90,
+            "materialsOrPrerequisites": [
+              "A way to jot notes (phone or notebook)"
+            ],
+            "reflectionPrompts": [
+              "Which was hardest to generate — a confounder, reverse causation, or a selection effect? What does that tell you about your default assumptions?",
+              "Did naming the alternatives change how strongly you held the claim?"
+            ],
+            "verification": {
+              "mode": "reflection-submission",
+              "isGating": false,
+              "selfAssessmentCriteria": [
+                "I stated the claimed association and its direction precisely.",
+                "I generated at least two genuine non-causal explanations.",
+                "I identified the evidence that would actually settle it."
+              ]
+            },
+            "linkedCompetencies": [
+              "causal-reasoning",
+              "evidence-quality"
+            ]
+          },
+          "retrievalPractice": [],
+          "transferExercises": [],
+          "masteryVerification": {
+            "assessmentIds": [
+              "assess-causal"
+            ],
+            "requiredPerformance": {
+              "minimumAccuracy": 0.8,
+              "minimumTransferScore": 0.7
+            }
+          }
+        }
+      ]
+    },
+    {
+      "sectionId": "sec-evidence",
+      "title": "Weighing What You're Given",
+      "description": "Not all evidence is equal. Learn to rank sources by what actually makes them trustworthy.",
+      "learningObjectives": [
+        {
+          "objectiveId": "obj-3",
+          "description": "Rank competing sources by independence, relevance, and corroboration.",
+          "linkedCompetencies": [
+            "evidence-quality"
+          ]
+        }
+      ],
+      "motivationHooks": [
+        {
+          "type": "curiosity-prompt",
+          "prompt": "Why does a single dramatic story sway us more than data covering ten thousand people — even when we know better?"
+        },
+        {
+          "type": "relevance-anchor",
+          "prompt": "Every purchase, vote, and medical choice you make rests on weighing evidence you didn't gather yourself."
+        }
+      ],
+      "learningExperiences": [
+        {
+          "experienceId": "exp-quality",
+          "title": "Vivid Is Not the Same as True",
+          "experienceType": "discussion",
+          "difficultyProfile": {
+            "overall": 3,
+            "conceptualComplexity": 3,
+            "ambiguity": 4
+          },
+          "estimatedDurationMinutes": 16,
+          "linkedCompetencies": [
+            "evidence-quality"
+          ],
+          "desiredCognitiveActions": [
+            "analysis",
+            "reflection",
+            "comparison"
+          ],
+          "contentBlocks": [
+            {
+              "blockId": "cb-q1",
+              "type": "text",
+              "content": "We're built to remember stories, not base rates. A friend's terrible flight cancels out a statistic about the safest year in aviation history. Good judgment means consciously re-weighting the dry number above the vivid tale."
+            },
+            {
+              "blockId": "cb-q2",
+              "type": "audio",
+              "url": "",
+              "captionOrTranscript": "Transcript: A two-minute clip discusses how a single recalled shark attack reshapes beach attendance for an entire summer, despite the vanishingly small change in actual risk."
+            },
+            {
+              "blockId": "cb-q3",
+              "type": "interactive",
+              "content": "Interactive widget: drag a slider between 'one vivid anecdote' and 'aggregate data from 10,000 cases' and watch the estimated reliability update."
+            }
+          ],
+          "interactionSequence": [
+            {
+              "interactionId": "int-likert-1",
+              "interactionType": "reflection",
+              "prompt": "How often do you catch yourself swayed by a single memorable example over the broader data?",
+              "required": false,
+              "responseFormat": "likert",
+              "revealCondition": "after-response",
+              "options": [
+                "Almost never",
+                "Rarely",
+                "Sometimes",
+                "Often",
+                "Almost always"
+              ],
+              "feedback": {
+                "type": "socratic",
+                "hints": [
+                  "Most people land at 'often' once they look honestly — the anecdote bias is the default setting, not a personal flaw."
+                ]
+              }
+            },
+            {
+              "interactionId": "int-mc-q",
+              "interactionType": "multiple-choice",
+              "prompt": "Two claims about a drug's safety conflict. Which source should generally carry the most weight?",
+              "required": true,
+              "responseFormat": "multiple-choice",
+              "revealCondition": "after-response",
+              "options": [
+                "A heartfelt testimonial from someone harmed by the drug",
+                "A manufacturer's press release citing its own trial",
+                "A meta-analysis pooling many independent randomized trials",
+                "A viral social media thread with thousands of likes"
+              ],
+              "correctIndex": 2,
+              "optionFeedback": [
+                {
+                  "optionIndex": 0,
+                  "feedback": "Vivid, but a single unrepresentative case — exactly the anecdote trap.",
+                  "linkedMisconceptionId": "mis-vivid"
+                },
+                {
+                  "optionIndex": 1,
+                  "feedback": "Not independent: the seller grading its own homework is a textbook conflict of interest."
+                },
+                {
+                  "optionIndex": 2,
+                  "feedback": "Correct — many independent trials, pooled, dilute any single source's bias."
+                },
+                {
+                  "optionIndex": 3,
+                  "feedback": "Popularity measures spread, not truth — likes are not evidence."
+                }
+              ],
+              "feedback": {
+                "type": "elaborative",
+                "elaborativeFeedback": "Independence and aggregation are what make the meta-analysis strongest: it pools many trials run by different teams, diluting any single source's bias. The testimonial is vivid but unrepresentative; the press release isn't independent of the seller; popularity isn't evidence at all."
+              }
+            }
+          ],
+          "workedExamples": [
+            {
+              "exampleId": "we-q1",
+              "problem": "Rank these on evidence quality for 'does this supplement improve memory?': (a) a celebrity endorsement, (b) a single small study funded by the maker, (c) an independent systematic review.",
+              "steps": [
+                "Strip away vividness and fame — the celebrity carries zero evidential weight on a factual question.",
+                "Check independence — the maker-funded study has a clear conflict of interest, lowering its weight.",
+                "Look for aggregation and independence together — the systematic review pools independent studies."
+              ],
+              "conclusion": "Ordering: independent review > maker-funded study > celebrity endorsement. Fame and funding are signals about persuasion, not truth."
+            }
+          ],
+          "retrievalPractice": [
+            {
+              "retrievalItemId": "rp-3",
+              "retrievalType": "free-recall",
+              "prompt": "From memory, list the three properties that make evidence high quality.",
+              "difficulty": 2,
+              "schedule": {
+                "initialReviewDays": 1,
+                "subsequentReviewDays": [
+                  4,
+                  10,
+                  21
+                ],
+                "decayParameters": {
+                  "decayRate": 0.15,
+                  "strengthMultiplier": 2.3,
+                  "minimumIntervalDays": 1,
+                  "maximumIntervalDays": 60
+                }
+              }
+            }
+          ],
+          "transferExercises": [
+            {
+              "exerciseId": "transfer-purchase",
+              "context": "consumer decision",
+              "scenario": "You're choosing between two air purifiers. One has 4,000 glowing reviews averaging 4.6 stars; the other has an independent lab test showing superior particle removal but only 40 reviews.",
+              "task": "Decide which evidence should dominate your choice and justify it using the quality criteria.",
+              "successCriteria": [
+                "Recognizes review counts measure popularity, not independent verification",
+                "Weights the independent lab test for the specific factual claim (particle removal)",
+                "Acknowledges reviews are still useful for reliability/durability claims the lab didn't test"
+              ]
+            }
+          ],
+          "masteryVerification": {
+            "assessmentIds": [
+              "assess-causal"
+            ],
+            "requiredPerformance": {
+              "minimumAccuracy": 0.75,
+              "minimumTransferScore": 0.65
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "assessments": [
+    {
+      "assessmentId": "assess-causal",
+      "title": "Causal & Evidential Reasoning Check",
+      "assessmentType": "scenario-analysis",
+      "linkedCompetencies": [
+        "causal-reasoning",
+        "evidence-quality"
+      ],
+      "adaptiveDifficulty": true,
+      "questions": [
+        {
+          "questionId": "q-0",
+          "difficulty": 2,
+          "prompt": "A city installs more streetlights and burglaries fall the following year. Which additional piece of evidence would do the MOST to support the claim that the streetlights caused the drop?",
+          "questionType": "multiple-choice",
+          "options": [
+            "A poll showing residents feel safer",
+            "Burglaries also fell in similar nearby cities that added no streetlights",
+            "Burglaries stayed flat in similar nearby cities that added no streetlights",
+            "A news story profiling a burglar who retired that year"
+          ],
+          "correctIndex": 2,
+          "optionFeedback": [
+            {
+              "optionIndex": 0,
+              "feedback": "Feeling safer is an outcome of perception, not evidence about what drove the burglary numbers."
+            },
+            {
+              "optionIndex": 1,
+              "feedback": "If burglaries fell everywhere, the drop is probably a regional trend — that evidence would UNDERMINE the streetlight claim.",
+              "linkedMisconceptionId": "mis-corr-cause"
+            },
+            {
+              "optionIndex": 2,
+              "feedback": "Right — a comparison group that lacked the intervention and did not improve is exactly what isolates the streetlights as the difference-maker."
+            },
+            {
+              "optionIndex": 3,
+              "feedback": "A single vivid case can't carry a city-level causal claim.",
+              "linkedMisconceptionId": "mis-vivid"
+            }
+          ]
+        },
+        {
+          "questionId": "q-1",
+          "difficulty": 3,
+          "prompt": "A study reports that employees who use standing desks are more productive. Write a short analysis: is the causal claim ('standing desks boost productivity') justified? Name the strongest alternative explanation.",
+          "questionType": "scenario-analysis",
+          "successCriteria": [
+            "States that the observational design cannot establish causation",
+            "Identifies self-selection (motivated employees choose standing desks) as the key confounder",
+            "Notes what evidence would settle it (randomized assignment)"
+          ],
+          "rubric": {
+            "excellent": "Names the correlation-causation gap, identifies self-selection as the confounder, and specifies a randomized design as the fix.",
+            "adequate": "Recognizes the claim is shaky and gestures at an alternative explanation, but doesn't name the design fix.",
+            "weak": "Accepts the causal claim or only objects to sample size without addressing confounding."
+          },
+          "errorPatterns": [
+            {
+              "errorPatternId": "ep-leap",
+              "description": "Learner accepts the causal claim because the association is strong or intuitive.",
+              "linkedMisconceptionId": "mis-corr-cause",
+              "remediationAction": "resurface worked example we-1 and the streetlights prediction"
+            }
+          ]
+        },
+        {
+          "questionId": "q-2",
+          "difficulty": 2,
+          "prompt": "You must advise a friend on whether a new diet 'works.' They cite a glowing testimonial video. What single piece of evidence would you ask for instead, and why is it stronger?",
+          "questionType": "short-answer",
+          "successCriteria": [
+            "Requests aggregate or controlled data rather than a testimonial",
+            "Explains that one vivid case is unrepresentative",
+            "References independence or base rates"
+          ],
+          "rubric": {
+            "excellent": "Asks for a controlled study or aggregate data and explains the unrepresentativeness of a single vivid case using base rates.",
+            "adequate": "Prefers data over the testimonial but gives a thin justification.",
+            "weak": "Treats the testimonial as sufficient or only doubts the person's honesty."
+          },
+          "errorPatterns": [
+            {
+              "errorPatternId": "ep-anecdote",
+              "description": "Learner treats a vivid individual story as decisive evidence.",
+              "linkedMisconceptionId": "mis-vivid",
+              "remediationAction": "resurface worked example we-q1; flag for instructor review if repeated"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "retrievalSystem": {
+    "algorithm": "performance-adaptive",
+    "confidenceWeighting": true,
+    "interleavingEnabled": true,
+    "retrievalModes": [
+      "free-recall",
+      "cued-recall",
+      "application",
+      "scenario-analysis",
+      "contrast"
+    ]
+  },
+  "masterySystem": {
+    "masteryLevels": [
+      "novice",
+      "developing",
+      "proficient",
+      "mastered"
+    ],
+    "decayModelEnabled": true,
+    "reverificationRequired": true
+  },
+  "analytics": {
+    "track": [
+      "accuracy",
+      "confidence",
+      "time-on-task",
+      "retrieval-strength",
+      "transfer-performance",
+      "misconception-frequency"
+    ],
+    "errorAnalysis": {
+      "enabled": true,
+      "errorPatternTracking": true,
+      "misconceptionFrequencyLogging": true,
+      "linkedToMisconceptionIds": [
+        "mis-corr-cause",
+        "mis-vivid"
+      ]
+    }
+  },
+  "glossary": [
+    {
+      "term": "Confounder",
+      "definition": "A hidden third variable that influences both of two correlated variables, creating the illusion that one causes the other."
+    },
+    {
+      "term": "Correlation",
+      "definition": "A measurable tendency for two variables to move together. It supports prediction but does not, by itself, establish cause."
+    },
+    {
+      "term": "Base rate",
+      "definition": "The underlying frequency of an event in a population — the statistical backdrop that vivid anecdotes tend to make us ignore."
+    },
+    {
+      "term": "Reverse causation",
+      "definition": "When the presumed effect is actually the cause; the causal arrow points the opposite way from what's claimed."
+    },
+    {
+      "term": "Meta-analysis",
+      "definition": "A study that statistically combines results from many independent studies to estimate an overall effect with greater reliability."
+    },
+    {
+      "term": "Transfer",
+      "definition": "Applying a skill learned in one context to a genuinely novel situation — the real test of understanding."
+    }
+  ]
+}
