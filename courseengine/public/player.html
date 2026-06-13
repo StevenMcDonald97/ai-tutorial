@@ -1,0 +1,2115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Course Player</title>
+<!--__OG_TAGS__-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Spline+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --paper:#f4f1ea;
+  --paper-deep:#ece7dc;
+  --surface:#fbf9f4;
+  --surface-raised:#ffffff;
+  --ink:#23211c;
+  --ink-soft:#5f5a4f;
+  --ink-faint:#928c7d;
+  --line:#ddd6c7;
+  --line-soft:#e8e2d5;
+  --accent:#7a2e1d;          /* oxblood */
+  --accent-deep:#5e2114;
+  --accent-wash:#f3e4df;
+  --accent-line:#e3c4ba;
+  --moss:#4a5d3a;
+  --moss-wash:#e8ecdf;
+  --gold:#9a6a18;
+  --gold-wash:#f6ecd6;
+  --indigo:#33457a;
+  --indigo-wash:#e3e7f2;
+  --plum:#5a3566;
+  --plum-wash:#efe6f2;
+  --rust:#9c4a26;
+  --rust-wash:#f6e6dc;
+  --good:#3f6d4e;
+  --good-wash:#e6efe7;
+  --warn:#9c3527;
+  --warn-wash:#f7e4e0;
+  --radius:4px;
+  --radius-lg:8px;
+  --shadow-sm:0 1px 2px rgba(47,40,28,.06);
+  --shadow:0 6px 28px -12px rgba(47,40,28,.28);
+  --shadow-lg:0 20px 60px -24px rgba(47,40,28,.4);
+  --serif:'Fraunces',Georgia,serif;
+  --read:'Newsreader',Georgia,serif;
+  --sans:'Spline Sans',-apple-system,sans-serif;
+  --mono:'Spline Sans Mono',ui-monospace,monospace;
+  --sidebar-w:312px;
+}
+
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--sans);background:var(--paper);color:var(--ink);
+  min-height:100vh;font-size:15px;line-height:1.6;
+  background-image:
+    radial-gradient(circle at 12% 8%, rgba(122,46,29,.04), transparent 38%),
+    radial-gradient(circle at 88% 92%, rgba(74,93,58,.045), transparent 42%);
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:var(--serif);font-weight:500;line-height:1.12;letter-spacing:-.01em}
+::selection{background:var(--accent-wash);color:var(--accent-deep)}
+
+/* ─── Layout ─────────────────────────────────────────── */
+#app{display:flex;min-height:100vh}
+
+/* ─── Sidebar ────────────────────────────────────────── */
+#sidebar{
+  width:var(--sidebar-w);min-width:var(--sidebar-w);
+  background:linear-gradient(180deg,var(--surface),var(--paper));
+  border-right:1px solid var(--line);display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;overflow-y:auto;z-index:40;
+}
+#sidebar-header{padding:26px 24px 18px;border-bottom:1px solid var(--line)}
+.brand-mark{display:flex;align-items:center;gap:9px;margin-bottom:18px}
+.brand-seal{
+  width:30px;height:30px;border:1.5px solid var(--accent);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;color:var(--accent);
+  font-family:var(--serif);font-size:15px;font-style:italic;flex-shrink:0;
+}
+.brand-name{font-family:var(--serif);font-size:14px;font-style:italic;color:var(--ink-soft);letter-spacing:.02em}
+#sidebar-header .course-eyebrow{font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+#sidebar-header h2{font-size:19px;color:var(--ink);line-height:1.22}
+#progress-meta{margin-top:16px}
+#progress-bar-wrap{background:var(--line);border-radius:99px;height:5px;overflow:hidden}
+#progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--rust));border-radius:99px;transition:width .5s cubic-bezier(.22,1,.36,1);width:0}
+#progress-label{margin-top:7px;font-size:11px;color:var(--ink-faint);letter-spacing:.02em}
+
+/* Competency rail */
+#competency-rail{padding:18px 24px;border-bottom:1px solid var(--line)}
+.rail-label{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.rail-label .ghost-btn{font-family:var(--sans);font-size:10px;letter-spacing:.08em;color:var(--accent);background:none;border:none;cursor:pointer;text-transform:uppercase}
+.comp-badge{margin-bottom:13px}
+.comp-badge:last-child{margin-bottom:0}
+.comp-badge-top{display:flex;align-items:baseline;gap:8px;margin-bottom:5px}
+.comp-badge-title{font-size:12px;font-weight:500;color:var(--ink);flex:1;line-height:1.3}
+.comp-badge-level{font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:1px 6px;border-radius:99px;white-space:nowrap}
+.lvl-novice{background:var(--line);color:var(--ink-soft)}
+.lvl-developing{background:var(--gold-wash);color:var(--gold)}
+.lvl-proficient{background:var(--indigo-wash);color:var(--indigo)}
+.lvl-mastered{background:var(--good-wash);color:var(--good)}
+.comp-bar-wrap{background:var(--line);border-radius:99px;height:4px;overflow:hidden}
+.comp-bar{height:100%;border-radius:99px;transition:width .5s cubic-bezier(.22,1,.36,1)}
+
+/* Section nav */
+#sidebar-nav{padding:8px 0 24px}
+.nav-section-label{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);padding:16px 24px 8px}
+.section-nav-item{}
+.section-nav-header{
+  padding:10px 24px;cursor:pointer;display:flex;align-items:center;gap:11px;
+  font-size:13.5px;font-weight:500;color:var(--ink-soft);user-select:none;
+  transition:background .15s,color .15s;position:relative;
+}
+.section-nav-header:hover{background:var(--paper-deep);color:var(--ink)}
+.section-nav-header.active{color:var(--ink)}
+.section-nav-header.active::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:3px;background:var(--accent);border-radius:0 3px 3px 0}
+.section-check{
+  width:19px;height:19px;border-radius:50%;border:1.5px solid var(--line);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-size:10px;transition:all .25s;color:transparent;
+}
+.section-check.done{background:var(--accent);border-color:var(--accent);color:#fff}
+.section-check.active{border-color:var(--accent)}
+.section-nav-title{flex:1;line-height:1.3}
+.section-nav-arrow{font-size:9px;transition:transform .25s;color:var(--ink-faint)}
+.section-nav-item.open .section-nav-arrow{transform:rotate(90deg)}
+.section-nav-children{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.section-nav-item.open .section-nav-children{max-height:900px}
+
+.sub-nav-item{
+  padding:7px 24px 7px 56px;cursor:pointer;font-size:12px;color:var(--ink-faint);
+  display:flex;align-items:center;gap:9px;transition:background .15s,color .15s;
+}
+.sub-nav-item:hover{background:var(--paper-deep);color:var(--ink)}
+.sub-nav-item.active{color:var(--accent);font-weight:600}
+.sub-dot{width:6px;height:6px;border-radius:50%;background:var(--line);flex-shrink:0;transition:all .2s}
+.sub-nav-item.done .sub-dot{background:var(--moss)}
+.sub-nav-item.active .sub-dot{background:var(--accent);box-shadow:0 0 0 3px var(--accent-wash)}
+.sub-nav-item.assess .sub-dot{border-radius:1px;background:var(--gold)}
+.sub-nav-label{flex:1;line-height:1.3}
+.sub-kind{font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint)}
+
+/* ─── Main ───────────────────────────────────────────── */
+#main-wrap{flex:1;min-width:0;position:relative}
+#topbar{
+  position:sticky;top:0;z-index:30;backdrop-filter:blur(10px);
+  background:rgba(244,241,234,.82);border-bottom:1px solid var(--line);
+  display:none;align-items:center;gap:12px;padding:12px 18px;
+}
+#menu-toggle{background:none;border:1px solid var(--line);border-radius:var(--radius);padding:7px 10px;cursor:pointer;color:var(--ink);font-size:15px;line-height:1}
+#topbar .tb-title{font-family:var(--serif);font-size:15px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#main{max-width:760px;margin:0 auto;padding:54px 40px 96px}
+
+/* ─── Screens ────────────────────────────────────────── */
+.screen{display:none}
+.screen.active{display:block;animation:rise .4s cubic-bezier(.22,1,.36,1)}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.stagger>*{opacity:0;animation:rise .5s cubic-bezier(.22,1,.36,1) forwards}
+.stagger>*:nth-child(1){animation-delay:.02s}
+.stagger>*:nth-child(2){animation-delay:.08s}
+.stagger>*:nth-child(3){animation-delay:.14s}
+.stagger>*:nth-child(4){animation-delay:.20s}
+.stagger>*:nth-child(5){animation-delay:.26s}
+.stagger>*:nth-child(6){animation-delay:.32s}
+.stagger>*:nth-child(n+7){animation-delay:.38s}
+
+/* ─── Shared components ──────────────────────────────── */
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.eyebrow .rule{height:1px;flex:1;background:var(--accent-line);max-width:60px}
+.lede{font-family:var(--read);font-size:18px;line-height:1.6;color:var(--ink-soft);margin-bottom:8px}
+
+.tag{display:inline-flex;align-items:center;gap:5px;padding:3px 11px;border-radius:99px;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-family:var(--sans)}
+.tag .tdot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.tag-accent{background:var(--accent-wash);color:var(--accent)}
+.tag-moss{background:var(--moss-wash);color:var(--moss)}
+.tag-gold{background:var(--gold-wash);color:var(--gold)}
+.tag-indigo{background:var(--indigo-wash);color:var(--indigo)}
+.tag-plum{background:var(--plum-wash);color:var(--plum)}
+.tag-rust{background:var(--rust-wash);color:var(--rust)}
+.tag-line{background:transparent;color:var(--ink-soft);border:1px solid var(--line)}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 26px;border-radius:99px;font-size:14px;font-weight:600;font-family:var(--sans);cursor:pointer;border:1px solid transparent;transition:all .2s;letter-spacing:.01em}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:var(--shadow-sm)}
+.btn-primary:hover{background:var(--accent-deep);transform:translateY(-1px);box-shadow:var(--shadow)}
+.btn-primary:active{transform:none}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-secondary{background:var(--surface-raised);color:var(--ink);border-color:var(--line)}
+.btn-secondary:hover{background:var(--paper-deep);border-color:var(--ink-faint)}
+.btn-sm{padding:9px 18px;font-size:13px}
+.btn-ghost{background:none;color:var(--accent);font-weight:600;font-family:var(--sans);cursor:pointer;border:none;padding:5px 0;font-size:13px;border-bottom:1px solid var(--accent-line)}
+.btn-ghost:hover{border-color:var(--accent)}
+
+.nav-buttons{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:44px;padding-top:26px;border-top:1px solid var(--line)}
+
+.card{background:var(--surface-raised);border:1px solid var(--line);border-radius:var(--radius-lg);padding:24px 26px;box-shadow:var(--shadow-sm);margin-bottom:18px}
+
+/* ─── Intro / cover ──────────────────────────────────── */
+.cover{
+  position:relative;border:1px solid var(--line);border-radius:var(--radius-lg);
+  overflow:hidden;margin-bottom:34px;background:var(--surface-raised);box-shadow:var(--shadow);
+}
+.cover-art{
+  height:184px;position:relative;overflow:hidden;
+  background:
+    repeating-linear-gradient(135deg,transparent,transparent 13px,rgba(122,46,29,.05) 13px,rgba(122,46,29,.05) 14px),
+    linear-gradient(120deg,var(--accent-wash),var(--gold-wash) 55%,var(--moss-wash));
+}
+.cover-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cover-art .seal{
+  position:absolute;right:22px;top:22px;width:62px;height:62px;border-radius:50%;
+  border:1.5px solid var(--accent);color:var(--accent);background:rgba(251,249,244,.7);
+  display:flex;align-items:center;justify-content:center;font-family:var(--serif);
+  font-style:italic;font-size:13px;backdrop-filter:blur(3px);text-align:center;line-height:1.1;
+}
+.cover-body{padding:28px 30px 30px}
+.cover-tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+.cover-body h1{font-size:38px;line-height:1.05;margin-bottom:14px;letter-spacing:-.02em}
+.cover-desc{font-family:var(--read);font-size:18px;line-height:1.55;color:var(--ink-soft)}
+
+.meta-strip{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:30px;background:var(--surface-raised)}
+.meta-cell{padding:16px 18px;border-right:1px solid var(--line-soft)}
+.meta-cell:last-child{border-right:none}
+.meta-cell .mc-val{font-family:var(--serif);font-size:21px;font-weight:500;color:var(--ink);line-height:1}
+.meta-cell .mc-key{font-size:10px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.1em;margin-top:6px}
+
+.section-head{margin-bottom:24px}
+.section-head h2{font-size:23px;margin-bottom:6px}
+
+.lm-grid{display:flex;flex-wrap:wrap;gap:7px;margin:6px 0 6px}
+.lm-pill{
+  display:inline-flex;align-items:center;gap:6px;background:var(--surface-raised);
+  border:1px solid var(--line);border-radius:99px;padding:6px 13px;font-size:12px;color:var(--ink-faint);
+}
+.lm-pill.on{background:var(--moss-wash);border-color:#c4d0b3;color:var(--moss);font-weight:500}
+.lm-pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;opacity:.5}
+.lm-pill.on .dot{opacity:1}
+
+.list-clean{list-style:none}
+.outcomes-list li{padding:10px 0 10px 28px;position:relative;font-family:var(--read);font-size:16px;color:var(--ink-soft);border-bottom:1px solid var(--line-soft)}
+.outcomes-list li:last-child{border-bottom:none}
+.outcomes-list li::before{content:'';position:absolute;left:2px;top:17px;width:9px;height:9px;border:1.5px solid var(--accent);border-radius:50%}
+
+.prereq-list li{padding:8px 0 8px 26px;position:relative;font-size:14px;color:var(--ink-soft)}
+.prereq-list li::before{content:'§';position:absolute;left:4px;color:var(--ink-faint);font-family:var(--serif)}
+
+/* ─── Prior knowledge check ──────────────────────────── */
+.pkc-banner{
+  background:linear-gradient(120deg,var(--indigo-wash),var(--surface-raised));
+  border:1px solid #c9d2e8;border-radius:var(--radius-lg);padding:18px 22px;margin-bottom:26px;
+  display:flex;gap:14px;align-items:flex-start;
+}
+.pkc-banner .pkc-icon{font-size:22px;flex-shrink:0;margin-top:2px}
+.pkc-banner h3{font-size:16px;margin-bottom:4px;color:var(--indigo)}
+.pkc-banner p{font-size:13.5px;color:var(--ink-soft)}
+.probe-card{background:var(--surface-raised);border:1px solid var(--line);border-radius:var(--radius-lg);padding:22px 24px;margin-bottom:16px;box-shadow:var(--shadow-sm)}
+.probe-num{font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin-bottom:8px;letter-spacing:.04em}
+.probe-routing{margin-top:14px;display:none;border-top:1px dashed var(--line);padding-top:14px}
+.probe-routing.show{display:block}
+.routing-row{display:flex;gap:10px;align-items:center;font-size:12.5px;color:var(--ink-soft);padding:4px 0}
+.routing-cond{font-family:var(--mono);font-size:11px;background:var(--paper-deep);padding:2px 8px;border-radius:4px;color:var(--ink)}
+
+/* ─── Motivation hooks ───────────────────────────────── */
+.hook{
+  border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:12px;
+  display:flex;align-items:flex-start;gap:14px;font-family:var(--read);font-size:16px;line-height:1.5;
+  border-left:3px solid;position:relative;
+}
+.hook-icon{font-size:20px;flex-shrink:0;margin-top:1px;font-family:var(--sans)}
+.hook .hk-type{font-family:var(--sans);font-size:9.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:4px;opacity:.85}
+.hook-real-world-stakes{background:var(--warn-wash);border-color:var(--warn);color:#6e261d}
+.hook-prediction-gap{background:var(--gold-wash);border-color:var(--gold);color:#6b4910}
+.hook-curiosity-prompt{background:var(--plum-wash);border-color:var(--plum);color:#492a52}
+.hook-relevance-anchor{background:var(--moss-wash);border-color:var(--moss);color:#36462a}
+
+/* objectives */
+.objectives-list li{
+  padding:12px 16px 12px 40px;position:relative;font-size:14.5px;background:var(--surface-raised);
+  border:1px solid var(--line);border-radius:var(--radius);margin-bottom:7px;
+}
+.objectives-list li::before{content:'→';position:absolute;left:15px;top:12px;color:var(--accent);font-weight:600}
+.obj-comps{margin-top:7px;display:flex;flex-wrap:wrap;gap:5px}
+
+/* ─── Experience ─────────────────────────────────────── */
+.exp-header{margin-bottom:26px}
+.exp-header h2{font-size:30px;margin:10px 0;line-height:1.08}
+.exp-meta{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.exp-meta-item{font-size:12.5px;color:var(--ink-faint);display:flex;align-items:center;gap:6px}
+.diff-dots{display:inline-flex;gap:3px;align-items:center}
+.diff-dot{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.diff-dot.on{background:var(--accent)}
+.cog-actions{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:6px}
+
+/* content blocks */
+.cb-text{font-family:var(--read);font-size:18px;line-height:1.68;color:var(--ink);margin-bottom:20px}
+.cb-text:first-letter{}
+.cb-media{margin-bottom:22px}
+.cb-media img{width:100%;border-radius:var(--radius-lg);border:1px solid var(--line);display:block}
+.cb-media video,.cb-media audio{width:100%;border-radius:var(--radius-lg)}
+.cb-caption{font-size:12.5px;color:var(--ink-faint);text-align:center;margin-top:8px;font-style:italic;font-family:var(--read)}
+.cb-placeholder{
+  background:var(--paper-deep);border:1px dashed var(--line);border-radius:var(--radius-lg);
+  min-height:150px;display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;
+  color:var(--ink-faint);font-size:13px;
+}
+.cb-placeholder .ph-ico{font-size:26px;opacity:.6}
+.cb-transcript{margin-top:8px}
+.cb-transcript summary{font-size:12.5px;color:var(--accent);cursor:pointer;font-weight:500}
+.cb-transcript p{font-size:13.5px;color:var(--ink-soft);margin-top:8px;font-family:var(--read);line-height:1.6}
+.cb-interactive{background:var(--indigo-wash);border:1px solid #c9d2e8;border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:20px;font-size:14px;color:var(--indigo)}
+
+/* worked example */
+.worked{background:var(--surface-raised);border:1px solid var(--line);border-left:3px solid var(--moss);border-radius:0 var(--radius-lg) var(--radius-lg) 0;padding:20px 24px;margin-bottom:22px}
+.worked-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--moss);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.worked-problem{font-family:var(--read);font-size:16.5px;font-weight:500;margin-bottom:14px;color:var(--ink)}
+.we-steps{list-style:none;counter-reset:we}
+.we-steps li{counter-increment:we;padding:8px 0 8px 36px;position:relative;font-size:14.5px;color:var(--ink-soft);line-height:1.55}
+.we-steps li::before{content:counter(we);position:absolute;left:0;top:7px;width:24px;height:24px;background:var(--moss-wash);color:var(--moss);border-radius:50%;font-size:12px;font-weight:700;font-family:var(--sans);display:flex;align-items:center;justify-content:center}
+.we-conclusion{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);font-family:var(--read);font-size:15px;color:var(--moss);font-style:italic}
+
+/* ─── Interactions ───────────────────────────────────── */
+.interaction{background:var(--surface-raised);border:1px solid var(--line);border-radius:var(--radius-lg);padding:24px 26px;margin-bottom:18px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+.interaction::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);opacity:.6}
+.int-prediction::before{background:var(--indigo)}
+.int-reflection::before{background:var(--plum)}
+.int-compare::before{background:var(--gold)}
+.int-mc::before{background:var(--accent)}
+.int-scenario::before{background:var(--rust)}
+.int-dragdrop::before{background:var(--moss)}
+.int-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.int-prediction .int-label{color:var(--indigo)}
+.int-reflection .int-label{color:var(--plum)}
+.int-compare .int-label{color:var(--gold)}
+.int-mc .int-label{color:var(--accent)}
+.int-scenario .int-label{color:var(--rust)}
+.int-dragdrop .int-label{color:var(--moss)}
+.int-label .req-star{color:var(--accent);font-size:11px}
+.int-prompt{font-family:var(--read);font-size:18px;font-weight:500;margin-bottom:18px;line-height:1.45;color:var(--ink)}
+
+.sa-input{
+  width:100%;padding:13px 15px;border:1.5px solid var(--line);border-radius:var(--radius);
+  font-size:15px;font-family:var(--read);color:var(--ink);resize:vertical;min-height:100px;
+  transition:border .18s,box-shadow .18s;background:var(--surface);line-height:1.55;
+}
+.sa-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-wash)}
+.sa-input:disabled{opacity:.8;background:var(--paper-deep);cursor:default}
+
+/* multiple choice */
+.mc-options{display:flex;flex-direction:column;gap:9px;margin-bottom:4px}
+.mc-option{
+  display:flex;align-items:center;gap:12px;padding:13px 16px;border:1.5px solid var(--line);
+  border-radius:var(--radius);cursor:pointer;font-size:14.5px;transition:all .15s;background:var(--surface);
+}
+.mc-option:hover{border-color:var(--ink-faint);background:var(--paper-deep)}
+.mc-option .mc-key{
+  width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;
+  font-family:var(--mono);color:var(--ink-soft);transition:all .15s;
+}
+.mc-option.selected{border-color:var(--accent);background:var(--accent-wash)}
+.mc-option.selected .mc-key{background:var(--accent);border-color:var(--accent);color:#fff}
+.mc-option.correct{border-color:var(--good);background:var(--good-wash)}
+.mc-option.correct .mc-key{background:var(--good);border-color:var(--good);color:#fff}
+.mc-option.incorrect{border-color:var(--warn);background:var(--warn-wash)}
+.mc-option.incorrect .mc-key{background:var(--warn);border-color:var(--warn);color:#fff}
+.mc-option.locked{cursor:default;pointer-events:none}
+
+/* ranking */
+.rank-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+.rank-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--radius);background:var(--surface);cursor:grab;font-size:14px}
+.rank-item:active{cursor:grabbing}
+.rank-item.dragging{opacity:.5;border-style:dashed}
+.rank-grip{color:var(--ink-faint);font-size:15px;cursor:grab}
+.rank-num{font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:600;width:18px}
+
+/* likert */
+.likert{display:flex;gap:8px;margin-top:6px}
+.likert-opt{flex:1;text-align:center;padding:10px 4px;border:1.5px solid var(--line);border-radius:var(--radius);cursor:pointer;font-size:13px;transition:all .15s;background:var(--surface)}
+.likert-opt:hover{border-color:var(--ink-faint)}
+.likert-opt.selected{border-color:var(--accent);background:var(--accent-wash);color:var(--accent);font-weight:600}
+
+/* confidence */
+.confidence{background:var(--gold-wash);border:1px solid #e6d3a6;border-radius:var(--radius);padding:14px 18px;margin-top:14px}
+.confidence-label{font-size:12px;font-weight:600;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.confidence-row{display:flex;align-items:center;gap:14px}
+.confidence-slider{flex:1;accent-color:var(--gold);cursor:pointer;height:4px}
+.confidence-value{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--gold);min-width:42px;text-align:center}
+.confidence-anchors{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-faint);margin-top:6px}
+
+/* compare-responses (learner self-compares against model) */
+.compare-note{font-size:13.5px;color:var(--ink-soft);margin-bottom:14px;font-family:var(--read)}
+
+/* submit + feedback */
+.submit-row{margin-top:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.saved-flag{font-size:12.5px;color:var(--good);font-weight:600;display:flex;align-items:center;gap:5px}
+.hint-btn{background:none;border:1px dashed var(--gold);color:var(--gold);border-radius:99px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+.hint-btn:hover{background:var(--gold-wash)}
+.hint-box{margin-top:12px;background:var(--gold-wash);border:1px solid #e6d3a6;border-radius:var(--radius);padding:12px 16px;font-size:13.5px;color:#6b4910;display:none;font-family:var(--read);line-height:1.5}
+.hint-box.show{display:block;animation:rise .3s}
+.hint-box .hint-n{font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:4px;opacity:.7}
+
+.feedback{margin-top:18px;border-radius:var(--radius-lg);padding:16px 18px;font-size:15px;line-height:1.6;display:none;font-family:var(--read);border:1px solid}
+.feedback.show{display:block;animation:rise .35s}
+.feedback .fb-head{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.fb-elaborative{background:var(--indigo-wash);border-color:#c9d2e8;color:#2a386a}
+.fb-elaborative .fb-head{color:var(--indigo)}
+.fb-corrective{background:var(--accent-wash);border-color:var(--accent-line);color:var(--accent-deep)}
+.fb-corrective .fb-head{color:var(--accent)}
+.fb-socratic{background:var(--plum-wash);border-color:#d9c4e0;color:#492a52}
+.fb-socratic .fb-head{color:var(--plum)}
+.fb-correct{background:var(--good-wash);border-color:#bcd6c2;color:#2f5740}
+.fb-correct .fb-head{color:var(--good)}
+
+/* retrieval practice */
+.retrieval{background:var(--surface-raised);border:1px solid var(--line);border-radius:var(--radius-lg);padding:0;margin-bottom:18px;overflow:hidden;box-shadow:var(--shadow-sm)}
+.retrieval-banner{background:var(--moss-wash);padding:16px 24px;border-bottom:1px solid #cdd8bd}
+.retrieval-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.retrieval-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--moss);display:flex;align-items:center;gap:7px}
+.retrieval-type{font-size:10px;color:var(--moss);font-family:var(--mono);opacity:.8}
+.retrieval-prompt{font-family:var(--read);font-size:17px;font-weight:500;color:var(--ink);line-height:1.45}
+.retrieval-body{padding:18px 24px}
+.schedule-strip{margin-top:14px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--ink-faint);flex-wrap:wrap}
+.sched-chip{font-family:var(--mono);font-size:11px;background:var(--paper-deep);border:1px solid var(--line);border-radius:99px;padding:3px 10px;color:var(--ink-soft)}
+.decay-meta{font-size:11px;color:var(--ink-faint);margin-top:8px;font-family:var(--mono)}
+
+/* transfer */
+.transfer{background:var(--surface-raised);border:1px solid var(--line);border-radius:var(--radius-lg);padding:24px 26px;margin-bottom:18px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+.transfer::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--rust)}
+.transfer-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--rust);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.transfer-ctx{font-family:var(--mono);font-size:10px;background:var(--rust-wash);color:var(--rust);padding:2px 8px;border-radius:4px;text-transform:none;letter-spacing:0}
+.transfer-scenario{background:var(--rust-wash);border-radius:var(--radius);padding:16px 18px;margin-bottom:14px;font-family:var(--read);font-size:16px;line-height:1.5;color:#5e2e16}
+.transfer-task{font-family:var(--read);font-size:17px;font-weight:500;margin-bottom:14px;color:var(--ink)}
+.criteria-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px}
+.criteria-list{list-style:none;margin-bottom:14px}
+.criteria-list li{font-size:14px;color:var(--ink-soft);padding:5px 0 5px 22px;position:relative;line-height:1.45}
+.criteria-list li::before{content:'◇';position:absolute;left:0;color:var(--rust);font-size:11px;top:6px}
+
+/* mastery verification */
+.mastery-box{background:linear-gradient(120deg,var(--accent-wash),var(--surface-raised));border:1px solid var(--accent-line);border-radius:var(--radius-lg);padding:20px 24px;margin:6px 0 18px}
+.mastery-box h4{font-size:15px;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.mastery-thresholds{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:14px}
+.mthresh{font-size:13px;color:var(--ink-soft)}
+.mthresh b{font-family:var(--mono);color:var(--accent);font-size:15px;display:block}
+
+/* ─── Further reading ─────────────────────────────────── */
+.further{background:var(--indigo-wash);border:1px solid var(--line);border-left:3px solid var(--indigo);border-radius:0 var(--radius-lg) var(--radius-lg) 0;padding:20px 24px;margin:6px 0 22px}
+.further-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--indigo);margin-bottom:4px;display:flex;align-items:center;gap:7px}
+.further-note{font-size:12.5px;color:var(--ink-soft);font-style:italic;margin-bottom:14px}
+.fr-item{padding:12px 0;border-top:1px dashed var(--line)}
+.fr-item:first-of-type{border-top:none}
+.fr-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.fr-title{font-family:var(--read);font-size:16.5px;font-weight:500;color:var(--ink)}
+.fr-title a{color:var(--indigo);text-decoration:none;border-bottom:1px solid var(--accent-line)}
+.fr-title a:hover{border-bottom-color:var(--indigo)}
+.fr-type{font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;background:var(--indigo);color:#fff;padding:2px 8px;border-radius:4px}
+.fr-author{font-size:13px;color:var(--ink-faint);margin-top:2px}
+.fr-cite{font-size:12.5px;color:var(--ink-faint);font-style:italic;margin-top:2px}
+.fr-rationale{font-family:var(--read);font-size:14.5px;color:var(--ink-soft);line-height:1.5;margin-top:6px}
+
+/* ─── Self-guided exercise ────────────────────────────── */
+.selfguided{background:var(--surface-raised);border:1px solid var(--line);border-radius:var(--radius-lg);padding:24px 26px;margin-bottom:18px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+.selfguided::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--plum)}
+.sg-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--plum);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.sg-formative{font-family:var(--mono);font-size:9.5px;background:var(--plum-wash);color:var(--plum);padding:2px 8px;border-radius:4px;text-transform:none;letter-spacing:0}
+.sg-context{background:var(--plum-wash);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;font-family:var(--read);font-size:15px;line-height:1.5;color:#4a2b55}
+.sg-objective{font-family:var(--read);font-size:17px;font-weight:500;margin-bottom:16px;color:var(--ink)}
+.sg-heading{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin:14px 0 8px}
+.sg-steps{list-style:none;counter-reset:sg;margin-bottom:6px}
+.sg-steps li{counter-increment:sg;padding:7px 0 7px 36px;position:relative;font-size:14.5px;color:var(--ink-soft);line-height:1.55}
+.sg-steps li::before{content:counter(sg);position:absolute;left:0;top:6px;width:24px;height:24px;background:var(--plum-wash);color:var(--plum);border-radius:50%;font-size:12px;font-weight:700;font-family:var(--sans);display:flex;align-items:center;justify-content:center}
+.sg-meta{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:8px;font-size:12.5px;color:var(--ink-faint)}
+.sg-prep{list-style:none}
+.sg-prep li{font-size:14px;color:var(--ink-soft);padding:4px 0 4px 20px;position:relative;line-height:1.45}
+.sg-prep li::before{content:'▪';position:absolute;left:0;color:var(--plum);font-size:11px;top:5px}
+.sg-reflect{list-style:none}
+.sg-reflect li{font-size:14.5px;color:var(--ink-soft);font-family:var(--read);padding:5px 0 5px 22px;position:relative;line-height:1.5}
+.sg-reflect li::before{content:'❀';position:absolute;left:0;color:var(--plum);font-size:11px;top:7px}
+.sg-criteria{list-style:none}
+.sg-criteria li{font-size:14px;color:var(--ink-soft);padding:5px 0 5px 24px;position:relative;line-height:1.45}
+.sg-criteria li::before{content:'☐';position:absolute;left:0;color:var(--plum);font-size:13px;top:4px}
+
+/* ─── Assessment ─────────────────────────────────────── */
+.assess-head{margin-bottom:26px}
+.assess-head h2{font-size:28px;margin:8px 0}
+.q-card{background:var(--surface-raised);border:1px solid var(--line);border-radius:var(--radius-lg);padding:24px 26px;margin-bottom:18px;box-shadow:var(--shadow-sm)}
+.q-meta{display:flex;align-items:center;gap:10px;font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;font-weight:600}
+.q-prompt{font-family:var(--read);font-size:18px;font-weight:500;margin-bottom:16px;line-height:1.45;color:var(--ink)}
+.rubric{background:var(--paper-deep);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;margin-top:16px}
+.rubric-title{font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:12px}
+.rubric-row{display:flex;gap:14px;margin-bottom:10px;font-size:14px;align-items:baseline}
+.rubric-row:last-child{margin-bottom:0}
+.rubric-level{font-weight:700;min-width:78px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;font-family:var(--sans)}
+.rubric-excellent .rubric-level{color:var(--good)}
+.rubric-adequate .rubric-level{color:var(--gold)}
+.rubric-weak .rubric-level{color:var(--warn)}
+.rubric-desc{color:var(--ink-soft);font-family:var(--read);line-height:1.45}
+.error-patterns{margin-top:14px;border-top:1px dashed var(--line);padding-top:14px}
+.ep-title{font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--warn);margin-bottom:10px}
+.ep-item{font-size:13px;color:var(--ink-soft);padding:7px 0;border-bottom:1px solid var(--line-soft);line-height:1.45}
+.ep-item:last-child{border-bottom:none}
+.ep-item b{color:var(--ink)}
+.ep-remedy{display:block;margin-top:3px;font-size:12px;color:var(--ink-faint)}
+.ep-remedy::before{content:'↳ ';color:var(--rust)}
+
+/* ─── Glossary ───────────────────────────────────────── */
+.glossary-link{border-bottom:1px dotted var(--accent);cursor:help;color:var(--accent-deep)}
+#glossary-btn{
+  position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;
+  border-radius:99px;padding:11px 18px;font-size:13px;font-weight:600;font-family:var(--sans);
+  cursor:pointer;box-shadow:var(--shadow);z-index:120;display:flex;align-items:center;gap:7px;transition:all .2s;
+}
+#glossary-btn:hover{background:var(--accent-deep);transform:translateY(-2px)}
+#scrim{position:fixed;inset:0;background:rgba(35,33,28,.34);backdrop-filter:blur(2px);z-index:150;opacity:0;pointer-events:none;transition:opacity .25s}
+#scrim.open{opacity:1;pointer-events:auto}
+#glossary-drawer{
+  position:fixed;top:0;right:0;bottom:0;width:380px;max-width:90vw;background:var(--surface);
+  border-left:1px solid var(--line);box-shadow:var(--shadow-lg);z-index:200;
+  display:flex;flex-direction:column;transform:translateX(100%);transition:transform .32s cubic-bezier(.22,1,.36,1);
+}
+#glossary-drawer.open{transform:none}
+#glossary-drawer-header{padding:22px 24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+#glossary-drawer-header h3{font-size:20px}
+#glossary-drawer-header .sub{font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
+#glossary-close{background:none;border:1px solid var(--line);border-radius:var(--radius);cursor:pointer;font-size:16px;color:var(--ink-soft);width:34px;height:34px;display:flex;align-items:center;justify-content:center}
+#glossary-search{margin:16px 24px 0;padding:10px 14px;border:1.5px solid var(--line);border-radius:99px;font-size:13px;font-family:var(--sans);background:var(--surface-raised);width:calc(100% - 48px)}
+#glossary-search:focus{outline:none;border-color:var(--accent)}
+#glossary-body{overflow-y:auto;padding:14px 0 24px;flex:1}
+.glossary-term{padding:14px 24px;border-bottom:1px solid var(--line-soft)}
+.glossary-term dt{font-family:var(--serif);font-size:16px;font-weight:500;color:var(--accent)}
+.glossary-term dd{font-family:var(--read);font-size:15px;color:var(--ink-soft);margin-top:4px;line-height:1.5}
+
+/* ─── Complete ───────────────────────────────────────── */
+#screen-complete{text-align:center;padding:70px 20px}
+.complete-seal{
+  width:96px;height:96px;border:2px solid var(--accent);border-radius:50%;display:flex;
+  align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;font-size:30px;
+  color:var(--accent);margin:0 auto 28px;position:relative;animation:sealIn .6s cubic-bezier(.22,1,.36,1);
+}
+@keyframes sealIn{from{opacity:0;transform:scale(.7) rotate(-8deg)}to{opacity:1;transform:none}}
+.complete-seal::after{content:'';position:absolute;inset:-7px;border:1px solid var(--accent-line);border-radius:50%}
+#screen-complete h1{font-size:42px;margin-bottom:14px}
+#screen-complete .c-sub{font-family:var(--read);font-size:19px;color:var(--ink-soft);max-width:480px;margin:0 auto 18px;line-height:1.5}
+.complete-stats{display:flex;justify-content:center;gap:36px;margin:30px 0 36px;flex-wrap:wrap}
+.cstat .cs-val{font-family:var(--serif);font-size:30px;color:var(--accent)}
+.cstat .cs-key{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-faint);margin-top:4px}
+
+/* toast */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120%);background:var(--ink);color:var(--paper);padding:12px 22px;border-radius:99px;font-size:13.5px;z-index:300;transition:transform .35s cubic-bezier(.22,1,.36,1);box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:8px}
+#toast.show{transform:translateX(-50%) translateY(0)}
+
+/* scrollbars */
+#sidebar::-webkit-scrollbar,#glossary-body::-webkit-scrollbar{width:6px}
+#sidebar::-webkit-scrollbar-thumb,#glossary-body::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
+
+/* responsive */
+@media(max-width:920px){
+  #sidebar{position:fixed;left:0;top:0;transform:translateX(-100%);transition:transform .3s cubic-bezier(.22,1,.36,1);box-shadow:var(--shadow-lg)}
+  #sidebar.open{transform:none}
+  #topbar{display:flex}
+  #main{padding:32px 22px 80px}
+  .meta-strip{grid-template-columns:repeat(2,1fr)}
+  .meta-cell:nth-child(2){border-right:none}
+  .cover-body h1{font-size:30px}
+}
+@media(max-width:520px){
+  #main{padding:24px 16px 72px}
+  .cover-body h1{font-size:26px}
+  .nav-buttons{flex-direction:column-reverse;align-items:stretch}
+  .nav-buttons .btn{justify-content:center}
+}
+
+/* ─── Review queue / self-grade / tools / loader ─────── */
+.due-badge{background:var(--accent);color:#fff;font-size:10px;font-weight:700;border-radius:99px;padding:1px 7px;margin-left:6px}
+#sidebar-tools{margin-top:auto;border-top:1px solid var(--line);padding:14px 24px 18px;display:flex;flex-direction:column;gap:8px}
+#sidebar-tools button{background:none;border:1px solid var(--line);border-radius:var(--radius);padding:8px 10px;font-size:11.5px;font-family:var(--sans);color:var(--ink-soft);cursor:pointer;text-align:left;transition:all .15s}
+#sidebar-tools button:hover{border-color:var(--accent);color:var(--accent)}
+.selfgrade{margin-top:14px;background:var(--paper-deep);border:1px solid var(--line);border-radius:var(--radius);padding:12px 16px}
+.selfgrade .sg-q{font-size:12px;font-weight:600;color:var(--ink-soft);display:block;margin-bottom:9px}
+.sg-btns{display:flex;gap:8px;flex-wrap:wrap}
+.sg-btn{border-radius:99px;padding:8px 16px;font-size:12.5px;font-weight:600;font-family:var(--sans);cursor:pointer;border:1.5px solid;background:var(--surface-raised);transition:all .15s}
+.sg-good{border-color:#bcd6c2;color:var(--good)} .sg-good:hover{background:var(--good-wash)}
+.sg-gold{border-color:#e6d3a6;color:var(--gold)} .sg-gold:hover{background:var(--gold-wash)}
+.sg-warn{border-color:#e8c4bd;color:var(--warn)} .sg-warn:hover{background:var(--warn-wash)}
+.review-item{margin-bottom:18px}
+.review-head-card{background:linear-gradient(120deg,var(--moss-wash),var(--surface-raised));border:1px solid #cdd8bd;border-radius:var(--radius-lg);padding:18px 22px;margin-bottom:24px;display:flex;gap:14px;align-items:flex-start}
+.review-head-card h3{font-size:16px;color:var(--moss);margin-bottom:4px}
+.review-head-card p{font-size:13.5px;color:var(--ink-soft)}
+.review-lesson-link{font-size:12px;color:var(--accent);background:none;border:none;cursor:pointer;border-bottom:1px solid var(--accent-line);padding:0;font-family:var(--sans)}
+#report-overlay{position:fixed;inset:0;background:rgba(35,33,28,.4);backdrop-filter:blur(2px);z-index:400;display:none;align-items:center;justify-content:center;padding:20px}
+#report-overlay.open{display:flex}
+#report-card{background:var(--surface-raised);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);max-width:560px;width:100%;max-height:80vh;overflow-y:auto;padding:26px 28px}
+#report-card h3{font-size:20px;margin-bottom:14px}
+.report-line{font-size:13.5px;color:var(--ink-soft);padding:7px 0;border-bottom:1px solid var(--line-soft);font-family:var(--mono);line-height:1.45}
+.report-line:last-child{border-bottom:none}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- ─── Sidebar ─── -->
+  <nav id="sidebar">
+    <div id="sidebar-header">
+      <div class="brand-mark">
+        <div class="brand-seal" id="brand-seal">C</div>
+        <div class="brand-name">Course Engine</div>
+      </div>
+      <div class="course-eyebrow" id="sidebar-eyebrow">Course</div>
+      <h2 id="sidebar-title" onClick="goScreen('intro')" style="cursor:pointer"></h2>
+      <div id="progress-meta">
+        <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+        <div id="progress-label"></div>
+      </div>
+    </div>
+    <div id="competency-rail">
+      <div class="rail-label">
+        <span>Competency Mastery</span>
+        <button class="ghost-btn" onclick="resetProgress()">Reset</button>
+      </div>
+      <div id="competency-bars"></div>
+    </div>
+    <div id="sidebar-nav"></div>
+    <div id="sidebar-tools">
+      <button onclick="document.getElementById('course-file').click()">&#10515; Load course JSON</button>
+      <button onclick="exportProgress()">&#10548; Export progress</button>
+      <button onclick="document.getElementById('progress-file').click()">&#10549; Import progress</button>
+    </div>
+  </nav>
+
+  <!-- ─── Main ─── -->
+  <div id="main-wrap">
+    <div id="topbar">
+      <button id="menu-toggle" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+      <div class="tb-title" id="tb-title"></div>
+    </div>
+    <main id="main">
+      <div id="screen-intro"    class="screen active"></div>
+      <div id="screen-pkc"      class="screen"></div>
+      <div id="screen-section"  class="screen"></div>
+      <div id="screen-exp"      class="screen"></div>
+      <div id="screen-assess"   class="screen"></div>
+      <div id="screen-review"   class="screen"></div>
+      <div id="screen-complete" class="screen"></div>
+    </main>
+  </div>
+</div>
+
+<button id="glossary-btn" onclick="toggleGlossary()">✦ Glossary</button>
+<div id="scrim" onclick="closeOverlays()"></div>
+<aside id="glossary-drawer">
+  <div id="glossary-drawer-header">
+    <div>
+      <h3>Glossary</h3>
+      <div class="sub">Key terms</div>
+    </div>
+    <button id="glossary-close" onclick="toggleGlossary()">✕</button>
+  </div>
+  <input id="glossary-search" type="text" placeholder="Search terms…" oninput="filterGlossary(this.value)">
+  <div id="glossary-body"></div>
+</aside>
+
+<div id="toast"></div>
+
+<input type="file" id="course-file" accept=".json,application/json" style="display:none" onchange="handleCourseFile(this.files[0]);this.value=''">
+<input type="file" id="progress-file" accept=".json,application/json" style="display:none" onchange="handleProgressFile(this.files[0]);this.value=''">
+<div id="report-overlay">
+  <div id="report-card">
+    <h3 id="report-title"></h3>
+    <div id="report-body"></div>
+    <div style="text-align:right;margin-top:16px"><button class="btn btn-primary btn-sm" onclick="closeReport()">Close</button></div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════════════
+   COURSE DATA — conforms to Course Engine JSON Schema v4 (v1.0 reference)
+   Replace this object with your own course. Every field the player reads is
+   optional-safe: missing arrays/objects degrade gracefully.
+   ════════════════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════════════════
+   COURSE DATA — injected at the edge by functions/[slug].js.
+   When this page is served via /<slug>, the Function replaces the token
+   below with the real course object. When opened directly (or for the
+   upload flow), the token stays a string and INIT treats it as "no course
+   loaded", then waits for an upload.
+   ════════════════════════════════════════════════════════════════════════ */
+let COURSE = "__INJECTED_COURSE__";
+
+/* A real course is "injected" only when COURSE is a non-null object. When the
+   page is served raw (direct visit / upload flow) the token is still a string,
+   so we fall back to an empty-safe shape and remember that nothing is loaded. */
+let HAS_COURSE = (COURSE && typeof COURSE === 'object' && !Array.isArray(COURSE));
+if (!HAS_COURSE) COURSE = { courseMetadata:{}, sections:[], competencies:[] };
+
+/* ════════════════════════════════════════════════════════════════════════
+   COURSE PLAYER ENGINE
+   ════════════════════════════════════════════════════════════════════════ */
+let C = COURSE; // shorthand
+let LM = C.learningModel || {};
+
+// ── State ───────────────────────────────────────────────────────────────
+let STORE_KEY = 'course-progress:' + (C.courseMetadata?.courseId || 'default');
+let state = loadState();
+
+function freshState(){
+  return {
+    screen:'intro', sectionIdx:0, expIdx:0, assessId:null,
+    completedExperiences:[], completedAssessments:[], completedProbes:[],
+    competencyEvidence:{},             // competencyId -> {attempts:[{s,w,t,k}]}
+    reviewSchedule:{},                 // retrievalItemId -> {expId,due,intervalDays,step,reps,lastScore,lastReviewed}
+    answers:{},                        // expId -> {interactionId:{answer,confidence,score}}
+    revealed:{},                       // expId -> [ids]
+    assessAnswers:{},                  // assessId -> {questionId:answer|choiceIndex}
+    assessSubmitted:[], assessSelfRatings:{},
+    pkcDone:false, pkcAnswers:{}
+  };
+}
+function loadState(){
+  try{ const raw = localStorage.getItem(STORE_KEY); if(raw){ const s=JSON.parse(raw); return Object.assign(freshState(), s); } }catch(e){}
+  return freshState();
+}
+function saveState(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
+function resetProgress(){
+  if(!confirm('Reset all progress for this course? This cannot be undone.')) return;
+  state = freshState(); saveState(); buildSidebar(); goScreen('intro'); toast('Progress reset');
+}
+
+// helpers for set-like arrays
+const has = (arr,v)=> Array.isArray(arr) && arr.includes(v);
+const add = (arr,v)=>{ if(!arr.includes(v)) arr.push(v); };
+
+// ── Competency maths ──────────────────────────────────────────────────────
+// Evidence-based competency ledger.
+// Each scored event appends an attempt {s:score 0–1, w:weight, t:timestamp, k:kind}.
+// Progress = decay-weighted mean accuracy × evidence saturation, so a single
+// lucky answer can't reach mastery and unused knowledge drifts down when
+// masterySystem.decayModelEnabled is true.
+const EVIDENCE_W = {            // base evidence weight by kind
+  assessment:1.0, transfer:0.8, mc:0.5, ranking:0.5, retrieval:0.5,
+  pkc:0.4, participation:0.15
+};
+const EVIDENCE_TARGET = 3.0;    // total (decayed) weight needed for full credit
+const DECAY_HALF_LIFE = 30;     // days — evidence halves in influence
+
+function recordEvidence(compIds, score, kind, weightOverride){
+  const w = weightOverride!=null ? weightOverride : (EVIDENCE_W[kind] ?? 0.3);
+  (compIds||[]).forEach(id=>{
+    const ev = state.competencyEvidence[id] = state.competencyEvidence[id] || {attempts:[]};
+    ev.attempts.push({ s: Math.max(0, Math.min(1, score)), w, t: Date.now(), k: kind });
+  });
+  saveState(); updateSidebarProgress();
+}
+function compProgress(compId){
+  const ev = state.competencyEvidence[compId];
+  if(!ev || !ev.attempts.length) return 0;
+  const decayOn = C.masterySystem?.decayModelEnabled;
+  let sw=0, sws=0;
+  ev.attempts.forEach(a=>{
+    let w=a.w;
+    if(decayOn){ const days=(Date.now()-a.t)/86400000; w *= Math.pow(0.5, days/DECAY_HALF_LIFE); }
+    sw+=w; sws+=w*a.s;
+  });
+  if(!sw) return 0;
+  const accuracy = sws/sw;
+  const saturation = Math.min(1, sw/EVIDENCE_TARGET);
+  return accuracy*saturation;
+}
+function compThreshold(comp){
+  return (comp && comp.masteryThreshold!=null) ? comp.masteryThreshold
+       : (C.learningModel?.masteryThreshold ?? 0.85);
+}
+function compLevel(p, comp){
+  const levels = C.masterySystem?.masteryLevels || ['novice','developing','proficient','mastered'];
+  const thr = compThreshold(comp);
+  if(p >= thr)      return levels[3]||'mastered';
+  if(p >= thr*0.65) return levels[2]||'proficient';
+  if(p >= thr*0.3)  return levels[1]||'developing';
+  return levels[0]||'novice';
+}
+function levelClass(lvl){ return 'lvl-' + String(lvl).toLowerCase(); }
+function compColor(p, comp){
+  const thr = compThreshold(comp);
+  if(p >= thr)      return 'var(--good)';
+  if(p >= thr*0.65) return 'var(--indigo)';
+  if(p >= thr*0.3)  return 'var(--gold)';
+  return 'var(--ink-faint)';
+}
+function expCompetencies(expId){
+  for(const sec of C.sections||[]) for(const e of sec.learningExperiences||[])
+    if(e.experienceId===expId) return e.linkedCompetencies||[];
+  return [];
+}
+
+// ── Progress accounting ───────────────────────────────────────────────────
+function allExperiences(){ return (C.sections||[]).flatMap(s=>s.learningExperiences||[]); }
+function totalUnits(){ return allExperiences().length + (C.assessments||[]).length; }
+function doneUnits(){ return state.completedExperiences.length + state.completedAssessments.length; }
+function overallPct(){ const t=totalUnits(); return t? Math.round(doneUnits()/t*100):0; }
+
+// ════════════════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════════════════════════════════
+function goScreen(screen, sIdx, eIdx){
+  state.screen = screen;
+  if(sIdx!=null) state.sectionIdx = sIdx;
+  if(eIdx!=null) state.expIdx = eIdx;
+  saveState();
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el = document.getElementById('screen-'+screen);
+
+  if(screen==='intro') renderIntro();
+  else if(screen==='pkc') renderPKC();
+  else if(screen==='section') renderSection();
+  else if(screen==='exp') renderExp();
+  else if(screen==='assess') renderAssess();
+  else if(screen==='review') renderReview();
+  else if(screen==='complete') renderComplete();
+
+  el.classList.add('active');
+  document.getElementById('main').scrollTop = 0;
+  window.scrollTo({top:0, behavior:'smooth'});
+  buildSidebar();
+  closeSidebarMobile();
+  updateTopbar();
+}
+function updateTopbar(){
+  let t = C.courseMetadata?.title || 'Course';
+  if(state.screen==='exp'){ const e=curExp(); if(e) t=e.title; }
+  else if(state.screen==='section'){ const s=C.sections[state.sectionIdx]; if(s) t=s.title; }
+  else if(state.screen==='assess'){ const a=findAssess(state.assessId); if(a) t=a.title; }
+  else if(state.screen==='review'){ t='Review queue'; }
+  document.getElementById('tb-title').textContent = t;
+}
+function curSection(){ return C.sections?.[state.sectionIdx]; }
+function curExp(){ return curSection()?.learningExperiences?.[state.expIdx]; }
+function findAssess(id){ return (C.assessments||[]).find(a=>a.assessmentId===id); }
+function findCompetency(id){ return (C.competencies||[]).find(c=>c.competencyId===id); }
+
+// ════════════════════════════════════════════════════════════════════════
+//  SIDEBAR
+// ════════════════════════════════════════════════════════════════════════
+function buildSidebar(){
+  const meta = C.courseMetadata||{};
+  document.getElementById('sidebar-title').textContent = meta.title||'Course';
+  document.getElementById('sidebar-eyebrow').textContent = (meta.difficultyLevel||'course');
+  document.getElementById('brand-seal').textContent = (meta.title||'C').trim()[0]||'C';
+
+  // competency rail
+  const rail = document.getElementById('competency-bars');
+  rail.innerHTML = (C.competencies||[]).map(c=>{
+    const p = compProgress(c.competencyId);
+    const lvl = compLevel(p, c);
+    return `<div class="comp-badge">
+      <div class="comp-badge-top">
+        <span class="comp-badge-title">${c.title}</span>
+        <span class="comp-badge-level ${levelClass(lvl)}">${lvl}</span>
+      </div>
+      <div class="comp-bar-wrap"><div class="comp-bar" style="width:${Math.round(p*100)}%;background:${compColor(p, c)}"></div></div>
+    </div>`;
+  }).join('');
+
+  // section nav
+  const nav = document.getElementById('sidebar-nav');
+  let html = '';
+  if(C.priorKnowledgeCheck?.enabled){
+    const done = state.pkcDone;
+    const active = state.screen==='pkc';
+    html += `<div class="nav-section-label">Start</div>
+      <div class="section-nav-item ${active?'open':''}">
+        <div class="section-nav-header ${active?'active':''}" onclick="goScreen('pkc')">
+          <span class="section-check ${done?'done':''} ${active?'active':''}">${done?'✓':''}</span>
+          <span class="section-nav-title">Prior Knowledge Check</span>
+        </div>
+      </div>`;
+  }
+  const dueCount = dueReviews().length;
+  html += `<div class="nav-section-label">Practice</div>
+    <div class="section-nav-item">
+      <div class="section-nav-header ${state.screen==='review'?'active':''}" onclick="goScreen('review')">
+        <span class="section-check ${state.screen==='review'?'active':''}">&#8635;</span>
+        <span class="section-nav-title">Review queue</span>
+        ${dueCount?`<span class="due-badge">${dueCount}</span>`:''}
+      </div>
+    </div>`;
+  html += `<div class="nav-section-label">Sections</div>`;
+  (C.sections||[]).forEach((sec,si)=>{
+    const exps = sec.learningExperiences||[];
+    const allDone = exps.every(e=>has(state.completedExperiences,e.experienceId)) && exps.length>0;
+    const isCur = (state.screen==='exp'||state.screen==='section') && state.sectionIdx===si;
+    const open = isCur;
+    html += `<div class="section-nav-item ${open?'open':''}" id="nav-sec-${si}">
+      <div class="section-nav-header ${isCur?'active':''}" onclick="toggleNavSection(${si})">
+        <span class="section-check ${allDone?'done':''} ${isCur?'active':''}">${allDone?'✓':''}</span>
+        <span class="section-nav-title">${si+1}. ${sec.title}</span>
+        <span class="section-nav-arrow">▶</span>
+      </div>
+      <div class="section-nav-children">`;
+    exps.forEach((e,ei)=>{
+      const d = has(state.completedExperiences,e.experienceId);
+      const a = state.screen==='exp'&&state.sectionIdx===si&&state.expIdx===ei;
+      html += `<div class="sub-nav-item ${d?'done':''} ${a?'active':''}" onclick="event.stopPropagation();goScreen('exp',${si},${ei})">
+        <span class="sub-dot"></span>
+        <span class="sub-nav-label">${e.title}</span>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  // assessments
+  if((C.assessments||[]).length){
+    html += `<div class="nav-section-label">Assessments</div>`;
+    (C.assessments||[]).forEach(a=>{
+      const d = has(state.completedAssessments,a.assessmentId);
+      const act = state.screen==='assess'&&state.assessId===a.assessmentId;
+      html += `<div class="section-nav-item">
+        <div class="sub-nav-item assess ${d?'done':''} ${act?'active':''}" style="padding-left:24px" onclick="openAssessment('${a.assessmentId}')">
+          <span class="sub-dot"></span>
+          <span class="sub-nav-label">${a.title}</span>
+        </div>
+      </div>`;
+    });
+  }
+  nav.innerHTML = html;
+  updateSidebarProgress();
+}
+function updateSidebarProgress(){
+  const pct = overallPct();
+  document.getElementById('progress-bar').style.width = pct+'%';
+  document.getElementById('progress-label').textContent = `${doneUnits()} of ${totalUnits()} complete · ${pct}%`;
+  // refresh comp bars live
+  (C.competencies||[]).forEach((c,i)=>{});
+  const rail = document.getElementById('competency-bars');
+  if(rail){
+    rail.querySelectorAll('.comp-badge').forEach((node,i)=>{
+      const c = C.competencies[i]; if(!c) return;
+      const p = compProgress(c.competencyId);
+      const lvl = compLevel(p, c);
+      const bar = node.querySelector('.comp-bar');
+      bar.style.width = Math.round(p*100)+'%'; bar.style.background = compColor(p, c);
+      const lvlEl = node.querySelector('.comp-badge-level');
+      lvlEl.textContent = lvl; lvlEl.className = 'comp-badge-level '+levelClass(lvl);
+    });
+  }
+}
+function toggleNavSection(si){
+  const item = document.getElementById('nav-sec-'+si);
+  const wasOpen = item.classList.contains('open');
+  // navigate to section intro if not already inside it
+  if(state.screen==='exp' && state.sectionIdx===si){ item.classList.toggle('open'); return; }
+  goScreen('section', si, 0);
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  INTRO SCREEN
+// ════════════════════════════════════════════════════════════════════════
+function renderIntro(){
+  const m = C.courseMetadata||{};
+  const tagColors=['accent','moss','gold','indigo','plum','rust'];
+  const tags = (m.tags||[]).map((t,i)=>`<span class="tag tag-${tagColors[i%tagColors.length]}"><span class="tdot"></span>${t}</span>`).join('');
+  const seal = (m.version? 'v'+m.version : (m.difficultyLevel||''));
+
+  const hrs = Math.floor((m.estimatedDurationMinutes||0)/60), mins=(m.estimatedDurationMinutes||0)%60;
+  const dur = hrs? `${hrs}h${mins?' '+mins+'m':''}` : `${mins}m`;
+
+  const lmFlags = [
+    ['retrievalPracticeEnabled','Retrieval Practice'],
+    ['confidenceCalibrationEnabled','Confidence Calibration'],
+    ['adaptiveDifficultyEnabled','Adaptive Difficulty'],
+    ['interleavingEnabled','Interleaving'],
+    ['spacedRepetitionEnabled','Spaced Repetition']
+  ];
+  const lmPills = lmFlags.map(([k,label])=>`<span class="lm-pill ${LM[k]?'on':''}"><span class="dot"></span>${label}</span>`).join('');
+
+  // outcomes from all competencies
+  const outcomes = (C.competencies||[]).flatMap(c=>(c.desiredOutcomes||[]).map(o=>o.description));
+  const outcomesHTML = outcomes.map(o=>`<li>${o}</li>`).join('');
+
+  const prereqs = (m.prerequisites||[]).map(p=>`<li><b style="color:var(--ink);text-transform:capitalize">${p.type}:</b> ${p.description}</li>`).join('');
+
+  const startScreen = C.priorKnowledgeCheck?.enabled && !state.pkcDone ? "goScreen('pkc')" : "goScreen('section',0,0)";
+  const startLabel  = C.priorKnowledgeCheck?.enabled && !state.pkcDone ? 'Begin with a knowledge check' : 'Begin the course';
+
+  const coverArt = m.thumbnailImage
+    ? `<img src="${m.thumbnailImage}" alt="${m.title}">`
+    : `<div class="seal">${seal||'✦'}</div>`;
+
+  document.getElementById('screen-intro').innerHTML = `
+   <div class="stagger">
+    <div class="cover">
+      <div class="cover-art">${coverArt}</div>
+      <div class="cover-body">
+        <div class="cover-tags">${tags}</div>
+        <h1>${m.title||'Untitled Course'}</h1>
+        <p class="cover-desc">${m.description||''}</p>
+      </div>
+    </div>
+
+    <div class="meta-strip">
+      <div class="meta-cell"><div class="mc-val">${dur}</div><div class="mc-key">Est. time</div></div>
+      <div class="meta-cell"><div class="mc-val" style="text-transform:capitalize">${m.difficultyLevel||'—'}</div><div class="mc-key">Level</div></div>
+      <div class="meta-cell"><div class="mc-val">${(C.sections||[]).length}</div><div class="mc-key">Sections</div></div>
+      <div class="meta-cell"><div class="mc-val">${(C.competencies||[]).length}</div><div class="mc-key">Competencies</div></div>
+    </div>
+
+    ${reviewCardHTML()}
+
+    <div class="eyebrow"><span class="rule"></span>Learning design</div>
+    <div class="lm-grid">${lmPills}</div>
+
+    ${outcomesHTML?`<div class="eyebrow" style="margin-top:30px"><span class="rule"></span>What you'll be able to do</div>
+    <ul class="list-clean outcomes-list">${outcomesHTML}</ul>`:''}
+
+    ${prereqs?`<div class="eyebrow" style="margin-top:30px"><span class="rule"></span>Before you start</div>
+    <ul class="list-clean prereq-list">${prereqs}</ul>`:''}
+
+    <div style="margin-top:36px;display:flex;gap:12px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="${startScreen}">${startLabel} →</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('course-file').click()">Load course JSON</button>
+    </div>
+   </div>`;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  PRIOR KNOWLEDGE CHECK
+// ════════════════════════════════════════════════════════════════════════
+function renderPKC(){
+  const pkc = C.priorKnowledgeCheck;
+  if(!pkc?.enabled){ goScreen('section',0,0); return; }
+
+  const probes = (pkc.probeQuestions||[]).map((p,i)=>{
+    const saved = state.pkcAnswers[p.probeId];
+    const comps = (p.linkedCompetencies||[]).map(cId=>{
+      const c=findCompetency(cId); return c?`<span class="tag tag-line" style="margin-left:4px">${c.title}</span>`:'';
+    }).join('');
+
+    let inputHTML='';
+    if(p.questionType==='multiple-choice' && p.options){
+      inputHTML = `<div class="mc-options" id="pkc-mc-${p.probeId}">` + p.options.map((o,oi)=>`
+        <div class="mc-option ${saved&&saved.choice===oi?'selected':''} ${saved?'locked':''} ${saved&&saved.choice===oi&&oi===p.correctIndex?'correct':''} ${saved&&saved.choice===oi&&oi!==p.correctIndex?'incorrect':''} ${saved&&oi===p.correctIndex&&saved.choice!==oi?'correct':''}"
+             onclick="answerProbeMC('${p.probeId}',${oi},${p.correctIndex})">
+          <span class="mc-key">${String.fromCharCode(65+oi)}</span><span>${o}</span>
+        </div>`).join('') + `</div>`;
+    } else {
+      inputHTML = `<textarea class="sa-input" id="pkc-sa-${p.probeId}" placeholder="Type what you already know…" ${saved?'disabled':''}>${saved?saved.text||'':''}</textarea>
+        ${!saved?`<div class="submit-row"><button class="btn btn-primary btn-sm" onclick="answerProbeSA('${p.probeId}')">Submit</button></div>`:''}`;
+    }
+
+    const routing = (p.routingRules||[]).map(r=>`
+      <div class="routing-row"><span class="routing-cond">${r.condition}</span><span>→ ${r.action}</span></div>`).join('');
+    const crit = (p.scoringCriteria||[]).map(c=>`<li>${c}</li>`).join('');
+
+    return `<div class="probe-card" id="probe-${p.probeId}">
+      <div class="probe-num">Probe ${i+1} · ${p.questionType}</div>
+      <div class="int-prompt">${p.prompt}</div>
+      <div style="margin-bottom:12px">${comps}</div>
+      ${inputHTML}
+      ${saved?probeOptionFeedback(p,saved):''}
+      <div class="probe-routing ${saved?'show':''}" id="routing-${p.probeId}">
+        <div class="criteria-label">Scoring criteria</div>
+        <ul class="criteria-list">${crit}</ul>
+        <div class="criteria-label" style="margin-top:10px">Adaptive routing</div>
+        ${routing}
+      </div>
+    </div>`;
+  }).join('');
+
+  const allAnswered = (pkc.probeQuestions||[]).every(p=>state.pkcAnswers[p.probeId]);
+
+  document.getElementById('screen-pkc').innerHTML = `
+   <div class="stagger">
+    <div class="eyebrow"><span class="rule"></span>Calibration · ${pkc.placement}</div>
+    <h1 style="font-size:32px;margin-bottom:14px">Prior Knowledge Check</h1>
+    <div class="pkc-banner">
+      <span class="pkc-icon">🧭</span>
+      <div>
+        <h3>This isn't graded</h3>
+        <p>Your answers help the engine route you — skipping what you've mastered, reinforcing what you haven't. Answer honestly; the routing rules below each probe show how responses are used.</p>
+      </div>
+    </div>
+    ${probes}
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goScreen('intro')">← Back</button>
+      <button class="btn btn-primary" onclick="finishPKC()">${allAnswered?'Continue to the course →':'Skip & start course →'}</button>
+    </div>
+   </div>`;
+}
+function answerProbeMC(probeId, choice, correct){
+  state.pkcAnswers[probeId] = { choice, correct: choice===correct };
+  // light competency credit for correct prior knowledge
+  const pkc = C.priorKnowledgeCheck.probeQuestions.find(p=>p.probeId===probeId);
+  recordEvidence(pkc.linkedCompetencies, choice===correct?1:0, 'pkc');
+  saveState(); renderPKC();
+}
+function answerProbeSA(probeId){
+  const ta = document.getElementById('pkc-sa-'+probeId);
+  if(!ta || !ta.value.trim()){ toast('Write a short answer first'); return; }
+  state.pkcAnswers[probeId] = { text: ta.value };
+  const pkc = C.priorKnowledgeCheck.probeQuestions.find(p=>p.probeId===probeId);
+  recordEvidence(pkc.linkedCompetencies, 1, 'participation');
+  saveState(); renderPKC();
+}
+function finishPKC(){
+  state.pkcDone = true; add(state.completedProbes,'all'); saveState();
+  toast('Knowledge check recorded'); goScreen('section',0,0);
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  SECTION SCREEN
+// ════════════════════════════════════════════════════════════════════════
+function renderSection(){
+  const sec = curSection(); if(!sec) return;
+  const si = state.sectionIdx;
+
+  const hookIcons={'real-world-stakes':'⚠','prediction-gap':'◎','curiosity-prompt':'?','relevance-anchor':'⚓'};
+  const hooks=(sec.motivationHooks||[]).map(h=>`
+    <div class="hook hook-${h.type}">
+      <span class="hook-icon">${hookIcons[h.type]||'✦'}</span>
+      <div><span class="hk-type">${h.type.replace(/-/g,' ')}</span>${h.prompt}</div>
+    </div>`).join('');
+
+  const objectives=(sec.learningObjectives||[]).map(o=>{
+    const comps=(o.linkedCompetencies||[]).map(cId=>{
+      const c=findCompetency(cId); return c?`<span class="tag tag-line">${c.title}</span>`:'';
+    }).join('');
+    return `<li>${o.description}<div class="obj-comps">${comps}</div></li>`;
+  }).join('');
+
+  const expList = (sec.learningExperiences||[]).map((e,ei)=>{
+    const done = has(state.completedExperiences,e.experienceId);
+    return `<div class="card" style="display:flex;align-items:center;gap:16px;cursor:pointer;margin-bottom:10px" onclick="goScreen('exp',${si},${ei})">
+      <div style="width:34px;height:34px;border-radius:50%;border:1.5px solid ${done?'var(--accent)':'var(--line)'};background:${done?'var(--accent)':'transparent'};color:${done?'#fff':'var(--ink-faint)'};display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;flex-shrink:0">${done?'✓':ei+1}</div>
+      <div style="flex:1">
+        <div style="font-family:var(--serif);font-size:16px;color:var(--ink)">${e.title}</div>
+        <div style="font-size:12px;color:var(--ink-faint);margin-top:2px">${expTypeLabel(e.experienceType)} · ${e.estimatedDurationMinutes||'—'} min</div>
+      </div>
+      <span style="color:var(--ink-faint)">→</span>
+    </div>`;
+  }).join('');
+
+  const prevAction = si>0 ? `goScreen('section',${si-1},0)` : `goScreen('intro')`;
+
+  document.getElementById('screen-section').innerHTML = `
+   <div class="stagger">
+    <div class="eyebrow"><span class="rule"></span>Section ${si+1} of ${C.sections.length}</div>
+    <h1 style="font-size:34px;margin-bottom:12px">${sec.title}</h1>
+    <p class="lede">${sec.description||''}</p>
+    <div style="margin-top:24px">${hooks}</div>
+    ${objectives?`<div class="eyebrow" style="margin-top:30px"><span class="rule"></span>Learning objectives</div>
+    <ul class="list-clean objectives-list">${objectives}</ul>`:''}
+    <div class="eyebrow" style="margin-top:30px"><span class="rule"></span>Experiences in this section</div>
+    ${expList}
+    ${renderFurther(sec)}
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="${prevAction}">← Back</button>
+      <button class="btn btn-primary" onclick="goScreen('exp',${si},0)">Start section →</button>
+    </div>
+   </div>`;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  EXPERIENCE SCREEN
+// ════════════════════════════════════════════════════════════════════════
+function renderFurther(sec){
+  const items=(sec.furtherReading||[]);
+  if(!items.length) return '';
+  const rows=items.map(r=>{
+    const type=(r.resourceType||'resource');
+    const titleHTML = r.url
+      ? `<a href="${r.url}" target="_blank" rel="noopener">${r.title||'Untitled'}</a>`
+      : (r.title||'Untitled');
+    const comps=(r.linkedCompetencies||[]).map(cId=>{const c=findCompetency(cId);return c?`<span class="tag tag-line">${c.title}</span>`:'';}).join('');
+    return `<div class="fr-item">
+      <div class="fr-top">
+        <span class="fr-title">${titleHTML}</span>
+        <span class="fr-type">${type}</span>
+      </div>
+      ${r.author?`<div class="fr-author">${r.author}</div>`:''}
+      ${(!r.url && r.citation)?`<div class="fr-cite">${r.citation}</div>`:''}
+      ${r.rationaleNote?`<div class="fr-rationale">${r.rationaleNote}</div>`:''}
+      ${comps?`<div class="obj-comps" style="margin-top:8px">${comps}</div>`:''}
+    </div>`;
+  }).join('');
+  return `<div class="eyebrow" style="margin-top:30px"><span class="rule"></span>Further reading</div>
+    <div class="further">
+      <div class="further-label">📖 Optional · go deeper</div>
+      <div class="further-note">Supplementary resources for those who want more — never required to progress.</div>
+      ${rows}
+    </div>`;
+}
+
+function renderExp(){
+  const sec = curSection(); const exp = curExp(); if(!exp) return;
+  const si=state.sectionIdx, ei=state.expIdx;
+  const isLast = ei === sec.learningExperiences.length-1;
+  state.revealed[exp.experienceId] = state.revealed[exp.experienceId]||[];
+  state.answers[exp.experienceId]  = state.answers[exp.experienceId]||{};
+
+  const dp = exp.difficultyProfile||{};
+  const diffDots = renderDiffDots(dp.overall||0);
+  const cogTags = (exp.desiredCognitiveActions||[]).map(a=>`<span class="tag tag-${cogColor(a)}"><span class="tdot"></span>${a}</span>`).join('');
+  const compTags = (exp.linkedCompetencies||[]).map(cId=>{const c=findCompetency(cId);return c?`<span class="tag tag-line">${c.title}</span>`:'';}).join('');
+
+  const content = (exp.contentBlocks||[]).map(renderContentBlock).join('');
+  const worked  = (exp.workedExamples||[]).map(renderWorked).join('');
+  const selfGuided = renderSelfGuided(exp.selfGuidedExercise);
+  const interactions = (exp.interactionSequence||[]).map(int=>renderInteraction(int,exp)).join('');
+  const retrieval = (exp.retrievalPractice||[]).map(r=>renderRetrieval(r,exp)).join('');
+  const transfer  = (exp.transferExercises||[]).map(t=>renderTransfer(t,exp)).join('');
+  const mastery   = renderMastery(exp);
+
+  const nextLabel = isLast ? 'Complete section →' : 'Next experience →';
+  const nextAction = isLast ? `completeExp('${exp.experienceId}');finishSection(${si})` : `completeExp('${exp.experienceId}');goScreen('exp',${si},${ei+1})`;
+  const prevAction = ei>0 ? `goScreen('exp',${si},${ei-1})` : `goScreen('section',${si})`;
+
+  document.getElementById('screen-exp').innerHTML = `
+   <div class="exp-header">
+     <div class="eyebrow">${sec.title} · ${expTypeLabel(exp.experienceType)}</div>
+     <h2>${exp.title}</h2>
+     <div class="exp-meta">
+       <span class="exp-meta-item">◷ ${exp.estimatedDurationMinutes||'—'} min</span>
+       <span class="exp-meta-item">Difficulty ${diffDots}</span>
+       ${dp.conceptualComplexity?`<span class="exp-meta-item">Conceptual ${dp.conceptualComplexity}/5</span>`:''}
+       ${dp.ambiguity?`<span class="exp-meta-item">Ambiguity ${dp.ambiguity}/5</span>`:''}
+     </div>
+     <div class="cog-actions">${cogTags}${compTags}</div>
+   </div>
+   ${content}
+   ${worked}
+   ${selfGuided}
+   ${interactions}
+   ${retrieval}
+   ${transfer}
+   ${mastery}
+   <div class="nav-buttons">
+     <button class="btn btn-secondary" onclick="${prevAction}">← Back</button>
+     <button class="btn btn-primary" onclick="${nextAction}">${nextLabel}</button>
+   </div>`;
+  attachGlossaryLinks();
+}
+
+function renderContentBlock(b){
+  if(b.type==='text') return `<div class="cb-text">${b.content||''}</div>`;
+  if(b.type==='image'){
+    return `<figure class="cb-media">${
+      b.url ? `<img src="${b.url}" alt="${b.altText||''}">`
+            : `<div class="cb-placeholder"><span class="ph-ico">🖼</span><span>${b.altText||'Image'}</span></div>`
+    }${b.altText?`<figcaption class="cb-caption">${b.altText}</figcaption>`:''}</figure>`;
+  }
+  if(b.type==='video'){
+    return `<figure class="cb-media">${
+      b.url ? `<video controls src="${b.url}"></video>`
+            : `<div class="cb-placeholder"><span class="ph-ico">▶</span><span>Video</span></div>`
+    }${b.captionOrTranscript?`<details class="cb-transcript"><summary>Transcript</summary><p>${b.captionOrTranscript}</p></details>`:''}</figure>`;
+  }
+  if(b.type==='audio'){
+    return `<figure class="cb-media">${
+      b.url ? `<audio controls src="${b.url}"></audio>`
+            : `<div class="cb-placeholder"><span class="ph-ico">♪</span><span>Audio</span></div>`
+    }${b.captionOrTranscript?`<details class="cb-transcript"><summary>Transcript</summary><p>${b.captionOrTranscript}</p></details>`:''}</figure>`;
+  }
+  if(b.type==='interactive') return `<div class="cb-interactive">⚡ ${b.content||'Interactive element'}</div>`;
+  return '';
+}
+
+function renderWorked(we){
+  const steps=(we.steps||[]).map(s=>`<li>${s}</li>`).join('');
+  return `<div class="worked">
+    <div class="worked-label">✦ Worked Example</div>
+    <div class="worked-problem">${we.problem||''}</div>
+    <ol class="we-steps">${steps}</ol>
+    ${we.conclusion?`<div class="we-conclusion">${we.conclusion}</div>`:''}
+  </div>`;
+}
+
+function renderSelfGuided(sg){
+  if(!sg) return '';
+  const steps=(sg.instructions||[]).map(s=>`<li>${s}</li>`).join('');
+  const reflect=(sg.reflectionPrompts||[]).map(p=>`<li>${p}</li>`).join('');
+  const prep=(sg.materialsOrPrerequisites||[]).map(m=>`<li>${m}</li>`).join('');
+  const crit=(sg.verification&&sg.verification.selfAssessmentCriteria||[]).map(c=>`<li>${c}</li>`).join('');
+  const meta=[];
+  if(sg.estimatedRealWorldDurationMinutes) meta.push(`◷ ~${sg.estimatedRealWorldDurationMinutes} min in the real world`);
+  if(sg.verification&&sg.verification.mode&&sg.verification.mode!=='none') meta.push(`✎ ${sg.verification.mode.replace(/-/g,' ')}`);
+  return `<div class="selfguided">
+    <div class="sg-label">⇲ Self-Guided Exercise <span class="sg-formative">formative · not graded</span></div>
+    ${sg.realWorldContext?`<div class="sg-context"><b>Where:</b> ${sg.realWorldContext}</div>`:''}
+    ${sg.objective?`<div class="sg-objective">${sg.objective}</div>`:''}
+    ${meta.length?`<div class="sg-meta">${meta.map(m=>`<span>${m}</span>`).join('')}</div>`:''}
+    ${steps?`<div class="sg-heading">What to do</div><ol class="sg-steps">${steps}</ol>`:''}
+    ${prep?`<div class="sg-heading">Before you start</div><ul class="sg-prep">${prep}</ul>`:''}
+    ${reflect?`<div class="sg-heading">When you return — reflect</div><ul class="sg-reflect">${reflect}</ul>`:''}
+    ${crit?`<div class="sg-heading">Judge your own work</div><ul class="sg-criteria">${crit}</ul>`:''}
+  </div>`;
+}
+
+// ── Interactions ──────────────────────────────────────────────────────────
+const INT_META = {
+  'prediction':   {cls:'int-prediction', icon:'◎', label:'Prediction'},
+  'reflection':   {cls:'int-reflection', icon:'❀', label:'Reflection'},
+  'compare-responses':{cls:'int-compare', icon:'⚖', label:'Compare Responses'},
+  'multiple-choice':{cls:'int-mc', icon:'◉', label:'Multiple Choice'},
+  'scenario-analysis':{cls:'int-scenario', icon:'⌖', label:'Scenario Analysis'},
+  'drag-drop':    {cls:'int-dragdrop', icon:'↕', label:'Ranking'}
+};
+function renderInteraction(int, exp){
+  const expId=exp.experienceId;
+  const meta = INT_META[int.interactionType]||{cls:'',icon:'•',label:int.interactionType};
+  const saved = state.answers[expId][int.interactionId];
+  const revealed = has(state.revealed[expId], int.interactionId);
+  const reqStar = int.required ? `<span class="req-star">● required</span>` : '';
+
+  const head = `<div class="int-label">${meta.icon} ${meta.label} ${reqStar}</div>
+                <div class="int-prompt">${int.prompt||''}</div>`;
+  let bodyHTML='';
+
+  if(int.interactionType==='multiple-choice' && int.options){
+    bodyHTML = `<div class="mc-options">` + int.options.map((o,oi)=>{
+      let cls='';
+      if(saved){
+        if(oi===int.correctIndex) cls='correct';
+        else if(saved.choice===oi) cls='incorrect';
+        cls+=' locked';
+      } else if(saved && saved.choice===oi) cls='selected';
+      return `<div class="mc-option ${cls}" ${!saved?`onclick="answerMC('${expId}','${int.interactionId}',${oi})"`:''}>
+        <span class="mc-key">${String.fromCharCode(65+oi)}</span><span>${o}</span></div>`;
+    }).join('') + `</div>`;
+  }
+  else if(int.interactionType==='drag-drop' && int.options){
+    // ranking — render as ordered list, reveal best answer on attempt
+    const order = (saved && saved.order) ? saved.order : int.options.map((_,i)=>i);
+    bodyHTML = `<ul class="rank-list" id="rank-${int.interactionId}">` +
+      order.map((origIdx,pos)=>`<li class="rank-item" draggable="${!saved}" data-idx="${origIdx}">
+        <span class="rank-num">${pos+1}</span><span class="rank-grip">⋮⋮</span><span>${int.options[origIdx]}</span></li>`).join('') +
+      `</ul>${!saved?`<div class="submit-row"><button class="btn btn-primary btn-sm" onclick="submitRanking('${expId}','${int.interactionId}')">Lock in order</button></div>`:''}`;
+  }
+  else if(int.interactionType==='reflection' && int.responseFormat==='likert' && int.options){
+    bodyHTML = `<div class="likert">` + int.options.map((o,oi)=>`
+      <div class="likert-opt ${saved&&saved.choice===oi?'selected':''}" onclick="answerLikert('${expId}','${int.interactionId}',${oi})">${o}</div>`).join('') + `</div>`;
+  }
+  else {
+    // short-answer style (prediction, reflection, scenario, compare)
+    bodyHTML = `<textarea class="sa-input" id="sa-${int.interactionId}" placeholder="Write your response…" ${revealed?'disabled':''}>${saved?saved.answer||'':''}</textarea>`;
+  }
+
+  // confidence prompt
+  let confHTML='';
+  if(int.confidencePrompt?.enabled && LM.confidenceCalibrationEnabled && !revealed){
+    const cp=int.confidencePrompt, mid=Math.round(((cp.scaleMin||1)+(cp.scaleMax||5))/2);
+    const cur = saved?.confidence || mid;
+    confHTML = `<div class="confidence">
+      <div class="confidence-label">◷ ${cp.prompt||'How confident are you?'}</div>
+      <div class="confidence-row">
+        <input type="range" class="confidence-slider" min="${cp.scaleMin||1}" max="${cp.scaleMax||5}" value="${cur}"
+               id="conf-${int.interactionId}" oninput="document.getElementById('confval-${int.interactionId}').textContent=this.value+' / ${cp.scaleMax||5}'">
+        <span class="confidence-value" id="confval-${int.interactionId}">${cur} / ${cp.scaleMax||5}</span>
+      </div>
+      <div class="confidence-anchors"><span>Not sure</span><span>Certain</span></div>
+    </div>`;
+  }
+
+  // hints (hint-only or socratic feedback)
+  const fb = int.feedback||{};
+  let hintHTML='';
+  if((fb.hints||[]).length){
+    hintHTML = `<div id="hints-${int.interactionId}">
+      <div class="submit-row"><button class="hint-btn" onclick="revealHint('${int.interactionId}')">💡 Need a hint?</button></div>
+      <div class="hint-box" id="hintbox-${int.interactionId}"></div>
+    </div>`;
+  }
+
+  // submit / feedback
+  let submitHTML='', feedbackHTML='';
+  const needsSubmit = ['prediction','reflection','scenario-analysis','compare-responses'].includes(int.interactionType)
+                      && int.responseFormat!=='likert';
+  if(needsSubmit && !revealed){
+    const label = int.interactionType==='reflection' ? 'Save reflection' : 'Submit & reveal';
+    submitHTML = `<div class="submit-row"><button class="btn btn-primary btn-sm" onclick="submitText('${expId}','${int.interactionId}')">${label}</button></div>`;
+  } else if(needsSubmit && revealed){
+    submitHTML = `<div class="submit-row"><span class="saved-flag">✓ Response recorded</span></div>`;
+  }
+
+  // feedback shown if revealed (or MC/ranking answered)
+  const showFb = revealed || (saved && ['multiple-choice','drag-drop'].includes(int.interactionType));
+  if(showFb) feedbackHTML = renderFeedback(fb, saved, int) + optionFeedbackHTML(int, saved);
+
+  return `<div class="interaction ${meta.cls}" id="int-${int.interactionId}">
+    ${head}${bodyHTML}${confHTML}${hintHTML}${submitHTML}${feedbackHTML}
+  </div>`;
+}
+
+function renderFeedback(fb, saved, int){
+  let cls='fb-elaborative', head='Why', body='';
+  if(int && int.interactionType==='multiple-choice' && saved){
+    const right = saved.choice===int.correctIndex;
+    cls = right?'fb-correct':'fb-corrective';
+    head = right?'Correct':'Not quite';
+  }
+  if(fb.type==='elaborative' && fb.elaborativeFeedback){ cls=cls==='fb-correct'?'fb-correct':'fb-elaborative'; head=head==='Why'?'Explanation':head; body=fb.elaborativeFeedback; }
+  else if(fb.type==='corrective' && fb.correctiveFeedback){ cls=cls==='fb-correct'?'fb-correct':'fb-corrective'; head=head==='Why'?'Correction':head; body=fb.correctiveFeedback; }
+  else if(fb.type==='socratic'){ cls='fb-socratic'; head='Consider'; body=(fb.hints||[]).join(' '); }
+  else { body = fb.elaborativeFeedback || fb.correctiveFeedback || (fb.hints||[]).join(' '); }
+  if(!body) return '';
+  return `<div class="feedback show ${cls}"><div class="fb-head">✦ ${head}</div>${body}</div>`;
+}
+
+// ── Interaction handlers ──────────────────────────────────────────────────
+function ansStore(expId,id,val){ state.answers[expId]=state.answers[expId]||{}; state.answers[expId][id]=val; saveState(); }
+function reveal(expId,id){ state.revealed[expId]=state.revealed[expId]||[]; add(state.revealed[expId],id); saveState(); }
+
+function submitText(expId,intId){
+  const ta=document.getElementById('sa-'+intId);
+  const exp=curExp(); const int=exp.interactionSequence.find(i=>i.interactionId===intId);
+  if(int.required && (!ta||!ta.value.trim())){ toast('This response is required'); return; }
+  const confEl=document.getElementById('conf-'+intId);
+  ansStore(expId,intId,{answer:ta?ta.value:'',confidence:confEl?+confEl.value:null});
+  reveal(expId,intId);
+  recordEvidence(exp.linkedCompetencies, 1, 'participation');
+  renderExp(); toast(int.interactionType==='reflection'?'Reflection saved':'Response recorded');
+}
+function answerMC(expId,intId,choice){
+  const exp=curExp(); const int=exp.interactionSequence.find(i=>i.interactionId===intId);
+  ansStore(expId,intId,{choice}); reveal(expId,intId);
+  recordEvidence(exp.linkedCompetencies, choice===int.correctIndex?1:0, 'mc');
+  renderExp();
+}
+function answerLikert(expId,intId,choice){
+  const exp=curExp(); const int=exp.interactionSequence.find(i=>i.interactionId===intId);
+  ansStore(expId,intId,{choice}); reveal(expId,intId);
+  recordEvidence(exp.linkedCompetencies, 1, 'participation', 0.05);
+  renderExp();
+}
+function submitRanking(expId,intId){
+  const list=document.getElementById('rank-'+intId);
+  const order=[...list.querySelectorAll('.rank-item')].map(li=>+li.dataset.idx);
+  const exp=curExp(); const int=exp.interactionSequence.find(i=>i.interactionId===intId);
+  ansStore(expId,intId,{order}); reveal(expId,intId);
+  let score;
+  if(Array.isArray(int.correctOrder) && int.correctOrder.length===order.length){
+    const hits = order.filter((v,i)=>v===int.correctOrder[i]).length;
+    score = hits/order.length;
+  } else {
+    score = order[0]===int.correctIndex ? 1 : 0.3;
+  }
+  recordEvidence(exp.linkedCompetencies, score, 'ranking');
+  renderExp(); toast(score>=0.99?'Perfect order':'Order locked — see explanation');
+}
+let _hintIdx={};
+function revealHint(intId){
+  const exp=curExp();
+  const int=exp.interactionSequence.find(i=>i.interactionId===intId);
+  const hints=int.feedback?.hints||[];
+  _hintIdx[intId]=(_hintIdx[intId]||0);
+  if(_hintIdx[intId]>=hints.length){ toast('No more hints'); return; }
+  const box=document.getElementById('hintbox-'+intId);
+  box.classList.add('show');
+  box.innerHTML = hints.slice(0,_hintIdx[intId]+1).map((h,i)=>`<div style="${i>0?'margin-top:8px':''}"><span class="hint-n">Hint ${i+1}</span>${h}</div>`).join('');
+  _hintIdx[intId]++;
+}
+
+// ── Retrieval practice ─────────────────────────────────────────────────────
+function renderRetrieval(r,exp){
+  const expId=exp.experienceId;
+  const saved = state.answers[expId][r.retrievalItemId];
+  const revealed = has(state.revealed[expId], r.retrievalItemId);
+  const graded = saved && saved.score!=null;
+  const rec = state.reviewSchedule[r.retrievalItemId];
+
+  let footer;
+  if(!revealed){
+    footer = `<div class="submit-row"><button class="btn btn-primary btn-sm" onclick="submitRetrieval('${expId}','${r.retrievalItemId}')">Submit recall</button></div>`;
+  } else if(!graded){
+    footer = selfGradeRow(`gradeRetrieval('${expId}','${r.retrievalItemId}',SCORE)`, 'Be honest — how complete was your recall?');
+  } else {
+    footer = `<div class="schedule-strip"><span class="saved-flag">✓ ${gradeLabel(saved.score)}</span>${rec?`<span style="color:var(--ink-faint)">Next review:</span> <span class="sched-chip">${fmtDue(rec.due)}</span>`:''}</div>`;
+  }
+
+  return `<div class="retrieval" id="rp-${r.retrievalItemId}">
+    <div class="retrieval-banner">
+      <div class="retrieval-top">
+        <span class="retrieval-label">↻ Retrieval Practice ${renderDiffDots(r.difficulty,true)}</span>
+        <span class="retrieval-type">${r.retrievalType}</span>
+      </div>
+      <div class="retrieval-prompt">${r.prompt}</div>
+    </div>
+    <div class="retrieval-body">
+      <textarea class="sa-input" id="sa-${r.retrievalItemId}" placeholder="Retrieve from memory — resist looking back." ${revealed?'disabled':''}>${saved?saved.answer||'':''}</textarea>
+      ${footer}
+    </div>
+  </div>`;
+}
+function submitRetrieval(expId,itemId){
+  const ta=document.getElementById('sa-'+itemId);
+  if(!ta||!ta.value.trim()){ toast('Write what you remember first'); return; }
+  ansStore(expId,itemId,{answer:ta.value}); reveal(expId,itemId);
+  renderExp(); toast('Now grade your own recall');
+}
+function gradeRetrieval(expId,itemId,score){
+  const saved=state.answers[expId][itemId]||{}; saved.score=score; saved.gradedAt=Date.now();
+  ansStore(expId,itemId,saved);
+  recordEvidence(expCompetencies(expId), score, 'retrieval');
+  scheduleReview(itemId, expId, score);
+  renderExp(); toast('Recall logged · next review '+fmtDue(state.reviewSchedule[itemId].due));
+}
+
+// ── Transfer ───────────────────────────────────────────────────────────────
+function renderTransfer(t,exp){
+  const expId=exp.experienceId;
+  const saved=state.answers[expId][t.exerciseId];
+  const rated = saved && saved.score!=null;
+  const crit=(t.successCriteria||[]).map(c=>`<li>${c}</li>`).join('');
+  let footer;
+  if(!saved){
+    footer=`<div class="submit-row"><button class="btn btn-primary btn-sm" onclick="submitTransfer('${expId}','${t.exerciseId}')">Submit transfer</button></div>`;
+  } else if(!rated){
+    footer=selfGradeRow(`rateTransfer('${expId}','${t.exerciseId}',SCORE)`, 'Check your answer against the success criteria above',
+      [['Met all criteria',1,'good'],['Met some',0.55,'gold'],['Missed',0.15,'warn']]);
+  } else {
+    footer=`<div class="submit-row"><span class="saved-flag">✓ Transfer recorded · self-rated</span></div>`;
+  }
+  return `<div class="transfer" id="tr-${t.exerciseId}">
+    <div class="transfer-label">⇄ Transfer Exercise <span class="transfer-ctx">${t.context||''}</span></div>
+    <div class="transfer-scenario">${t.scenario||''}</div>
+    <div class="transfer-task">${t.task||''}</div>
+    <div class="criteria-label">Success criteria</div>
+    <ul class="criteria-list">${crit}</ul>
+    <textarea class="sa-input" id="sa-${t.exerciseId}" placeholder="Apply your reasoning to this new context…" ${saved?'disabled':''}>${saved?saved.answer||'':''}</textarea>
+    ${footer}
+  </div>`;
+}
+function submitTransfer(expId,exId){
+  const ta=document.getElementById('sa-'+exId);
+  if(!ta||!ta.value.trim()){ toast('Write your applied answer first'); return; }
+  ansStore(expId,exId,{answer:ta.value});
+  renderExp(); toast('Now rate yourself against the criteria');
+}
+function rateTransfer(expId,exId,score){
+  const saved=state.answers[expId][exId]||{}; saved.score=score; ansStore(expId,exId,saved);
+  recordEvidence(expCompetencies(expId), score, 'transfer');
+  renderExp(); toast('Transfer recorded — strong evidence toward mastery');
+}
+
+// ── Mastery verification block ─────────────────────────────────────────────
+function renderMastery(exp){
+  const mv=exp.masteryVerification; if(!mv) return '';
+  const rp=mv.requiredPerformance||{};
+  const links=(mv.assessmentIds||[]).map(aId=>{
+    const a=findAssess(aId); return a?`<button class="btn btn-secondary btn-sm" onclick="openAssessment('${aId}')">Open ${a.title} →</button>`:'';
+  }).join('');
+  return `<div class="mastery-box">
+    <h4>✓ Mastery verification</h4>
+    <div class="mastery-thresholds">
+      ${rp.minimumAccuracy!=null?`<div class="mthresh"><b>${Math.round(rp.minimumAccuracy*100)}%</b>min. accuracy</div>`:''}
+      ${rp.minimumTransferScore!=null?`<div class="mthresh"><b>${Math.round(rp.minimumTransferScore*100)}%</b>min. transfer</div>`:''}
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">${links}</div>
+  </div>`;
+}
+
+// ── Completion of experiences/sections ──────────────────────────────────────
+function completeExp(expId){ add(state.completedExperiences,expId); recordEvidence(expCompetencies(expId), 1, 'participation'); saveState(); }
+function finishSection(si){
+  if(si===C.sections.length-1) goScreen('complete');
+  else goScreen('section',si+1,0);
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  ASSESSMENT SCREEN
+// ════════════════════════════════════════════════════════════════════════
+function openAssessment(aId){ state.assessId=aId; saveState(); goScreen('assess'); }
+function renderAssess(){
+  const a=findAssess(state.assessId); if(!a){ goScreen('intro'); return; }
+  const submitted=has(state.assessSubmitted,a.assessmentId);
+  state.assessAnswers[a.assessmentId]=state.assessAnswers[a.assessmentId]||{};
+
+  const comps=(a.linkedCompetencies||[]).map(cId=>{const c=findCompetency(cId);return c?`<span class="tag tag-line">${c.title}</span>`:'';}).join('');
+
+  const questions=(a.questions||[]).map((q,qi)=>{
+    const isMC = q.questionType==='multiple-choice' && Array.isArray(q.options);
+    const ans=state.assessAnswers[a.assessmentId][q.questionId];
+    const rubric=q.rubric||{};
+
+    let inputHTML;
+    if(isMC){
+      inputHTML = `<div class="mc-options">` + q.options.map((o,oi)=>{
+        let cls='', click='';
+        if(submitted){
+          if(oi===q.correctIndex) cls='correct';
+          else if(ans===oi) cls='incorrect';
+          cls+=' locked';
+        } else {
+          if(ans===oi) cls='selected';
+          click=`onclick="answerAssessMC('${a.assessmentId}','${q.questionId}',${oi})"`;
+        }
+        return `<div class="mc-option ${cls}" ${click}><span class="mc-key">${String.fromCharCode(65+oi)}</span><span>${o}</span></div>`;
+      }).join('') + `</div>`;
+      if(submitted && ans!=null){
+        const of=(q.optionFeedback||[]).find(f=>f.optionIndex===ans);
+        if(of && of.feedback) inputHTML += `<div class="feedback show ${ans===q.correctIndex?'fb-correct':'fb-corrective'}" style="margin-top:10px"><div class="fb-head">✦ ${ans===q.correctIndex?'Correct':'Not quite'}</div>${of.feedback}</div>`;
+      }
+    } else {
+      inputHTML = `<textarea class="sa-input" id="aq-${a.assessmentId}-${q.questionId}" placeholder="Write your response…" ${submitted?'disabled':''}>${ans||''}</textarea>`;
+    }
+
+    const rubricHTML = (submitted && !isMC) ? `
+      <div class="rubric">
+        <div class="rubric-title">Self-assess against the rubric</div>
+        <div class="rubric-row rubric-excellent"><span class="rubric-level">Excellent</span><span class="rubric-desc">${rubric.excellent||''}</span></div>
+        <div class="rubric-row rubric-adequate"><span class="rubric-level">Adequate</span><span class="rubric-desc">${rubric.adequate||''}</span></div>
+        <div class="rubric-row rubric-weak"><span class="rubric-level">Weak</span><span class="rubric-desc">${rubric.weak||''}</span></div>
+      </div>
+      ${(q.successCriteria||[]).length?`<div style="margin-top:14px"><div class="criteria-label">Success criteria</div><ul class="criteria-list">${q.successCriteria.map(c=>`<li>${c}</li>`).join('')}</ul></div>`:''}
+      ${renderErrorPatterns(q)}
+    `:'';
+
+    let selfRate='';
+    if(submitted && !isMC){
+      const rated=(state.assessSelfRatings[a.assessmentId]||{})[q.questionId];
+      selfRate = rated
+        ? `<div class="submit-row"><span class="saved-flag">✓ Self-rated: ${rated.label}</span></div>`
+        : selfGradeRow(`rateAssessQ('${a.assessmentId}','${q.questionId}',SCORE,'LBL')`, 'Rate your answer against the rubric',
+            [['Excellent',1,'good'],['Adequate',0.6,'gold'],['Weak',0.25,'warn']]);
+    }
+
+    return `<div class="q-card">
+      <div class="q-meta">Q${qi+1} · ${q.questionType} · Difficulty ${renderDiffDots(q.difficulty,true)}</div>
+      <div class="q-prompt">${q.prompt}</div>
+      ${inputHTML}
+      ${rubricHTML}
+      ${selfRate}
+    </div>`;
+  }).join('');
+
+  document.getElementById('screen-assess').innerHTML=`
+   <div class="stagger">
+    <div class="assess-head">
+      <div class="eyebrow"><span class="rule"></span>${a.assessmentType}</div>
+      <h2>${a.title}</h2>
+      <div style="margin:10px 0 8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span style="font-size:12px;color:var(--ink-faint)">Measures:</span> ${comps}</div>
+      ${a.adaptiveDifficulty?`<div style="font-size:13px;color:var(--indigo);display:flex;align-items:center;gap:6px"><span>⚡</span>Adaptive difficulty enabled — questions adjust to your responses.</div>`:''}
+    </div>
+    ${questions}
+    ${!submitted?`<button class="btn btn-primary" onclick="submitAssessment('${a.assessmentId}')">Submit assessment</button>`
+      :`<div class="card" style="background:var(--good-wash);border-color:#bcd6c2">
+          <h3 style="font-size:19px;margin-bottom:6px;color:var(--good)">Submitted ✓</h3>
+          <p style="font-family:var(--read);font-size:15px;color:var(--ink-soft)">Multiple-choice answers were scored automatically. Rate each written answer against its rubric — your self-rating is recorded as mastery evidence. Error patterns show how specific mistakes map to misconceptions.</p>
+        </div>`}
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goScreen('exp',${state.sectionIdx},${state.expIdx})">← Back to experience</button>
+      ${submitted?`<button class="btn btn-primary" onclick="goScreen('complete')">Finish →</button>`:''}
+    </div>
+   </div>`;
+}
+function renderErrorPatterns(q){
+  const eps=q.errorPatterns||[]; if(!eps.length) return '';
+  const rows=eps.map(ep=>{
+    const mis=findMisconception(ep.linkedMisconceptionId);
+    return `<div class="ep-item">
+      <b>${ep.description}</b>
+      ${mis?`<span style="display:block;margin-top:3px;color:var(--ink-faint)">Misconception: "${mis.misconception}"</span>`:''}
+      <span class="ep-remedy">${ep.remediationAction}</span>
+    </div>`;
+  }).join('');
+  return `<div class="error-patterns"><div class="ep-title">⚠ Watch for these error patterns</div>${rows}</div>`;
+}
+function findMisconception(id){
+  for(const c of C.competencies||[]) for(const m of c.commonMisconceptions||[])
+    if(m.misconceptionId===id) return m;
+  return null;
+}
+function answerAssessMC(aId,qId,oi){
+  if(has(state.assessSubmitted,aId)) return;
+  state.assessAnswers[aId]=state.assessAnswers[aId]||{};
+  state.assessAnswers[aId][qId]=oi; saveState(); renderAssess();
+}
+function submitAssessment(aId){
+  const a=findAssess(aId);
+  let answered=0;
+  (a.questions||[]).forEach(q=>{
+    if(q.questionType==='multiple-choice' && Array.isArray(q.options)){
+      if(state.assessAnswers[aId][q.questionId]!=null) answered++;
+    } else {
+      const ta=document.getElementById(`aq-${aId}-${q.questionId}`);
+      if(ta){ state.assessAnswers[aId][q.questionId]=ta.value; if(ta.value.trim()) answered++; }
+    }
+  });
+  if(answered===0){ toast('Answer at least one question'); return; }
+  add(state.assessSubmitted,aId); add(state.completedAssessments,aId);
+  // auto-score the objective questions; written ones await self-rating
+  (a.questions||[]).forEach(q=>{
+    if(q.questionType==='multiple-choice' && Array.isArray(q.options) && q.correctIndex!=null){
+      const ch=state.assessAnswers[aId][q.questionId];
+      if(ch!=null) recordEvidence(a.linkedCompetencies||[], ch===q.correctIndex?1:0, 'assessment');
+    }
+  });
+  saveState(); renderAssess(); toast('Submitted — self-rate your written answers below');
+}
+function rateAssessQ(aId,qId,score,label){
+  state.assessSelfRatings[aId]=state.assessSelfRatings[aId]||{};
+  if(state.assessSelfRatings[aId][qId]!=null) return;
+  state.assessSelfRatings[aId][qId]={score,label};
+  const a=findAssess(aId);
+  recordEvidence(a.linkedCompetencies||[], score, 'assessment');
+  saveState(); renderAssess(); toast('Self-rating recorded: '+label);
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  COMPLETE SCREEN
+// ════════════════════════════════════════════════════════════════════════
+function renderComplete(){
+  const m=C.courseMetadata||{};
+  const mastered=(C.competencies||[]).filter(c=>compProgress(c.competencyId)>=compThreshold(c)).length;
+  document.getElementById('screen-complete').innerHTML=`
+    <div class="complete-seal">${(m.version?'v'+m.version:'✦')}</div>
+    <h1>Course complete</h1>
+    <p class="c-sub">You've worked through every section, experience, and assessment in <em>${m.title||'this course'}</em>. The reasoning reflexes you practiced here are built to transfer.</p>
+    <div class="complete-stats">
+      <div class="cstat"><div class="cs-val">${state.completedExperiences.length}</div><div class="cs-key">Experiences</div></div>
+      <div class="cstat"><div class="cs-val">${state.completedAssessments.length}</div><div class="cs-key">Assessments</div></div>
+      <div class="cstat"><div class="cs-val">${mastered}/${(C.competencies||[]).length}</div><div class="cs-key">Competencies mastered</div></div>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-secondary" onclick="goScreen('intro')">Back to start</button>
+      <button class="btn btn-primary" onclick="goScreen('section',0,0)">Review sections →</button>
+    </div>`;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  GLOSSARY
+// ════════════════════════════════════════════════════════════════════════
+function renderGlossary(filter=''){
+  const body=document.getElementById('glossary-body');
+  const terms=(C.glossary||[]).filter(g=>!filter || g.term.toLowerCase().includes(filter.toLowerCase()) || g.definition.toLowerCase().includes(filter.toLowerCase()));
+  if(!terms.length){ body.innerHTML=`<p style="padding:16px 24px;font-size:14px;color:var(--ink-faint)">No matching terms.</p>`; return; }
+  body.innerHTML=terms.map(g=>`<dl class="glossary-term"><dt>${g.term}</dt><dd>${g.definition}</dd></dl>`).join('');
+}
+function filterGlossary(v){ renderGlossary(v); }
+function toggleGlossary(){
+  const d=document.getElementById('glossary-drawer'), s=document.getElementById('scrim');
+  const open=d.classList.toggle('open'); s.classList.toggle('open',open);
+  if(open) renderGlossary();
+}
+function attachGlossaryLinks(){
+  document.querySelectorAll('.glossary-link').forEach(el=>{
+    const term=el.dataset.term;
+    const g=(C.glossary||[]).find(x=>x.term.toLowerCase()===String(term).toLowerCase());
+    if(g){ el.title=g.definition; el.onclick=()=>{ if(!document.getElementById('glossary-drawer').classList.contains('open')) toggleGlossary(); filterGlossary(g.term); document.getElementById('glossary-search').value=g.term; }; }
+  });
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  UTILITIES
+// ════════════════════════════════════════════════════════════════════════
+function cogColor(a){ return {prediction:'indigo',analysis:'plum',reflection:'gold',retrieval:'moss',comparison:'rust',synthesis:'accent'}[a]||'line'; }
+function expTypeLabel(t){ return {'guided-analysis':'Guided Analysis','worked-example':'Worked Example','case-study':'Case Study','simulation':'Simulation','discussion':'Discussion','self-guided-exercise':'Self-Guided Exercise'}[t]||t; }
+function renderDiffDots(n,inline){
+  n=n||0;
+  const dots=Array.from({length:5},(_,i)=>`<span class="diff-dot ${i<n?'on':''}"></span>`).join('');
+  return `<span class="diff-dots" ${inline?'style="vertical-align:middle"':''}>${dots}</span>`;
+}
+function toast(msg){
+  const t=document.getElementById('toast'); t.innerHTML='✦ '+msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2200);
+}
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('scrim').classList.toggle('open'); }
+function closeSidebarMobile(){ if(window.innerWidth<=920){ document.getElementById('sidebar').classList.remove('open'); } }
+function closeOverlays(){
+  document.getElementById('glossary-drawer').classList.remove('open');
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('scrim').classList.remove('open');
+}
+
+// drag-drop ranking wiring (event delegation)
+document.addEventListener('dragstart',e=>{ const li=e.target.closest('.rank-item'); if(li&&li.draggable){ li.classList.add('dragging'); }});
+document.addEventListener('dragend',e=>{ const li=e.target.closest('.rank-item'); if(li){ li.classList.remove('dragging'); renumberRanks(li.parentElement); }});
+document.addEventListener('dragover',e=>{
+  const list=e.target.closest('.rank-list'); if(!list) return; e.preventDefault();
+  const dragging=list.querySelector('.dragging'); if(!dragging) return;
+  const after=[...list.querySelectorAll('.rank-item:not(.dragging)')].find(li=>{
+    const r=li.getBoundingClientRect(); return e.clientY < r.top + r.height/2;
+  });
+  if(after) list.insertBefore(dragging,after); else list.appendChild(dragging);
+});
+function renumberRanks(list){ if(!list) return; [...list.querySelectorAll('.rank-item')].forEach((li,i)=>{ const n=li.querySelector('.rank-num'); if(n)n.textContent=i+1; }); }
+
+// ════════════════════════════════════════════════════════════════════════
+//  SELF-GRADING + OPTION FEEDBACK HELPERS
+// ════════════════════════════════════════════════════════════════════════
+function selfGradeRow(fnTemplate, label, opts){
+  const o = opts || [['Recalled it',1,'good'],['Partially',0.5,'gold'],["Couldn't",0,'warn']];
+  return `<div class="selfgrade"><span class="sg-q">${label}</span><div class="sg-btns">${
+    o.map(([txt,score,tone])=>`<button class="sg-btn sg-${tone}" onclick="${fnTemplate.replace('SCORE',score).replace('LBL',txt)}">${txt}</button>`).join('')
+  }</div></div>`;
+}
+function gradeLabel(s){ return s>=0.75?'Recalled':s>=0.4?'Partial recall':'Missed — it will return sooner'; }
+
+function optionFeedbackHTML(int, saved){
+  if(!saved) return '';
+  let out='';
+  const ofs=int.optionFeedback||[];
+  const block=(of,head)=>{
+    if(!of||!of.feedback) return '';
+    const mis=of.linkedMisconceptionId?findMisconception(of.linkedMisconceptionId):null;
+    return `<div class="feedback show fb-elaborative" style="margin-top:10px"><div class="fb-head">✦ ${head}</div>${of.feedback}${mis?`<div style="margin-top:6px;font-size:13px;color:var(--ink-faint)">Common misconception: "${mis.misconception}"</div>`:''}</div>`;
+  };
+  if(int.interactionType==='multiple-choice' && saved.choice!=null){
+    out += block(ofs.find(f=>f.optionIndex===saved.choice),'About your choice');
+    if(saved.choice!==int.correctIndex){
+      out += block(ofs.find(f=>f.optionIndex===int.correctIndex),'Why '+String.fromCharCode(65+(int.correctIndex??0))+' is right');
+    }
+  }
+  if(int.interactionType==='drag-drop' && Array.isArray(int.correctOrder) && saved.order){
+    const hits=saved.order.filter((v,i)=>v===int.correctOrder[i]).length;
+    out += `<div class="feedback show fb-elaborative" style="margin-top:10px"><div class="fb-head">✦ Expert order · you matched ${hits}/${int.correctOrder.length}</div><ol style="margin:6px 0 0 18px">${int.correctOrder.map(i=>`<li>${int.options[i]}</li>`).join('')}</ol></div>`;
+  }
+  return out;
+}
+function probeOptionFeedback(p,saved){
+  if(!saved || saved.choice==null) return '';
+  const of=(p.optionFeedback||[]).find(f=>f.optionIndex===saved.choice);
+  if(!of||!of.feedback) return '';
+  return `<div class="feedback show ${saved.choice===p.correctIndex?'fb-correct':'fb-corrective'}" style="margin:12px 0 0"><div class="fb-head">✦ About your answer</div>${of.feedback}</div>`;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  SPACED-REPETITION SCHEDULER + REVIEW QUEUE
+//  The course JSON stays static; the engine owns all timestamps in
+//  state.reviewSchedule. Intervals come from each item's schedule block.
+// ════════════════════════════════════════════════════════════════════════
+function findRetrievalItem(itemId){
+  for(const sec of C.sections||[]) for(const e of sec.learningExperiences||[])
+    for(const r of e.retrievalPractice||[]) if(r.retrievalItemId===itemId) return {item:r, exp:e, sec};
+  return null;
+}
+function expIndices(expId){
+  for(let si=0;si<(C.sections||[]).length;si++){
+    const es=C.sections[si].learningExperiences||[];
+    for(let ei=0;ei<es.length;ei++) if(es[ei].experienceId===expId) return [si,ei];
+  }
+  return [0,0];
+}
+function scheduleReview(itemId, expId, score){
+  const found=findRetrievalItem(itemId); if(!found) return;
+  const sch=found.item.schedule||{};
+  const seq=[sch.initialReviewDays??1, ...((sch.subsequentReviewDays&&sch.subsequentReviewDays.length)?sch.subsequentReviewDays:[3,7,14,30])];
+  const dp=sch.decayParameters||{};
+  const minI=dp.minimumIntervalDays??1, maxI=dp.maximumIntervalDays??365;
+  const rec=state.reviewSchedule[itemId]||{expId, step:-1, intervalDays:0, reps:0};
+  rec.expId=expId; rec.reps=(rec.reps||0)+1;
+  let interval;
+  if(score>=0.75){                       // solid recall → advance the ladder
+    rec.step=Math.min((rec.step??-1)+1, seq.length);
+    interval = rec.step<seq.length
+      ? seq[rec.step]
+      : Math.round(Math.max(rec.intervalDays, seq[seq.length-1])*(dp.strengthMultiplier||2));
+  } else if(score>=0.4){                 // partial → shrink the interval
+    interval=Math.max(minI, Math.round((rec.intervalDays||seq[0])/2));
+  } else {                               // missed → restart the ladder
+    rec.step=0; interval=seq[0];
+  }
+  interval=Math.max(minI, Math.min(maxI, interval));
+  rec.intervalDays=interval;
+  rec.due=Date.now()+interval*86400000;
+  rec.lastScore=score; rec.lastReviewed=Date.now();
+  state.reviewSchedule[itemId]=rec; saveState();
+}
+function dueReviews(){
+  const now=Date.now();
+  return Object.entries(state.reviewSchedule||{})
+    .filter(([id,rec])=>rec.due<=now)
+    .map(([id,rec])=>({id,rec,found:findRetrievalItem(id)}))
+    .filter(x=>x.found);
+}
+function interleaveByCompetency(items){
+  // round-robin across each item's primary competency so adjacent items differ
+  const groups={};
+  items.forEach(x=>{
+    const k=(x.found.exp.linkedCompetencies||['_'])[0];
+    (groups[k]=groups[k]||[]).push(x);
+  });
+  Object.values(groups).forEach(g=>g.sort(()=>Math.random()-0.5));
+  const keys=Object.keys(groups); const out=[]; let added=true;
+  while(added){ added=false; keys.forEach(k=>{ if(groups[k].length){ out.push(groups[k].shift()); added=true; } }); }
+  return out;
+}
+function nextDueTs(){
+  const all=Object.values(state.reviewSchedule||{});
+  return all.length ? Math.min(...all.map(r=>r.due)) : null;
+}
+function fmtDue(ts){
+  const d=ts-Date.now();
+  if(d<=0) return 'due now';
+  const days=Math.ceil(d/86400000);
+  if(days===1) return 'tomorrow';
+  if(days<30) return 'in '+days+'d';
+  return new Date(ts).toLocaleDateString();
+}
+function reviewCardHTML(){
+  const scheduled=Object.keys(state.reviewSchedule||{}).length;
+  if(!scheduled) return '';
+  const due=dueReviews().length;
+  if(due) return `<div class="card" style="display:flex;align-items:center;gap:16px;border-left:3px solid var(--moss)">
+    <span style="font-size:22px">&#8635;</span>
+    <div style="flex:1"><b>${due} retrieval review${due>1?'s':''} due</b><div style="font-size:13px;color:var(--ink-soft)">Spaced recall is where the durable memory gets built.</div></div>
+    <button class="btn btn-primary btn-sm" onclick="goScreen('review')">Start reviews →</button></div>`;
+  const nd=nextDueTs();
+  return `<div class="card" style="display:flex;align-items:center;gap:16px"><span style="font-size:20px;color:var(--good)">✓</span><div style="flex:1"><b>Reviews up to date</b><div style="font-size:13px;color:var(--ink-soft)">Next review ${nd?fmtDue(nd):'—'}.</div></div></div>`;
+}
+function renderReview(){
+  const dueAll=interleaveByCompetency(dueReviews());
+  const scheduled=Object.keys(state.reviewSchedule||{}).length;
+  let body;
+  if(!scheduled){
+    body=`<div class="card"><b>Nothing scheduled yet.</b><p style="font-family:var(--read);color:var(--ink-soft);font-size:15px;margin-top:6px">Retrieval items enter this queue the first time you recall and grade them inside a lesson. The engine then schedules each next review from the item's spacing parameters.</p></div>`;
+  } else if(!dueAll.length){
+    body=`<div class="card" style="border-left:3px solid var(--good)"><b>All caught up ✓</b><p style="font-family:var(--read);color:var(--ink-soft);font-size:15px;margin-top:6px">Next review ${fmtDue(nextDueTs())}. The gap is the point — come back then.</p></div>`;
+  } else {
+    body=dueAll.map((x,i)=>renderReviewItem(x,i)).join('');
+  }
+  document.getElementById('screen-review').innerHTML=`
+   <div class="stagger">
+    <div class="eyebrow"><span class="rule"></span>Spaced retrieval</div>
+    <h1 style="font-size:32px;margin-bottom:14px">Review queue</h1>
+    <div class="review-head-card"><span style="font-size:22px">&#8635;</span><div>
+      <h3>${dueAll.length?dueAll.length+' item'+(dueAll.length>1?'s':'')+' due':'Review schedule'}</h3>
+      <p>Answer from memory before grading yourself — the source content stays hidden on purpose. Items are interleaved across competencies, and your self-grade sets the next interval.</p>
+    </div></div>
+    ${body}
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goScreen('intro')">← Back</button>
+    </div>
+   </div>`;
+  window.scrollTo({top:0});
+}
+function renderReviewItem(x,i){
+  const r=x.found.item, exp=x.found.exp;
+  const comps=(exp.linkedCompetencies||[]).map(cid=>{const c=findCompetency(cid);return c?`<span class="tag tag-line">${c.title}</span>`:'';}).join('');
+  const [si,ei]=expIndices(exp.experienceId);
+  return `<div class="retrieval review-item" id="review-${r.retrievalItemId}">
+    <div class="retrieval-banner">
+      <div class="retrieval-top">
+        <span class="retrieval-label">&#8635; Review ${i+1} ${renderDiffDots(r.difficulty,true)}</span>
+        <span class="retrieval-type">${r.retrievalType||''}</span>
+      </div>
+      <div class="retrieval-prompt">${r.prompt}</div>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">${comps}
+        <button class="review-lesson-link" onclick="goScreen('exp',${si},${ei})">revisit lesson ↗</button></div>
+    </div>
+    <div class="retrieval-body">
+      <textarea class="sa-input" placeholder="Retrieve from memory — write or rehearse it, then grade yourself."></textarea>
+      ${selfGradeRow(`gradeReview('${r.retrievalItemId}',SCORE)`,'How did the recall go?')}
+    </div>
+  </div>`;
+}
+function gradeReview(itemId,score){
+  const found=findRetrievalItem(itemId); if(!found) return;
+  recordEvidence(found.exp.linkedCompetencies||[], score, 'retrieval');
+  scheduleReview(itemId, found.exp.experienceId, score);
+  toast((score>=0.75?'Scheduled — next review ':'No problem — it returns ')+fmtDue(state.reviewSchedule[itemId].due));
+  renderReview(); buildSidebar();
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  COURSE LOADER + VALIDATION
+// ════════════════════════════════════════════════════════════════════════
+function handleCourseFile(file){
+  if(!file) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ loadCourse(JSON.parse(r.result)); }
+                 catch(e){ showReport('Could not load course',['Invalid JSON: '+e.message]); } };
+  r.readAsText(file);
+}
+function validateCourse(c){
+  const errors=[], warnings=[];
+  if(!c || typeof c!=='object' || Array.isArray(c)){ errors.push('Root must be a JSON object.'); return {errors,warnings}; }
+  if(!c.courseMetadata) errors.push('Missing courseMetadata.');
+  if(!Array.isArray(c.sections)||!c.sections.length) errors.push('sections[] missing or empty.');
+  if(errors.length) return {errors,warnings};
+  if(!Array.isArray(c.competencies)||!c.competencies.length) warnings.push('competencies[] missing or empty — mastery tracking will be inert.');
+
+  const compIds=new Set((c.competencies||[]).map(x=>x.competencyId));
+  const assessIds=new Set((c.assessments||[]).map(x=>x.assessmentId));
+  const misIds=new Set((c.competencies||[]).flatMap(x=>(x.commonMisconceptions||[]).map(m=>m.misconceptionId)));
+  const exerciseIds=new Set();
+  (c.sections||[]).forEach(s=>(s.learningExperiences||[]).forEach(e=>(e.transferExercises||[]).forEach(t=>exerciseIds.add(t.exerciseId))));
+  const badComp=(ids,where)=>(ids||[]).forEach(id=>{ if(!compIds.has(id)) warnings.push(`${where}: unresolved competencyId "${id}"`); });
+
+  (c.sections||[]).forEach(s=>{
+    (s.learningObjectives||[]).forEach(o=>badComp(o.linkedCompetencies,`section ${s.sectionId} objective ${o.objectiveId}`));
+    (s.furtherReading||[]).forEach(fr=>badComp(fr.linkedCompetencies,`furtherReading ${fr.resourceId}`));
+    (s.learningExperiences||[]).forEach(e=>{
+      badComp(e.linkedCompetencies,`experience ${e.experienceId}`);
+      ((e.masteryVerification||{}).assessmentIds||[]).forEach(id=>{
+        if(!assessIds.has(id)) warnings.push(`experience ${e.experienceId}: unresolved assessmentId "${id}"`);
+      });
+      (e.interactionSequence||[]).forEach(it=>{
+        if(['multiple-choice','drag-drop'].includes(it.interactionType)){
+          if(!Array.isArray(it.options)||!it.options.length)
+            warnings.push(`interaction ${it.interactionId}: ${it.interactionType} has no options[] — will fall back to free text.`);
+          else if(it.interactionType==='multiple-choice' && it.correctIndex==null)
+            warnings.push(`interaction ${it.interactionId}: options[] without correctIndex — cannot be scored.`);
+        }
+      });
+    });
+  });
+  (c.competencies||[]).forEach(cc=>(cc.desiredOutcomes||[]).forEach(o=>(o.verifiedBy||[]).forEach(id=>{
+    if(!assessIds.has(id)&&!exerciseIds.has(id))
+      warnings.push(`competency ${cc.competencyId} outcome ${o.outcomeId}: verifiedBy "${id}" matches no assessment or transfer exercise`);
+  })));
+  (c.assessments||[]).forEach(a=>{
+    badComp(a.linkedCompetencies,`assessment ${a.assessmentId}`);
+    (a.questions||[]).forEach(q=>{
+      (q.errorPatterns||[]).forEach(ep=>{
+        if(ep.linkedMisconceptionId && !misIds.has(ep.linkedMisconceptionId))
+          warnings.push(`question ${q.questionId}: errorPattern "${ep.errorPatternId}" links unknown misconception "${ep.linkedMisconceptionId}"`);
+      });
+      if(q.questionType==='multiple-choice' && (!Array.isArray(q.options)||q.correctIndex==null))
+        warnings.push(`question ${q.questionId}: multiple-choice without options/correctIndex — rendered as free text.`);
+    });
+  });
+  ((c.learningModel||{}).interleavingGroups||[]).forEach(g=>badComp(g.competencyIds,`interleavingGroup ${g.groupId}`));
+  ((c.priorKnowledgeCheck||{}).probeQuestions||[]).forEach(pq=>badComp(pq.linkedCompetencies,`probe ${pq.probeId}`));
+  return {errors,warnings};
+}
+function loadCourse(obj){
+  const {errors,warnings}=validateCourse(obj);
+  if(errors.length){ showReport('Course failed to load',errors); return; }
+  COURSE=obj; C=COURSE; LM=C.learningModel||{};
+  STORE_KEY='course-progress:'+(C.courseMetadata?.courseId||'default');
+  state=loadState();
+  buildSidebar(); renderGlossary(); goScreen('intro');
+  if(warnings.length) showReport(`Loaded with ${warnings.length} warning${warnings.length>1?'s':''}`, warnings);
+  else toast('Course loaded: '+(C.courseMetadata?.title||'untitled'));
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  PROGRESS EXPORT / IMPORT
+// ════════════════════════════════════════════════════════════════════════
+function exportProgress(){
+  const payload={ courseId:C.courseMetadata?.courseId||'default', exportedAt:new Date().toISOString(), state };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=(C.courseMetadata?.courseId||'course')+'-progress.json';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  toast('Progress exported');
+}
+function handleProgressFile(file){
+  if(!file) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{
+    const pr=JSON.parse(r.result);
+    if(!pr || typeof pr.state!=='object') throw new Error('No "state" object found in file.');
+    const curId=C.courseMetadata?.courseId||'default';
+    if(pr.courseId && pr.courseId!==curId &&
+       !confirm(`This progress file is for course "${pr.courseId}", but "${curId}" is loaded. Import anyway?`)) return;
+    state=Object.assign(freshState(), pr.state); saveState();
+    buildSidebar(); goScreen(state.screen||'intro', state.sectionIdx, state.expIdx);
+    toast('Progress imported');
+  }catch(e){ showReport('Could not import progress',[e.message]); } };
+  r.readAsText(file);
+}
+function showReport(title,lines){
+  document.getElementById('report-title').textContent=title;
+  document.getElementById('report-body').innerHTML=
+    (lines||[]).map(l=>`<div class="report-line">${String(l).replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>`).join('')
+    || '<div class="report-line">No details.</div>';
+  document.getElementById('report-overlay').classList.add('open');
+}
+function closeReport(){ document.getElementById('report-overlay').classList.remove('open'); }
+
+// drag & drop a course .json anywhere onto the window
+window.addEventListener('dragover',e=>{
+  if([...(e.dataTransfer?.types||[])].includes('Files')) e.preventDefault();
+});
+window.addEventListener('drop',e=>{
+  const f=e.dataTransfer?.files?.[0];
+  if(f && /\.json$/i.test(f.name)){ e.preventDefault(); handleCourseFile(f); }
+});
+
+// keyboard: Esc closes overlays
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeOverlays(); });
+
+// ── INIT ────────────────────────────────────────────────────────────────
+function showEmptyState(){
+  document.getElementById('sidebar-title').textContent = 'No course loaded';
+  document.getElementById('sidebar-eyebrow').textContent = 'Course Engine';
+  document.getElementById('screen-intro').innerHTML = `
+    <div class="stagger">
+      <div class="eyebrow"><span class="rule"></span>Course Engine</div>
+      <h1 style="font-size:32px;margin-bottom:14px">No course loaded</h1>
+      <div class="card">
+        <p style="font-family:var(--read);color:var(--ink-soft);font-size:16px">
+          Pick a course from the home page, or load a course file from your
+          machine to start.
+        </p>
+        <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+          <a class="btn btn-secondary btn-sm" href="/">← Browse courses</a>
+          <button class="btn btn-primary btn-sm"
+            onclick="document.getElementById('course-file').click()">⤓ Load course JSON</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+if (HAS_COURSE) {
+  buildSidebar();
+  goScreen(state.screen||'intro', state.sectionIdx, state.expIdx);
+} else {
+  showEmptyState();
+}
+
+</script>
+</body>
+</html>
