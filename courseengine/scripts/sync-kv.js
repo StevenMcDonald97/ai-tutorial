@@ -92,7 +92,7 @@ function main() {
     }
 
     // Write via stdin-less path: wrangler reads the value from a file.
-    sh(['kv', 'key', 'put', key, '--path', full, ...namespaceArgs()]);
+    sh(['kv', 'key', 'put', key, '--path', full, '--remote', ...namespaceArgs()]);
     console.log(`✓ put ${key}`);
     written++;
   }
@@ -101,7 +101,7 @@ function main() {
   for (const slug of Object.keys(cache)) {
     if (!nextCache[slug]) {
       const key = 'course:' + slug;
-      sh(['kv', 'key', 'delete', key, ...namespaceArgs()]);
+      sh(['kv', 'key', 'delete', key, '--remote', ...namespaceArgs()]);
       console.log(`✗ deleted stale ${key}`);
     }
   }
