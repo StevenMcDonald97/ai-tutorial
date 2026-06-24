@@ -1,5 +1,75 @@
 [
   {
+    "slug": "reactCourse",
+    "courseId": "advanced-react-architecture",
+    "title": "Advanced React Architecture",
+    "description": "A production-grade course for professional consultants serving small-to-midsize SaaS companies. Treats React as a design system — a set of composable primitives, data-flow contracts, and trade-off surfaces — rather than a collection of APIs. Covers rendering mechanics, async UI coordination, TypeScript contract design, functional programming patterns, state topology, component design, forms, library selection, testing philosophy, performance architecture, and the integrative skill of prescribing and defending a React architecture for a real SaaS context.",
+    "duration": 1055,
+    "durationLabel": "17h 35m",
+    "difficulty": "advanced",
+    "ogImage": "https://cdn.advanced-react-architecture.dev/thumbnails/course-cover.png"
+  },
+  {
+    "slug": "typescrtipV4",
+    "courseId": "advanced-typescript",
+    "title": "Advanced TypeScript: From Type-System Mechanics to Front-End Type Architecture",
+    "description": "A rigorous, transfer-focused course that rebuilds your mental model of the TypeScript type system and assembles it into production architecture. You progress from foundations (structural typing, narrowing, erasure) through type-level programming (generics, conditional and mapped types), domain modelling (discriminated unions, branding, immutability), boundary validation (runtime schemas, type guards), and finally the design of a coherent SaaS front-end type layer with a single source of truth.",
+    "duration": 480,
+    "durationLabel": "8h",
+    "difficulty": "advanced",
+    "ogImage": "PLACEHOLDER"
+  },
+  {
+    "slug": "ancient-philosophy",
+    "courseId": "ancient-philosophy",
+    "title": "Ancient Philosophy: Greece, India, and China",
+    "description": "An intermediate course exploring the major philosophical traditions of antiquity across three civilizations. Learners examine foundational arguments about reality, knowledge, and value from Greek, South Asian, and East Asian thinkers, develop primary-text reading skills, practice cross-tradition comparison, and apply ancient frameworks to contemporary problems.",
+    "duration": 2000,
+    "durationLabel": "33h 20m",
+    "difficulty": "intermediate",
+    "ogImage": "PLACEHOLDER"
+  },
+  {
+    "slug": "uIUxCourseV5",
+    "courseId": "contemporary-ui-and-ux-mastery",
+    "title": "Contemporary UI/UX Mastery",
+    "description": "An advanced practitioner course for senior UI/UX designers who already command the fundamentals and are ready to operate at a systems, strategic, and organizational level. The course moves through a deliberate arc: from rigorous cognitive and perceptual science through visual design, interaction, motion, systems thinking, accessibility, AI-augmented workflows, design leadership, and ethics. The arc closes with a capstone synthesis requiring learners to translate all competencies into a coherent, defensible design strategy for a complex real-world product context.",
+    "duration": 990,
+    "durationLabel": "16h 30m",
+    "difficulty": "advanced",
+    "ogImage": "https://assets.contemporary-uiux-mastery.com/thumbnails/course-cover-v1.png"
+  },
+  {
+    "slug": "joy-contentment-course",
+    "courseId": "joy-and-contentment",
+    "title": "Joy and Contentment: A Multi-Lens Course for Living Well",
+    "description": "A rigorous, evidence-based course guiding mid-20s adults through philosophical, religious, and scientific understandings of joy and contentment, culminating in a personalized, sustainable practice system for lasting well-being.",
+    "duration": 480,
+    "durationLabel": "8h",
+    "difficulty": "intermediate",
+    "ogImage": "PLACEHOLDER"
+  },
+  {
+    "slug": "timeguesser",
+    "courseId": "master-timeguesser",
+    "title": "Master TimeGuesser",
+    "description": "An intermediate course for daily web game enthusiasts who play TimeGuesser regularly but have plateaued on score. Learners move from reactive, intuition-driven guessing to systematic, evidence-based estimation — building clue-reading skills, structured scoring strategy, and a transferable daily-game thinking toolkit applicable to GeoGuessr, Wordle, and beyond.",
+    "duration": 120,
+    "durationLabel": "2h",
+    "difficulty": "intermediate",
+    "ogImage": "PLACEHOLDER"
+  },
+  {
+    "slug": "practicalAi",
+    "courseId": "practical-ai",
+    "title": "Practical AI for Working Professionals",
+    "description": "Practical AI equips working professionals with an accurate mental model of modern artificial intelligence — from conceptual foundations through machine learning and neural networks to large language models — and the hands-on judgment to select, apply, and critically evaluate AI tools in real workflows. The course balances conceptual literacy (how these systems actually work), applied skill (using them well), and critical skill (knowing when not to trust them). Learners move through three acts: building a technical mental model, putting it to work, and learning to audit and verify AI outputs.",
+    "duration": 600,
+    "durationLabel": "10h",
+    "difficulty": "intermediate",
+    "ogImage": "https://cdn.practicalai.course/assets/thumbnail-v1.png"
+  },
+  {
     "slug": "critical-thinking-101",
     "courseId": "critical-thinking-101",
     "title": "Reading the Evidence",
@@ -8,5 +78,35 @@
     "durationLabel": "9h",
     "difficulty": "intermediate",
     "ogImage": ""
+  },
+  {
+    "slug": "boardgameConvincing",
+    "courseId": "convince-friends-to-play-boardgames",
+    "title": "Roll for Initiative: Convincing Friends to Play Boardgames",
+    "description": "An intermediate course for boardgame enthusiasts who want to bring reluctant friends to the table and keep them coming back. Covers game taxonomy fluency, reluctance diagnosis, rhetorical pitching techniques, sustainable game night design, and community-finding strategies. Treats persuasion as a learnable craft grounded in understanding people, not just games.",
+    "duration": 180,
+    "durationLabel": "3h",
+    "difficulty": "intermediate",
+    "ogImage": "https://cdn.convince-friends-boardgames.course/assets/thumbnails/roll-for-initiative-thumb.jpg"
+  },
+  {
+    "slug": "tea_foundation_complete",
+    "courseId": "tea",
+    "title": "The World in a Cup — A Complete Guide to Tea",
+    "description": "A complete journey for the curious beginner: from tea's ancient Chinese origins and the plant biology behind every cup, through the processing craft that creates six distinct tea types, to the brewing variables, global cultures, world ceremonies, and sensory vocabulary that turn casual drinking into confident, articulate appreciation. Each section builds on the last, culminating in a structured tasting practice you can use for life.",
+    "duration": 600,
+    "durationLabel": "10h",
+    "difficulty": "novice",
+    "ogImage": "https://assets.tea-course.io/images/world-in-a-cup-thumb.jpg"
+  },
+  {
+    "slug": "musicThough9Artists",
+    "courseId": "western-music-through-the-lens-of-7-important-ar",
+    "title": "Western Music Through the Lens of 9 Important Artists",
+    "description": "A novice-friendly journey through the evolution of Western music from the late Baroque to the present, anchored in nine genre-defining artists - Bach, Beethoven, Stravinsky, Louis Armstrong, Miles Davis, The Beatles, Aretha Franklin, Bob Dylan, and Kendrick Lamar. Learners build a portable listening toolkit: how to hear structure by ear, recognize what made each artist innovative in their context, tell genres apart, trace influence across eras, and walk into any performance prepared to listen richly and enjoyably.",
+    "duration": 480,
+    "durationLabel": "8h",
+    "difficulty": "novice",
+    "ogImage": "https://placehold.co/1200x675?text=Western+Music+Through+9+Artists"
   }
 ]

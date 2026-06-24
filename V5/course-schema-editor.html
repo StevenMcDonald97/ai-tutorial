@@ -1,0 +1,2018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course Schema Editor</title>
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --panel: #ffffff;
+    --ink: #1c2330;
+    --ink-soft: #55617a;
+    --ink-faint: #8a94a8;
+    --line: #dfe3ea;
+    --line-soft: #eceff3;
+    --accent: #2f5fe0;
+    --accent-soft: #eaf0fe;
+    --accent-ink: #1c3da8;
+    --ok: #1f8a4c;
+    --ok-soft: #e7f5ec;
+    --warn: #b5701a;
+    --warn-soft: #fbf1e2;
+    --err: #c0392b;
+    --err-soft: #fbeae8;
+    --radius: 7px;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    background: var(--bg);
+    font-size: 14px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font-family: inherit; cursor: pointer; }
+  input, textarea, select { font-family: inherit; font-size: 13px; }
+
+  /* ---------- App shell ---------- */
+  .app { display: flex; flex-direction: column; height: 100vh; }
+  .topbar {
+    display: flex; align-items: center; gap: 14px;
+    padding: 10px 18px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+    flex: 0 0 auto;
+    z-index: 30;
+  }
+  .topbar h1 {
+    font-size: 15px; font-weight: 650; margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .topbar .ver {
+    font-size: 11px; color: var(--ink-faint);
+    border: 1px solid var(--line); border-radius: 20px;
+    padding: 1px 8px; font-weight: 500;
+  }
+  .topbar .spacer { flex: 1; }
+  .btn {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--ink);
+    padding: 7px 13px;
+    border-radius: var(--radius);
+    font-size: 13px; font-weight: 550;
+    transition: background .12s, border-color .12s;
+  }
+  .btn:hover { background: var(--line-soft); }
+  .btn.primary {
+    background: var(--accent); border-color: var(--accent); color: #fff;
+  }
+  .btn.primary:hover { background: var(--accent-ink); }
+  .btn.ghost { border-color: transparent; background: transparent; }
+  .btn.ghost:hover { background: var(--line-soft); }
+  .btn.sm { padding: 4px 9px; font-size: 12px; }
+  .btn.danger { color: var(--err); }
+  .btn.danger:hover { background: var(--err-soft); border-color: #eccac6; }
+
+  .body { display: flex; flex: 1; min-height: 0; }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    width: 232px; flex: 0 0 232px;
+    background: var(--panel);
+    border-right: 1px solid var(--line);
+    overflow-y: auto;
+    padding: 8px 0;
+  }
+  .nav-group-label {
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em;
+    color: var(--ink-faint); font-weight: 650;
+    padding: 14px 18px 5px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 18px; font-size: 13px; color: var(--ink-soft);
+    border-left: 2px solid transparent; cursor: pointer;
+    user-select: none;
+  }
+  .nav-item:hover { background: var(--line-soft); }
+  .nav-item.active {
+    color: var(--accent-ink); background: var(--accent-soft);
+    border-left-color: var(--accent); font-weight: 600;
+  }
+  .nav-item .count {
+    margin-left: auto; font-size: 11px; color: var(--ink-faint);
+    background: var(--line-soft); border-radius: 10px; padding: 0 7px;
+    min-width: 20px; text-align: center;
+  }
+  .nav-item.active .count { background: #fff; color: var(--accent-ink); }
+  .nav-item .warn-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--warn);
+    margin-left: auto;
+  }
+
+  /* ---------- Main panel ---------- */
+  .main { flex: 1; overflow-y: auto; min-width: 0; }
+  .main-inner { max-width: 880px; margin: 0 auto; padding: 26px 34px 120px; }
+  .page-head { margin-bottom: 6px; }
+  .page-head h2 { font-size: 21px; margin: 0 0 4px; letter-spacing: -0.02em; }
+  .page-head p { margin: 0; color: var(--ink-soft); font-size: 13px; max-width: 640px; }
+
+  /* ---------- Validation panel ---------- */
+  .valpanel {
+    width: 300px; flex: 0 0 300px;
+    background: var(--panel);
+    border-left: 1px solid var(--line);
+    overflow-y: auto;
+    padding: 0;
+  }
+  .valpanel.collapsed { flex-basis: 0; width: 0; overflow: hidden; }
+  .valpanel-head {
+    position: sticky; top: 0; background: var(--panel);
+    padding: 14px 16px 10px; border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .valpanel-head h3 { font-size: 13px; margin: 0; font-weight: 650; }
+  .val-summary { display: flex; gap: 6px; margin-left: auto; }
+  .val-chip {
+    font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 20px;
+  }
+  .val-chip.err { background: var(--err-soft); color: var(--err); }
+  .val-chip.warn { background: var(--warn-soft); color: var(--warn); }
+  .val-chip.ok { background: var(--ok-soft); color: var(--ok); }
+  .val-list { padding: 8px; }
+  .val-entry {
+    display: flex; gap: 8px; padding: 8px 10px; border-radius: var(--radius);
+    font-size: 12px; margin-bottom: 4px; line-height: 1.4;
+  }
+  .val-entry.err { background: var(--err-soft); }
+  .val-entry.warn { background: var(--warn-soft); }
+  .val-entry .ic { font-weight: 700; flex: 0 0 auto; }
+  .val-entry.err .ic { color: var(--err); }
+  .val-entry.warn .ic { color: var(--warn); }
+  .val-entry .vmsg { color: var(--ink); }
+  .val-entry .vwhere { display: block; color: var(--ink-faint); font-size: 11px; margin-top: 2px; }
+  .val-empty { padding: 24px 16px; text-align: center; color: var(--ink-faint); font-size: 12.5px; }
+
+  /* ---------- Form primitives ---------- */
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 10px; margin-top: 16px;
+    overflow: hidden;
+  }
+  .card-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 16px; background: #fbfcfd;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .card-head .ch-title { font-weight: 600; font-size: 13.5px; }
+  .card-head .ch-id {
+    font-family: var(--mono); font-size: 11.5px; color: var(--accent-ink);
+    background: var(--accent-soft); padding: 1px 7px; border-radius: 5px;
+  }
+  .card-head .ch-spacer { flex: 1; }
+  .card-head.collapsible { cursor: pointer; }
+  .card-head .twirl { color: var(--ink-faint); transition: transform .15s; font-size: 11px; }
+  .card.collapsed .twirl { transform: rotate(-90deg); }
+  .card.collapsed .card-body { display: none; }
+  .card-body { padding: 16px; }
+
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field > label {
+    display: block; font-size: 12px; font-weight: 600; color: var(--ink-soft);
+    margin-bottom: 5px;
+  }
+  .field > label .req { color: var(--err); margin-left: 2px; }
+  .field > label .hint {
+    display: block; font-weight: 400; color: var(--ink-faint);
+    font-size: 11.5px; margin-top: 1px;
+  }
+  .control, textarea.control, select.control {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 8px 10px;
+    background: #fff; color: var(--ink);
+    transition: border-color .12s, box-shadow .12s;
+  }
+  .control:focus, textarea.control:focus, select.control:focus {
+    outline: none; border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  textarea.control { resize: vertical; min-height: 60px; line-height: 1.5; }
+  select.control { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2355617a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; padding-right: 28px; }
+  .control.invalid { border-color: var(--err); }
+
+  .row { display: flex; gap: 12px; }
+  .row > .field { flex: 1; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .grid-5 { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; }
+
+  .check {
+    display: flex; align-items: center; gap: 9px; cursor: pointer;
+    padding: 7px 0; user-select: none;
+  }
+  .check input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+  .check label { font-size: 13px; cursor: pointer; }
+  .check .hint { color: var(--ink-faint); font-size: 11.5px; }
+
+  /* number stepper */
+  .stepper { display: flex; align-items: center; gap: 0; width: 100%; }
+  .stepper input { text-align: center; border-radius: 0; border-left: 0; border-right: 0; }
+  .stepper button {
+    border: 1px solid var(--line); background: #fff; color: var(--ink-soft);
+    width: 30px; flex: 0 0 30px; padding: 8px 0; font-size: 15px;
+  }
+  .stepper button:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+  .stepper button:last-child { border-radius: 0 var(--radius) var(--radius) 0; }
+  .stepper button:hover { background: var(--line-soft); }
+
+  /* rating 1-5 */
+  .rating { display: flex; gap: 4px; }
+  .rating button {
+    flex: 1; border: 1px solid var(--line); background: #fff;
+    padding: 6px 0; border-radius: var(--radius); font-size: 13px; font-weight: 600;
+    color: var(--ink-faint);
+  }
+  .rating button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .rating button:hover:not(.on) { background: var(--line-soft); }
+
+  /* string-array editor */
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 7px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--line-soft); border: 1px solid var(--line);
+    border-radius: 20px; padding: 3px 6px 3px 11px; font-size: 12.5px;
+  }
+  .chip button { border: none; background: none; color: var(--ink-faint); font-size: 14px; line-height: 1; padding: 0 2px; }
+  .chip button:hover { color: var(--err); }
+  .chip.mono { font-family: var(--mono); font-size: 11.5px; }
+  .inline-add { display: flex; gap: 6px; }
+  .inline-add .control { flex: 1; }
+
+  /* multiselect dropdown for IDs */
+  .ms { position: relative; }
+  .ms-box {
+    min-height: 38px; border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 5px 8px; background: #fff; display: flex; flex-wrap: wrap; gap: 5px;
+    align-items: center; cursor: pointer;
+  }
+  .ms-box:hover { border-color: var(--ink-faint); }
+  .ms-placeholder { color: var(--ink-faint); font-size: 12.5px; }
+  .ms-menu {
+    position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 40;
+    background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: 0 8px 24px rgba(20,30,50,.12); max-height: 240px; overflow-y: auto;
+    padding: 4px;
+  }
+  .ms-opt { padding: 7px 9px; border-radius: 5px; font-size: 12.5px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+  .ms-opt:hover { background: var(--line-soft); }
+  .ms-opt.sel { background: var(--accent-soft); color: var(--accent-ink); }
+  .ms-opt .oid { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); }
+  .ms-opt.sel .oid { color: var(--accent-ink); }
+  .ms-none { padding: 10px; text-align: center; color: var(--ink-faint); font-size: 12px; }
+  .badref { border: 1px dashed var(--err) !important; background: var(--err-soft); color: var(--err); }
+
+  /* nested list of object-cards */
+  .sub-list { margin-top: 4px; }
+  .empty-note {
+    color: var(--ink-faint); font-size: 12.5px; font-style: italic;
+    padding: 12px; text-align: center; border: 1px dashed var(--line);
+    border-radius: var(--radius); margin-bottom: 10px;
+  }
+  .add-row { margin-top: 4px; }
+
+  .section-block { margin-top: 22px; }
+  .section-block > .sb-label {
+    font-size: 12px; font-weight: 650; color: var(--ink); text-transform: uppercase;
+    letter-spacing: .04em; display: flex; align-items: center; gap: 8px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--line); margin-bottom: 4px;
+  }
+  .sb-label .sb-count { color: var(--ink-faint); font-weight: 500; text-transform: none; letter-spacing: 0; }
+
+  .nested {
+    border-left: 2px solid var(--line); padding-left: 14px; margin: 10px 0 10px 2px;
+  }
+  details.fold { margin-top: 12px; }
+  details.fold > summary {
+    cursor: pointer; font-size: 12.5px; font-weight: 600; color: var(--accent-ink);
+    list-style: none; display: flex; align-items: center; gap: 6px; padding: 4px 0;
+  }
+  details.fold > summary::-webkit-details-marker { display: none; }
+  details.fold > summary::before { content: "▸"; font-size: 10px; transition: transform .15s; }
+  details.fold[open] > summary::before { transform: rotate(90deg); }
+
+  /* welcome / empty state */
+  .welcome { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 40px; }
+  .welcome h2 { font-size: 24px; margin: 0 0 8px; letter-spacing: -0.02em; }
+  .welcome p { color: var(--ink-soft); max-width: 440px; margin: 0 0 24px; }
+  .welcome .actions { display: flex; gap: 12px; }
+  .welcome .drop-hint { margin-top: 26px; font-size: 12px; color: var(--ink-faint); }
+
+  /* JSON modal */
+  .overlay { position: fixed; inset: 0; background: rgba(20,28,44,.45); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 30px; }
+  .modal { background: #fff; border-radius: 12px; width: 100%; max-width: 760px; max-height: 86vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+  .modal-head { padding: 14px 18px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px; }
+  .modal-head h3 { margin: 0; font-size: 15px; }
+  .modal-body { padding: 0; overflow: auto; flex: 1; }
+  .modal-body textarea { width: 100%; height: 100%; min-height: 420px; border: none; padding: 16px 18px; font-family: var(--mono); font-size: 12px; line-height: 1.55; resize: none; }
+  .modal-body textarea:focus { outline: none; }
+  .modal-foot { padding: 12px 18px; border-top: 1px solid var(--line); display: flex; gap: 10px; align-items: center; }
+  .modal-foot .msg { font-size: 12.5px; }
+  .modal-foot .msg.err { color: var(--err); }
+  .modal-foot .msg.ok { color: var(--ok); }
+
+  .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 9px 16px; border-radius: 8px; font-size: 13px; z-index: 200; opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+
+  .dragover { outline: 3px dashed var(--accent); outline-offset: -6px; }
+  .hidden { display: none !important; }
+  .muted-link { color: var(--accent); cursor: pointer; text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <h1>Course Schema Editor</h1>
+    <span class="ver">v5</span>
+    <div class="spacer"></div>
+    <button class="btn sm ghost" id="btnNew">New course</button>
+    <button class="btn sm ghost" id="btnOpen">Open JSON…</button>
+    <button class="btn sm ghost" id="btnPaste">Paste JSON</button>
+    <button class="btn sm ghost" id="btnToggleVal">Validation</button>
+    <button class="btn sm" id="btnView">View JSON</button>
+    <button class="btn sm primary" id="btnExport">Download JSON</button>
+    <input type="file" id="fileInput" accept=".json,application/json" class="hidden">
+  </div>
+  <div class="body">
+    <nav class="sidebar" id="sidebar"></nav>
+    <main class="main" id="main"></main>
+    <aside class="valpanel" id="valpanel"></aside>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+/* =====================================================================
+   Course Schema Editor (v5)
+   Single-file vanilla-JS editor for the course-engine JSON object.
+   ===================================================================== */
+
+(function () {
+"use strict";
+
+/* ---------------------------------------------------------------------
+   Enumerations (allowed values) lifted from the schema/doc
+   ------------------------------------------------------------------- */
+const ENUM = {
+  difficultyLevel: ["novice", "intermediate", "advanced"],
+  prerequisiteType: ["knowledge", "course", "assessment"],
+  taxonomyLevel: ["remember", "understand", "apply", "analyze", "evaluate", "create"],
+  pkcPlacement: ["before-course", "before-section"],
+  probeType: ["multiple-choice", "short-answer", "scenario-analysis"],
+  routingAction: ["skip-to-section", "unlock-advanced", "flag-for-review"],
+  motivationHook: ["real-world-stakes", "prediction-gap", "curiosity-prompt", "relevance-anchor"],
+  resourceType: ["article", "book", "paper", "video", "website", "other"],
+  experienceType: ["guided-analysis", "worked-example", "case-study", "simulation", "discussion", "self-guided-exercise"],
+  cognitiveAction: ["prediction", "analysis", "reflection", "retrieval", "comparison", "synthesis"],
+  contentBlockType: ["text", "image", "video", "audio", "interactive"],
+  interactionType: ["prediction", "compare-responses", "reflection", "multiple-choice", "drag-drop", "scenario-analysis"],
+  responseFormat: ["short-answer", "multiple-choice", "ranking", "likert"],
+  revealCondition: ["after-response", "after-attempt", "on-request"],
+  feedbackType: ["elaborative", "corrective", "hint-only", "socratic"],
+  retrievalType: ["free-recall", "cued-recall", "application", "scenario-analysis", "contrast"],
+  verificationMode: ["self-attested", "reflection-submission", "none"],
+  assessmentType: ["scenario-analysis", "multiple-choice", "short-answer", "performance-task"],
+  questionType: ["short-answer", "multiple-choice", "scenario-analysis"],
+  retrievalAlgorithm: ["spaced-repetition", "fixed-interval", "performance-adaptive"],
+  retrievalModes: ["free-recall", "cued-recall", "application", "scenario-analysis", "contrast"],
+  masteryLevels: ["novice", "developing", "proficient", "mastered"],
+  analyticsTrack: ["accuracy", "confidence", "time-on-task", "retrieval-strength", "transfer-performance", "misconception-frequency"],
+};
+
+/* ---------------------------------------------------------------------
+   Default-object factories — every "add" button uses one of these so new
+   nodes carry the full set of schema keys.
+   ------------------------------------------------------------------- */
+let _seq = 0;
+function uid(prefix) { _seq++; return prefix + "-" + Date.now().toString(36).slice(-4) + _seq; }
+
+const FACTORY = {
+  course() {
+    return {
+      courseMetadata: {
+        courseId: uid("course"), title: "", description: "", thumbnailImage: "",
+        estimatedDurationMinutes: 0, difficultyLevel: "novice", version: "1.0",
+        lastUpdated: new Date().toISOString().slice(0, 10), language: "en",
+        tags: [], prerequisites: [],
+      },
+      learningModel: {
+        masteryThreshold: 0.85, passingThreshold: 0.7,
+        retrievalPracticeEnabled: true, confidenceCalibrationEnabled: false,
+        adaptiveDifficultyEnabled: false, interleavingEnabled: false,
+        interleavingGroups: [], spacedRepetitionEnabled: true,
+      },
+      priorKnowledgeCheck: { enabled: false, placement: "before-course", probeQuestions: [] },
+      competencies: [],
+      sections: [],
+      assessments: [],
+      retrievalSystem: { algorithm: "spaced-repetition", confidenceWeighting: false, interleavingEnabled: false, retrievalModes: [] },
+      masterySystem: { masteryLevels: ["novice", "developing", "proficient", "mastered"], decayModelEnabled: false, reverificationRequired: false },
+      analytics: { track: [], errorAnalysis: { enabled: false, errorPatternTracking: false, misconceptionFrequencyLogging: false, linkedToMisconceptionIds: [] } },
+      glossary: [],
+    };
+  },
+  prerequisite() { return { type: "knowledge", description: "" }; },
+  interleavingGroup() { return { groupId: uid("ileave"), competencyIds: [], experienceIds: [], rationaleNote: "" }; },
+  probe() {
+    return { probeId: uid("probe"), prompt: "", questionType: "multiple-choice", options: [], correctIndex: 0,
+      optionFeedback: [], linkedCompetencies: [], scoringCriteria: [], routingRules: [] };
+  },
+  routingRule() { return { condition: "", action: "skip-to-section" }; },
+  optionFeedback() { return { optionIndex: 0, feedback: "", linkedMisconceptionId: "" }; },
+  competency() {
+    return { competencyId: uid("comp"), title: "", description: "", taxonomyLevel: "understand",
+      difficultyProfile: { overall: 3, conceptualComplexity: 3, ambiguity: 3, technicalSkill: 3, readingDemand: 3 },
+      transferRequired: false, masteryThreshold: 0.85, desiredOutcomes: [], commonMisconceptions: [] };
+  },
+  desiredOutcome() {
+    return { outcomeId: uid("outcome"), description: "", verifiedBy: [],
+      verificationCriteria: { minimumAccuracy: 0.8, minimumConfidenceCalibration: 0.7, requiresTransferSuccess: false } };
+  },
+  misconception() {
+    return { misconceptionId: uid("mis"), misconception: "", whyIncorrect: "", remediationStrategy: "", linkedErrorPatterns: [] };
+  },
+  section() {
+    return { sectionId: uid("sec"), title: "", description: "", learningObjectives: [],
+      motivationHooks: [], furtherReading: [], learningExperiences: [] };
+  },
+  objective() { return { objectiveId: uid("obj"), description: "", linkedCompetencies: [] }; },
+  motivationHook() { return { type: "real-world-stakes", prompt: "" }; },
+  furtherReading() {
+    return { resourceId: uid("res"), title: "", resourceType: "article", url: "", citation: "", author: "", rationaleNote: "", linkedCompetencies: [] };
+  },
+  experience() {
+    return { experienceId: uid("exp"), title: "", experienceType: "guided-analysis",
+      difficultyProfile: { overall: 3, conceptualComplexity: 3, ambiguity: 3 },
+      estimatedDurationMinutes: 0, linkedCompetencies: [], desiredCognitiveActions: [],
+      contentBlocks: [], interactionSequence: [], workedExamples: [],
+      selfGuidedExercise: null, retrievalPractice: [], transferExercises: [],
+      masteryVerification: { assessmentIds: [], requiredPerformance: { minimumAccuracy: 0.8, minimumTransferScore: 0.7 } } };
+  },
+  contentBlock() { return { blockId: uid("block"), type: "text", content: "", url: "", altText: "", captionOrTranscript: "" }; },
+  interaction() {
+    return { interactionId: uid("ix"), title: "", interactionType: "multiple-choice", prompt: "", required: false,
+      responseFormat: "multiple-choice", revealCondition: "after-response", options: [], correctIndex: 0,
+      correctOrder: [], optionFeedback: [],
+      feedback: { type: "elaborative", elaborativeFeedback: "", correctiveFeedback: "", hints: [] },
+      confidencePrompt: { enabled: false, scaleMin: 1, scaleMax: 5, prompt: "" } };
+  },
+  workedExample() { return { exampleId: uid("we"), problem: "", steps: [], conclusion: "" }; },
+  selfGuidedExercise() {
+    return { exerciseId: uid("sge"), realWorldContext: "", objective: "", instructions: [],
+      estimatedRealWorldDurationMinutes: 0, materialsOrPrerequisites: [], reflectionPrompts: [],
+      verification: { mode: "self-attested", isGating: false, selfAssessmentCriteria: [] }, linkedCompetencies: [] };
+  },
+  retrievalItem() {
+    return { retrievalItemId: uid("rp"), retrievalType: "free-recall", prompt: "", difficulty: 3,
+      schedule: { initialReviewDays: 1, subsequentReviewDays: [3, 7, 14, 30],
+        decayParameters: { decayRate: 0.1, strengthMultiplier: 2, minimumIntervalDays: 1, maximumIntervalDays: 365 } } };
+  },
+  transferExercise() { return { exerciseId: uid("transfer"), context: "", scenario: "", task: "", successCriteria: [] }; },
+  assessment() {
+    return { assessmentId: uid("assess"), title: "", assessmentType: "multiple-choice",
+      linkedCompetencies: [], adaptiveDifficulty: false, questions: [] };
+  },
+  question() {
+    return { questionId: uid("q"), difficulty: 3, prompt: "", questionType: "multiple-choice",
+      options: [], correctIndex: 0, optionFeedback: [], successCriteria: [],
+      rubric: { excellent: "", adequate: "", weak: "" }, errorPatterns: [] };
+  },
+  errorPattern() { return { errorPatternId: uid("err"), description: "", linkedMisconceptionId: "", remediationAction: "" }; },
+  glossaryTerm() { return { term: "", definition: "" }; },
+};
+
+/* ---------------------------------------------------------------------
+   App state
+   ------------------------------------------------------------------- */
+const state = {
+  course: null,          // the working document, or null at welcome screen
+  page: "metadata",      // active sidebar page
+  collapsed: {},         // collapse memory by card key
+  valCollapsed: false,
+};
+
+/* ---------------------------------------------------------------------
+   Small DOM helpers
+   ------------------------------------------------------------------- */
+function el(tag, attrs, children) {
+  const n = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    if (k === "class") n.className = attrs[k];
+    else if (k === "html") n.innerHTML = attrs[k];
+    else if (k.startsWith("on") && typeof attrs[k] === "function") n.addEventListener(k.slice(2), attrs[k]);
+    else if (attrs[k] === true) n.setAttribute(k, "");
+    else if (attrs[k] !== false && attrs[k] != null) n.setAttribute(k, attrs[k]);
+  }
+  if (children != null) (Array.isArray(children) ? children : [children]).forEach(c => {
+    if (c == null) return;
+    n.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+  });
+  return n;
+}
+function clear(node) { while (node.firstChild) node.removeChild(node.firstChild); }
+function $(sel) { return document.querySelector(sel); }
+
+let _toastTimer = null;
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(_toastTimer); _toastTimer = setTimeout(() => t.classList.remove("show"), 1900);
+}
+
+/* Re-render everything from current state */
+function render() {
+  window.renderSidebar();
+  window.renderMain();
+  window.renderValidation();
+}
+
+// expose a few things to later script chunks
+window.__CE = { ENUM, FACTORY, state, el, clear, $, toast, render, uid };
+
+})();
+/* =====================================================================
+   Part 2 — control builders + ID registries
+   ===================================================================== */
+(function () {
+"use strict";
+const { ENUM, state, el, render, toast } = window.__CE;
+
+/* ----- generic binding helpers ----- */
+// obj[key] bound input; onInput optional extra callback
+function bindText(obj, key, opts) {
+  opts = opts || {};
+  const node = el(opts.area ? "textarea" : "input", {
+    class: "control" + (opts.invalid ? " invalid" : ""),
+    type: opts.type || "text",
+    placeholder: opts.placeholder || "",
+    rows: opts.rows || 3,
+  });
+  node.value = obj[key] == null ? "" : obj[key];
+  node.addEventListener("input", () => {
+    obj[key] = node.value;
+    if (opts.onInput) opts.onInput(node.value);
+    if (opts.live) render();
+    else markValidationDirty();
+  });
+  if (!opts.area) node.type = opts.type || "text";
+  return node;
+}
+
+function bindSelect(obj, key, values, opts) {
+  opts = opts || {};
+  const sel = el("select", { class: "control" });
+  if (opts.allowEmpty) sel.appendChild(el("option", { value: "" }, opts.emptyLabel || "— none —"));
+  values.forEach(v => {
+    const o = el("option", { value: v }, v);
+    if (obj[key] === v) o.selected = true;
+    sel.appendChild(o);
+  });
+  sel.value = obj[key] == null ? "" : obj[key];
+  sel.addEventListener("change", () => {
+    obj[key] = sel.value;
+    if (opts.onChange) opts.onChange(sel.value);
+    if (opts.live) render(); else markValidationDirty();
+  });
+  return sel;
+}
+
+function bindCheck(obj, key, label, opts) {
+  opts = opts || {};
+  const box = el("input", { type: "checkbox" });
+  box.checked = !!obj[key];
+  if (opts.disabled) box.disabled = true;
+  box.addEventListener("change", () => {
+    obj[key] = box.checked;
+    if (opts.onChange) opts.onChange(box.checked);
+    if (opts.live) render(); else markValidationDirty();
+  });
+  const id = "chk" + Math.random().toString(36).slice(2, 8);
+  box.id = id;
+  return el("div", { class: "check" }, [
+    box,
+    el("label", { for: id }, [label, opts.hint ? el("span", { class: "hint" }, " — " + opts.hint) : null]),
+  ]);
+}
+
+function bindNumber(obj, key, opts) {
+  opts = opts || {};
+  const min = opts.min, max = opts.max, step = opts.step || 1;
+  const input = el("input", { class: "control", type: "number" });
+  input.value = obj[key] == null ? "" : obj[key];
+  if (min != null) input.min = min;
+  if (max != null) input.max = max;
+  input.step = step;
+  function commit(v) {
+    if (v === "" || v == null) { obj[key] = opts.float ? 0 : 0; }
+    else { let n = opts.float ? parseFloat(v) : parseInt(v, 10); if (isNaN(n)) n = 0;
+      if (min != null) n = Math.max(min, n); if (max != null) n = Math.min(max, n); obj[key] = n; }
+    markValidationDirty();
+  }
+  input.addEventListener("input", () => commit(input.value));
+  if (!opts.bare) {
+    const wrap = el("div", { class: "stepper" });
+    const dec = el("button", { type: "button" }, "−");
+    const inc = el("button", { type: "button" }, "+");
+    dec.addEventListener("click", () => { input.value = (parseFloat(input.value || 0) - step); commit(input.value); });
+    inc.addEventListener("click", () => { input.value = (parseFloat(input.value || 0) + step); commit(input.value); });
+    wrap.append(dec, input, inc);
+    return wrap;
+  }
+  return input;
+}
+
+// 1-5 rating widget
+function bindRating(obj, key) {
+  const wrap = el("div", { class: "rating" });
+  for (let i = 1; i <= 5; i++) {
+    const b = el("button", { type: "button" }, String(i));
+    if (obj[key] === i) b.classList.add("on");
+    b.addEventListener("click", () => { obj[key] = i; wrap.querySelectorAll("button").forEach((x, j) => x.classList.toggle("on", j + 1 === i)); markValidationDirty(); });
+    wrap.appendChild(b);
+  }
+  return wrap;
+}
+
+/* string-array editor (chips + add box). For ordered lists like steps/instructions. */
+function bindStringArray(arr, opts) {
+  opts = opts || {};
+  const wrap = el("div");
+  const chips = el("div", { class: "chips" });
+  function paint() {
+    chips.innerHTML = "";
+    if (!arr.length) chips.appendChild(el("span", { class: "ms-placeholder" }, opts.empty || "None yet."));
+    arr.forEach((v, i) => {
+      chips.appendChild(el("span", { class: "chip" + (opts.mono ? " mono" : "") }, [
+        (opts.ordered ? (i + 1) + ". " : "") + v,
+        el("button", { type: "button", onclick: () => { arr.splice(i, 1); paint(); markValidationDirty(); } }, "×"),
+      ]));
+    });
+  }
+  paint();
+  const input = el(opts.area ? "textarea" : "input", { class: "control", placeholder: opts.placeholder || "Type and press Enter…", rows: 2 });
+  function add() { const v = input.value.trim(); if (!v) return; arr.push(v); input.value = ""; paint(); markValidationDirty(); }
+  input.addEventListener("keydown", e => { if (e.key === "Enter" && !(opts.area && e.shiftKey)) { e.preventDefault(); add(); } });
+  const addBtn = el("button", { class: "btn sm", type: "button", onclick: add }, "Add");
+  wrap.append(chips, el("div", { class: "inline-add" }, [input, addBtn]));
+  return wrap;
+}
+
+/* integer-array editor (for subsequentReviewDays, correctOrder) */
+function bindIntArray(arr, opts) {
+  opts = opts || {};
+  const wrap = el("div");
+  const chips = el("div", { class: "chips" });
+  function paint() {
+    chips.innerHTML = "";
+    if (!arr.length) chips.appendChild(el("span", { class: "ms-placeholder" }, opts.empty || "None."));
+    arr.forEach((v, i) => chips.appendChild(el("span", { class: "chip mono" }, [
+      String(v), el("button", { type: "button", onclick: () => { arr.splice(i, 1); paint(); markValidationDirty(); } }, "×"),
+    ])));
+  }
+  paint();
+  const input = el("input", { class: "control", type: "number", placeholder: opts.placeholder || "number…" });
+  function add() { const v = parseInt(input.value, 10); if (isNaN(v)) return; arr.push(v); input.value = ""; paint(); markValidationDirty(); }
+  input.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); add(); } });
+  wrap.append(chips, el("div", { class: "inline-add" }, [input, el("button", { class: "btn sm", type: "button", onclick: add }, "Add")]));
+  return wrap;
+}
+
+/* fixed-enum multiselect (checkbox list of allowed string values) */
+function bindEnumMulti(arr, values) {
+  const wrap = el("div", { class: "chips" });
+  function paint() {
+    wrap.innerHTML = "";
+    values.forEach(v => {
+      const on = arr.includes(v);
+      const c = el("span", { class: "chip", style: on ? "background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)" : "cursor:pointer;background:#fff" }, v);
+      c.style.cursor = "pointer";
+      c.addEventListener("click", () => {
+        const idx = arr.indexOf(v);
+        if (idx >= 0) arr.splice(idx, 1); else arr.push(v);
+        paint(); markValidationDirty();
+      });
+      wrap.appendChild(c);
+    });
+  }
+  paint();
+  return wrap;
+}
+
+/* ---------------------------------------------------------------------
+   ID registries — collect every defined ID of a given kind, with labels,
+   so reference fields render as dropdowns instead of free text.
+   ------------------------------------------------------------------- */
+const registry = {
+  competencies() { return (state.course.competencies || []).map(c => ({ id: c.competencyId, label: c.title || "(untitled competency)" })); },
+  assessments() { return (state.course.assessments || []).map(a => ({ id: a.assessmentId, label: a.title || "(untitled assessment)" })); },
+  experiences() {
+    const out = [];
+    (state.course.sections || []).forEach(s => (s.learningExperiences || []).forEach(e =>
+      out.push({ id: e.experienceId, label: e.title || "(untitled experience)" })));
+    return out;
+  },
+  // all transfer-exercise ids (verifiedBy can point at these)
+  transferExercises() {
+    const out = [];
+    (state.course.sections || []).forEach(s => (s.learningExperiences || []).forEach(e =>
+      (e.transferExercises || []).forEach(t => out.push({ id: t.exerciseId, label: t.task || t.scenario || "(transfer exercise)" }))));
+    return out;
+  },
+  verifiableTargets() { return registry.assessments().concat(registry.transferExercises()); },
+  misconceptions() {
+    const out = [];
+    (state.course.competencies || []).forEach(c => (c.commonMisconceptions || []).forEach(m =>
+      out.push({ id: m.misconceptionId, label: m.misconception || "(misconception)" })));
+    return out;
+  },
+  errorPatterns() {
+    const out = [];
+    (state.course.assessments || []).forEach(a => (a.questions || []).forEach(q =>
+      (q.errorPatterns || []).forEach(ep => out.push({ id: ep.errorPatternId, label: ep.description || "(error pattern)" }))));
+    return out;
+  },
+};
+
+/* multiselect dropdown bound to an array of ID strings, options from registry() */
+function bindIdMulti(arr, optionsFn) {
+  const ms = el("div", { class: "ms" });
+  const box = el("div", { class: "ms-box", tabindex: "0" });
+  let open = false, menu = null;
+  function options() { return optionsFn(); }
+  function paintBox() {
+    box.innerHTML = "";
+    if (!arr.length) { box.appendChild(el("span", { class: "ms-placeholder" }, "Click to link…")); return; }
+    const opts = options();
+    arr.forEach((id, i) => {
+      const found = opts.find(o => o.id === id);
+      const chip = el("span", { class: "chip mono" + (found ? "" : " badref") }, [
+        id, el("button", { type: "button", onclick: e => { e.stopPropagation(); arr.splice(i, 1); paintBox(); markValidationDirty(); } }, "×"),
+      ]);
+      box.appendChild(chip);
+    });
+  }
+  function paintMenu() {
+    menu.innerHTML = "";
+    const opts = options();
+    if (!opts.length) { menu.appendChild(el("div", { class: "ms-none" }, "No IDs defined yet to link to.")); return; }
+    opts.forEach(o => {
+      const sel = arr.includes(o.id);
+      const row = el("div", { class: "ms-opt" + (sel ? " sel" : "") }, [
+        el("span", {}, sel ? "✓ " : "  "),
+        el("span", {}, o.label),
+        el("span", { class: "oid" }, o.id),
+      ]);
+      row.addEventListener("click", () => {
+        const idx = arr.indexOf(o.id);
+        if (idx >= 0) arr.splice(idx, 1); else arr.push(o.id);
+        paintBox(); paintMenu(); markValidationDirty();
+      });
+      menu.appendChild(row);
+    });
+  }
+  function openMenu() {
+    if (open) return; open = true;
+    menu = el("div", { class: "ms-menu" }); paintMenu(); ms.appendChild(menu);
+    setTimeout(() => document.addEventListener("mousedown", outside), 0);
+  }
+  function closeMenu() { if (!open) return; open = false; if (menu) menu.remove(); menu = null; document.removeEventListener("mousedown", outside); }
+  function outside(e) { if (!ms.contains(e.target)) closeMenu(); }
+  box.addEventListener("click", () => open ? closeMenu() : openMenu());
+  paintBox(); ms.appendChild(box);
+  return ms;
+}
+
+/* single-ID select (allows empty) bound to obj[key] */
+function bindIdSingle(obj, key, optionsFn, opts) {
+  opts = opts || {};
+  const sel = el("select", { class: "control" });
+  function paint() {
+    sel.innerHTML = "";
+    sel.appendChild(el("option", { value: "" }, opts.emptyLabel || "— none —"));
+    const opts2 = optionsFn();
+    let has = false;
+    opts2.forEach(o => { const op = el("option", { value: o.id }, o.label + "  (" + o.id + ")"); if (obj[key] === o.id) { op.selected = true; has = true; } sel.appendChild(op); });
+    if (obj[key] && !has) { const op = el("option", { value: obj[key] }, "⚠ " + obj[key] + " (unresolved)"); op.selected = true; sel.appendChild(op); }
+    sel.value = obj[key] || "";
+  }
+  paint();
+  sel.addEventListener("change", () => { obj[key] = sel.value; markValidationDirty(); });
+  return sel;
+}
+
+window.__CE.controls = {
+  bindText, bindSelect, bindCheck, bindNumber, bindRating, bindStringArray,
+  bindIntArray, bindEnumMulti, bindIdMulti, bindIdSingle, registry,
+};
+
+/* validation is recomputed lazily; this just re-renders the panel */
+let _valDirty = false;
+function markValidationDirty() { _valDirty = true; if (window.renderValidation) window.renderValidation(); }
+window.__CE.markValidationDirty = markValidationDirty;
+
+})();
+/* =====================================================================
+   Part 3 — layout helpers (field/card/sublist) + sidebar
+   ===================================================================== */
+(function () {
+"use strict";
+const { state, el, clear, render } = window.__CE;
+
+/* labelled field wrapper */
+function field(labelText, control, opts) {
+  opts = opts || {};
+  return el("div", { class: "field" }, [
+    labelText ? el("label", {}, [
+      labelText,
+      opts.req ? el("span", { class: "req" }, "*") : null,
+      opts.hint ? el("span", { class: "hint" }, opts.hint) : null,
+    ]) : null,
+    control,
+  ]);
+}
+
+/* a collapsible card with title, optional id chip, and a remove button */
+function card(opts) {
+  const key = opts.key || "";
+  const collapsed = !!state.collapsed[key];
+  const c = el("div", { class: "card" + (collapsed ? " collapsed" : "") });
+  const head = el("div", { class: "card-head collapsible" });
+  const twirl = el("span", { class: "twirl" }, "▾");
+  head.appendChild(twirl);
+  head.appendChild(el("span", { class: "ch-title" }, opts.title || "Item"));
+  if (opts.id) head.appendChild(el("span", { class: "ch-id" }, opts.id));
+  head.appendChild(el("span", { class: "ch-spacer" }));
+  if (opts.onRemove) {
+    const rm = el("button", { class: "btn sm danger", type: "button" }, "Remove");
+    rm.addEventListener("click", e => { e.stopPropagation(); opts.onRemove(); });
+    head.appendChild(rm);
+  }
+  head.addEventListener("click", () => {
+    state.collapsed[key] = !state.collapsed[key];
+    c.classList.toggle("collapsed");
+  });
+  const body = el("div", { class: "card-body" });
+  c.append(head, body);
+  return { card: c, body };
+}
+
+/* a labelled section block (header + list region + add button) */
+function block(label, count, addLabel, onAdd) {
+  const wrap = el("div", { class: "section-block" });
+  const header = el("div", { class: "sb-label" }, [
+    label,
+    el("span", { class: "sb-count" }, count != null ? "(" + count + ")" : ""),
+  ]);
+  wrap.appendChild(header);
+  const listRegion = el("div", { class: "sub-list" });
+  wrap.appendChild(listRegion);
+  if (onAdd) {
+    const btn = el("button", { class: "btn sm", type: "button", onclick: onAdd }, "+ " + (addLabel || "Add"));
+    wrap.appendChild(el("div", { class: "add-row" }, btn));
+  }
+  return { wrap, listRegion, header };
+}
+
+function emptyNote(text) { return el("div", { class: "empty-note" }, text || "None yet."); }
+
+function fold(summaryText, content, openByDefault) {
+  const d = el("details", { class: "fold" });
+  if (openByDefault) d.open = true;
+  d.appendChild(el("summary", {}, summaryText));
+  const inner = el("div", { class: "nested" });
+  (Array.isArray(content) ? content : [content]).forEach(c => c && inner.appendChild(c));
+  d.appendChild(inner);
+  return d;
+}
+
+window.__CE.layout = { field, card, block, emptyNote, fold };
+
+/* ---------------------------------------------------------------------
+   Sidebar
+   ------------------------------------------------------------------- */
+const NAV = [
+  { group: "Course" },
+  { id: "metadata", label: "Metadata" },
+  { id: "learningModel", label: "Learning model" },
+  { id: "priorKnowledge", label: "Prior-knowledge check" },
+  { group: "Content" },
+  { id: "competencies", label: "Competencies", count: c => c.competencies.length },
+  { id: "sections", label: "Sections", count: c => c.sections.length },
+  { id: "assessments", label: "Assessments", count: c => c.assessments.length },
+  { group: "Systems" },
+  { id: "retrievalSystem", label: "Retrieval system" },
+  { id: "masterySystem", label: "Mastery system" },
+  { id: "analytics", label: "Analytics" },
+  { id: "glossary", label: "Glossary", count: c => c.glossary.length },
+];
+
+function renderSidebar() {
+  const nav = window.__CE.$("#sidebar");
+  clear(nav);
+  if (!state.course) return;
+  NAV.forEach(item => {
+    if (item.group) { nav.appendChild(el("div", { class: "nav-group-label" }, item.group)); return; }
+    const row = el("div", { class: "nav-item" + (state.page === item.id ? " active" : "") });
+    row.appendChild(el("span", {}, item.label));
+    if (item.count) {
+      const n = item.count(state.course);
+      row.appendChild(el("span", { class: "count" }, String(n)));
+    }
+    row.addEventListener("click", () => { state.page = item.id; render(); window.__CE.$("#main").scrollTop = 0; });
+    nav.appendChild(row);
+  });
+}
+window.renderSidebar = renderSidebar;
+
+})();
+/* =====================================================================
+   Part 4 — main router, welcome screen, simpler pages, shared editors
+   ===================================================================== */
+(function () {
+"use strict";
+const CE = window.__CE;
+const { ENUM, FACTORY, state, el, clear, render, toast } = CE;
+const C = CE.controls;
+const L = CE.layout;
+
+/* shared: optionFeedback list editor (used by probes, interactions, questions) */
+function optionFeedbackBlock(item, parentCtx) {
+  // parentCtx: { optionsArr } so optionIndex can be shown meaningfully
+  const arr = item.optionFeedback;
+  const b = L.block("Option feedback", arr.length, "Add option feedback", () => { arr.push(FACTORY.optionFeedback()); rerender(); });
+  function rerender() { paint(); }
+  function paint() {
+    clear(b.listRegion);
+    b.header.querySelector(".sb-count").textContent = "(" + arr.length + ")";
+    if (!arr.length) { b.listRegion.appendChild(L.emptyNote("No per-option feedback. Add one entry per option to explain why it's right or wrong.")); return; }
+    arr.forEach((of, i) => {
+      const c = L.card({ key: "of-" + (item.interactionId || item.probeId || item.questionId) + "-" + i,
+        title: "Feedback → option [" + of.optionIndex + "]",
+        onRemove: () => { arr.splice(i, 1); rerender(); CE.markValidationDirty(); } });
+      const optChoices = (parentCtx.optionsArr || []).map((o, idx) => ({ id: String(idx), label: "[" + idx + "] " + (o || "(empty)") }));
+      // optionIndex as a select over existing option indices
+      const idxSel = el("select", { class: "control" });
+      if (!optChoices.length) idxSel.appendChild(el("option", { value: "0" }, "0 (no options defined)"));
+      optChoices.forEach(o => { const op = el("option", { value: o.id }, o.label); if (of.optionIndex === parseInt(o.id, 10)) op.selected = true; idxSel.appendChild(op); });
+      idxSel.value = String(of.optionIndex);
+      idxSel.addEventListener("change", () => { of.optionIndex = parseInt(idxSel.value, 10) || 0;
+        c.card.querySelector(".ch-title").textContent = "Feedback → option [" + of.optionIndex + "]"; CE.markValidationDirty(); });
+      c.body.append(
+        L.field("Applies to option", idxSel),
+        L.field("Feedback shown after answering", C.bindText(of, "feedback", { area: true, placeholder: "Why this option is right or wrong…" })),
+        L.field("Linked misconception", C.bindIdSingle(of, "linkedMisconceptionId", C.registry.misconceptions, { emptyLabel: "— none —" }), { hint: "Optional. Surfaces this misconception when a wrong distractor is chosen." })
+      );
+      b.listRegion.appendChild(c.card);
+    });
+  }
+  paint();
+  return b.wrap;
+}
+CE.optionFeedbackBlock = optionFeedbackBlock;
+
+/* shared: difficultyProfile editor (subset of keys via list) */
+function difficultyProfile(obj, keys) {
+  const grid = el("div", { class: "grid-" + (keys.length >= 5 ? "5" : "3") });
+  keys.forEach(k => {
+    const labels = { overall: "Overall", conceptualComplexity: "Conceptual", ambiguity: "Ambiguity", technicalSkill: "Technical skill", readingDemand: "Reading demand" };
+    grid.appendChild(L.field(labels[k] || k, C.bindRating(obj, k)));
+  });
+  return grid;
+}
+CE.difficultyProfile = difficultyProfile;
+
+/* ----- page: header + body ----- */
+function pageHead(title, desc) {
+  return el("div", { class: "page-head" }, [el("h2", {}, title), desc ? el("p", {}, desc) : null]);
+}
+
+function renderMain() {
+  const main = CE.$("#main");
+  clear(main);
+  if (!state.course) { main.appendChild(welcomeScreen()); return; }
+  const inner = el("div", { class: "main-inner" });
+  const fn = PAGES[state.page] || PAGES.metadata;
+  fn(inner);
+  main.appendChild(inner);
+}
+window.renderMain = renderMain;
+
+function welcomeScreen() {
+  const w = el("div", { class: "welcome" });
+  w.append(
+    el("h2", {}, "Course Schema Editor"),
+    el("p", {}, "Build or edit a course-engine JSON object through a guided form. Every field in the v5 schema is editable, linked IDs are picked from dropdowns, and a live validation panel mirrors the player's load-time checks."),
+    el("div", { class: "actions" }, [
+      el("button", { class: "btn primary", onclick: () => { newCourse(); } }, "Create new course"),
+      el("button", { class: "btn", onclick: () => CE.$("#fileInput").click() }, "Open existing JSON…"),
+      el("button", { class: "btn", onclick: () => CE.openPasteModal() }, "Paste JSON"),
+    ]),
+    el("div", { class: "drop-hint" }, "…or drop a .json file anywhere on this window.")
+  );
+  return w;
+}
+
+function newCourse() { state.course = FACTORY.course(); state.page = "metadata"; render(); toast("New course created"); }
+CE.newCourse = newCourse;
+
+/* =====================  PAGE RENDERERS  ===================== */
+const PAGES = {};
+
+/* ---- Metadata ---- */
+PAGES.metadata = function (root) {
+  root.appendChild(pageHead("Course metadata", "Identity, description, and difficulty. courseId and at least one section are the only hard requirements for a loadable course."));
+  const m = state.course.courseMetadata;
+  const c = L.card({ key: "meta", title: "Identity" });
+  c.body.append(
+    L.field("Course ID", C.bindText(m, "courseId"), { req: true, hint: "Unique. Keys saved progress — changing it orphans existing saves." }),
+    L.field("Title", C.bindText(m, "title"), { req: true }),
+    L.field("Description", C.bindText(m, "description", { area: true })),
+    L.field("Thumbnail image URL", C.bindText(m, "thumbnailImage", { placeholder: "https://…" })),
+    el("div", { class: "grid-3" }, [
+      L.field("Estimated duration (min)", C.bindNumber(m, "estimatedDurationMinutes", { min: 0 })),
+      L.field("Difficulty level", C.bindSelect(m, "difficultyLevel", ENUM.difficultyLevel)),
+      L.field("Version", C.bindText(m, "version")),
+    ]),
+    el("div", { class: "grid-2" }, [
+      L.field("Last updated", C.bindText(m, "lastUpdated", { type: "date" }), { hint: "ISO-8601 date." }),
+      L.field("Language", C.bindText(m, "language", { placeholder: "en, en-US, es…" }), { hint: "BCP-47 tag." }),
+    ]),
+    L.field("Tags", C.bindStringArray(m.tags, { placeholder: "Add a tag…", mono: false }))
+  );
+  root.appendChild(c.card);
+
+  // prerequisites
+  const pb = L.block("Prerequisites", m.prerequisites.length, "Add prerequisite", () => { m.prerequisites.push(FACTORY.prerequisite()); render(); });
+  if (!m.prerequisites.length) pb.listRegion.appendChild(L.emptyNote("No prerequisites. These are displayed to learners, not enforced."));
+  m.prerequisites.forEach((p, i) => {
+    const pc = L.card({ key: "prereq-" + i, title: "Prerequisite " + (i + 1), onRemove: () => { m.prerequisites.splice(i, 1); render(); } });
+    pc.body.append(
+      L.field("Type", C.bindSelect(p, "type", ENUM.prerequisiteType)),
+      L.field("Description", C.bindText(p, "description", { area: true }))
+    );
+    pb.listRegion.appendChild(pc.card);
+  });
+  root.appendChild(pb.wrap);
+};
+
+/* ---- Learning model ---- */
+PAGES.learningModel = function (root) {
+  root.appendChild(pageHead("Learning model", "Global pedagogy switches and thresholds. Per-competency settings override these where both exist."));
+  const lm = state.course.learningModel;
+  const c = L.card({ key: "lm-thresh", title: "Thresholds" });
+  c.body.append(el("div", { class: "grid-2" }, [
+    L.field("Mastery threshold", C.bindNumber(lm, "masteryThreshold", { float: true, min: 0, max: 1, step: 0.05 }), { hint: "0–1. Default bar; falls back to 0.85 if absent." }),
+    L.field("Passing threshold", C.bindNumber(lm, "passingThreshold", { float: true, min: 0, max: 1, step: 0.05 }), { hint: "0–1. Informational in the current player." }),
+  ]));
+  root.appendChild(c.card);
+
+  const sw = L.card({ key: "lm-sw", title: "Switches" });
+  sw.body.append(
+    C.bindCheck(lm, "retrievalPracticeEnabled", "Retrieval practice enabled", { hint: "Items render whenever present." }),
+    C.bindCheck(lm, "confidenceCalibrationEnabled", "Confidence calibration enabled", { hint: "Enables confidence prompts on interactions that define them." }),
+    C.bindCheck(lm, "adaptiveDifficultyEnabled", "Adaptive difficulty enabled"),
+    C.bindCheck(lm, "interleavingEnabled", "Interleaving enabled"),
+    C.bindCheck(lm, "spacedRepetitionEnabled", "Spaced repetition enabled")
+  );
+  root.appendChild(sw.card);
+
+  const ig = lm.interleavingGroups;
+  const b = L.block("Interleaving groups", ig.length, "Add group", () => { ig.push(FACTORY.interleavingGroup()); render(); });
+  if (!ig.length) b.listRegion.appendChild(L.emptyNote("No interleaving groups."));
+  ig.forEach((g, i) => {
+    const gc = L.card({ key: "ig-" + i, title: "Group", id: g.groupId, onRemove: () => { ig.splice(i, 1); render(); } });
+    gc.body.append(
+      L.field("Group ID", C.bindText(g, "groupId")),
+      L.field("Competencies", C.bindIdMulti(g.competencyIds, C.registry.competencies), { hint: "Linkage-validated at load." }),
+      L.field("Experiences", C.bindIdMulti(g.experienceIds, C.registry.experiences)),
+      L.field("Rationale note", C.bindText(g, "rationaleNote", { area: true, placeholder: "e.g. contrast near-transfer items" }))
+    );
+    b.listRegion.appendChild(gc.card);
+  });
+  root.appendChild(b.wrap);
+};
+
+/* ---- Prior-knowledge check ---- */
+PAGES.priorKnowledge = function (root) {
+  root.appendChild(pageHead("Prior-knowledge check", "Optional probe screen shown before the course or a section. Multiple-choice probes are scored; short-answer probes record participation only."));
+  const pk = state.course.priorKnowledgeCheck;
+  const c = L.card({ key: "pk-cfg", title: "Configuration" });
+  c.body.append(
+    C.bindCheck(pk, "enabled", "Enabled", { live: true }),
+    L.field("Placement", C.bindSelect(pk, "placement", ENUM.pkcPlacement))
+  );
+  root.appendChild(c.card);
+
+  const probes = pk.probeQuestions;
+  const b = L.block("Probe questions", probes.length, "Add probe", () => { probes.push(FACTORY.probe()); render(); });
+  if (!probes.length) b.listRegion.appendChild(L.emptyNote("No probe questions."));
+  probes.forEach((p, i) => {
+    const pc = L.card({ key: "probe-" + i, title: p.prompt ? p.prompt.slice(0, 50) : "Probe", id: p.probeId, onRemove: () => { probes.splice(i, 1); render(); } });
+    pc.body.append(
+      L.field("Probe ID", C.bindText(p, "probeId")),
+      L.field("Prompt", C.bindText(p, "prompt", { area: true }), { req: true }),
+      L.field("Question type", C.bindSelect(p, "questionType", ENUM.probeType, { live: true })),
+      L.field("Linked competencies", C.bindIdMulti(p.linkedCompetencies, C.registry.competencies), { hint: "Competencies this probe measures." })
+    );
+    if (p.questionType === "multiple-choice") {
+      pc.body.append(
+        L.field("Options", C.bindStringArray(p.options, { ordered: true, placeholder: "Add an answer choice…" }), { req: true, hint: "Required for multiple-choice." }),
+        L.field("Correct option index", C.bindNumber(p, "correctIndex", { min: 0, bare: true }), { req: true, hint: "Zero-based index into the options above." }),
+      );
+      pc.body.appendChild(CE.optionFeedbackBlock(p, { optionsArr: p.options }));
+    } else {
+      pc.body.appendChild(L.field("Scoring criteria", C.bindStringArray(p.scoringCriteria, { area: true, placeholder: "Add a criterion…" }), { hint: "Rubric-style criteria shown for short-answer probes." }));
+    }
+    // routing rules
+    const rr = p.routingRules;
+    const rb = L.block("Routing rules", rr.length, "Add rule", () => { rr.push(FACTORY.routingRule()); render(); });
+    if (!rr.length) rb.listRegion.appendChild(L.emptyNote("No routing rules. (Currently advisory — displayed, not executed.)"));
+    rr.forEach((r, ri) => {
+      const rc = L.card({ key: "rr-" + i + "-" + ri, title: "Rule " + (ri + 1), onRemove: () => { rr.splice(ri, 1); render(); } });
+      rc.body.append(
+        L.field("Condition", C.bindText(r, "condition", { placeholder: "e.g. score >= 0.85" })),
+        L.field("Action", C.bindSelect(r, "action", ENUM.routingAction, { allowEmpty: true, emptyLabel: "— custom / none —" }))
+      );
+      rb.listRegion.appendChild(rc.card);
+    });
+    pc.body.appendChild(rb.wrap);
+    b.listRegion.appendChild(pc.card);
+  });
+  root.appendChild(b.wrap);
+};
+
+/* ---- Retrieval system ---- */
+PAGES.retrievalSystem = function (root) {
+  root.appendChild(pageHead("Retrieval system", "Declares the spacing approach. Actual scheduling runs per-item from each retrieval item's schedule block."));
+  const rs = state.course.retrievalSystem;
+  const c = L.card({ key: "rs", title: "Settings" });
+  c.body.append(
+    L.field("Algorithm", C.bindSelect(rs, "algorithm", ENUM.retrievalAlgorithm)),
+    C.bindCheck(rs, "confidenceWeighting", "Confidence weighting"),
+    C.bindCheck(rs, "interleavingEnabled", "Interleaving enabled"),
+    L.field("Retrieval modes", C.bindEnumMulti(rs.retrievalModes, ENUM.retrievalModes))
+  );
+  root.appendChild(c.card);
+};
+
+/* ---- Mastery system ---- */
+PAGES.masterySystem = function (root) {
+  root.appendChild(pageHead("Mastery system", "Mastery level labels and decay behavior."));
+  const ms = state.course.masterySystem;
+  const c = L.card({ key: "ms", title: "Settings" });
+  c.body.append(
+    L.field("Mastery levels", C.bindEnumMulti(ms.masteryLevels, ENUM.masteryLevels), { hint: "The level labels used in the sidebar rail (novice → mastered)." }),
+    C.bindCheck(ms, "decayModelEnabled", "Decay model enabled", { hint: "When true, evidence weight halves per 30 days at read time." }),
+    C.bindCheck(ms, "reverificationRequired", "Re-verification required")
+  );
+  root.appendChild(c.card);
+};
+
+/* ---- Analytics ---- */
+PAGES.analytics = function (root) {
+  root.appendChild(pageHead("Analytics", "What the engine should track. Declarative."));
+  const an = state.course.analytics;
+  const c = L.card({ key: "an", title: "Tracking" });
+  c.body.appendChild(L.field("Track", C.bindEnumMulti(an.track, ENUM.analyticsTrack)));
+  root.appendChild(c.card);
+  const ea = an.errorAnalysis;
+  const ec = L.card({ key: "an-err", title: "Error analysis" });
+  ec.body.append(
+    C.bindCheck(ea, "enabled", "Enabled"),
+    C.bindCheck(ea, "errorPatternTracking", "Error-pattern tracking"),
+    C.bindCheck(ea, "misconceptionFrequencyLogging", "Misconception-frequency logging"),
+    L.field("Linked misconceptions", C.bindIdMulti(ea.linkedToMisconceptionIds, C.registry.misconceptions))
+  );
+  root.appendChild(ec.card);
+};
+
+/* ---- Glossary ---- */
+PAGES.glossary = function (root) {
+  root.appendChild(pageHead("Glossary", "Term / definition pairs for the glossary drawer."));
+  const g = state.course.glossary;
+  const b = L.block("Terms", g.length, "Add term", () => { g.push(FACTORY.glossaryTerm()); render(); });
+  if (!g.length) b.listRegion.appendChild(L.emptyNote("No glossary terms."));
+  g.forEach((t, i) => {
+    const tc = L.card({ key: "gl-" + i, title: t.term || "Term " + (i + 1), onRemove: () => { g.splice(i, 1); render(); } });
+    tc.body.append(
+      L.field("Term", C.bindText(t, "term", { onInput: () => { tc.card.querySelector(".ch-title").textContent = t.term || "Term"; } })),
+      L.field("Definition", C.bindText(t, "definition", { area: true }))
+    );
+    b.listRegion.appendChild(tc.card);
+  });
+  root.appendChild(b.wrap);
+};
+
+CE.PAGES = PAGES;
+CE.pageHead = pageHead;
+
+})();
+/* =====================================================================
+   Part 5 — competencies & assessments pages
+   ===================================================================== */
+(function () {
+"use strict";
+const CE = window.__CE;
+const { ENUM, FACTORY, state, el, clear, render } = CE;
+const C = CE.controls;
+const L = CE.layout;
+
+/* ---- Competencies ---- */
+CE.PAGES.competencies = function (root) {
+  root.appendChild(CE.pageHead("Competencies", "The skills the course teaches — the hub of the ID graph. Every scored event lands on one or more of these."));
+  const comps = state.course.competencies;
+  const b = L.block("Competencies", comps.length, "Add competency", () => { comps.push(FACTORY.competency()); render(); });
+  if (!comps.length) b.listRegion.appendChild(L.emptyNote("No competencies yet. Add one to start linking content to it."));
+  comps.forEach((cp, i) => {
+    const c = L.card({ key: "comp-" + cp.competencyId, title: cp.title || "Competency " + (i + 1), id: cp.competencyId, onRemove: () => { comps.splice(i, 1); render(); } });
+    c.body.append(
+      L.field("Competency ID", C.bindText(cp, "competencyId"), { req: true, hint: "The hub ID everything else links to." }),
+      L.field("Title", C.bindText(cp, "title", { onInput: () => { c.card.querySelector(".ch-title").textContent = cp.title || "Competency"; } }), { req: true }),
+      L.field("Description", C.bindText(cp, "description", { area: true })),
+      el("div", { class: "grid-2" }, [
+        L.field("Taxonomy level", C.bindSelect(cp, "taxonomyLevel", ENUM.taxonomyLevel)),
+        L.field("Mastery threshold", C.bindNumber(cp, "masteryThreshold", { float: true, min: 0, max: 1, step: 0.05 }), { hint: "Enforced. Overrides the global threshold." }),
+      ]),
+      C.bindCheck(cp, "transferRequired", "Transfer required"),
+      L.field("Difficulty profile (1–5)", CE.difficultyProfile(cp.difficultyProfile, ["overall", "conceptualComplexity", "ambiguity", "technicalSkill", "readingDemand"]))
+    );
+
+    // desired outcomes
+    const outs = cp.desiredOutcomes;
+    const ob = L.block("Desired outcomes", outs.length, "Add outcome", () => { outs.push(FACTORY.desiredOutcome()); render(); });
+    if (!outs.length) ob.listRegion.appendChild(L.emptyNote("No desired outcomes."));
+    outs.forEach((o, oi) => {
+      const oc = L.card({ key: "out-" + cp.competencyId + "-" + oi, title: "Outcome " + (oi + 1), id: o.outcomeId, onRemove: () => { outs.splice(oi, 1); render(); } });
+      oc.body.append(
+        L.field("Outcome ID", C.bindText(o, "outcomeId")),
+        L.field("Description", C.bindText(o, "description", { area: true })),
+        L.field("Verified by", C.bindIdMulti(o.verifiedBy, C.registry.verifiableTargets), { hint: "Must match an assessmentId or transfer exerciseId (validated)." }),
+        L.field("Verification criteria", el("div", { class: "grid-3" }, [
+          L.field("Min accuracy", C.bindNumber(o.verificationCriteria, "minimumAccuracy", { float: true, min: 0, max: 1, step: 0.05, bare: true })),
+          L.field("Min confidence cal.", C.bindNumber(o.verificationCriteria, "minimumConfidenceCalibration", { float: true, min: 0, max: 1, step: 0.05, bare: true })),
+          L.field("Transfer success", el("div", {}, C.bindCheck(o.verificationCriteria, "requiresTransferSuccess", "Required"))),
+        ]))
+      );
+      ob.listRegion.appendChild(oc.card);
+    });
+    c.body.appendChild(ob.wrap);
+
+    // misconceptions
+    const mis = cp.commonMisconceptions;
+    const mb = L.block("Common misconceptions", mis.length, "Add misconception", () => { mis.push(FACTORY.misconception()); render(); });
+    if (!mis.length) mb.listRegion.appendChild(L.emptyNote("No misconceptions. Each plausible distractor should embody one."));
+    mis.forEach((m, mi) => {
+      const mc = L.card({ key: "mis-" + cp.competencyId + "-" + mi, title: m.misconception ? m.misconception.slice(0, 46) : "Misconception", id: m.misconceptionId, onRemove: () => { mis.splice(mi, 1); render(); } });
+      mc.body.append(
+        L.field("Misconception ID", C.bindText(m, "misconceptionId"), { hint: "Referenced by optionFeedback & errorPatterns." }),
+        L.field("Misconception", C.bindText(m, "misconception", { area: true, onInput: () => { mc.card.querySelector(".ch-title").textContent = m.misconception ? m.misconception.slice(0, 46) : "Misconception"; } }), { hint: "Stated as the learner would hold it; quoted verbatim in the UI." }),
+        L.field("Why incorrect", C.bindText(m, "whyIncorrect", { area: true })),
+        L.field("Remediation strategy", C.bindText(m, "remediationStrategy", { area: true })),
+        L.field("Linked error patterns", C.bindIdMulti(m.linkedErrorPatterns, C.registry.errorPatterns), { hint: "Cross-reference to assessment errorPatternIds." })
+      );
+      mb.listRegion.appendChild(mc.card);
+    });
+    c.body.appendChild(mb.wrap);
+
+    b.listRegion.appendChild(c.card);
+  });
+  root.appendChild(b.wrap);
+};
+
+/* ---- Assessments ---- */
+CE.PAGES.assessments = function (root) {
+  root.appendChild(CE.pageHead("Assessments", "Formal checks, opened from an experience's mastery verification or the sidebar. Every question score records evidence against the assessment's linked competencies."));
+  const ass = state.course.assessments;
+  const b = L.block("Assessments", ass.length, "Add assessment", () => { ass.push(FACTORY.assessment()); render(); });
+  if (!ass.length) b.listRegion.appendChild(L.emptyNote("No assessments yet."));
+  ass.forEach((a, i) => {
+    const c = L.card({ key: "ass-" + a.assessmentId, title: a.title || "Assessment " + (i + 1), id: a.assessmentId, onRemove: () => { ass.splice(i, 1); render(); } });
+    c.body.append(
+      L.field("Assessment ID", C.bindText(a, "assessmentId"), { req: true }),
+      L.field("Title", C.bindText(a, "title", { onInput: () => { c.card.querySelector(".ch-title").textContent = a.title || "Assessment"; } }), { req: true }),
+      el("div", { class: "grid-2" }, [
+        L.field("Assessment type", C.bindSelect(a, "assessmentType", ENUM.assessmentType)),
+        L.field("Adaptive difficulty", el("div", {}, C.bindCheck(a, "adaptiveDifficulty", "Enabled"))),
+      ]),
+      L.field("Linked competencies", C.bindIdMulti(a.linkedCompetencies, C.registry.competencies), { req: true, hint: "All question scores in this assessment record evidence against these." })
+    );
+
+    const qs = a.questions;
+    const qb = L.block("Questions", qs.length, "Add question", () => { qs.push(FACTORY.question()); render(); });
+    if (!qs.length) qb.listRegion.appendChild(L.emptyNote("No questions."));
+    qs.forEach((q, qi) => {
+      const qc = L.card({ key: "q-" + a.assessmentId + "-" + qi, title: q.prompt ? q.prompt.slice(0, 50) : "Question " + (qi + 1), id: q.questionId, onRemove: () => { qs.splice(qi, 1); render(); } });
+      qc.body.append(
+        L.field("Question ID", C.bindText(q, "questionId")),
+        L.field("Prompt", C.bindText(q, "prompt", { area: true, onInput: () => { qc.card.querySelector(".ch-title").textContent = q.prompt ? q.prompt.slice(0, 50) : "Question"; } }), { req: true }),
+        el("div", { class: "grid-2" }, [
+          L.field("Question type", C.bindSelect(q, "questionType", ENUM.questionType, { live: true })),
+          L.field("Difficulty (1–5)", C.bindRating(q, "difficulty")),
+        ])
+      );
+      if (q.questionType === "multiple-choice") {
+        qc.body.append(
+          L.field("Options", C.bindStringArray(q.options, { ordered: true, placeholder: "Add a choice…" }), { req: true, hint: "Required for multiple-choice." }),
+          L.field("Correct option index", C.bindNumber(q, "correctIndex", { min: 0, bare: true }), { req: true, hint: "Zero-based. Auto-scored 1/0 on submit." })
+        );
+        qc.body.appendChild(CE.optionFeedbackBlock(q, { optionsArr: q.options }));
+      }
+      qc.body.appendChild(L.field("Success criteria", C.bindStringArray(q.successCriteria, { area: true, placeholder: "Add a criterion…" }), { hint: "Shown post-submit for written questions." }));
+      // rubric
+      qc.body.appendChild(L.fold("Rubric (for written self-rating)", [
+        L.field("Excellent", C.bindText(q.rubric, "excellent", { area: true, rows: 2 })),
+        L.field("Adequate", C.bindText(q.rubric, "adequate", { area: true, rows: 2 })),
+        L.field("Weak", C.bindText(q.rubric, "weak", { area: true, rows: 2 })),
+      ]));
+      // error patterns
+      const eps = q.errorPatterns;
+      const eb = L.block("Error patterns", eps.length, "Add error pattern", () => { eps.push(FACTORY.errorPattern()); render(); });
+      if (!eps.length) eb.listRegion.appendChild(L.emptyNote("No error patterns."));
+      eps.forEach((ep, ei) => {
+        const ec = L.card({ key: "ep-" + a.assessmentId + "-" + qi + "-" + ei, title: "Error pattern", id: ep.errorPatternId, onRemove: () => { eps.splice(ei, 1); render(); } });
+        ec.body.append(
+          L.field("Error pattern ID", C.bindText(ep, "errorPatternId")),
+          L.field("Description", C.bindText(ep, "description", { area: true, placeholder: "Observable wrong-answer pattern…" })),
+          L.field("Linked misconception", C.bindIdSingle(ep, "linkedMisconceptionId", C.registry.misconceptions, { emptyLabel: "— none —" }), { hint: "Validated at load." }),
+          L.field("Remediation action", C.bindText(ep, "remediationAction", { placeholder: "e.g. resurface worked-example-01" }))
+        );
+        eb.listRegion.appendChild(ec.card);
+      });
+      qc.body.appendChild(eb.wrap);
+      qb.listRegion.appendChild(qc.card);
+    });
+    c.body.appendChild(qb.wrap);
+    b.listRegion.appendChild(c.card);
+  });
+  root.appendChild(b.wrap);
+};
+
+})();
+/* =====================================================================
+   Part 6 — sections page (deeply nested)
+   ===================================================================== */
+(function () {
+"use strict";
+const CE = window.__CE;
+const { ENUM, FACTORY, state, el, clear, render } = CE;
+const C = CE.controls;
+const L = CE.layout;
+
+/* ---------- a single learning experience ---------- */
+function renderExperience(exp, sec, ei) {
+  const c = L.card({ key: "exp-" + exp.experienceId, title: exp.title || "Experience", id: exp.experienceId,
+    onRemove: () => { sec.learningExperiences.splice(ei, 1); render(); } });
+  c.body.append(
+    L.field("Experience ID", C.bindText(exp, "experienceId"), { req: true, hint: "Keys learner answers & review back-links." }),
+    L.field("Title", C.bindText(exp, "title", { onInput: () => { c.card.querySelector(".ch-title").textContent = exp.title || "Experience"; } }), { req: true }),
+    el("div", { class: "grid-2" }, [
+      L.field("Experience type", C.bindSelect(exp, "experienceType", ENUM.experienceType)),
+      L.field("Est. duration (min)", C.bindNumber(exp, "estimatedDurationMinutes", { min: 0 })),
+    ]),
+    L.field("Linked competencies", C.bindIdMulti(exp.linkedCompetencies, C.registry.competencies), { req: true, hint: "Every scored event inside this experience records evidence against these." }),
+    L.field("Desired cognitive actions", C.bindEnumMulti(exp.desiredCognitiveActions, ENUM.cognitiveAction)),
+    L.field("Difficulty profile (1–5)", CE.difficultyProfile(exp.difficultyProfile, ["overall", "conceptualComplexity", "ambiguity"]))
+  );
+
+  c.body.appendChild(L.fold("Content blocks (" + exp.contentBlocks.length + ")", [contentBlocksEditor(exp)]));
+  c.body.appendChild(L.fold("Interaction sequence (" + exp.interactionSequence.length + ")", [interactionsEditor(exp)]));
+  c.body.appendChild(L.fold("Worked examples (" + exp.workedExamples.length + ")", [workedExamplesEditor(exp)]));
+  c.body.appendChild(L.fold("Self-guided exercise" + (exp.selfGuidedExercise ? " (1)" : ""), [selfGuidedEditor(exp)]));
+  c.body.appendChild(L.fold("Retrieval practice (" + exp.retrievalPractice.length + ")", [retrievalEditor(exp)]));
+  c.body.appendChild(L.fold("Transfer exercises (" + exp.transferExercises.length + ")", [transferEditor(exp)]));
+  c.body.appendChild(L.fold("Mastery verification", [masteryVerificationEditor(exp)]));
+  return c.card;
+}
+
+/* content blocks */
+function contentBlocksEditor(exp) {
+  const arr = exp.contentBlocks;
+  const b = L.block("", arr.length, "Add content block", () => { arr.push(FACTORY.contentBlock()); render(); });
+  if (!arr.length) b.listRegion.appendChild(L.emptyNote("No content blocks."));
+  arr.forEach((blk, i) => {
+    const bc = L.card({ key: "blk-" + exp.experienceId + "-" + i, title: blk.type + " block", id: blk.blockId, onRemove: () => { arr.splice(i, 1); render(); } });
+    bc.body.append(
+      L.field("Block ID", C.bindText(blk, "blockId")),
+      L.field("Type", C.bindSelect(blk, "type", ENUM.contentBlockType, { live: true }))
+    );
+    if (blk.type === "text") {
+      bc.body.appendChild(L.field("Content", C.bindText(blk, "content", { area: true, rows: 4 })));
+    } else {
+      bc.body.appendChild(L.field("URL", C.bindText(blk, "url", { placeholder: "https://…" })));
+      if (blk.type === "image") bc.body.appendChild(L.field("Alt text", C.bindText(blk, "altText")));
+      if (blk.type === "video" || blk.type === "audio") bc.body.appendChild(L.field("Caption / transcript", C.bindText(blk, "captionOrTranscript", { area: true })));
+    }
+    b.listRegion.appendChild(bc.card);
+  });
+  return b.wrap;
+}
+
+/* interaction sequence */
+function interactionsEditor(exp) {
+  const arr = exp.interactionSequence;
+  const b = L.block("", arr.length, "Add interaction", () => { arr.push(FACTORY.interaction()); render(); });
+  if (!arr.length) b.listRegion.appendChild(L.emptyNote("No interactions."));
+  arr.forEach((ix, i) => {
+    const ic = L.card({ key: "ix-" + exp.experienceId + "-" + ix.interactionId, title: ix.title || ix.interactionType, id: ix.interactionId, onRemove: () => { arr.splice(i, 1); render(); } });
+    ic.body.append(
+      L.field("Interaction ID", C.bindText(ix, "interactionId")),
+      L.field("Title", C.bindText(ix, "title", { onInput: () => { ic.card.querySelector(".ch-title").textContent = ix.title || ix.interactionType; } })),
+      L.field("Prompt", C.bindText(ix, "prompt", { area: true }), { req: true }),
+      el("div", { class: "grid-2" }, [
+        L.field("Interaction type", C.bindSelect(ix, "interactionType", ENUM.interactionType, { live: true })),
+        L.field("Response format", C.bindSelect(ix, "responseFormat", ENUM.responseFormat, { live: true })),
+      ]),
+      el("div", { class: "grid-2" }, [
+        L.field("Reveal condition", C.bindSelect(ix, "revealCondition", ENUM.revealCondition)),
+        L.field("Required", el("div", {}, C.bindCheck(ix, "required", "Required item"))),
+      ])
+    );
+
+    const needsOptions = ix.interactionType === "multiple-choice" || ix.interactionType === "drag-drop" || ix.responseFormat === "multiple-choice" || ix.responseFormat === "likert" || ix.responseFormat === "ranking";
+    if (needsOptions) {
+      ic.body.appendChild(L.field("Options", C.bindStringArray(ix.options, { ordered: true, placeholder: "Add a choice…" }), { req: true, hint: "Required for multiple-choice, drag-drop, and likert. Without it the item degrades to free text." }));
+    }
+    if (ix.interactionType === "multiple-choice" || ix.responseFormat === "multiple-choice") {
+      ic.body.appendChild(L.field("Correct option index", C.bindNumber(ix, "correctIndex", { min: 0, bare: true }), { req: true, hint: "Zero-based index of the correct option." }));
+    }
+    if (ix.interactionType === "drag-drop" || ix.responseFormat === "ranking") {
+      ic.body.append(
+        L.field("Correct order", C.bindIntArray(ix.correctOrder, { placeholder: "option index…" }), { hint: "Option indices, best-to-worst. Enables positional scoring." }),
+        L.field("Fallback correct index", C.bindNumber(ix, "correctIndex", { min: 0, bare: true }), { hint: "Used if no correct order is given — scores on whether the top item matches." })
+      );
+    }
+    if (needsOptions) ic.body.appendChild(CE.optionFeedbackBlock(ix, { optionsArr: ix.options }));
+
+    // feedback
+    ic.body.appendChild(L.fold("Feedback", [
+      L.field("Feedback type", C.bindSelect(ix.feedback, "type", ENUM.feedbackType)),
+      L.field("Elaborative feedback", C.bindText(ix.feedback, "elaborativeFeedback", { area: true })),
+      L.field("Corrective feedback", C.bindText(ix.feedback, "correctiveFeedback", { area: true })),
+      L.field("Progressive hints", C.bindStringArray(ix.feedback.hints, { ordered: true, placeholder: "Add a hint…" })),
+    ]));
+    // confidence prompt
+    ic.body.appendChild(L.fold("Confidence prompt", [
+      C.bindCheck(ix.confidencePrompt, "enabled", "Enabled"),
+      el("div", { class: "grid-3" }, [
+        L.field("Scale min", C.bindNumber(ix.confidencePrompt, "scaleMin", { bare: true })),
+        L.field("Scale max", C.bindNumber(ix.confidencePrompt, "scaleMax", { bare: true })),
+        L.field("Prompt", C.bindText(ix.confidencePrompt, "prompt")),
+      ]),
+    ]));
+    b.listRegion.appendChild(ic.card);
+  });
+  return b.wrap;
+}
+
+/* worked examples */
+function workedExamplesEditor(exp) {
+  const arr = exp.workedExamples;
+  const b = L.block("", arr.length, "Add worked example", () => { arr.push(FACTORY.workedExample()); render(); });
+  if (!arr.length) b.listRegion.appendChild(L.emptyNote("No worked examples."));
+  arr.forEach((we, i) => {
+    const wc = L.card({ key: "we-" + exp.experienceId + "-" + i, title: "Worked example " + (i + 1), id: we.exampleId, onRemove: () => { arr.splice(i, 1); render(); } });
+    wc.body.append(
+      L.field("Example ID", C.bindText(we, "exampleId")),
+      L.field("Problem", C.bindText(we, "problem", { area: true })),
+      L.field("Steps", C.bindStringArray(we.steps, { ordered: true, area: true, placeholder: "Add a step…" })),
+      L.field("Conclusion", C.bindText(we, "conclusion", { area: true }))
+    );
+    b.listRegion.appendChild(wc.card);
+  });
+  return b.wrap;
+}
+
+/* self-guided exercise (single optional object) */
+function selfGuidedEditor(exp) {
+  const wrap = el("div");
+  if (!exp.selfGuidedExercise) {
+    wrap.appendChild(L.emptyNote("No self-guided exercise."));
+    wrap.appendChild(el("button", { class: "btn sm", type: "button", onclick: () => { exp.selfGuidedExercise = FACTORY.selfGuidedExercise(); render(); } }, "+ Add self-guided exercise"));
+    return wrap;
+  }
+  const sge = exp.selfGuidedExercise;
+  const c = L.card({ key: "sge-" + exp.experienceId, title: "Self-guided exercise", id: sge.exerciseId, onRemove: () => { exp.selfGuidedExercise = null; render(); } });
+  c.body.append(
+    L.field("Exercise ID", C.bindText(sge, "exerciseId")),
+    L.field("Real-world context", C.bindText(sge, "realWorldContext", { area: true, placeholder: "e.g. attend an open mic night" })),
+    L.field("Objective", C.bindText(sge, "objective", { area: true })),
+    L.field("Instructions", C.bindStringArray(sge.instructions, { ordered: true, area: true, placeholder: "Add an ordered step…" })),
+    L.field("Est. real-world duration (min)", C.bindNumber(sge, "estimatedRealWorldDurationMinutes", { min: 0 })),
+    L.field("Materials / prerequisites", C.bindStringArray(sge.materialsOrPrerequisites, { placeholder: "Add a material…" })),
+    L.field("Reflection prompts", C.bindStringArray(sge.reflectionPrompts, { area: true, placeholder: "Add a reflection prompt…" }))
+  );
+  c.body.appendChild(L.fold("Verification", [
+    L.field("Mode", C.bindSelect(sge.verification, "mode", ENUM.verificationMode)),
+    C.bindCheck(sge.verification, "isGating", "Is gating", { hint: "Must stay false — self-guided exercises are formative and never block mastery.", disabled: true }),
+    L.field("Self-assessment criteria", C.bindStringArray(sge.verification.selfAssessmentCriteria, { placeholder: "Add a criterion…" })),
+  ], true));
+  // hard-enforce isGating false
+  sge.verification.isGating = false;
+  c.body.appendChild(L.field("Linked competencies", C.bindIdMulti(sge.linkedCompetencies, C.registry.competencies)));
+  wrap.appendChild(c.card);
+  return wrap;
+}
+
+/* retrieval practice */
+function retrievalEditor(exp) {
+  const arr = exp.retrievalPractice;
+  const b = L.block("", arr.length, "Add retrieval item", () => { arr.push(FACTORY.retrievalItem()); render(); });
+  if (!arr.length) b.listRegion.appendChild(L.emptyNote("No retrieval items."));
+  arr.forEach((rp, i) => {
+    const rc = L.card({ key: "rp-" + exp.experienceId + "-" + rp.retrievalItemId, title: "Retrieval item", id: rp.retrievalItemId, onRemove: () => { arr.splice(i, 1); render(); } });
+    rc.body.append(
+      L.field("Retrieval item ID", C.bindText(rp, "retrievalItemId"), { hint: "Unique across the whole course — it keys the review schedule." }),
+      L.field("Prompt", C.bindText(rp, "prompt", { area: true, placeholder: "The recall cue. No stored answer — self-graded." })),
+      el("div", { class: "grid-2" }, [
+        L.field("Retrieval type", C.bindSelect(rp, "retrievalType", ENUM.retrievalType)),
+        L.field("Difficulty (1–5)", C.bindRating(rp, "difficulty")),
+      ])
+    );
+    const sch = rp.schedule, dp = sch.decayParameters;
+    rc.body.appendChild(L.fold("Schedule", [
+      L.field("Initial review (days)", C.bindNumber(sch, "initialReviewDays", { min: 0 }), { hint: "First interval after a successful in-lesson recall. Default 1." }),
+      L.field("Subsequent review ladder (days)", C.bindIntArray(sch.subsequentReviewDays, { placeholder: "days…" }), { hint: "The interval ladder after the first. Default [3, 7, 14, 30]." }),
+      L.field("Decay parameters", el("div", { class: "grid-2" }, [
+        L.field("Decay rate", C.bindNumber(dp, "decayRate", { float: true, step: 0.05, bare: true }), { hint: "Reserved; not consumed by current scheduler." }),
+        L.field("Strength multiplier", C.bindNumber(dp, "strengthMultiplier", { float: true, step: 0.1, bare: true }), { hint: "Default 2." }),
+        L.field("Min interval (days)", C.bindNumber(dp, "minimumIntervalDays", { min: 0, bare: true }), { hint: "Default 1." }),
+        L.field("Max interval (days)", C.bindNumber(dp, "maximumIntervalDays", { min: 0, bare: true }), { hint: "Default 365." }),
+      ])),
+    ], true));
+    b.listRegion.appendChild(rc.card);
+  });
+  return b.wrap;
+}
+
+/* transfer exercises */
+function transferEditor(exp) {
+  const arr = exp.transferExercises;
+  const b = L.block("", arr.length, "Add transfer exercise", () => { arr.push(FACTORY.transferExercise()); render(); });
+  if (!arr.length) b.listRegion.appendChild(L.emptyNote("No transfer exercises."));
+  arr.forEach((tx, i) => {
+    const tc = L.card({ key: "tx-" + exp.experienceId + "-" + tx.exerciseId, title: "Transfer exercise", id: tx.exerciseId, onRemove: () => { arr.splice(i, 1); render(); } });
+    tc.body.append(
+      L.field("Exercise ID", C.bindText(tx, "exerciseId"), { hint: "Can be a verifiedBy target for outcomes." }),
+      L.field("Context", C.bindText(tx, "context", { placeholder: "Domain the scenario is drawn from" })),
+      L.field("Scenario", C.bindText(tx, "scenario", { area: true })),
+      L.field("Task", C.bindText(tx, "task", { area: true })),
+      L.field("Success criteria", C.bindStringArray(tx.successCriteria, { area: true, placeholder: "Add a criterion…" }))
+    );
+    b.listRegion.appendChild(tc.card);
+  });
+  return b.wrap;
+}
+
+/* mastery verification (single object) */
+function masteryVerificationEditor(exp) {
+  const mv = exp.masteryVerification;
+  return el("div", {}, [
+    L.field("Assessment IDs", C.bindIdMulti(mv.assessmentIds, C.registry.assessments), { hint: "Linkage-validated at load." }),
+    L.field("Required performance", el("div", { class: "grid-2" }, [
+      L.field("Min accuracy", C.bindNumber(mv.requiredPerformance, "minimumAccuracy", { float: true, min: 0, max: 1, step: 0.05, bare: true })),
+      L.field("Min transfer score", C.bindNumber(mv.requiredPerformance, "minimumTransferScore", { float: true, min: 0, max: 1, step: 0.05, bare: true })),
+    ])),
+  ]);
+}
+
+/* ---------- the sections page ---------- */
+CE.PAGES.sections = function (root) {
+  root.appendChild(CE.pageHead("Sections", "Ordered top-level units. Each renders a section-intro screen followed by its learning experiences. At least one section is required for a loadable course."));
+  const secs = state.course.sections;
+  const b = L.block("Sections", secs.length, "Add section", () => { secs.push(FACTORY.section()); render(); });
+  if (!secs.length) b.listRegion.appendChild(L.emptyNote("No sections yet. A course needs at least one to load."));
+  secs.forEach((sec, si) => {
+    const c = L.card({ key: "sec-" + sec.sectionId, title: sec.title || "Section " + (si + 1), id: sec.sectionId, onRemove: () => { secs.splice(si, 1); render(); } });
+    c.body.append(
+      L.field("Section ID", C.bindText(sec, "sectionId"), { req: true }),
+      L.field("Title", C.bindText(sec, "title", { onInput: () => { c.card.querySelector(".ch-title").textContent = sec.title || "Section"; } }), { req: true }),
+      L.field("Description", C.bindText(sec, "description", { area: true }))
+    );
+
+    // learning objectives
+    const objs = sec.learningObjectives;
+    const obb = L.block("Learning objectives", objs.length, "Add objective", () => { objs.push(FACTORY.objective()); render(); });
+    if (!objs.length) obb.listRegion.appendChild(L.emptyNote("No objectives."));
+    objs.forEach((o, oi) => {
+      const oc = L.card({ key: "obj-" + sec.sectionId + "-" + oi, title: "Objective " + (oi + 1), id: o.objectiveId, onRemove: () => { objs.splice(oi, 1); render(); } });
+      oc.body.append(
+        L.field("Objective ID", C.bindText(o, "objectiveId")),
+        L.field("Description", C.bindText(o, "description", { area: true })),
+        L.field("Linked competencies", C.bindIdMulti(o.linkedCompetencies, C.registry.competencies))
+      );
+      obb.listRegion.appendChild(oc.card);
+    });
+    c.body.appendChild(obb.wrap);
+
+    // motivation hooks
+    const hooks = sec.motivationHooks;
+    const hb = L.block("Motivation hooks", hooks.length, "Add hook", () => { hooks.push(FACTORY.motivationHook()); render(); });
+    if (!hooks.length) hb.listRegion.appendChild(L.emptyNote("No motivation hooks."));
+    hooks.forEach((h, hi) => {
+      const hc = L.card({ key: "hook-" + sec.sectionId + "-" + hi, title: h.type, onRemove: () => { hooks.splice(hi, 1); render(); } });
+      hc.body.append(
+        L.field("Type", C.bindSelect(h, "type", ENUM.motivationHook, { onChange: () => { hc.card.querySelector(".ch-title").textContent = h.type; } })),
+        L.field("Prompt", C.bindText(h, "prompt", { area: true }))
+      );
+      hb.listRegion.appendChild(hc.card);
+    });
+    c.body.appendChild(hb.wrap);
+
+    // further reading
+    const fr = sec.furtherReading;
+    const fb = L.block("Further reading", fr.length, "Add resource", () => { fr.push(FACTORY.furtherReading()); render(); });
+    if (!fr.length) fb.listRegion.appendChild(L.emptyNote("No further reading."));
+    fr.forEach((r, ri) => {
+      const rc = L.card({ key: "fr-" + sec.sectionId + "-" + ri, title: r.title || "Resource", id: r.resourceId, onRemove: () => { fr.splice(ri, 1); render(); } });
+      rc.body.append(
+        L.field("Resource ID", C.bindText(r, "resourceId")),
+        L.field("Title", C.bindText(r, "title", { onInput: () => { rc.card.querySelector(".ch-title").textContent = r.title || "Resource"; } })),
+        el("div", { class: "grid-2" }, [
+          L.field("Resource type", C.bindSelect(r, "resourceType", ENUM.resourceType)),
+          L.field("Author", C.bindText(r, "author")),
+        ]),
+        L.field("URL", C.bindText(r, "url", { placeholder: "https://… (optional)" })),
+        L.field("Citation", C.bindText(r, "citation", { placeholder: "For non-linkable sources such as books" })),
+        L.field("Rationale note", C.bindText(r, "rationaleNote", { area: true, placeholder: "Why this resource is worth reading" })),
+        L.field("Linked competencies", C.bindIdMulti(r.linkedCompetencies, C.registry.competencies))
+      );
+      fb.listRegion.appendChild(rc.card);
+    });
+    c.body.appendChild(fb.wrap);
+
+    // learning experiences
+    const exps = sec.learningExperiences;
+    const eb = L.block("Learning experiences", exps.length, "Add experience", () => { exps.push(FACTORY.experience()); render(); });
+    if (!exps.length) eb.listRegion.appendChild(L.emptyNote("No learning experiences."));
+    exps.forEach((exp, ei) => eb.listRegion.appendChild(renderExperience(exp, sec, ei)));
+    c.body.appendChild(eb.wrap);
+
+    b.listRegion.appendChild(c.card);
+  });
+  root.appendChild(b.wrap);
+};
+
+})();
+/* =====================================================================
+   Part 7 — validation, I/O, modals, boot
+   ===================================================================== */
+(function () {
+"use strict";
+const CE = window.__CE;
+const { FACTORY, state, el, clear, render, toast } = CE;
+
+/* ---------------------------------------------------------------------
+   Validation — mirrors the player's load-time linkage checks.
+   Errors block the (hypothetical) load; warnings are advisory.
+   ------------------------------------------------------------------- */
+function validate(course) {
+  const errors = [], warnings = [];
+  const E = (msg, where) => errors.push({ msg, where });
+  const W = (msg, where) => warnings.push({ msg, where });
+
+  if (!course || typeof course !== "object") { E("Root is not an object.", ""); return { errors, warnings }; }
+
+  // ----- hard errors -----
+  if (!course.courseMetadata || typeof course.courseMetadata !== "object") E("Missing courseMetadata.", "courseMetadata");
+  else if (!course.courseMetadata.courseId) W("courseMetadata.courseId is empty — saved progress keys depend on it.", "Metadata");
+  if (!Array.isArray(course.sections) || course.sections.length === 0) E("Missing or empty sections — at least one section is required.", "Sections");
+
+  // ----- build ID sets -----
+  const compIds = new Set((course.competencies || []).map(c => c.competencyId).filter(Boolean));
+  const assessIds = new Set((course.assessments || []).map(a => a.assessmentId).filter(Boolean));
+  const misIds = new Set();
+  (course.competencies || []).forEach(c => (c.commonMisconceptions || []).forEach(m => m.misconceptionId && misIds.add(m.misconceptionId)));
+  const transferIds = new Set();
+  (course.sections || []).forEach(s => (s.learningExperiences || []).forEach(e => (e.transferExercises || []).forEach(t => t.exerciseId && transferIds.add(t.exerciseId))));
+  const verifiable = new Set([...assessIds, ...transferIds]);
+
+  if (!course.competencies || course.competencies.length === 0) W("No competencies defined — scored events have nowhere to land.", "Competencies");
+
+  const checkComp = (ids, where) => (ids || []).forEach(id => { if (!compIds.has(id)) W("Unresolved competencyId “" + id + "”.", where); });
+
+  // interleaving groups
+  (course.learningModel && course.learningModel.interleavingGroups || []).forEach((g, i) => {
+    checkComp(g.competencyIds, "Learning model › group " + (g.groupId || i + 1));
+  });
+
+  // prior knowledge
+  (course.priorKnowledgeCheck && course.priorKnowledgeCheck.probeQuestions || []).forEach((p, i) => {
+    const where = "Prior knowledge › " + (p.probeId || "probe " + (i + 1));
+    checkComp(p.linkedCompetencies, where);
+    if (p.questionType === "multiple-choice") {
+      if (!Array.isArray(p.options) || p.options.length === 0) W("MC probe has no options — it will render as free text and cannot be scored.", where);
+      if (p.correctIndex == null) W("MC probe has no correctIndex — it cannot be scored.", where);
+      else if (Array.isArray(p.options) && (p.correctIndex < 0 || p.correctIndex >= p.options.length)) W("MC probe correctIndex is out of range.", where);
+    }
+  });
+
+  // competencies: desired-outcome verifiedBy + misconception/errorPattern links
+  (course.competencies || []).forEach(c => {
+    (c.desiredOutcomes || []).forEach(o => (o.verifiedBy || []).forEach(v => {
+      if (!verifiable.has(v)) W("verifiedBy “" + v + "” matches no assessment or transfer exercise.", "Competency " + (c.title || c.competencyId) + " › outcome " + (o.outcomeId || ""));
+    }));
+  });
+
+  // error-pattern IDs (collect) + check their misconception links
+  const errPatIds = new Set();
+  (course.assessments || []).forEach(a => (a.questions || []).forEach(q => (q.errorPatterns || []).forEach(ep => {
+    if (ep.errorPatternId) errPatIds.add(ep.errorPatternId);
+    if (ep.linkedMisconceptionId && !misIds.has(ep.linkedMisconceptionId))
+      W("errorPattern links misconception “" + ep.linkedMisconceptionId + "” that doesn't exist.", "Assessment " + (a.title || a.assessmentId));
+  })));
+  // misconception → errorPattern cross refs
+  (course.competencies || []).forEach(c => (c.commonMisconceptions || []).forEach(m => (m.linkedErrorPatterns || []).forEach(ep => {
+    if (!errPatIds.has(ep)) W("misconception links errorPattern “" + ep + "” that doesn't exist.", "Competency " + (c.title || c.competencyId));
+  })));
+
+  // sections / experiences
+  (course.sections || []).forEach(s => {
+    (s.learningObjectives || []).forEach(o => checkComp(o.linkedCompetencies, "Section " + (s.title || s.sectionId) + " › objective"));
+    (s.furtherReading || []).forEach(r => checkComp(r.linkedCompetencies, "Section " + (s.title || s.sectionId) + " › reading"));
+    (s.learningExperiences || []).forEach(e => {
+      const where = "Experience " + (e.title || e.experienceId);
+      if (!e.linkedCompetencies || e.linkedCompetencies.length === 0) W("Experience has no linked competencies — its scores land nowhere.", where);
+      checkComp(e.linkedCompetencies, where);
+      (e.interactionSequence || []).forEach(ix => {
+        const w2 = where + " › " + (ix.interactionId || "interaction");
+        const isMC = ix.interactionType === "multiple-choice" || ix.responseFormat === "multiple-choice";
+        if (isMC) {
+          if (!Array.isArray(ix.options) || ix.options.length === 0) W("MC interaction has no options — degrades to free text.", w2);
+          if (ix.correctIndex == null) W("MC interaction has no correctIndex — cannot be scored.", w2);
+        }
+        if (ix.interactionType === "drag-drop" && (!ix.correctOrder || ix.correctOrder.length === 0) && ix.correctIndex == null)
+          W("drag-drop interaction has neither correctOrder nor correctIndex — cannot be scored.", w2);
+        (ix.optionFeedback || []).forEach(of => { if (of.linkedMisconceptionId && !misIds.has(of.linkedMisconceptionId)) W("optionFeedback links misconception “" + of.linkedMisconceptionId + "” that doesn't exist.", w2); });
+      });
+      (e.masteryVerification && e.masteryVerification.assessmentIds || []).forEach(id => { if (!assessIds.has(id)) W("masteryVerification assessmentId “" + id + "” matches no assessment.", where); });
+      if (e.selfGuidedExercise && e.selfGuidedExercise.verification && e.selfGuidedExercise.verification.isGating === true)
+        W("self-guided exercise has isGating=true — it must be false (formative only).", where);
+      checkComp((e.selfGuidedExercise && e.selfGuidedExercise.linkedCompetencies) || [], where + " › self-guided");
+    });
+  });
+
+  // assessments
+  (course.assessments || []).forEach(a => {
+    const where = "Assessment " + (a.title || a.assessmentId);
+    checkComp(a.linkedCompetencies, where);
+    (a.questions || []).forEach(q => {
+      if (q.questionType === "multiple-choice") {
+        if (!Array.isArray(q.options) || q.options.length === 0) W("MC question has no options.", where + " › " + (q.questionId || "question"));
+        if (q.correctIndex == null) W("MC question has no correctIndex — cannot be auto-scored.", where + " › " + (q.questionId || "question"));
+      }
+      (q.optionFeedback || []).forEach(of => { if (of.linkedMisconceptionId && !misIds.has(of.linkedMisconceptionId)) W("optionFeedback links missing misconception “" + of.linkedMisconceptionId + "”.", where); });
+    });
+  });
+
+  return { errors, warnings };
+}
+CE.validate = validate;
+
+function renderValidation() {
+  const panel = CE.$("#valpanel");
+  clear(panel);
+  if (state.valCollapsed) { panel.classList.add("collapsed"); return; }
+  panel.classList.remove("collapsed");
+  if (!state.course) return;
+  const { errors, warnings } = validate(state.course);
+
+  const head = el("div", { class: "valpanel-head" }, [
+    el("h3", {}, "Validation"),
+    el("div", { class: "val-summary" }, [
+      errors.length ? el("span", { class: "val-chip err" }, errors.length + " error" + (errors.length > 1 ? "s" : "")) : null,
+      warnings.length ? el("span", { class: "val-chip warn" }, warnings.length + " warning" + (warnings.length > 1 ? "s" : "")) : null,
+      (!errors.length && !warnings.length) ? el("span", { class: "val-chip ok" }, "All clear") : null,
+    ]),
+  ]);
+  panel.appendChild(head);
+
+  const list = el("div", { class: "val-list" });
+  if (!errors.length && !warnings.length) {
+    list.appendChild(el("div", { class: "val-empty" }, "No linkage problems found. The course would load cleanly into the player."));
+  }
+  errors.forEach(e => list.appendChild(el("div", { class: "val-entry err" }, [
+    el("span", { class: "ic" }, "✕"),
+    el("span", {}, [el("span", { class: "vmsg" }, e.msg), e.where ? el("span", { class: "vwhere" }, e.where) : null]),
+  ])));
+  warnings.forEach(w => list.appendChild(el("div", { class: "val-entry warn" }, [
+    el("span", { class: "ic" }, "!"),
+    el("span", {}, [el("span", { class: "vmsg" }, w.msg), w.where ? el("span", { class: "vwhere" }, w.where) : null]),
+  ])));
+  panel.appendChild(list);
+}
+window.renderValidation = renderValidation;
+
+/* ---------------------------------------------------------------------
+   Normalize a loaded object so missing keys don't break the editor.
+   Merges parsed data over a fresh skeleton (deep, structure-aware).
+   ------------------------------------------------------------------- */
+function normalize(parsed) {
+  const base = FACTORY.course();
+  const out = Object.assign({}, base, parsed);
+  // ensure objects/arrays exist with all sub-keys
+  out.courseMetadata = Object.assign({}, base.courseMetadata, parsed.courseMetadata || {});
+  out.courseMetadata.tags = out.courseMetadata.tags || [];
+  out.courseMetadata.prerequisites = out.courseMetadata.prerequisites || [];
+  out.learningModel = Object.assign({}, base.learningModel, parsed.learningModel || {});
+  out.learningModel.interleavingGroups = out.learningModel.interleavingGroups || [];
+  out.priorKnowledgeCheck = Object.assign({}, base.priorKnowledgeCheck, parsed.priorKnowledgeCheck || {});
+  out.priorKnowledgeCheck.probeQuestions = (out.priorKnowledgeCheck.probeQuestions || []).map(p => Object.assign(FACTORY.probe(), p, {
+    options: p.options || [], optionFeedback: p.optionFeedback || [], linkedCompetencies: p.linkedCompetencies || [],
+    scoringCriteria: p.scoringCriteria || [], routingRules: p.routingRules || [],
+  }));
+  out.competencies = (parsed.competencies || []).map(c => {
+    const m = Object.assign(FACTORY.competency(), c);
+    m.difficultyProfile = Object.assign(FACTORY.competency().difficultyProfile, c.difficultyProfile || {});
+    m.desiredOutcomes = (c.desiredOutcomes || []).map(o => { const oo = Object.assign(FACTORY.desiredOutcome(), o); oo.verifiedBy = o.verifiedBy || []; oo.verificationCriteria = Object.assign(FACTORY.desiredOutcome().verificationCriteria, o.verificationCriteria || {}); return oo; });
+    m.commonMisconceptions = (c.commonMisconceptions || []).map(x => { const xx = Object.assign(FACTORY.misconception(), x); xx.linkedErrorPatterns = x.linkedErrorPatterns || []; return xx; });
+    return m;
+  });
+  out.sections = (parsed.sections || []).map(s => {
+    const ss = Object.assign(FACTORY.section(), s);
+    ss.learningObjectives = (s.learningObjectives || []).map(o => Object.assign(FACTORY.objective(), o, { linkedCompetencies: o.linkedCompetencies || [] }));
+    ss.motivationHooks = (s.motivationHooks || []).map(h => Object.assign(FACTORY.motivationHook(), h));
+    ss.furtherReading = (s.furtherReading || []).map(r => Object.assign(FACTORY.furtherReading(), r, { linkedCompetencies: r.linkedCompetencies || [] }));
+    ss.learningExperiences = (s.learningExperiences || []).map(e => {
+      const ee = Object.assign(FACTORY.experience(), e);
+      ee.difficultyProfile = Object.assign(FACTORY.experience().difficultyProfile, e.difficultyProfile || {});
+      ee.linkedCompetencies = e.linkedCompetencies || [];
+      ee.desiredCognitiveActions = e.desiredCognitiveActions || [];
+      ee.contentBlocks = (e.contentBlocks || []).map(b => Object.assign(FACTORY.contentBlock(), b));
+      ee.interactionSequence = (e.interactionSequence || []).map(ix => {
+        const ii = Object.assign(FACTORY.interaction(), ix);
+        ii.options = ix.options || []; ii.correctOrder = ix.correctOrder || []; ii.optionFeedback = ix.optionFeedback || [];
+        ii.feedback = Object.assign(FACTORY.interaction().feedback, ix.feedback || {}); ii.feedback.hints = (ix.feedback && ix.feedback.hints) || [];
+        ii.confidencePrompt = Object.assign(FACTORY.interaction().confidencePrompt, ix.confidencePrompt || {});
+        return ii;
+      });
+      ee.workedExamples = (e.workedExamples || []).map(w => Object.assign(FACTORY.workedExample(), w, { steps: w.steps || [] }));
+      if (e.selfGuidedExercise) {
+        const sg = Object.assign(FACTORY.selfGuidedExercise(), e.selfGuidedExercise);
+        sg.instructions = e.selfGuidedExercise.instructions || []; sg.materialsOrPrerequisites = e.selfGuidedExercise.materialsOrPrerequisites || [];
+        sg.reflectionPrompts = e.selfGuidedExercise.reflectionPrompts || []; sg.linkedCompetencies = e.selfGuidedExercise.linkedCompetencies || [];
+        sg.verification = Object.assign(FACTORY.selfGuidedExercise().verification, e.selfGuidedExercise.verification || {}); sg.verification.selfAssessmentCriteria = sg.verification.selfAssessmentCriteria || [];
+        ee.selfGuidedExercise = sg;
+      } else ee.selfGuidedExercise = null;
+      ee.retrievalPractice = (e.retrievalPractice || []).map(rp => {
+        const rr = Object.assign(FACTORY.retrievalItem(), rp);
+        rr.schedule = Object.assign(FACTORY.retrievalItem().schedule, rp.schedule || {});
+        rr.schedule.subsequentReviewDays = (rp.schedule && rp.schedule.subsequentReviewDays) || [];
+        rr.schedule.decayParameters = Object.assign(FACTORY.retrievalItem().schedule.decayParameters, (rp.schedule && rp.schedule.decayParameters) || {});
+        return rr;
+      });
+      ee.transferExercises = (e.transferExercises || []).map(t => Object.assign(FACTORY.transferExercise(), t, { successCriteria: t.successCriteria || [] }));
+      ee.masteryVerification = Object.assign(FACTORY.experience().masteryVerification, e.masteryVerification || {});
+      ee.masteryVerification.assessmentIds = (e.masteryVerification && e.masteryVerification.assessmentIds) || [];
+      ee.masteryVerification.requiredPerformance = Object.assign(FACTORY.experience().masteryVerification.requiredPerformance, (e.masteryVerification && e.masteryVerification.requiredPerformance) || {});
+      return ee;
+    });
+    return ss;
+  });
+  out.assessments = (parsed.assessments || []).map(a => {
+    const aa = Object.assign(FACTORY.assessment(), a);
+    aa.linkedCompetencies = a.linkedCompetencies || [];
+    aa.questions = (a.questions || []).map(q => {
+      const qq = Object.assign(FACTORY.question(), q);
+      qq.options = q.options || []; qq.optionFeedback = q.optionFeedback || []; qq.successCriteria = q.successCriteria || [];
+      qq.rubric = Object.assign(FACTORY.question().rubric, q.rubric || {});
+      qq.errorPatterns = (q.errorPatterns || []).map(ep => Object.assign(FACTORY.errorPattern(), ep));
+      return qq;
+    });
+    return aa;
+  });
+  out.retrievalSystem = Object.assign(FACTORY.course().retrievalSystem, parsed.retrievalSystem || {}); out.retrievalSystem.retrievalModes = (parsed.retrievalSystem && parsed.retrievalSystem.retrievalModes) || [];
+  out.masterySystem = Object.assign(FACTORY.course().masterySystem, parsed.masterySystem || {}); out.masterySystem.masteryLevels = (parsed.masterySystem && parsed.masterySystem.masteryLevels) || FACTORY.course().masterySystem.masteryLevels;
+  out.analytics = Object.assign(FACTORY.course().analytics, parsed.analytics || {}); out.analytics.track = (parsed.analytics && parsed.analytics.track) || [];
+  out.analytics.errorAnalysis = Object.assign(FACTORY.course().analytics.errorAnalysis, (parsed.analytics && parsed.analytics.errorAnalysis) || {}); out.analytics.errorAnalysis.linkedToMisconceptionIds = (parsed.analytics && parsed.analytics.errorAnalysis && parsed.analytics.errorAnalysis.linkedToMisconceptionIds) || [];
+  out.glossary = (parsed.glossary || []).map(g => Object.assign(FACTORY.glossaryTerm(), g));
+  return out;
+}
+
+function loadFromText(text, sourceName) {
+  let parsed;
+  try { parsed = JSON.parse(text); }
+  catch (err) { return { ok: false, error: "Invalid JSON: " + err.message }; }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return { ok: false, error: "Root must be a JSON object." };
+  state.course = normalize(parsed);
+  state.page = "metadata"; state.collapsed = {};
+  render();
+  return { ok: true };
+}
+CE.loadFromText = loadFromText;
+
+/* ---------------------------------------------------------------------
+   Export
+   ------------------------------------------------------------------- */
+function buildJSON() { return JSON.stringify(state.course, null, 2); }
+CE.buildJSON = buildJSON;
+
+function download() {
+  const blob = new Blob([buildJSON()], { type: "application/json" });
+  const a = el("a", { href: URL.createObjectURL(blob), download: (state.course.courseMetadata.courseId || "course") + ".json" });
+  document.body.appendChild(a); a.click(); a.remove();
+  toast("Downloaded " + a.download);
+}
+
+/* ---------------------------------------------------------------------
+   Modals: View JSON  &  Paste JSON
+   ------------------------------------------------------------------- */
+function modal(opts) {
+  const overlay = el("div", { class: "overlay" });
+  const m = el("div", { class: "modal" });
+  const head = el("div", { class: "modal-head" }, [el("h3", {}, opts.title), el("div", { style: "flex:1" }), el("button", { class: "btn sm ghost", onclick: close }, "✕")]);
+  const body = el("div", { class: "modal-body" });
+  const ta = el("textarea", { spellcheck: "false" }); ta.value = opts.value || ""; if (opts.readonly) ta.readOnly = true;
+  body.appendChild(ta);
+  const msg = el("div", { class: "msg" });
+  const foot = el("div", { class: "modal-foot" });
+  foot.appendChild(msg); foot.appendChild(el("div", { style: "flex:1" }));
+  (opts.buttons || []).forEach(btn => {
+    const b = el("button", { class: "btn sm " + (btn.primary ? "primary" : ""), onclick: () => btn.onClick(ta, msg, close) }, btn.label);
+    foot.appendChild(b);
+  });
+  m.append(head, body, foot); overlay.appendChild(m); document.body.appendChild(overlay);
+  overlay.addEventListener("mousedown", e => { if (e.target === overlay) close(); });
+  function close() { overlay.remove(); }
+  return { ta, msg, close };
+}
+
+function openViewModal() {
+  modal({
+    title: "Course JSON", value: buildJSON(), readonly: false,
+    buttons: [
+      { label: "Copy", onClick: (ta, msg) => { ta.select(); navigator.clipboard.writeText(ta.value).then(() => { msg.textContent = "Copied to clipboard."; msg.className = "msg ok"; }); } },
+      { label: "Apply edits", onClick: (ta, msg, close) => { const r = loadFromText(ta.value); if (r.ok) { close(); toast("JSON applied"); } else { msg.textContent = r.error; msg.className = "msg err"; } } },
+      { label: "Download", primary: true, onClick: () => download() },
+    ],
+  });
+}
+
+function openPasteModal() {
+  modal({
+    title: "Paste course JSON", value: "", readonly: false,
+    buttons: [
+      { label: "Load", primary: true, onClick: (ta, msg, close) => { const r = loadFromText(ta.value); if (r.ok) { close(); toast("Course loaded"); } else { msg.textContent = r.error; msg.className = "msg err"; } } },
+    ],
+  });
+}
+CE.openPasteModal = openPasteModal;
+
+/* ---------------------------------------------------------------------
+   Wiring & boot
+   ------------------------------------------------------------------- */
+function boot() {
+  CE.$("#btnNew").addEventListener("click", () => {
+    if (state.course && !confirm("Start a new course? Unsaved changes will be lost.")) return;
+    CE.newCourse();
+  });
+  CE.$("#btnOpen").addEventListener("click", () => CE.$("#fileInput").click());
+  CE.$("#btnPaste").addEventListener("click", openPasteModal);
+  CE.$("#btnView").addEventListener("click", () => { if (!state.course) { toast("Create or open a course first"); return; } openViewModal(); });
+  CE.$("#btnExport").addEventListener("click", () => { if (!state.course) { toast("Create or open a course first"); return; } download(); });
+  CE.$("#btnToggleVal").addEventListener("click", () => { state.valCollapsed = !state.valCollapsed; renderValidation(); });
+
+  CE.$("#fileInput").addEventListener("change", e => {
+    const f = e.target.files[0]; if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => { const r = loadFromText(reader.result, f.name); if (r.ok) toast("Loaded " + f.name); else alert(r.error); };
+    reader.readAsText(f); e.target.value = "";
+  });
+
+  // drag & drop
+  const app = document.body;
+  ["dragenter", "dragover"].forEach(ev => app.addEventListener(ev, e => { e.preventDefault(); app.classList.add("dragover"); }));
+  ["dragleave", "drop"].forEach(ev => app.addEventListener(ev, e => { e.preventDefault(); if (ev === "drop" || e.target === app) app.classList.remove("dragover"); }));
+  app.addEventListener("drop", e => {
+    const f = e.dataTransfer.files[0]; if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => { const r = loadFromText(reader.result, f.name); if (r.ok) toast("Loaded " + f.name); else alert(r.error); };
+    reader.readAsText(f);
+  });
+
+  render();
+}
+
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+else boot();
+
+})();
+
+</script>
+</body>
+</html>

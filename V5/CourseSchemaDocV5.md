@@ -1,4 +1,4 @@
-# Course Engine JSON Schema — v4.1
+# Course Engine JSON Schema — v5
 
 Documentation for the course JSON consumed by `coursePlayerV4.html`. A course is a single JSON object; every screen, interaction, score, and review the player produces is driven by this file. The schema reference itself lives in `exampleJsonV4.json`, where each field's value is a string describing its type and allowed values.
 

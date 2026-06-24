@@ -1,0 +1,7 @@
+name = "cf-worker"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# Static assets (CSS, images, etc.) served directly by Cloudflare
+[assets]
+directory = "./public"
