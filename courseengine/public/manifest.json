@@ -60,6 +60,16 @@
     "ogImage": "PLACEHOLDER"
   },
   {
+    "slug": "fullstack-interview",
+    "courseId": "mastering-the-fullstack-interview",
+    "title": "Mastering the Fullstack Interview: Technology Depth",
+    "description": "An intermediate course that makes early-career software engineers technically conversant across the modern stack so they can answer the substantive questions an interview asks. It builds a shared map and vocabulary, drills the cross-cutting fundamentals every engineer is tested on (complexity, the request lifecycle, networking/HTTP, security), goes deep on high-value frontend and backend/data/infrastructure technologies via the durable concepts beneath them, and closes by helping learners judge which technologies are worth their time and build a personal mastery plan.",
+    "duration": 480,
+    "durationLabel": "8h",
+    "difficulty": "intermediate",
+    "ogImage": "https://assets.coursebuilder.io/courses/mastering-the-fullstack-interview/thumbnail.png"
+  },
+  {
     "slug": "practicalAi",
     "courseId": "practical-ai",
     "title": "Practical AI for Working Professionals",

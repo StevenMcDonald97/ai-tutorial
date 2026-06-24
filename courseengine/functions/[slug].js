@@ -50,6 +50,7 @@ export async function onRequestGet(context) {
   try {
     course = await env.COURSES.get('course:' + slug, 'json');
   } catch (err) {
+    console.log('KV read/parse failed for', slug, err.message);
     course = null;
   }
   if (!course) {
