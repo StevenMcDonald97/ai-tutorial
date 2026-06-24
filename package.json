@@ -1,9 +1,13 @@
 {
-  "devDependencies": {
-    "wrangler": "^4.99.0"
+  "name": "courseengine",
+  "version": "1.0.0",
+  "description": "A website that hosts many online courses using a **single** course player. Each course is just a JSON file. When someone visits `yoursite.com/some-course`, the matching course is loaded into the player automatically. You never have to build a separate page for each course.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "dependencies": {
-    "@types/express": "^5.0.6",
-    "express": "^5.2.1"
-  }
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
 }
