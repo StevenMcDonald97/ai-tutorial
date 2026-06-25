@@ -89,7 +89,7 @@ export async function onRequestGet(context) {
 // ── Helpers ───────────────────────────────────────────────────────────────
 
 async function readManifest(env, request) {
-  const res = await env.ASSETS.fetch(new URL('/manifest.json', request.url));
+  const res = await env.ASSETS.fetch(new URL('../public/manifest.json', request.url));
   if (!res.ok) throw new Error('manifest fetch failed: ' + res.status);
   return res.json();
 }
