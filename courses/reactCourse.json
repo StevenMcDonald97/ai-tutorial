@@ -3,7 +3,7 @@
     "courseId": "advanced-react-architecture",
     "title": "Advanced React Architecture",
     "description": "A production-grade course for professional consultants serving small-to-midsize SaaS companies. Treats React as a design system — a set of composable primitives, data-flow contracts, and trade-off surfaces — rather than a collection of APIs. Covers rendering mechanics, async UI coordination, TypeScript contract design, functional programming patterns, state topology, component design, forms, library selection, testing philosophy, performance architecture, and the integrative skill of prescribing and defending a React architecture for a real SaaS context.",
-    "thumbnailImage": "./assets/react-course.jpg",
+    "thumbnailImage": "/assets/react-course.jpg",
     "estimatedDurationMinutes": 1055,
     "difficultyLevel": "advanced",
     "version": "1.0",

@@ -3,7 +3,7 @@
     "courseId": "tea",
     "title": "The World in a Cup — A Complete Guide to Tea",
     "description": "A complete journey for the curious beginner: from tea's ancient Chinese origins and the plant biology behind every cup, through the processing craft that creates six distinct tea types, to the brewing variables, global cultures, world ceremonies, and sensory vocabulary that turn casual drinking into confident, articulate appreciation. Each section builds on the last, culminating in a structured tasting practice you can use for life.",
-    "thumbnailImage": "./assets/tea-course.jpg",
+    "thumbnailImage": "/assets/tea-course.jpg",
     "estimatedDurationMinutes": 600,
     "difficultyLevel": "novice",
     "version": "1.0",
