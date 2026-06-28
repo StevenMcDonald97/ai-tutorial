@@ -549,6 +549,7 @@ h1,h2,h3,h4{font-family:var(--serif);font-weight:500;line-height:1.12;letter-spa
 /* toast */
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120%);background:var(--ink);color:var(--paper);padding:12px 22px;border-radius:99px;font-size:13.5px;z-index:300;transition:transform .35s cubic-bezier(.22,1,.36,1);box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:8px}
 #toast.show{transform:translateX(-50%) translateY(0)}
+#toast:empty { display:none; }
 
 /* scrollbars */
 #sidebar::-webkit-scrollbar,#glossary-body::-webkit-scrollbar{width:6px}
@@ -602,10 +603,10 @@ h1,h2,h3,h4{font-family:var(--serif);font-weight:500;line-height:1.12;letter-spa
   <!-- ─── Sidebar ─── -->
   <nav id="sidebar">
     <div id="sidebar-header">
-      <div class="brand-mark">
+      <!--<div class="brand-mark"> // Commented out for now, to be added back if branding is needed later
         <div class="brand-seal" id="brand-seal">C</div>
         <div class="brand-name">Course Engine</div>
-      </div>
+      </div>-->
       <div class="course-eyebrow" id="sidebar-eyebrow">Course</div>
       <h2 id="sidebar-title" onClick="goScreen('intro')" style="cursor:pointer"></h2>
       <div id="progress-meta">
@@ -956,7 +957,8 @@ function toggleNavSection(si){
 function renderIntro(){
   const m = C.courseMetadata||{};
   const tagColors=['accent','moss','gold','indigo','plum','rust'];
-  const tags = (m.tags||[]).map((t,i)=>`<span class="tag tag-${tagColors[i%tagColors.length]}"><span class="tdot"></span>${t}</span>`).join('');
+  const tags= []; //disable tags for now
+  // const tags = (m.tags||[]).map((t,i)=>`<span class="tag tag-${tagColors[i%tagColors.length]}"><span class="tdot"></span>${t}</span>`).join('');
   const seal = (m.version? 'v'+m.version : (m.difficultyLevel||''));
 
   const hrs = Math.floor((m.estimatedDurationMinutes||0)/60), mins=(m.estimatedDurationMinutes||0)%60;
@@ -1342,21 +1344,21 @@ function renderInteraction(int, exp){
     bodyHTML = `<textarea class="sa-input" id="sa-${int.interactionId}" placeholder="Write your response…" ${revealed?'disabled':''}>${saved?saved.answer||'':''}</textarea>`;
   }
 
-  // confidence prompt
-  let confHTML='';
-  if(int.confidencePrompt?.enabled && LM.confidenceCalibrationEnabled && !revealed){
-    const cp=int.confidencePrompt, mid=Math.round(((cp.scaleMin||1)+(cp.scaleMax||5))/2);
-    const cur = saved?.confidence || mid;
-    confHTML = `<div class="confidence">
-      <div class="confidence-label">◷ ${cp.prompt||'How confident are you?'}</div>
-      <div class="confidence-row">
-        <input type="range" class="confidence-slider" min="${cp.scaleMin||1}" max="${cp.scaleMax||5}" value="${cur}"
-               id="conf-${int.interactionId}" oninput="document.getElementById('confval-${int.interactionId}').textContent=this.value+' / ${cp.scaleMax||5}'">
-        <span class="confidence-value" id="confval-${int.interactionId}">${cur} / ${cp.scaleMax||5}</span>
-      </div>
-      <div class="confidence-anchors"><span>Not sure</span><span>Certain</span></div>
-    </div>`;
-  }
+  // for now disable confidence prompt
+  // let confHTML='';
+  // if(int.confidencePrompt?.enabled && LM.confidenceCalibrationEnabled && !revealed){
+  //   const cp=int.confidencePrompt, mid=Math.round(((cp.scaleMin||1)+(cp.scaleMax||5))/2);
+  //   const cur = saved?.confidence || mid;
+  //   confHTML = `<div class="confidence">
+  //     <div class="confidence-label">◷ ${cp.prompt||'How confident are you?'}</div>
+  //     <div class="confidence-row">
+  //       <input type="range" class="confidence-slider" min="${cp.scaleMin||1}" max="${cp.scaleMax||5}" value="${cur}"
+  //              id="conf-${int.interactionId}" oninput="document.getElementById('confval-${int.interactionId}').textContent=this.value+' / ${cp.scaleMax||5}'">
+  //       <span class="confidence-value" id="confval-${int.interactionId}">${cur} / ${cp.scaleMax||5}</span>
+  //     </div>
+  //     <div class="confidence-anchors"><span>Not sure</span><span>Certain</span></div>
+  //   </div>`;
+  // }
 
   // hints (hint-only or socratic feedback)
   const fb = int.feedback||{};
