@@ -7,7 +7,7 @@
     "duration": 1055,
     "durationLabel": "17h 35m",
     "difficulty": "advanced",
-    "ogImage": "https://cdn.advanced-react-architecture.dev/thumbnails/course-cover.png"
+    "ogImage": "/assets/react-course.jpg"
   },
   {
     "slug": "typescrtipV4",
@@ -107,7 +107,7 @@
     "duration": 600,
     "durationLabel": "10h",
     "difficulty": "novice",
-    "ogImage": "https://assets.tea-course.io/images/world-in-a-cup-thumb.jpg"
+    "ogImage": "/assets/tea-course.jpg"
   },
   {
     "slug": "musicThough9Artists",
