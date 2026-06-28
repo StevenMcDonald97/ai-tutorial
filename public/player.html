@@ -845,7 +845,7 @@ function buildSidebar(){
   const meta = C.courseMetadata||{};
   document.getElementById('sidebar-title').textContent = meta.title||'Course';
   document.getElementById('sidebar-eyebrow').textContent = (meta.difficultyLevel||'course');
-  document.getElementById('brand-seal').textContent = (meta.title||'C').trim()[0]||'C';
+  const sealEl = document.getElementById('brand-seal'); if(sealEl) sealEl.textContent = (meta.title||'C').trim()[0]||'C';
 
   // competency rail
   const rail = document.getElementById('competency-bars');
@@ -1345,7 +1345,7 @@ function renderInteraction(int, exp){
   }
 
   // for now disable confidence prompt
-  // let confHTML='';
+  let confHTML='';
   // if(int.confidencePrompt?.enabled && LM.confidenceCalibrationEnabled && !revealed){
   //   const cp=int.confidencePrompt, mid=Math.round(((cp.scaleMin||1)+(cp.scaleMax||5))/2);
   //   const cur = saved?.confidence || mid;
