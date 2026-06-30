@@ -28,6 +28,9 @@ const DEFAULT_OG_IMAGE = '/assets/og-default.png'; // site-wide fallback preview
 
 export async function onRequestGet(context) {
   const { params, env, request } = context;
+   if (params.slug === "manifest.json") {
+    return next(); // pass through to static asset
+  }
   const slug = String(params.slug || '').trim();
 
   // ── 1 + 2. Validate the slug against the manifest ──────────────────────
