@@ -68,7 +68,7 @@
     render(!q ? ALL : ALL.filter(c =>
       (c.title+' '+(c.description||'')+' '+(c.difficulty||'')).toLowerCase().includes(q)));
   }
-  fetch('./manifest.json')
+  fetch('/manifest.json')
     .then(r => r.json())
     .then(list => { ALL = list; render(ALL); })
     .catch(() => { document.getElementById('grid').innerHTML =
