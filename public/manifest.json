@@ -40,6 +40,16 @@
     "ogImage": "https://assets.contemporary-uiux-mastery.com/thumbnails/course-cover-v1.png"
   },
   {
+    "slug": "front-end-system-design-course",
+    "courseId": "front-end-system-design",
+    "title": "Front-End System Design: Architecting for Scale",
+    "description": "A staff-level course for senior frontend and fullstack engineers who need to move from building features to architecting whole front-end systems. Covers requirements elicitation, structural styles (monoliths, modular monoliths, micro-frontends), rendering and data-fetching strategy, state architecture, design systems and shared platform concerns, performance and scalability engineering, and how to document and defend architectural decisions.",
+    "duration": 480,
+    "durationLabel": "8h",
+    "difficulty": "intermediate",
+    "ogImage": "https://assets.example.com/courses/front-end-system-design/thumbnail.png"
+  },
+  {
     "slug": "joy-contentment-course",
     "courseId": "joy-and-contentment",
     "title": "Joy and Contentment: A Multi-Lens Course for Living Well",
