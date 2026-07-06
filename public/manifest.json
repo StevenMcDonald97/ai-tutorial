@@ -30,6 +30,16 @@
     "ogImage": "PLACEHOLDER"
   },
   {
+    "slug": "basic-adult-skills-course",
+    "courseId": "basic-adult-skills",
+    "title": "Basic Adult Skills",
+    "description": "A practical, intermediate-level course for mid-to-late-20-somethings covering the financial, interpersonal, and administrative skills adult life requires but rarely teaches directly: budgeting and banking, credit and debt, communication and negotiation, taxes and bureaucratic navigation, health and insurance, housing decisions, home and vehicle maintenance, working with contractors, and long-term planning. Every section pairs concrete worked examples with cross-domain transfer exercises so skills learned in one context (e.g., negotiating a price) are explicitly re-applied in another (e.g., a lease renewal or a contractor quote).",
+    "duration": 480,
+    "durationLabel": "8h",
+    "difficulty": "intermediate",
+    "ogImage": "https://cdn.example.com/courses/basic-adult-skills/thumbnail.jpg"
+  },
+  {
     "slug": "uIUxCourseV5",
     "courseId": "contemporary-ui-and-ux-mastery",
     "title": "Contemporary UI/UX Mastery",
