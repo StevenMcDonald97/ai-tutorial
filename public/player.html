@@ -597,8 +597,6 @@ h1,h2,h3,h4{font-family:var(--serif);font-weight:500;line-height:1.12;letter-spa
 .report-line:last-child{border-bottom:none}
 .collapsible {
     max-width: 360px;
-    background: #fff;
-    border: 1px solid #e0e0e0;
     border-radius: 8px;
     overflow: hidden;
   }
@@ -623,15 +621,10 @@ h1,h2,h3,h4{font-family:var(--serif);font-weight:500;line-height:1.12;letter-spa
     overflow: hidden;
     transition: max-height 0.25s ease;
   }
-  .collapsible-content ul {
-    margin: 0;
-    padding: 12px 20px;
-    list-style: disc;
+  .collapsible.open .collapsible-content {
+    max-height: 100%; 
   }
-  .collapsible-content li {
-    padding: 4px 0;
-    color: #333;
-  }
+
 </style>
 </head>
 <body>
@@ -991,17 +984,9 @@ function toggleNavSection(si){
   goScreen('section', si, 0);
 }
 function toggleCollapse(id) {
-    const container = document.getElementById(id);
-    const content = container.querySelector("#"+id+'.collapsible-content');
- 
+    const container = document.getElementById(id); 
     const isOpen = container.classList.toggle('open');
- 
-    if (isOpen) {
-      content.style.maxHeight = content.scrollHeight + 'px';
-    } else {
-      content.style.maxHeight = '0px';
-    }
-  }
+}
 // ════════════════════════════════════════════════════════════════════════
 //  INTRO SCREEN
 // ════════════════════════════════════════════════════════════════════════
