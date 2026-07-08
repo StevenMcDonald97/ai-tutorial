@@ -2,12 +2,12 @@
   "courseMetadata": {
     "courseId": "basic-adult-skills",
     "title": "Basic Adult Skills",
-    "description": "A practical, intermediate-level course for mid-to-late-20-somethings covering the financial, interpersonal, and administrative skills adult life requires but rarely teaches directly: budgeting and banking, credit and debt, communication and negotiation, taxes and bureaucratic navigation, health and insurance, housing decisions, home and vehicle maintenance, working with contractors, and long-term planning. Every section pairs concrete worked examples with cross-domain transfer exercises so skills learned in one context (e.g., negotiating a price) are explicitly re-applied in another (e.g., a lease renewal or a contractor quote).",
+    "description": "A practical, intermediate-level course for mid-to-late-20-somethings covering the financial, interpersonal, and administrative skills adult life requires but rarely teaches directly: budgeting and banking, credit and debt, communication and negotiation, taxes and bureaucratic navigation, health and insurance, housing decisions, home and vehicle maintenance, working with contractors, and long-term planning. Every section pairs concrete worked examples with cross-domain transfer exercises so skills learned in one context (e.g., negotiating a price) are explicitly re-applied in another (e.g., a lease renewal or a contractor quote). Note: tax, insurance, credit, and housing content is written for a United States context; learners elsewhere should treat the specific institutions, thresholds, and legal rules as illustrative.",
     "thumbnailImage": "https://cdn.example.com/courses/basic-adult-skills/thumbnail.jpg",
     "estimatedDurationMinutes": 480,
     "difficultyLevel": "intermediate",
-    "version": "1.0",
-    "lastUpdated": "2026-07-03",
+    "version": "1.1",
+    "lastUpdated": "2026-07-07",
     "language": "en",
     "tags": [
       "personal-finance",
@@ -152,11 +152,11 @@
         "routingRules": [
           {
             "condition": "score >= 0.85",
-            "action": "flag-for-review"
+            "action": "skip-to-section"
           },
           {
             "condition": "score < 0.5",
-            "action": "unlock-advanced"
+            "action": "flag-for-review"
           }
         ]
       },
@@ -245,11 +245,11 @@
         "routingRules": [
           {
             "condition": "score >= 0.85",
-            "action": "flag-for-review"
+            "action": "skip-to-section"
           },
           {
             "condition": "score < 0.5",
-            "action": "unlock-advanced"
+            "action": "flag-for-review"
           }
         ]
       },
@@ -339,11 +339,11 @@
         "routingRules": [
           {
             "condition": "score >= 0.85",
-            "action": "flag-for-review"
+            "action": "skip-to-section"
           },
           {
             "condition": "score < 0.5",
-            "action": "unlock-advanced"
+            "action": "flag-for-review"
           }
         ]
       },
@@ -434,11 +434,11 @@
         "routingRules": [
           {
             "condition": "score >= 0.85",
-            "action": "flag-for-review"
+            "action": "skip-to-section"
           },
           {
             "condition": "score < 0.5",
-            "action": "unlock-advanced"
+            "action": "flag-for-review"
           }
         ]
       },
@@ -530,11 +530,11 @@
         "routingRules": [
           {
             "condition": "score >= 0.85",
-            "action": "flag-for-review"
+            "action": "skip-to-section"
           },
           {
             "condition": "score < 0.5",
-            "action": "unlock-advanced"
+            "action": "flag-for-review"
           }
         ]
       },
@@ -2142,7 +2142,7 @@
             {
               "blockId": "money-foundations-budgeting-banking-exp-02-block-02",
               "type": "text",
-              "content": "Overdraft coverage is often marketed as a convenience, but it typically works as a flat fee per incident - commonly around $35 - regardless of how small the overdraft was. That means overdrafting by $15 can cost $35, an effective borrowing cost far higher than any credit card. The fix isn't willpower; it's linking a savings account as a backup transfer, or opting out of overdraft coverage so transactions simply get declined instead."
+              "content": "Overdraft coverage is often marketed as a convenience, but it typically works as a flat fee per incident - historically around $35, though some banks have recently reduced or eliminated overdraft fees - regardless of how small the overdraft was. That means overdrafting by $15 can cost $35, an effective borrowing cost far higher than any credit card. The fix isn't willpower; it's linking a savings account as a backup transfer, or opting out of overdraft coverage so transactions simply get declined instead."
             },
             {
               "blockId": "money-foundations-budgeting-banking-exp-02-block-03",
@@ -2160,7 +2160,7 @@
               "revealCondition": "after-response",
               "feedback": {
                 "type": "elaborative",
-                "elaborativeFeedback": "500 x 4.5% \u2248 $22.50, versus 500 x 0.01% \u2248 $0.05 - a difference of about $22.45. Most people underestimate this gap because 4.5% still sounds like a small number in isolation."
+                "elaborativeFeedback": "500 x 4.5% ≈ $22.50, versus 500 x 0.01% ≈ $0.05 - a difference of about $22.45. Most people underestimate this gap because 4.5% still sounds like a small number in isolation."
               },
               "confidencePrompt": {
                 "enabled": true,
@@ -2388,7 +2388,7 @@
               "steps": [
                 "Choose a target of 4 months of needs: $2,350 x 4 = $9,400.",
                 "Decide on a monthly contribution from her savings allocation: $300/month.",
-                "Divide target by contribution: $9,400 / $300 \u2248 31 months."
+                "Divide target by contribution: $9,400 / $300 ≈ 31 months."
               ],
               "conclusion": "Maria will reach her $9,400 emergency fund target in about 31 months (roughly 2.6 years) at $300/month - a concrete, plannable timeline rather than a vague goal."
             }
@@ -2632,7 +2632,7 @@
                 },
                 {
                   "optionIndex": 2,
-                  "feedback": "Correct - $500 x 4.5% \u2248 $22.50 versus $500 x 0.01% \u2248 $0.05, a difference of about $22.45."
+                  "feedback": "Correct - $500 x 4.5% ≈ $22.50 versus $500 x 0.01% ≈ $0.05, a difference of about $22.45."
                 },
                 {
                   "optionIndex": 3,
@@ -3196,7 +3196,7 @@
             {
               "blockId": "communication-negotiation-difficult-conversations-exp-03-block-02",
               "type": "text",
-              "content": "Most people wildly overestimate how 'needy' reaching out looks and underestimate how relieved the other person usually is that someone else made the first move. This mismatch between assumption and reality is exactly why people tend to under-initiate contact with friends they actually want to stay close to."
+              "content": "Research on social connection suggests people tend to overestimate how 'needy' reaching out looks and underestimate how positively the other person usually receives it. This mismatch between assumption and reality is exactly why people tend to under-initiate contact with friends they actually want to stay close to."
             }
           ],
           "interactionSequence": [
@@ -4609,7 +4609,7 @@
             {
               "interactionId": "taxes-bureaucracy-navigation-exp-01-int-01",
               "interactionType": "prediction",
-              "prompt": "Using simplified brackets (10% to $11,000, 12% to $44,725, 22% to $95,375), someone's taxable income rises from $44,000 to $50,000 due to a raise. Before calculating: do you predict their take-home pay increases, decreases, or stays the same?",
+              "prompt": "Using simplified, illustrative brackets based on 2023 single-filer thresholds - the exact cutoffs change each year, but the logic doesn't (10% to $11,000, 12% to $44,725, 22% to $95,375), someone's taxable income rises from $44,000 to $50,000 due to a raise. Before calculating: do you predict their take-home pay increases, decreases, or stays the same?",
               "required": true,
               "responseFormat": "short-answer",
               "revealCondition": "after-response",
@@ -4627,7 +4627,7 @@
             {
               "interactionId": "taxes-bureaucracy-navigation-exp-01-int-02",
               "interactionType": "multiple-choice",
-              "prompt": "Using simplified brackets (10% to $11,000, 12% to $44,725, 22% to $95,375), someone's taxable income rises from $44,000 to $50,000 due to a raise. What happens to their take-home pay?",
+              "prompt": "Using simplified, illustrative brackets based on 2023 single-filer thresholds - the exact cutoffs change each year, but the logic doesn't (10% to $11,000, 12% to $44,725, 22% to $95,375), someone's taxable income rises from $44,000 to $50,000 due to a raise. What happens to their take-home pay?",
               "required": true,
               "responseFormat": "multiple-choice",
               "revealCondition": "after-response",
@@ -4679,7 +4679,7 @@
                 "Next portion, $11,000 to $44,725 ($33,725), taxed at 12% = $4,047.",
                 "Remaining portion, $44,725 to $50,000 ($5,275), taxed at 22% = $1,160.50.",
                 "Total tax: $1,100 + $4,047 + $1,160.50 = $6,307.50.",
-                "Effective rate: $6,307.50 / $50,000 \u2248 12.6% - well below the 22% marginal rate on the last dollar earned."
+                "Effective rate: $6,307.50 / $50,000 ≈ 12.6% - well below the 22% marginal rate on the last dollar earned."
               ],
               "conclusion": "A raise that pushes part of your income into the 22% bracket does not mean your entire $50,000 gets taxed at 22%. Take-home pay always goes up with a raise, never down, under this system."
             }
@@ -6413,11 +6413,11 @@
               "steps": [
                 "Buying: down payment $32,000 + closing costs (~3%) $9,600 = $41,600 upfront.",
                 "Buying monthly: mortgage P&I ~$1,700 + PMI ~$120 + property tax/insurance ~$350 + maintenance reserve ~$400 + HOA ~$150 = ~$2,720/month.",
-                "5-year buying total: $2,720 x 60 + $41,600 \u2248 $205,000.",
+                "5-year buying total: $2,720 x 60 + $41,600 ≈ $205,000.",
                 "Renting monthly: $1,800 rent + ~$20 renters insurance = $1,820/month.",
-                "5-year renting total: $1,820 x 60 \u2248 $109,200."
+                "5-year renting total: $1,820 x 60 ≈ $109,200."
               ],
-              "conclusion": "Over 5 years, buying costs roughly $205,000 versus renting at roughly $109,200 - a substantial gap that's easy to miss if you only compare the mortgage payment to the rent payment. This doesn't settle whether buying is 'better' over a longer horizon with appreciation, but it shows why the naive payment-only comparison is misleading."
+              "conclusion": "Over 5 years, buying costs roughly $205,000 versus renting at roughly $109,200 - a substantial gap that's easy to miss if you only compare the mortgage payment to the rent payment. One important nuance: the $205,000 figure is total cash outflow, not pure cost - roughly $32,000 of it is the down payment and part of each monthly payment goes to principal, both of which build equity the buyer keeps. This doesn't settle whether buying is 'better' over a longer horizon with appreciation, but it shows why the naive payment-only comparison is misleading."
             }
           ],
           "retrievalPractice": [
@@ -6630,7 +6630,7 @@
         },
         {
           "experienceId": "housing-decisions-exp-03",
-          "title": "Reading a Lease for Red Flags \u2014 and Negotiating It",
+          "title": "Reading a Lease for Red Flags — and Negotiating It",
           "experienceType": "guided-analysis",
           "difficultyProfile": {
             "overall": 3,
@@ -8284,8 +8284,8 @@
               "exampleId": "vehicles-contractors-service-providers-exp-02-worked-01",
               "problem": "Compare total interest paid on a $22,000 car across a 4-year loan (6% APR) and a 6-year loan (7.5% APR).",
               "steps": [
-                "4-year loan: monthly payment \u2248 $517, total interest \u2248 $2,816.",
-                "6-year loan: monthly payment \u2248 $381, total interest \u2248 $5,432.",
+                "4-year loan: monthly payment ≈ $517, total interest ≈ $2,816.",
+                "6-year loan: monthly payment ≈ $381, total interest ≈ $5,432.",
                 "Difference in monthly payment: $517 - $381 = $136 (the 6-year loan looks $136/month cheaper).",
                 "Difference in total interest: $5,432 - $2,816 = $2,616 (the 6-year loan costs $2,616 more overall)."
               ],
@@ -8359,7 +8359,7 @@
         },
         {
           "experienceId": "vehicles-contractors-service-providers-exp-03",
-          "title": "Evaluating Quotes \u2014 and Negotiating the One You Pick",
+          "title": "Evaluating Quotes — and Negotiating the One You Pick",
           "experienceType": "guided-analysis",
           "difficultyProfile": {
             "overall": 3,
@@ -9141,7 +9141,7 @@
         },
         {
           "experienceId": "long-term-planning-life-admin-exp-02",
-          "title": "Evaluating a Major Purchase \u2014 and Building Your Life-Admin Folder",
+          "title": "Evaluating a Major Purchase — and Building Your Life-Admin Folder",
           "experienceType": "worked-example",
           "difficultyProfile": {
             "overall": 3,
@@ -9162,7 +9162,7 @@
             {
               "blockId": "long-term-planning-life-admin-exp-02-block-01",
               "type": "text",
-              "content": "Consider evaluating a $3,000 international trip. A structured cost-benefit framework asks: (1) True total cost - the $3,000 sticker price, plus, if financed on a credit card at 22% APR and paid off over 8 months, roughly $220 in additional interest, bringing the true cost closer to $3,220. (2) Opportunity cost - that $3,220, if instead added to an emergency fund or retirement contribution, could grow substantially over decades using the same compound-growth logic from Section 1. (3) Alternatives considered - a shorter, less expensive trip, or waiting 6 months to save the cash and avoid financing entirely. (4) Value/priority alignment - does this align with what your Section 1 budget already allocated toward 'wants,' or does it require pulling from savings?"
+              "content": "Consider evaluating a $3,000 international trip. A structured cost-benefit framework asks: (1) True total cost - the $3,000 sticker price, plus, if financed on a credit card at 22% APR and paid off over 8 months, roughly $250 in additional interest, bringing the true cost closer to $3,250. (2) Opportunity cost - that $3,250, if instead added to an emergency fund or retirement contribution, could grow substantially over decades using the same compound-growth logic from Section 1. (3) Alternatives considered - a shorter, less expensive trip, or waiting 6 months to save the cash and avoid financing entirely. (4) Value/priority alignment - does this align with what your Section 1 budget already allocated toward 'wants,' or does it require pulling from savings?"
             },
             {
               "blockId": "long-term-planning-life-admin-exp-02-block-02",
@@ -9197,7 +9197,7 @@
             {
               "interactionId": "long-term-planning-life-admin-exp-02-int-02",
               "interactionType": "multiple-choice",
-              "prompt": "Someone is evaluating whether to take a $3,000 trip, financed on a credit card at 22% APR and paid off over 8 months (adding ~$220 in interest). What does a structured cost-benefit evaluation require beyond the $3,000 sticker price?",
+              "prompt": "Someone is evaluating whether to take a $3,000 trip, financed on a credit card at 22% APR and paid off over 8 months (adding ~$250 in interest). What does a structured cost-benefit evaluation require beyond the $3,000 sticker price?",
               "required": true,
               "responseFormat": "multiple-choice",
               "revealCondition": "after-response",
@@ -9211,7 +9211,7 @@
               "optionFeedback": [
                 {
                   "optionIndex": 0,
-                  "feedback": "Correct - as shown in the worked example, the true cost is closer to $3,220, and the decision should also weigh alternatives and priority fit."
+                  "feedback": "Correct - as shown in the worked example, the true cost is closer to $3,250, and the decision should also weigh alternatives and priority fit."
                 },
                 {
                   "optionIndex": 1,
@@ -9245,8 +9245,8 @@
               "exampleId": "long-term-planning-life-admin-exp-02-worked-01",
               "problem": "Apply the structured cost-benefit framework to a $3,000 trip financed on a credit card.",
               "steps": [
-                "True total cost: $3,000 sticker price, plus roughly $220 in credit card interest if paid off over 8 months at 22% APR - true cost closer to $3,220.",
-                "Opportunity cost: that $3,220, if instead added to savings or retirement, could grow substantially over decades using compound-growth logic.",
+                "True total cost: $3,000 sticker price, plus roughly $220 in credit card interest if paid off over 8 months at 22% APR - true cost closer to $3,250.",
+                "Opportunity cost: that $3,250, if instead added to savings or retirement, could grow substantially over decades using compound-growth logic.",
                 "Alternatives considered: a shorter, less expensive trip; waiting 6 months to save the cash and avoid financing entirely.",
                 "Value/priority alignment: check whether this cost fits within the 'wants' category already funded in the person's budget, or requires pulling from savings."
               ],
@@ -10786,7 +10786,7 @@
         {
           "questionId": "tax-obligations-q1",
           "difficulty": 4,
-          "prompt": "Using simplified brackets (10% to $11,000, 12% to $44,725, 22% to $95,375), someone's taxable income rises from $44,000 to $50,000 due to a raise. What happens to their take-home pay?",
+          "prompt": "Using simplified, illustrative brackets based on 2023 single-filer thresholds - the exact cutoffs change each year, but the logic doesn't (10% to $11,000, 12% to $44,725, 22% to $95,375), someone's taxable income rises from $44,000 to $50,000 due to a raise. What happens to their take-home pay?",
           "questionType": "multiple-choice",
           "options": [
             "Moving into a higher tax bracket lowers your overall take-home pay.",
@@ -11969,7 +11969,7 @@
         {
           "questionId": "major-purchase-decision-making-q1",
           "difficulty": 3,
-          "prompt": "Someone is evaluating whether to take a $3,000 trip, financed on a credit card at 22% APR and paid off over 8 months (adding ~$220 in interest). What does a structured cost-benefit evaluation require beyond the $3,000 sticker price?",
+          "prompt": "Someone is evaluating whether to take a $3,000 trip, financed on a credit card at 22% APR and paid off over 8 months (adding ~$250 in interest). What does a structured cost-benefit evaluation require beyond the $3,000 sticker price?",
           "questionType": "multiple-choice",
           "options": [
             "A major purchase should be evaluated on sticker price alone.",
@@ -11990,7 +11990,7 @@
             },
             {
               "optionIndex": 2,
-              "feedback": "Correct - as shown in the worked example, the true cost is closer to $3,220, and the decision should also weigh alternatives and priority fit."
+              "feedback": "Correct - as shown in the worked example, the true cost is closer to $3,250, and the decision should also weigh alternatives and priority fit."
             },
             {
               "optionIndex": 3,
