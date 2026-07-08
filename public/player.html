@@ -595,6 +595,43 @@ h1,h2,h3,h4{font-family:var(--serif);font-weight:500;line-height:1.12;letter-spa
 #report-card h3{font-size:20px;margin-bottom:14px}
 .report-line{font-size:13.5px;color:var(--ink-soft);padding:7px 0;border-bottom:1px solid var(--line-soft);font-family:var(--mono);line-height:1.45}
 .report-line:last-child{border-bottom:none}
+.collapsible {
+    max-width: 360px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .collapsible-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    cursor: pointer;
+    font-weight: 600;
+    user-select: none;
+  }
+  .arrow {
+    transition: transform 0.2s ease;
+    font-size: 14px;
+  }
+  .collapsible.open .arrow {
+    transform: rotate(90deg);
+  }
+  .collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease;
+  }
+  .collapsible-content ul {
+    margin: 0;
+    padding: 12px 20px;
+    list-style: disc;
+  }
+  .collapsible-content li {
+    padding: 4px 0;
+    color: #333;
+  }
 </style>
 </head>
 <body>
@@ -614,12 +651,15 @@ h1,h2,h3,h4{font-family:var(--serif);font-weight:500;line-height:1.12;letter-spa
         <div id="progress-label"></div>
       </div>
     </div>
-    <div id="competency-rail">
-      <div class="rail-label">
+    <div id="competency-rail" class="collapsible">
+      <div class="rail-label collapsible-header" onclick="toggleCollapse('competency-rail')">
         <span>Competency Mastery</span>
-        <button class="ghost-btn" onclick="resetProgress()">Reset</button>
+        <span class="arrow">▶</span>
       </div>
-      <div id="competency-bars"></div>
+      <span class="collapsible-content" id="competency-rail-content">
+        <button class="ghost-btn" onclick="resetProgress()">Reset</button>
+        <div id="competency-bars"></div>
+      </span>
     </div>
     <div id="sidebar-nav"></div>
     <div id="sidebar-tools">
@@ -950,7 +990,18 @@ function toggleNavSection(si){
   if(state.screen==='exp' && state.sectionIdx===si){ item.classList.toggle('open'); return; }
   goScreen('section', si, 0);
 }
-
+function toggleCollapse(id) {
+    const container = document.getElementById(id);
+    const content = container.querySelector("#"+id+'.collapsible-content');
+ 
+    const isOpen = container.classList.toggle('open');
+ 
+    if (isOpen) {
+      content.style.maxHeight = content.scrollHeight + 'px';
+    } else {
+      content.style.maxHeight = '0px';
+    }
+  }
 // ════════════════════════════════════════════════════════════════════════
 //  INTRO SCREEN
 // ════════════════════════════════════════════════════════════════════════
