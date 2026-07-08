@@ -91,8 +91,8 @@ h1,h2,h3,h4{font-family:var(--serif);font-weight:500;line-height:1.12;letter-spa
 
 /* Competency rail */
 #competency-rail{padding:18px 24px;border-bottom:1px solid var(--line)}
-.rail-label{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
-.rail-label .ghost-btn{font-family:var(--sans);font-size:10px;letter-spacing:.08em;color:var(--accent);background:none;border:none;cursor:pointer;text-transform:uppercase}
+.rail-label{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:12px;display:flex;justify-content:auto;align-items:center;cursor:pointer}
+.reset-button.ghost-btn{font-family:var(--sans);font-size:10px;letter-spacing:.08em;color:var(--accent);background:none;border:none;cursor:pointer;text-transform:uppercase}
 .comp-badge{margin-bottom:13px}
 .comp-badge:last-child{margin-bottom:0}
 .comp-badge-top{display:flex;align-items:baseline;gap:8px;margin-bottom:5px}
@@ -614,13 +614,13 @@ h1,h2,h3,h4{font-family:var(--serif);font-weight:500;line-height:1.12;letter-spa
         <div id="progress-label"></div>
       </div>
     </div>
-    <div id="competency-rail">
-      <div class="rail-label">
+    <details id="competency-rail">
+      <summary class="rail-label">
         <span>Competency Mastery</span>
-        <button class="ghost-btn" onclick="resetProgress()">Reset</button>
-      </div>
+      </summary>
+      <button class="reset-button ghost-btn" onclick="resetProgress()">Reset</button>
       <div id="competency-bars"></div>
-    </div>
+    </details>
     <div id="sidebar-nav"></div>
     <div id="sidebar-tools">
       <button onclick="document.getElementById('course-file').click()">&#10515; Load course JSON</button>
