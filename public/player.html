@@ -803,7 +803,7 @@ function overallPct(){ const t=totalUnits(); return t? Math.round(doneUnits()/t*
 //  NAVIGATION
 // ════════════════════════════════════════════════════════════════════════
 function goScreen(screen, sIdx, eIdx){
-  closeOverlay();
+  closeOverlays();
   state.screen = screen;
   if(sIdx!=null) state.sectionIdx = sIdx;
   if(eIdx!=null) state.expIdx = eIdx;
