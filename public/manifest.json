@@ -33,7 +33,7 @@
     "slug": "basic-adult-skills-course",
     "courseId": "basic-adult-skills",
     "title": "Basic Adult Skills",
-    "description": "A practical, intermediate-level course for mid-to-late-20-somethings covering the financial, interpersonal, and administrative skills adult life requires but rarely teaches directly: budgeting and banking, credit and debt, communication and negotiation, taxes and bureaucratic navigation, health and insurance, housing decisions, home and vehicle maintenance, working with contractors, and long-term planning. Every section pairs concrete worked examples with cross-domain transfer exercises so skills learned in one context (e.g., negotiating a price) are explicitly re-applied in another (e.g., a lease renewal or a contractor quote).",
+    "description": "A practical, intermediate-level course for mid-to-late-20-somethings covering the financial, interpersonal, and administrative skills adult life requires but rarely teaches directly: budgeting and banking, credit and debt, communication and negotiation, taxes and bureaucratic navigation, health and insurance, housing decisions, home and vehicle maintenance, working with contractors, and long-term planning. Every section pairs concrete worked examples with cross-domain transfer exercises so skills learned in one context (e.g., negotiating a price) are explicitly re-applied in another (e.g., a lease renewal or a contractor quote). Note: tax, insurance, credit, and housing content is written for a United States context; learners elsewhere should treat the specific institutions, thresholds, and legal rules as illustrative.",
     "duration": 480,
     "durationLabel": "8h",
     "difficulty": "intermediate",
@@ -130,12 +130,12 @@
     "ogImage": "/assets/tea-course.jpg"
   },
   {
-    "slug": "musicThough9Artists",
-    "courseId": "western-music-through-the-lens-of-7-important-ar",
-    "title": "Western Music Through the Lens of 9 Important Artists",
-    "description": "A novice-friendly journey through the evolution of Western music from the late Baroque to the present, anchored in nine genre-defining artists - Bach, Beethoven, Stravinsky, Louis Armstrong, Miles Davis, The Beatles, Aretha Franklin, Bob Dylan, and Kendrick Lamar. Learners build a portable listening toolkit: how to hear structure by ear, recognize what made each artist innovative in their context, tell genres apart, trace influence across eras, and walk into any performance prepared to listen richly and enjoyably.",
-    "duration": 480,
-    "durationLabel": "8h",
+    "slug": "musicThough10Artists",
+    "courseId": "western-music-through-the-lens-of-10-important-artists",
+    "title": "Western Music Through the Lens of 10 Important Artists",
+    "description": "A novice-friendly journey through the evolution of Western music from the late Baroque to the present, anchored in ten genre-defining artists - Bach, Beethoven, Stravinsky, Bessie Smith, Louis Armstrong, Miles Davis, The Beatles, Aretha Franklin, Bob Dylan, and Kendrick Lamar. Learners build a portable listening toolkit: how to hear structure by ear, recognize what made each artist innovative in their context, tell genres apart, trace influence across eras, and walk into any performance prepared to listen richly and enjoyably.",
+    "duration": 546,
+    "durationLabel": "9h 6m",
     "difficulty": "novice",
     "ogImage": "https://placehold.co/1200x675?text=Western+Music+Through+9+Artists"
   }

@@ -391,30 +391,6 @@
             "action": "flag-competency-content-verification-as-likely-known"
           }
         ]
-      },
-      {
-        "probeId": "pkc-008",
-        "prompt": "Overall prior knowledge score routing: if a learner scores 6 or more out of 7 probe questions correctly, what should the engine do?",
-        "questionType": "scenario-analysis",
-        "options": [],
-        "correctIndex": -1,
-        "optionFeedback": [],
-        "linkedCompetencies": ["ai-foundations", "ml-fundamentals", "neural-network-literacy", "llm-mechanics", "tool-selection-workflow", "prompt-context-craft", "agentic-ai", "limitation-risk-assessment", "content-verification"],
-        "scoringCriteria": ["Aggregate score computed from pkc-001 through pkc-007"],
-        "routingRules": [
-          {
-            "condition": "aggregateScore >= 6",
-            "action": "unlock-advanced: route learner to transfer-focused assessments and skip Act-I foundational lectures; surface a personalised pathway note explaining the skip"
-          },
-          {
-            "condition": "aggregateScore >= 4 AND aggregateScore < 6",
-            "action": "flag-for-review: pre-populate spaced-retrieval queue with items from flagged competencies; recommend but do not mandate revisiting foundational sections"
-          },
-          {
-            "condition": "aggregateScore < 4",
-            "action": "standard-pathway: begin course from Section 1 with full foundational content"
-          }
-        ]
       }
     ]
   },
