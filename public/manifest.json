@@ -50,7 +50,7 @@
     "ogImage": "https://assets.contemporary-uiux-mastery.com/thumbnails/course-cover-v1.png"
   },
   {
-    "slug": "front-end-system-design-course",
+    "slug": "front-end-system-design-coursejson",
     "courseId": "front-end-system-design",
     "title": "Front-End System Design: Architecting for Scale",
     "description": "A staff-level course for senior frontend and fullstack engineers who need to move from building features to architecting whole front-end systems. Covers requirements elicitation, structural styles (monoliths, modular monoliths, micro-frontends), rendering and data-fetching strategy, state architecture, design systems and shared platform concerns, performance and scalability engineering, and how to document and defend architectural decisions.",
@@ -94,8 +94,8 @@
     "courseId": "practical-ai",
     "title": "Practical AI for Working Professionals",
     "description": "Practical AI equips working professionals with an accurate mental model of modern artificial intelligence — from conceptual foundations through machine learning and neural networks to large language models — and the hands-on judgment to select, apply, and critically evaluate AI tools in real workflows. The course balances conceptual literacy (how these systems actually work), applied skill (using them well), and critical skill (knowing when not to trust them). Learners move through three acts: building a technical mental model, putting it to work, and learning to audit and verify AI outputs.",
-    "duration": 600,
-    "durationLabel": "10h",
+    "duration": 936,
+    "durationLabel": "15h 36m",
     "difficulty": "intermediate",
     "ogImage": "https://cdn.practicalai.course/assets/thumbnail-v1.png"
   },
@@ -134,9 +134,9 @@
     "courseId": "western-music-through-the-lens-of-10-important-artists",
     "title": "Western Music Through the Lens of 10 Important Artists",
     "description": "A novice-friendly journey through the evolution of Western music from the late Baroque to the present, anchored in ten genre-defining artists - Bach, Beethoven, Stravinsky, Bessie Smith, Louis Armstrong, Miles Davis, The Beatles, Aretha Franklin, Bob Dylan, and Kendrick Lamar. Learners build a portable listening toolkit: how to hear structure by ear, recognize what made each artist innovative in their context, tell genres apart, trace influence across eras, and walk into any performance prepared to listen richly and enjoyably.",
-    "duration": 546,
-    "durationLabel": "9h 6m",
+    "duration": 594,
+    "durationLabel": "9h 54m",
     "difficulty": "novice",
-    "ogImage": "https://placehold.co/1200x675?text=Western+Music+Through+9+Artists"
+    "ogImage": "/assets/music-course.jpg"
   }
 ]
