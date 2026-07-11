@@ -1287,7 +1287,7 @@ function renderIntro(){
   const startLabel  = C.priorKnowledgeCheck?.enabled && !state.pkcDone ? 'Begin with a knowledge check' : 'Begin the course';
 
   const coverArt = m.thumbnailImage
-    ? `<img src="${safeUrl(m.thumbnailImage)}" alt="${esc(m.title||'')}">`
+    ? `<img src="${m.thumbnailImage}" alt="${esc(m.title||'')}">`
     : `<div class="seal">${seal||'✦'}</div>`;
 
   document.getElementById('screen-intro').innerHTML = `
@@ -1665,19 +1665,19 @@ function renderContentBlock(b){
   }
   if(t==='image'){
     return `<figure class="cb-media">${
-      b.url ? `<img src="${safeUrl(b.url)}" alt="${esc(b.altText||'')}">`
+      b.url ? `<img src="${(b.url)}" alt="${esc(b.altText||'')}">`
             : `<div class="cb-placeholder"><span class="ph-ico">🖼</span><span>${esc(b.altText||'Image')}</span></div>`
     }${b.altText?`<figcaption class="cb-caption">${esc(b.altText)}</figcaption>`:''}</figure>`;
   }
   if(t==='video'){
     return `<figure class="cb-media">${
-      b.url ? `<video controls src="${safeUrl(b.url)}"></video>`
+      b.url ? `<video controls src="${(b.url)}"></video>`
             : `<div class="cb-placeholder"><span class="ph-ico">▶</span><span>Video</span></div>`
     }${b.captionOrTranscript?`<details class="cb-transcript"><summary>Transcript</summary><p>${escBr(b.captionOrTranscript)}</p></details>`:''}</figure>`;
   }
   if(t==='audio'){
     return `<figure class="cb-media">${
-      b.url ? `<audio controls src="${safeUrl(b.url)}"></audio>`
+      b.url ? `<audio controls src="${(b.url)}"></audio>`
             : `<div class="cb-placeholder"><span class="ph-ico">♪</span><span>Audio</span></div>`
     }${b.captionOrTranscript?`<details class="cb-transcript"><summary>Transcript</summary><p>${escBr(b.captionOrTranscript)}</p></details>`:''}</figure>`;
   }
