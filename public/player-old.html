@@ -4,9 +4,6 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Course Player</title>
-<!-- Course Engine Player v6 — schema v6 support: markdown content, code/callout/table/key-terms blocks,
-     checkpoints, section summaries, reviewOnMiss, confidence calibration, adaptive assessments,
-     in-lesson interleaving, faded worked examples, glossary auto-linking, sanitized rendering. -->
 <!--__OG_TAGS__-->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -559,99 +556,6 @@ h1,h2,h3,h4{font-family:var(--serif);font-weight:500;line-height:1.12;letter-spa
 #sidebar::-webkit-scrollbar-thumb,#glossary-body::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
 
 /* responsive */
-
-/* ─── v6: markdown rendering ─────────────────────────── */
-.md-h{font-family:var(--serif);color:var(--ink);margin:26px 0 10px;line-height:1.2}
-h2.md-h{font-size:24px}h3.md-h{font-size:19px}h4.md-h{font-size:16px;text-transform:none}
-.cb-text .md-h:first-child{margin-top:0}
-.cb-text p{margin-bottom:14px}.cb-text p:last-child{margin-bottom:0}
-.md-list{margin:0 0 16px 24px;font-family:var(--read);font-size:17px;line-height:1.6}
-.md-list li{margin-bottom:6px}
-.md-bq{border-left:3px solid var(--accent-line);background:var(--surface);padding:12px 18px;margin:0 0 16px;border-radius:0 var(--radius) var(--radius) 0;color:var(--ink-soft);font-style:italic}
-.md-bq p{margin-bottom:8px}.md-bq p:last-child{margin-bottom:0}
-.md-hr{border:none;border-top:1px dashed var(--line);margin:22px 0}
-.md-code,code.md-code{font-family:var(--mono);font-size:.86em;background:var(--paper-deep);border:1px solid var(--line-soft);border-radius:3px;padding:1px 5px;color:var(--accent-deep)}
-.md-tablewrap{overflow-x:auto;margin:0 0 18px}
-.md-table{border-collapse:collapse;width:100%;font-size:14px;background:var(--surface-raised);font-family:var(--sans)}
-.md-table th{background:var(--paper-deep);text-align:left;font-weight:600;font-size:12.5px;letter-spacing:.02em}
-.md-table th,.md-table td{border:1px solid var(--line);padding:8px 12px;vertical-align:top}
-.md-table tr:nth-child(even) td{background:var(--surface)}
-
-/* ─── v6: code blocks ────────────────────────────────── */
-.cb-code{margin:0 0 22px;border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;background:#2a2721}
-.code-lang{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#b3a98f;background:#211e19;padding:6px 14px;border-bottom:1px solid #3a362d}
-.code-pre{margin:0;padding:14px 0;overflow-x:auto}
-.code-pre code{font-family:var(--mono);font-size:13px;line-height:1.65;color:#e8e2d1;display:block;min-width:max-content}
-.cl{display:block;padding:0 16px}
-.cl-hl{background:rgba(154,106,24,.22);box-shadow:inset 3px 0 0 var(--gold)}
-.cl-n{display:inline-block;width:2.2em;color:#7a7462;user-select:none;text-align:right;margin-right:14px;font-size:11px}
-.cb-code .cb-caption{background:var(--surface);padding:8px 14px;margin:0;border-top:1px solid var(--line)}
-.tok-k{color:#e0a458;font-weight:500}.tok-s{color:#a3be8c}.tok-n{color:#88b3c8}.tok-c{color:#7a7462;font-style:italic}
-
-/* ─── v6: callouts ───────────────────────────────────── */
-.callout{border:1px solid var(--line);border-left-width:3px;border-radius:0 var(--radius-lg) var(--radius-lg) 0;padding:16px 20px;margin:0 0 20px;background:var(--surface-raised)}
-.callout-head{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:7px}
-.callout-title{font-family:var(--serif);font-size:16px;color:var(--ink);margin-bottom:6px}
-.callout-body{font-family:var(--read);font-size:15.5px;line-height:1.62;color:var(--ink-soft)}
-.callout-body p{margin-bottom:10px}.callout-body p:last-child{margin-bottom:0}
-.co-note{border-left-color:var(--indigo);background:var(--indigo-wash)}.co-note .callout-head{color:var(--indigo)}
-.co-warning{border-left-color:var(--warn);background:var(--warn-wash)}.co-warning .callout-head{color:var(--warn)}
-.co-insight{border-left-color:var(--gold);background:var(--gold-wash)}.co-insight .callout-head{color:var(--gold)}
-.co-definition{border-left-color:var(--plum);background:var(--plum-wash)}.co-definition .callout-head{color:var(--plum)}
-.co-example{border-left-color:var(--moss);background:var(--moss-wash)}.co-example .callout-head{color:var(--moss)}
-
-/* ─── v6: key terms ──────────────────────────────────── */
-.keyterms{margin:0 0 22px;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--surface-raised);padding:16px 20px}
-.kt-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
-.kt-item{border-bottom:1px dashed var(--line-soft);padding:7px 0}
-.kt-item:last-child{border-bottom:none}
-.kt-item summary{cursor:pointer;font-family:var(--serif);font-size:15.5px;color:var(--accent-deep);list-style:none;display:flex;align-items:center;gap:8px}
-.kt-item summary::before{content:'✦';font-size:10px;color:var(--accent);transition:transform .2s}
-.kt-item[open] summary::before{transform:rotate(90deg)}
-.kt-def{font-family:var(--read);font-size:14.5px;color:var(--ink-soft);line-height:1.6;padding:6px 0 4px 20px}
-
-/* ─── v6: checkpoints / chunking ─────────────────────── */
-.checkpoint{background:var(--surface-raised);border:1px dashed var(--accent-line);border-radius:var(--radius-lg);padding:26px;margin:8px 0 28px;text-align:center}
-.ckpt-msg{font-family:var(--read);font-style:italic;font-size:15px;color:var(--ink-soft);margin-bottom:14px}
-.ckpt-dots{display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:18px}
-.ckpt-dot{width:8px;height:8px;border-radius:50%;background:var(--line);transition:background .3s}
-.ckpt-dot.on{background:var(--accent)}
-.ckpt-count{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-left:6px}
-.exp-seg-progress{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:7px;padding:10px 0;background:linear-gradient(var(--paper) 82%,transparent);margin-bottom:6px}
-
-/* ─── v6: section close (resolution + summary) ───────── */
-.section-close{margin-top:34px}
-.hook-prediction-resolution{border-left-color:var(--good)!important;background:var(--good-wash)!important}
-.hook-prediction-resolution .hk-type{color:var(--good)}
-.hk-orig{font-size:13px;color:var(--ink-faint);font-style:italic;margin-bottom:6px}
-.section-summary{background:var(--surface-raised);border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:0 0 var(--radius-lg) var(--radius-lg);padding:24px 28px;margin:16px 0 8px;box-shadow:var(--shadow-sm)}
-.ss-label{font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
-.ss-body{font-family:var(--read);font-size:16.5px;line-height:1.65;color:var(--ink)}
-.ss-takeaways{list-style:none;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
-.ss-takeaways li{padding:5px 0 5px 26px;position:relative;font-size:14.5px;color:var(--ink-soft);font-family:var(--sans)}
-.ss-takeaways li::before{content:'✓';position:absolute;left:2px;color:var(--good);font-weight:700}
-
-/* ─── v6: interleaved practice ───────────────────────── */
-.interleave{margin:0 0 22px;border:1px dashed var(--indigo);border-radius:var(--radius-lg);padding:16px 18px 4px;background:var(--indigo-wash)}
-.il-label{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--indigo);margin-bottom:12px}
-.il-label span{text-transform:none;letter-spacing:0;font-weight:400;color:var(--ink-faint);margin-left:6px}
-
-/* ─── v6: elaboration + calibration + faded example ──── */
-.int-elab::before{background:var(--moss)}
-.calibration{margin-top:10px;font-size:13px;font-family:var(--sans);color:var(--ink-soft);background:var(--gold-wash);border:1px solid #e6d3a6;border-radius:var(--radius);padding:8px 14px;display:flex;align-items:center;gap:8px}
-.calibration.miscal{background:var(--warn-wash);border-color:#e5b8ae;color:var(--warn)}
-.worked.faded{border-left-color:var(--gold)}
-.worked.faded .worked-label{color:var(--gold)}
-.fv-blank{margin:12px 0}
-.fv-p{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:6px;font-family:var(--sans)}
-.fv-yours{font-family:var(--read);font-size:14.5px;color:var(--ink-soft);background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--radius);padding:10px 14px;margin-bottom:8px;white-space:pre-wrap}
-.fv-model{background:var(--moss-wash);border:1px solid #cdd8bf;border-radius:var(--radius);padding:10px 14px;font-family:var(--read);font-size:14.5px;color:var(--ink)}
-.fv-model>span{display:block;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--moss);font-family:var(--sans);margin-bottom:4px}
-
-/* ─── v6: review queue extras ────────────────────────── */
-.rev-flag{font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--warn-wash);color:var(--warn);border:1px solid #e5b8ae;border-radius:99px;padding:2px 8px}
-.rev-kind{font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--paper-deep);color:var(--ink-faint);border-radius:99px;padding:2px 8px}
-
 @media(max-width:920px){
   #sidebar{position:fixed;left:0;top:0;transform:translateX(-100%);transition:transform .3s cubic-bezier(.22,1,.36,1);box-shadow:var(--shadow-lg)}
   #sidebar.open{transform:none}
@@ -810,8 +714,6 @@ function freshState(){
     revealed:{},                       // expId -> [ids]
     assessAnswers:{},                  // assessId -> {questionId:answer|choiceIndex}
     assessSubmitted:[], assessSelfRatings:{},
-    checkpoint:{},                     // expId -> last unlocked segment index
-    adaptState:{},                     // assessId -> adaptive serving state
     pkcDone:false, pkcAnswers:{}
   };
 }
@@ -828,211 +730,6 @@ function resetProgress(){
 // helpers for set-like arrays
 const has = (arr,v)=> Array.isArray(arr) && arr.includes(v);
 const add = (arr,v)=>{ if(!arr.includes(v)) arr.push(v); };
-
-// ════════════════════════════════════════════════════════════════════════
-//  v6 UTILITIES — sanitization, markdown, code highlighting
-//  Escape-first design: all course-sourced strings are HTML-escaped before
-//  any markdown transform, so raw HTML in course files is neutralized and
-//  markdown syntax is the only formatting channel.
-// ════════════════════════════════════════════════════════════════════════
-const ESC_MAP = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'};
-function esc(s){ return String(s??'').replace(/[&<>"]/g,c=>ESC_MAP[c]); }
-function escC(s){ return String(s??'').replace(/[&<>]/g,c=>ESC_MAP[c]); }   // element-content only (code)
-function escBr(s){ return esc(s).replace(/\n/g,'<br>'); }
-function safeUrl(u){ u=String(u||'').trim(); return /^(https?:|mailto:|#)/i.test(u) ? u.replace(/"/g,'&quot;') : '#'; }
-function mdDefault(){ return parseFloat(C.courseMetadata?.schemaVersion||'0') >= 6; }
-
-// inline markdown: code spans, links, bold, italics, strikethrough
-function mdInline(s){
-  let t = esc(s);
-  const hold = [];
-  const stash = html => { hold.push(html); return String.fromCharCode(0xE000 + hold.length - 1); };
-  t = t.replace(/`([^`\n]+)`/g, (m,c)=>stash('<code class="md-code">'+c+'</code>'));
-  t = t.replace(/\[([^\]\n]+)\]\(([^)\s]+)\)/g, (m,txt,url)=>stash('<a href="'+safeUrl(url)+'" target="_blank" rel="noopener">'+txt+'</a>'));
-  t = t.replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>').replace(/__([^_\n]+)__/g,'<b>$1</b>');
-  t = t.replace(/(^|[\s(“"'])\*([^*\n]+)\*/g,'$1<i>$2</i>').replace(/(^|[\s(“"'])_([^_\n]+)_/g,'$1<i>$2</i>');
-  t = t.replace(/~~([^~\n]+)~~/g,'<s>$1</s>');
-  t = t.replace(/[\uE000-\uF8FF]/g, c=>hold[c.charCodeAt(0)-0xE000] ?? c);
-  return t;
-}
-
-// block markdown: fenced code, headings, hr, blockquotes, lists, GFM tables, paragraphs
-function md(srcText){
-  const lines = String(srcText??'').replace(/\r\n?/g,'\n').split('\n');
-  const out = []; let i = 0; let para = [];
-  const flush = ()=>{ if(para.length){ out.push('<p>'+mdInline(para.join(' '))+'</p>'); para = []; } };
-  const splitRow = L => L.trim().replace(/^\|/,'').replace(/\|$/,'').split('|').map(c=>c.trim());
-  while(i < lines.length){
-    const L = lines[i];
-    const fence = L.match(/^```(\w*)\s*$/);
-    if(fence){ flush(); const lang = fence[1]; const buf = []; i++;
-      while(i < lines.length && !/^```\s*$/.test(lines[i])){ buf.push(lines[i]); i++; }
-      i++; out.push(codeHTML(buf.join('\n'), lang)); continue; }
-    if(/^\s*$/.test(L)){ flush(); i++; continue; }
-    const h = L.match(/^(#{1,4})\s+(.*)$/);
-    if(h){ flush(); const lvl = Math.min(4, h[1].length + 1);
-      out.push('<h'+lvl+' class="md-h">'+mdInline(h[2])+'</h'+lvl+'>'); i++; continue; }
-    if(/^\s*(---+|\*\*\*+)\s*$/.test(L)){ flush(); out.push('<hr class="md-hr">'); i++; continue; }
-    if(/^\s*>\s?/.test(L)){ flush(); const buf = [];
-      while(i < lines.length && /^\s*>\s?/.test(lines[i])){ buf.push(lines[i].replace(/^\s*>\s?/,'')); i++; }
-      out.push('<blockquote class="md-bq">'+md(buf.join('\n'))+'</blockquote>'); continue; }
-    if(/^\s*\|.*\|\s*$/.test(L) && i+1 < lines.length && /^\s*\|[\s:|-]+\|\s*$/.test(lines[i+1])){
-      flush(); const hdr = splitRow(L); i += 2; const rows = [];
-      while(i < lines.length && /^\s*\|.*\|\s*$/.test(lines[i])){ rows.push(splitRow(lines[i])); i++; }
-      out.push('<div class="md-tablewrap"><table class="md-table"><thead><tr>'
-        + hdr.map(c=>'<th>'+mdInline(c)+'</th>').join('') + '</tr></thead><tbody>'
-        + rows.map(r=>'<tr>'+r.map(c=>'<td>'+mdInline(c)+'</td>').join('')+'</tr>').join('')
-        + '</tbody></table></div>'); continue; }
-    const ul = L.match(/^\s*[-*+]\s+(.*)$/), ol = L.match(/^\s*\d+[.)]\s+(.*)$/);
-    if(ul || ol){ flush(); const ord = !!ol; const items = [];
-      while(i < lines.length){
-        const m = ord ? lines[i].match(/^\s*\d+[.)]\s+(.*)$/) : lines[i].match(/^\s*[-*+]\s+(.*)$/);
-        if(m){ items.push(m[1]); i++; }
-        else if(/^\s{2,}\S/.test(lines[i]||'') && items.length){ items[items.length-1] += ' ' + lines[i].trim(); i++; }
-        else break;
-      }
-      out.push((ord?'<ol':'<ul')+' class="md-list">'+items.map(it=>'<li>'+mdInline(it)+'</li>').join('')+(ord?'</ol>':'</ul>'));
-      continue; }
-    para.push(L.trim()); i++;
-  }
-  flush();
-  return out.join('');
-}
-
-// smartMd — block markdown only when block-level syntax is present, else inline
-function smartMd(s){
-  s = String(s??'');
-  return /```|(^|\n)\s*([-*+]|\d+[.)])\s|(^|\n)#{1,4}\s|(^|\n)\s*\||(^|\n)\s*>/.test(s) ? md(s) : mdInline(s);
-}
-
-// lightweight syntax highlighter (strings → comments → keywords → numbers)
-const HL_KW = {
-  js:'const let var function return if else for while do class new import export from async await try catch finally throw switch case break continue typeof instanceof of in extends super this default null undefined true false yield static get set delete void',
-  py:'def return if elif else for while class import from as with try except finally raise lambda pass None True False and or not in is global nonlocal yield async await del print assert break continue',
-  sql:'select from where insert into update delete set values join left right inner outer full on group by order having limit offset create table alter drop index primary key foreign references not null and or as distinct union all case when then end between like exists'
-};
-function langKey(l){
-  l = (l||'').toLowerCase();
-  if(['js','jsx','ts','tsx','javascript','typescript','json','java','c','cpp','c++','csharp','c#','go','rust','swift','kotlin','php','scala','dart'].includes(l)) return 'js';
-  if(['py','python','rb','ruby','sh','bash','shell','yaml','yml','r'].includes(l)) return 'py';
-  if(['sql','postgres','mysql','sqlite'].includes(l)) return 'sql';
-  return l;
-}
-function codeHTML(code, lang, caption, hlLines){
-  const k = langKey(lang);
-  const kws = (HL_KW[k]||'').split(' ').filter(Boolean);
-  const kwRe = kws.length ? new RegExp('\\b('+kws.join('|')+')\\b','g') : null;
-  const cmtRe = k==='py' ? /#.*$/ : k==='sql' ? /--.*$/ : /\/\/.*$/;
-  const hlSet = new Set(hlLines||[]);
-  const rendered = String(code??'').replace(/\r\n?/g,'\n').split('\n').map((line,idx)=>{
-    let s = escC(line); const hold = [];
-    const stash = html => { hold.push(html); return String.fromCharCode(0xE000 + hold.length - 1); };
-    s = s.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/g, m=>stash('<span class="tok-s">'+m+'</span>'));
-    s = s.replace(cmtRe, m=>stash('<span class="tok-c">'+m+'</span>'));
-    if(kwRe) s = s.replace(kwRe,'<span class="tok-k">$1</span>');
-    s = s.replace(/\b(\d+(?:\.\d+)?)\b/g,'<span class="tok-n">$1</span>');
-    s = s.replace(/[\uE000-\uF8FF]/g, c=>hold[c.charCodeAt(0)-0xE000] ?? c);
-    return '<span class="cl'+(hlSet.has(idx+1)?' cl-hl':'')+'"><span class="cl-n">'+(idx+1)+'</span><span class="cl-t">'+(s||' ')+'</span></span>';
-  }).join('');
-  return '<figure class="cb-code">'+(lang?'<div class="code-lang">'+esc(lang)+'</div>':'')
-    + '<pre class="code-pre"><code>'+rendered+'</code></pre>'
-    + (caption?'<figcaption class="cb-caption">'+mdInline(caption)+'</figcaption>':'') + '</figure>';
-}
-
-// ── v6: glossary merge + auto-linking ─────────────────────────────────────
-function mergeKeyTerms(){
-  const gl = C.glossary = C.glossary||[];
-  const hasT = t => gl.some(g=>String(g.term||'').toLowerCase()===String(t).toLowerCase());
-  (C.sections||[]).forEach(s=>(s.learningExperiences||[]).forEach(e=>(e.contentBlocks||[]).forEach(b=>{
-    if(b.type==='key-terms') (b.terms||[]).forEach(t=>{
-      if(t.term && t.addToGlossary!==false && !hasT(t.term)) gl.push({term:t.term, definition:t.definition||''});
-    });
-  })));
-}
-function autoLinkGlossary(root){
-  if(!root) return;
-  const terms = (C.glossary||[]).map(g=>g.term).filter(Boolean).sort((a,b)=>b.length-a.length);
-  if(!terms.length) return;
-  const linked = new Set();
-  root.querySelectorAll('.cb-text, .callout-body, .ss-body').forEach(el=>{
-    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode(n){
-      let p = n.parentElement;
-      while(p && p!==el){
-        if(/^(A|CODE|PRE|BUTTON|SUMMARY)$/.test(p.tagName) || p.classList.contains('glossary-link')) return NodeFilter.FILTER_REJECT;
-        p = p.parentElement;
-      }
-      return NodeFilter.FILTER_ACCEPT;
-    }});
-    const nodes = []; while(walker.nextNode()) nodes.push(walker.currentNode);
-    nodes.forEach(node=>{
-      for(const t of terms){
-        if(linked.has(t.toLowerCase())) continue;
-        const re = new RegExp('(^|[^\\w])('+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')(?![\\w])','i');
-        const m = node.nodeValue.match(re);
-        if(m){
-          const idx = m.index + m[1].length;
-          const span = document.createElement('span');
-          span.className = 'glossary-link'; span.dataset.term = t; span.textContent = node.nodeValue.substr(idx, m[2].length);
-          const after = node.splitText(idx);
-          after.nodeValue = after.nodeValue.slice(m[2].length);
-          after.parentNode.insertBefore(span, after);
-          linked.add(t.toLowerCase());
-          break; // node split — remaining text handled implicitly; move to next node
-        }
-      }
-    });
-  });
-}
-
-// ── v6: missed-item review scheduling ─────────────────────────────────────
-function missedSchedule(){
-  const ms = LM.missedItemSchedule||{};
-  return { init: ms.initialReviewDays??1,
-           seq: (ms.subsequentReviewDays&&ms.subsequentReviewDays.length)?ms.subsequentReviewDays:[3,7,14,30] };
-}
-// enter (or re-enter) an item into the review queue as a "missed" item
-function queueMissed(itemId, meta, flag){
-  const {init} = missedSchedule();
-  const rec = state.reviewSchedule[itemId]||{kind:'missed', step:0, reps:0, streak:0, intervalDays:init};
-  rec.kind='missed'; Object.assign(rec, meta||{});
-  rec.step=0; rec.streak=0; rec.intervalDays=init;
-  const due = Date.now() + init*86400000;
-  rec.due = rec.due ? Math.min(rec.due, due) : due;
-  if(flag) rec.flag=flag;
-  state.reviewSchedule[itemId]=rec; saveState();
-}
-// grade a missed item inside the review queue; retires after 3 consecutive successes
-function gradeMissedReview(itemId, score){
-  const {init, seq} = missedSchedule(); const ladder=[init, ...seq];
-  const rec = state.reviewSchedule[itemId]; if(!rec) return;
-  rec.reps=(rec.reps||0)+1; rec.lastScore=score; rec.lastReviewed=Date.now(); delete rec.flag;
-  if(score>=0.75){
-    rec.streak=(rec.streak||0)+1;
-    if(rec.streak>=3){ delete state.reviewSchedule[itemId]; saveState(); return 'retired'; }
-    rec.step=Math.min((rec.step||0)+1, ladder.length-1);
-    rec.intervalDays=ladder[rec.step];
-  } else if(score>=0.4){ rec.streak=0; rec.intervalDays=Math.max(1, Math.round((rec.intervalDays||init)/2)); }
-  else { rec.streak=0; rec.step=0; rec.intervalDays=ladder[0]; }
-  rec.due=Date.now()+rec.intervalDays*86400000;
-  saveState();
-}
-// resolve any review-queue item id back to its source content
-function findReviewSource(itemId){
-  const f = findRetrievalItem(itemId);
-  if(f) return {kind:'retrieval', prompt:f.item.prompt, comps:f.exp.linkedCompetencies||[],
-                expId:f.exp.experienceId, label:f.item.retrievalType||'', diff:f.item.difficulty};
-  for(const sec of C.sections||[]) for(const e of sec.learningExperiences||[])
-    for(const it of e.interactionSequence||[]) if(it.interactionId===itemId)
-      return {kind:'missed', prompt:it.prompt, comps:e.linkedCompetencies||[],
-              expId:e.experienceId, label:'lesson · '+(it.interactionType||'item'), diff:null};
-  for(const p of (C.priorKnowledgeCheck?.probeQuestions)||[]) if(p.probeId===itemId)
-    return {kind:'missed', prompt:p.prompt, comps:p.linkedCompetencies||[], pkc:true, label:'knowledge probe', diff:null};
-  for(const a of C.assessments||[]) for(const q of a.questions||[]) if(q.questionId===itemId)
-    return {kind:'missed', prompt:q.reviewPromptOverride||q.prompt, comps:a.linkedCompetencies||[],
-            assessId:a.assessmentId, label:'assessment', diff:q.difficulty};
-  return null;
-}
-
 
 // ── Competency maths ──────────────────────────────────────────────────────
 // Evidence-based competency ledger.
@@ -1158,7 +855,7 @@ function buildSidebar(){
     const lvl = compLevel(p, c);
     return `<div class="comp-badge">
       <div class="comp-badge-top">
-        <span class="comp-badge-title">${esc(c.title)}</span>
+        <span class="comp-badge-title">${c.title}</span>
         <span class="comp-badge-level ${levelClass(lvl)}">${lvl}</span>
       </div>
       <div class="comp-bar-wrap"><div class="comp-bar" style="width:${Math.round(p*100)}%;background:${compColor(p, c)}"></div></div>
@@ -1197,7 +894,7 @@ function buildSidebar(){
     html += `<div class="section-nav-item ${open?'open':''}" id="nav-sec-${si}">
       <div class="section-nav-header ${isCur?'active':''}" onclick="toggleNavSection(${si})">
         <span class="section-check ${allDone?'done':''} ${isCur?'active':''}">${allDone?'✓':''}</span>
-        <span class="section-nav-title">${si+1}. ${esc(sec.title)}</span>
+        <span class="section-nav-title">${si+1}. ${sec.title}</span>
         <span class="section-nav-arrow">▶</span>
       </div>
       <div class="section-nav-children">`;
@@ -1206,7 +903,7 @@ function buildSidebar(){
       const a = state.screen==='exp'&&state.sectionIdx===si&&state.expIdx===ei;
       html += `<div class="sub-nav-item ${d?'done':''} ${a?'active':''}" onclick="event.stopPropagation();goScreen('exp',${si},${ei})">
         <span class="sub-dot"></span>
-        <span class="sub-nav-label">${esc(e.title)}</span>
+        <span class="sub-nav-label">${e.title}</span>
       </div>`;
     });
     html += `</div></div>`;
@@ -1220,7 +917,7 @@ function buildSidebar(){
       html += `<div class="section-nav-item">
         <div class="sub-nav-item assess ${d?'done':''} ${act?'active':''}" style="padding-left:24px" onclick="openAssessment('${a.assessmentId}')">
           <span class="sub-dot"></span>
-          <span class="sub-nav-label">${esc(a.title)}</span>
+          <span class="sub-nav-label">${a.title}</span>
         </div>
       </div>`;
     });
@@ -1279,15 +976,15 @@ function renderIntro(){
 
   // outcomes from all competencies
   const outcomes = (C.competencies||[]).flatMap(c=>(c.desiredOutcomes||[]).map(o=>o.description));
-  const outcomesHTML = outcomes.map(o=>`<li>${mdInline(o)}</li>`).join('');
+  const outcomesHTML = outcomes.map(o=>`<li>${o}</li>`).join('');
 
-  const prereqs = (m.prerequisites||[]).map(p=>`<li><b style="color:var(--ink);text-transform:capitalize">${esc(p.type)}:</b> ${mdInline(p.description)}</li>`).join('');
+  const prereqs = (m.prerequisites||[]).map(p=>`<li><b style="color:var(--ink);text-transform:capitalize">${p.type}:</b> ${p.description}</li>`).join('');
 
   const startScreen = C.priorKnowledgeCheck?.enabled && !state.pkcDone ? "goScreen('pkc')" : "goScreen('section',0,0)";
   const startLabel  = C.priorKnowledgeCheck?.enabled && !state.pkcDone ? 'Begin with a knowledge check' : 'Begin the course';
 
   const coverArt = m.thumbnailImage
-    ? `<img src="${safeUrl(m.thumbnailImage)}" alt="${esc(m.title||'')}">`
+    ? `<img src="${m.thumbnailImage}" alt="${m.title}">`
     : `<div class="seal">${seal||'✦'}</div>`;
 
   document.getElementById('screen-intro').innerHTML = `
@@ -1296,8 +993,8 @@ function renderIntro(){
       <div class="cover-art">${coverArt}</div>
       <div class="cover-body">
         <div class="cover-tags">${tags}</div>
-        <h1>${esc(m.title||'Untitled Course')}</h1>
-        <p class="cover-desc">${mdInline(m.description||'')}</p>
+        <h1>${m.title||'Untitled Course'}</h1>
+        <p class="cover-desc">${m.description||''}</p>
       </div>
     </div>
 
@@ -1336,7 +1033,7 @@ function renderPKC(){
   const probes = (pkc.probeQuestions||[]).map((p,i)=>{
     const saved = state.pkcAnswers[p.probeId];
     const comps = (p.linkedCompetencies||[]).map(cId=>{
-      const c=findCompetency(cId); return c?`<span class="tag tag-line" style="margin-left:4px">${esc(c.title)}</span>`:'';
+      const c=findCompetency(cId); return c?`<span class="tag tag-line" style="margin-left:4px">${c.title}</span>`:'';
     }).join('');
 
     let inputHTML='';
@@ -1344,18 +1041,20 @@ function renderPKC(){
       inputHTML = `<div class="mc-options" id="pkc-mc-${p.probeId}">` + p.options.map((o,oi)=>`
         <div class="mc-option ${saved&&saved.choice===oi?'selected':''} ${saved?'locked':''} ${saved&&saved.choice===oi&&oi===p.correctIndex?'correct':''} ${saved&&saved.choice===oi&&oi!==p.correctIndex?'incorrect':''} ${saved&&oi===p.correctIndex&&saved.choice!==oi?'correct':''}"
              onclick="answerProbeMC('${p.probeId}',${oi},${p.correctIndex})">
-          <span class="mc-key">${String.fromCharCode(65+oi)}</span><span>${esc(o)}</span>
+          <span class="mc-key">${String.fromCharCode(65+oi)}</span><span>${o}</span>
         </div>`).join('') + `</div>`;
     } else {
-      inputHTML = `<textarea class="sa-input" id="pkc-sa-${p.probeId}" placeholder="Type what you already know…" ${saved?'disabled':''}>${esc(saved?saved.text||'':'')}</textarea>
+      inputHTML = `<textarea class="sa-input" id="pkc-sa-${p.probeId}" placeholder="Type what you already know…" ${saved?'disabled':''}>${saved?saved.text||'':''}</textarea>
         ${!saved?`<div class="submit-row"><button class="btn btn-primary btn-sm" onclick="answerProbeSA('${p.probeId}')">Submit</button></div>`:''}`;
     }
 
-    const crit = (p.scoringCriteria||[]).map(c=>`<li>${mdInline(c)}</li>`).join('');
+    const routing = (p.routingRules||[]).map(r=>`
+      <div class="routing-row"><span class="routing-cond">${r.condition}</span><span>→ ${r.action}</span></div>`).join('');
+    const crit = (p.scoringCriteria||[]).map(c=>`<li>${c}</li>`).join('');
 
     return `<div class="probe-card" id="probe-${p.probeId}">
-      <div class="probe-num">Probe ${i+1} · ${esc(p.questionType)}</div>
-      <div class="int-prompt">${smartMd(p.prompt)}</div>
+      <div class="probe-num">Probe ${i+1} · ${p.questionType}</div>
+      <div class="int-prompt">${p.prompt}</div>
       <div style="margin-bottom:12px">${comps}</div>
       ${inputHTML}
       ${saved?probeOptionFeedback(p,saved):''}
@@ -1370,8 +1069,15 @@ function renderPKC(){
 
   document.getElementById('screen-pkc').innerHTML = `
    <div class="stagger">
-    <div class="eyebrow"><span class="rule"></span>Calibration · ${esc(pkc.placement||'before-course')}</div>
+    <div class="eyebrow"><span class="rule"></span>Calibration · ${pkc.placement}</div>
     <h1 style="font-size:32px;margin-bottom:14px">Prior Knowledge Check</h1>
+    <!-- <div class="pkc-banner">
+      <span class="pkc-icon">🧭</span>
+      <div>
+        <h3>This isn't graded</h3>
+        <p>Your answers help the engine route you — skipping what you've mastered, reinforcing what you haven't. Answer honestly; the routing rules below each probe show how responses are used.</p>
+      </div>
+    </div> -->
     ${probes}
     <div class="nav-buttons">
       <button class="btn btn-secondary" onclick="goScreen('intro')">← Back</button>
@@ -1381,10 +1087,10 @@ function renderPKC(){
 }
 function answerProbeMC(probeId, choice, correct){
   state.pkcAnswers[probeId] = { choice, correct: choice===correct };
+  // light competency credit for correct prior knowledge
   const pkc = C.priorKnowledgeCheck.probeQuestions.find(p=>p.probeId===probeId);
   recordEvidence(pkc.linkedCompetencies, choice===correct?1:0, 'pkc');
-  if(choice!==correct && LM.reviewOnMiss) queueMissed(probeId, {});   // v6: misses feed the review queue
-  saveState(); renderPKC(); updateSidebarProgress(); buildSidebar();
+  saveState(); renderPKC();
 }
 function answerProbeSA(probeId){
   const ta = document.getElementById('pkc-sa-'+probeId);
@@ -1407,18 +1113,17 @@ function renderSection(){
   const si = state.sectionIdx;
 
   const hookIcons={'real-world-stakes':'⚠','prediction-gap':'◎','curiosity-prompt':'?','relevance-anchor':'⚓'};
-  // v6: prediction-resolution hooks render at the END of the section (see renderSectionClose), not on the intro
-  const hooks=(sec.motivationHooks||[]).filter(h=>h.type!=='prediction-resolution').map(h=>`
-    <div class="hook hook-${esc(h.type)}">
+  const hooks=(sec.motivationHooks||[]).map(h=>`
+    <div class="hook hook-${h.type}">
       <span class="hook-icon">${hookIcons[h.type]||'✦'}</span>
-      <div><span class="hk-type">${esc(String(h.type||'').replace(/-/g,' '))}</span>${mdInline(h.prompt)}</div>
+      <div><span class="hk-type">${h.type.replace(/-/g,' ')}</span>${h.prompt}</div>
     </div>`).join('');
 
   const objectives=(sec.learningObjectives||[]).map(o=>{
     const comps=(o.linkedCompetencies||[]).map(cId=>{
-      const c=findCompetency(cId); return c?`<span class="tag tag-line">${esc(c.title)}</span>`:'';
+      const c=findCompetency(cId); return c?`<span class="tag tag-line">${c.title}</span>`:'';
     }).join('');
-    return `<li>${mdInline(o.description)}<div class="obj-comps">${comps}</div></li>`;
+    return `<li>${o.description}<div class="obj-comps">${comps}</div></li>`;
   }).join('');
 
   const expList = (sec.learningExperiences||[]).map((e,ei)=>{
@@ -1426,7 +1131,7 @@ function renderSection(){
     return `<div class="card" style="display:flex;align-items:center;gap:16px;cursor:pointer;margin-bottom:10px" onclick="goScreen('exp',${si},${ei})">
       <div style="width:34px;height:34px;border-radius:50%;border:1.5px solid ${done?'var(--accent)':'var(--line)'};background:${done?'var(--accent)':'transparent'};color:${done?'#fff':'var(--ink-faint)'};display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;flex-shrink:0">${done?'✓':ei+1}</div>
       <div style="flex:1">
-        <div style="font-family:var(--serif);font-size:16px;color:var(--ink)">${esc(e.title)}</div>
+        <div style="font-family:var(--serif);font-size:16px;color:var(--ink)">${e.title}</div>
         <div style="font-size:12px;color:var(--ink-faint);margin-top:2px">${expTypeLabel(e.experienceType)} · ${e.estimatedDurationMinutes||'—'} min</div>
       </div>
       <span style="color:var(--ink-faint)">→</span>
@@ -1438,8 +1143,8 @@ function renderSection(){
   document.getElementById('screen-section').innerHTML = `
    <div class="stagger">
     <div class="eyebrow"><span class="rule"></span>Section ${si+1} of ${C.sections.length}</div>
-    <h1 style="font-size:34px;margin-bottom:12px">${esc(sec.title)}</h1>
-    <p class="lede">${mdInline(sec.description||'')}</p>
+    <h1 style="font-size:34px;margin-bottom:12px">${sec.title}</h1>
+    <p class="lede">${sec.description||''}</p>
     <div style="margin-top:24px">${hooks}</div>
     ${objectives?`<div class="eyebrow" style="margin-top:30px"><span class="rule"></span>Learning objectives</div>
     <ul class="list-clean objectives-list">${objectives}</ul>`:''}
@@ -1460,19 +1165,19 @@ function renderFurther(sec){
   const items=(sec.furtherReading||[]);
   if(!items.length) return '';
   const rows=items.map(r=>{
-    const type=esc(r.resourceType||'resource');
+    const type=(r.resourceType||'resource');
     const titleHTML = r.url
-      ? `<a href="${safeUrl(r.url)}" target="_blank" rel="noopener">${esc(r.title||'Untitled')}</a>`
-      : esc(r.title||'Untitled');
-    const comps=(r.linkedCompetencies||[]).map(cId=>{const c=findCompetency(cId);return c?`<span class="tag tag-line">${esc(c.title)}</span>`:'';}).join('');
+      ? `<a href="${r.url}" target="_blank" rel="noopener">${r.title||'Untitled'}</a>`
+      : (r.title||'Untitled');
+    const comps=(r.linkedCompetencies||[]).map(cId=>{const c=findCompetency(cId);return c?`<span class="tag tag-line">${c.title}</span>`:'';}).join('');
     return `<div class="fr-item">
       <div class="fr-top">
         <span class="fr-title">${titleHTML}</span>
         <span class="fr-type">${type}</span>
       </div>
-      ${r.author?`<div class="fr-author">${esc(r.author)}</div>`:''}
-      ${(!r.url && r.citation)?`<div class="fr-cite">${esc(r.citation)}</div>`:''}
-      ${r.rationaleNote?`<div class="fr-rationale">${mdInline(r.rationaleNote)}</div>`:''}
+      ${r.author?`<div class="fr-author">${r.author}</div>`:''}
+      ${(!r.url && r.citation)?`<div class="fr-cite">${r.citation}</div>`:''}
+      ${r.rationaleNote?`<div class="fr-rationale">${r.rationaleNote}</div>`:''}
       ${comps?`<div class="obj-comps" style="margin-top:8px">${comps}</div>`:''}
     </div>`;
   }).join('');
@@ -1490,63 +1195,28 @@ function renderExp(){
   const isLast = ei === sec.learningExperiences.length-1;
   state.revealed[exp.experienceId] = state.revealed[exp.experienceId]||[];
   state.answers[exp.experienceId]  = state.answers[exp.experienceId]||{};
-  state.checkpoint = state.checkpoint||{};
 
   const dp = exp.difficultyProfile||{};
   const diffDots = renderDiffDots(dp.overall||0);
-  const cogTags = (exp.desiredCognitiveActions||[]).map(a=>`<span class="tag tag-${cogColor(a)}"><span class="tdot"></span>${esc(a)}</span>`).join('');
-  const compTags = (exp.linkedCompetencies||[]).map(cId=>{const c=findCompetency(cId);return c?`<span class="tag tag-line">${esc(c.title)}</span>`:'';}).join('');
+  const cogTags = (exp.desiredCognitiveActions||[]).map(a=>`<span class="tag tag-${cogColor(a)}"><span class="tdot"></span>${a}</span>`).join('');
+  const compTags = (exp.linkedCompetencies||[]).map(cId=>{const c=findCompetency(cId);return c?`<span class="tag tag-line">${c.title}</span>`:'';}).join('');
 
-  // ── v6: progressive chunking via checkpointAfter ──
-  const segs = expSegments(exp);
-  const chunked = segs.length > 1;
-  const cur = chunked ? Math.min(state.checkpoint[exp.experienceId]||0, segs.length-1) : 0;
-  const atEnd = !chunked || cur === segs.length-1;
+  const content = (exp.contentBlocks||[]).map(renderContentBlock).join('');
+  const worked  = (exp.workedExamples||[]).map(renderWorked).join('');
+  const selfGuided = renderSelfGuided(exp.selfGuidedExercise);
+  const interactions = (exp.interactionSequence||[]).map(int=>renderInteraction(int,exp)).join('');
+  const retrieval = (exp.retrievalPractice||[]).map(r=>renderRetrieval(r,exp)).join('');
+  const transfer  = (exp.transferExercises||[]).map(t=>renderTransfer(t,exp)).join('');
+  const mastery   = renderMastery(exp);
 
-  let content='';
-  for(let s=0; s<=(chunked?cur:segs.length-1); s++){
-    content += `<div class="exp-seg" id="seg-${exp.experienceId}-${s}">` + segs[s].map(renderContentBlock).join('') + `</div>`;
-  }
-
-  const dots = chunked
-    ? `<div class="ckpt-dots">${segs.map((_,i)=>`<span class="ckpt-dot ${i<=cur?'on':''}"></span>`).join('')}<span class="ckpt-count">${cur+1} of ${segs.length}</span></div>`
-    : '';
-
-  let tail='';
-  if(!atEnd){
-    tail = `<div class="checkpoint">
-      <div class="ckpt-msg">Checkpoint — pause here for a moment, then continue when ready.</div>
-      ${dots}
-      <button class="btn btn-primary" onclick="advanceCheckpoint('${exp.experienceId}')">Continue →</button>
-    </div>
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="${ei>0?`goScreen('exp',${si},${ei-1})`:`goScreen('section',${si})`}">← Back</button>
-    </div>`;
-  } else {
-    const worked  = (exp.workedExamples||[]).map(w=>renderWorked(w,exp)).join('');
-    const selfGuided = renderSelfGuided(exp.selfGuidedExercise);
-    const interactions = (exp.interactionSequence||[]).map(int=>renderInteraction(int,exp)).join('');
-    const retrieval = (exp.retrievalPractice||[]).map(r=>renderRetrieval(r,exp)).join('');
-    const interleaved = interleavedRetrievalHTML(exp);
-    const transfer  = (exp.transferExercises||[]).map(t=>renderTransfer(t,exp)).join('');
-    const mastery   = renderMastery(exp);
-    const closing   = isLast ? renderSectionClose(sec) : '';
-
-    const nextLabel = isLast ? 'Complete section →' : 'Next experience →';
-    const nextAction = isLast ? `completeExp('${exp.experienceId}');finishSection(${si})` : `completeExp('${exp.experienceId}');goScreen('exp',${si},${ei+1})`;
-    const prevAction = ei>0 ? `goScreen('exp',${si},${ei-1})` : `goScreen('section',${si})`;
-
-    tail = `${worked}${selfGuided}${interactions}${retrieval}${interleaved}${transfer}${mastery}${closing}
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="${prevAction}">← Back</button>
-      <button class="btn btn-primary" onclick="${nextAction}">${nextLabel}</button>
-    </div>`;
-  }
+  const nextLabel = isLast ? 'Complete section →' : 'Next experience →';
+  const nextAction = isLast ? `completeExp('${exp.experienceId}');finishSection(${si})` : `completeExp('${exp.experienceId}');goScreen('exp',${si},${ei+1})`;
+  const prevAction = ei>0 ? `goScreen('exp',${si},${ei-1})` : `goScreen('section',${si})`;
 
   document.getElementById('screen-exp').innerHTML = `
    <div class="exp-header">
-     <div class="eyebrow">${esc(sec.title)} · ${expTypeLabel(exp.experienceType)}</div>
-     <h2>${esc(exp.title)}</h2>
+     <div class="eyebrow">${sec.title} · ${expTypeLabel(exp.experienceType)}</div>
+     <h2>${exp.title}</h2>
      <div class="exp-meta">
        <span class="exp-meta-item">◷ ${exp.estimatedDurationMinutes||'—'} min</span>
        <span class="exp-meta-item">Difficulty ${diffDots}</span>
@@ -1554,195 +1224,68 @@ function renderExp(){
        ${dp.ambiguity?`<span class="exp-meta-item">Ambiguity ${dp.ambiguity}/5</span>`:''}
      </div>
      <div class="cog-actions">${cogTags}${compTags}</div>
-     ${chunked && atEnd ? dots : ''}
    </div>
    ${content}
-   ${tail}`;
-  autoLinkGlossary(document.getElementById('screen-exp'));
+   ${worked}
+   ${selfGuided}
+   ${interactions}
+   ${retrieval}
+   ${transfer}
+   ${mastery}
+   <div class="nav-buttons">
+     <button class="btn btn-secondary" onclick="${prevAction}">← Back</button>
+     <button class="btn btn-primary" onclick="${nextAction}">${nextLabel}</button>
+   </div>`;
   attachGlossaryLinks();
 }
 
-// ── v6: chunking helpers ────────────────────────────────────────────────
-function expSegments(exp){
-  const blocks = exp.contentBlocks||[];
-  const segs=[[]];
-  blocks.forEach(b=>{ segs[segs.length-1].push(b); if(b && b.checkpointAfter) segs.push([]); });
-  if(segs.length>1 && !segs[segs.length-1].length) segs.pop();   // trailing checkpoint on last block
-  return segs;
-}
-function advanceCheckpoint(expId){
-  state.checkpoint = state.checkpoint||{};
-  state.checkpoint[expId] = (state.checkpoint[expId]||0)+1;
-  saveState(); renderExp(); updateSidebarProgress();
-  const seg = document.getElementById('seg-'+expId+'-'+state.checkpoint[expId]);
-  if(seg) setTimeout(()=>seg.scrollIntoView({behavior:'smooth', block:'start'}), 40);
-}
-
-// ── v6: in-lesson interleaving (executes learningModel.interleavingGroups) ──
-function interleavedRetrievalHTML(exp){
-  if(!LM.interleavingEnabled) return '';
-  const groups=(LM.interleavingGroups||[]).filter(g=>(g.experienceIds||[]).includes(exp.experienceId));
-  if(!groups.length) return '';
-  const now=Date.now(); const picks=[]; const seen=new Set();
-  groups.forEach(g=>{
-    const n = g.injectCount==null ? 1 : Math.max(0, +g.injectCount||0);
-    if(!n) return;
-    const cands=[];
-    (g.experienceIds||[]).forEach(eid=>{
-      if(eid===exp.experienceId) return;
-      const oe=allExperiences().find(x=>x.experienceId===eid); if(!oe) return;
-      (oe.retrievalPractice||[]).forEach(r=>{
-        const rec=state.reviewSchedule[r.retrievalItemId];
-        cands.push({r, oe, due:!!(rec&&rec.due<=now), practiced:!!rec, last:rec?(rec.lastReviewed||0):0});
-      });
-    });
-    cands.sort((a,b)=>(Number(b.due)-Number(a.due)) || (Number(b.practiced)-Number(a.practiced)) || (b.last-a.last));
-    cands.slice(0,n).forEach(c=>{ if(!seen.has(c.r.retrievalItemId)){ seen.add(c.r.retrievalItemId); picks.push(c); } });
-  });
-  if(!picks.length) return '';
-  const items = picks.map(c=>{
-    state.answers[c.oe.experienceId]=state.answers[c.oe.experienceId]||{};
-    state.revealed[c.oe.experienceId]=state.revealed[c.oe.experienceId]||[];
-    return renderRetrieval(c.r, c.oe);
-  }).join('');
-  return `<div class="interleave"><div class="il-label">⇆ Interleaved practice <span>from a sibling competency — switching strengthens both</span></div>${items}</div>`;
-}
-
-// ── v6: section close — prediction resolution + section summary ───────────
-function renderSectionClose(sec){
-  let out='';
-  const byId={}; (sec.motivationHooks||[]).forEach(h=>{ if(h.hookId) byId[h.hookId]=h; });
-  (sec.motivationHooks||[]).filter(h=>h.type==='prediction-resolution').forEach(h=>{
-    const orig = h.resolvesHookId ? byId[h.resolvesHookId] : null;
-    out += `<div class="hook hook-prediction-resolution">
-      <span class="hook-icon">◉</span>
-      <div><span class="hk-type">prediction — resolved</span>
-        ${orig?`<div class="hk-orig">You predicted on: “${mdInline(orig.prompt)}”</div>`:''}
-        ${mdInline(h.prompt||'')}</div>
-    </div>`;
-  });
-  const ss=sec.sectionSummary;
-  if(ss && (ss.content || (ss.keyTakeaways||[]).length)){
-    out += `<div class="section-summary">
-      <div class="ss-label">✦ Section summary — what you should now believe</div>
-      ${ss.content?`<div class="ss-body">${md(ss.content)}</div>`:''}
-      ${(ss.keyTakeaways||[]).length?`<ul class="ss-takeaways">${ss.keyTakeaways.map(t=>`<li>${mdInline(t)}</li>`).join('')}</ul>`:''}
-    </div>`;
-  }
-  return out ? `<div class="section-close">${out}</div>` : '';
-}
-
 function renderContentBlock(b){
-  if(!b || typeof b!=='object') return '';
-  const t = b.type||'text';
-  if(t==='text'){
-    const useMd = b.format ? b.format==='markdown' : mdDefault();
-    return `<div class="cb-text">${useMd ? md(b.content) : esc(b.content||'')}</div>`;
-  }
-  if(t==='code'){
-    return codeHTML(b.content, b.language, b.caption, b.highlightLines);
-  }
-  if(t==='callout'){
-    const v = ['note','warning','insight','definition','example'].includes(b.variant) ? b.variant : 'note';
-    const icons = {note:'✎', warning:'⚠', insight:'◆', definition:'❖', example:'⊙'};
-    return `<div class="callout co-${v}">
-      <div class="callout-head">${icons[v]} ${esc(v)}</div>
-      ${b.title?`<div class="callout-title">${mdInline(b.title)}</div>`:''}
-      <div class="callout-body">${md(b.content||'')}</div>
-    </div>`;
-  }
-  if(t==='table'){
-    const hdr=(b.headers||[]).map(h=>`<th>${mdInline(h)}</th>`).join('');
-    const rows=(b.rows||[]).map(r=>`<tr>${(r||[]).map(c=>`<td>${mdInline(c)}</td>`).join('')}</tr>`).join('');
-    return `<div class="md-tablewrap"><table class="md-table">${hdr?`<thead><tr>${hdr}</tr></thead>`:''}<tbody>${rows}</tbody></table>${b.caption?`<div class="cb-caption">${mdInline(b.caption)}</div>`:''}</div>`;
-  }
-  if(t==='key-terms'){
-    const terms=(b.terms||[]).filter(x=>x&&x.term);
-    if(!terms.length) return '';
-    return `<div class="keyterms"><div class="kt-label">✦ Key terms</div>${
-      terms.map(x=>`<details class="kt-item"><summary>${esc(x.term)}</summary><div class="kt-def">${mdInline(x.definition||'')}</div></details>`).join('')
-    }</div>`;
-  }
-  if(t==='image'){
+  if(b.type==='text') return `<div class="cb-text">${b.content||''}</div>`;
+  if(b.type==='image'){
     return `<figure class="cb-media">${
-      b.url ? `<img src="${safeUrl(b.url)}" alt="${esc(b.altText||'')}">`
-            : `<div class="cb-placeholder"><span class="ph-ico">🖼</span><span>${esc(b.altText||'Image')}</span></div>`
-    }${b.altText?`<figcaption class="cb-caption">${esc(b.altText)}</figcaption>`:''}</figure>`;
+      b.url ? `<img src="${b.url}" alt="${b.altText||''}">`
+            : `<div class="cb-placeholder"><span class="ph-ico">🖼</span><span>${b.altText||'Image'}</span></div>`
+    }${b.altText?`<figcaption class="cb-caption">${b.altText}</figcaption>`:''}</figure>`;
   }
-  if(t==='video'){
+  if(b.type==='video'){
     return `<figure class="cb-media">${
-      b.url ? `<video controls src="${safeUrl(b.url)}"></video>`
+      b.url ? `<video controls src="${b.url}"></video>`
             : `<div class="cb-placeholder"><span class="ph-ico">▶</span><span>Video</span></div>`
-    }${b.captionOrTranscript?`<details class="cb-transcript"><summary>Transcript</summary><p>${escBr(b.captionOrTranscript)}</p></details>`:''}</figure>`;
+    }${b.captionOrTranscript?`<details class="cb-transcript"><summary>Transcript</summary><p>${b.captionOrTranscript}</p></details>`:''}</figure>`;
   }
-  if(t==='audio'){
+  if(b.type==='audio'){
     return `<figure class="cb-media">${
-      b.url ? `<audio controls src="${safeUrl(b.url)}"></audio>`
+      b.url ? `<audio controls src="${b.url}"></audio>`
             : `<div class="cb-placeholder"><span class="ph-ico">♪</span><span>Audio</span></div>`
-    }${b.captionOrTranscript?`<details class="cb-transcript"><summary>Transcript</summary><p>${escBr(b.captionOrTranscript)}</p></details>`:''}</figure>`;
+    }${b.captionOrTranscript?`<details class="cb-transcript"><summary>Transcript</summary><p>${b.captionOrTranscript}</p></details>`:''}</figure>`;
   }
-  if(t==='interactive') return `<div class="cb-interactive">⚡ ${esc(b.content||'Interactive element')}</div>`;
+  if(b.type==='interactive') return `<div class="cb-interactive">⚡ ${b.content||'Interactive element'}</div>`;
   return '';
 }
 
-function renderWorked(we, exp){
-  const steps=(we.steps||[]).map(s=>`<li>${smartMd(s)}</li>`).join('');
+function renderWorked(we){
+  const steps=(we.steps||[]).map(s=>`<li>${s}</li>`).join('');
   return `<div class="worked">
     <div class="worked-label">✦ Worked Example</div>
-    <div class="worked-problem">${smartMd(we.problem||'')}</div>
+    <div class="worked-problem">${we.problem||''}</div>
     <ol class="we-steps">${steps}</ol>
-    ${we.conclusion?`<div class="we-conclusion">${smartMd(we.conclusion)}</div>`:''}
-  </div>` + renderFaded(we, exp);
-}
-
-// ── v6: faded worked example (worked → faded → independent) ───────────────
-function renderFaded(we, exp){
-  const fv = we && we.fadedVariant; if(!fv || !exp) return '';
-  const fid = 'fv-'+(we.exampleId||'x');
-  const expId = exp.experienceId;
-  const saved = (state.answers[expId]||{})[fid];
-  const given = (fv.givenSteps||[]).map(s=>`<li>${smartMd(s)}</li>`).join('');
-  const prompts = fv.blankedStepPrompts||[];
-  const answers = fv.blankedStepAnswers||[];
-  const blanks = prompts.map((p,i)=>`<div class="fv-blank">
-      <div class="fv-p">${i+1}. ${mdInline(p)}</div>
-      ${saved
-        ? `<div class="fv-yours">${escBr((saved.steps||[])[i]||'—')}</div>
-           <div class="fv-model"><span>Model answer</span>${smartMd(answers[i]||'')}</div>`
-        : `<textarea class="sa-input" id="fv-${fid}-${i}" placeholder="Supply this step yourself…"></textarea>`}
-    </div>`).join('');
-  return `<div class="worked faded">
-    <div class="worked-label">◐ Faded Example <span class="sg-formative">you supply the missing steps</span></div>
-    <div class="worked-problem">${smartMd(fv.problem||'')}</div>
-    ${given?`<ol class="we-steps">${given}</ol>`:''}
-    ${blanks}
-    ${saved
-      ? `<div class="submit-row"><span class="saved-flag">✓ Compared against the model answers</span></div>`
-      : `<div class="submit-row"><button class="btn btn-primary btn-sm" onclick="submitFaded('${expId}','${fid}',${prompts.length})">Reveal model answers</button></div>`}
+    ${we.conclusion?`<div class="we-conclusion">${we.conclusion}</div>`:''}
   </div>`;
-}
-function submitFaded(expId, fid, n){
-  const steps=[]; let any=false;
-  for(let i=0;i<n;i++){ const ta=document.getElementById('fv-'+fid+'-'+i); const v=ta?ta.value:''; steps.push(v); if(v.trim()) any=true; }
-  if(!any){ toast('Fill in at least one step first'); return; }
-  ansStore(expId, fid, {steps});
-  recordEvidence(expCompetencies(expId), 1, 'participation');
-  renderExp(); toast('Compare your steps against the model answers');
 }
 
 function renderSelfGuided(sg){
   if(!sg) return '';
-  const steps=(sg.instructions||[]).map(s=>`<li>${mdInline(s)}</li>`).join('');
-  const reflect=(sg.reflectionPrompts||[]).map(p=>`<li>${mdInline(p)}</li>`).join('');
-  const prep=(sg.materialsOrPrerequisites||[]).map(m=>`<li>${mdInline(m)}</li>`).join('');
-  const crit=(sg.verification&&sg.verification.selfAssessmentCriteria||[]).map(c=>`<li>${mdInline(c)}</li>`).join('');
+  const steps=(sg.instructions||[]).map(s=>`<li>${s}</li>`).join('');
+  const reflect=(sg.reflectionPrompts||[]).map(p=>`<li>${p}</li>`).join('');
+  const prep=(sg.materialsOrPrerequisites||[]).map(m=>`<li>${m}</li>`).join('');
+  const crit=(sg.verification&&sg.verification.selfAssessmentCriteria||[]).map(c=>`<li>${c}</li>`).join('');
   const meta=[];
   if(sg.estimatedRealWorldDurationMinutes) meta.push(`◷ ~${sg.estimatedRealWorldDurationMinutes} min in the real world`);
-  if(sg.verification&&sg.verification.mode&&sg.verification.mode!=='none') meta.push(`✎ ${esc(String(sg.verification.mode).replace(/-/g,' '))}`);
+  if(sg.verification&&sg.verification.mode&&sg.verification.mode!=='none') meta.push(`✎ ${sg.verification.mode.replace(/-/g,' ')}`);
   return `<div class="selfguided">
     <div class="sg-label">⇲ Self-Guided Exercise <span class="sg-formative">formative · not graded</span></div>
-    ${sg.realWorldContext?`<div class="sg-context"><b>Where:</b> ${mdInline(sg.realWorldContext)}</div>`:''}
-    ${sg.objective?`<div class="sg-objective">${smartMd(sg.objective)}</div>`:''}
+    ${sg.realWorldContext?`<div class="sg-context"><b>Where:</b> ${sg.realWorldContext}</div>`:''}
+    ${sg.objective?`<div class="sg-objective">${sg.objective}</div>`:''}
     ${meta.length?`<div class="sg-meta">${meta.map(m=>`<span>${m}</span>`).join('')}</div>`:''}
     ${steps?`<div class="sg-heading">What to do</div><ol class="sg-steps">${steps}</ol>`:''}
     ${prep?`<div class="sg-heading">Before you start</div><ul class="sg-prep">${prep}</ul>`:''}
@@ -1755,7 +1298,6 @@ function renderSelfGuided(sg){
 const INT_META = {
   'prediction':   {cls:'int-prediction', icon:'◎', label:'Prediction'},
   'reflection':   {cls:'int-reflection', icon:'❀', label:'Reflection'},
-  'elaboration':  {cls:'int-elab',       icon:'✎', label:'Elaboration'},
   'compare-responses':{cls:'int-compare', icon:'⚖', label:'Compare Responses'},
   'multiple-choice':{cls:'int-mc', icon:'◉', label:'Multiple Choice'},
   'scenario-analysis':{cls:'int-scenario', icon:'⌖', label:'Scenario Analysis'},
@@ -1763,13 +1305,13 @@ const INT_META = {
 };
 function renderInteraction(int, exp){
   const expId=exp.experienceId;
-  const meta = INT_META[int.interactionType]||{cls:'',icon:'•',label:esc(int.interactionType)};
+  const meta = INT_META[int.interactionType]||{cls:'',icon:'•',label:int.interactionType};
   const saved = state.answers[expId][int.interactionId];
   const revealed = has(state.revealed[expId], int.interactionId);
   const reqStar = int.required ? `<span class="req-star">● required</span>` : '';
 
   const head = `<div class="int-label">${meta.icon} ${meta.label} ${reqStar}</div>
-                <div class="int-prompt">${smartMd(int.prompt||'')}</div>`;
+                <div class="int-prompt">${int.prompt||''}</div>`;
   let bodyHTML='';
 
   if(int.interactionType==='multiple-choice' && int.options){
@@ -1779,47 +1321,48 @@ function renderInteraction(int, exp){
         if(oi===int.correctIndex) cls='correct';
         else if(saved.choice===oi) cls='incorrect';
         cls+=' locked';
-      }
+      } else if(saved && saved.choice===oi) cls='selected';
       return `<div class="mc-option ${cls}" ${!saved?`onclick="answerMC('${expId}','${int.interactionId}',${oi})"`:''}>
-        <span class="mc-key">${String.fromCharCode(65+oi)}</span><span>${esc(o)}</span></div>`;
+        <span class="mc-key">${String.fromCharCode(65+oi)}</span><span>${o}</span></div>`;
     }).join('') + `</div>`;
   }
   else if(int.interactionType==='drag-drop' && int.options){
+    // ranking — render as ordered list, reveal best answer on attempt
     const order = (saved && saved.order) ? saved.order : int.options.map((_,i)=>i);
     bodyHTML = `<ul class="rank-list" id="rank-${int.interactionId}">` +
       order.map((origIdx,pos)=>`<li class="rank-item" draggable="${!saved}" data-idx="${origIdx}">
-        <span class="rank-num">${pos+1}</span><span class="rank-grip">⋮⋮</span><span>${esc(int.options[origIdx])}</span></li>`).join('') +
+        <span class="rank-num">${pos+1}</span><span class="rank-grip">⋮⋮</span><span>${int.options[origIdx]}</span></li>`).join('') +
       `</ul>${!saved?`<div class="submit-row"><button class="btn btn-primary btn-sm" onclick="submitRanking('${expId}','${int.interactionId}')">Lock in order</button></div>`:''}`;
   }
   else if(int.interactionType==='reflection' && int.responseFormat==='likert' && int.options){
     bodyHTML = `<div class="likert">` + int.options.map((o,oi)=>`
-      <div class="likert-opt ${saved&&saved.choice===oi?'selected':''}" onclick="answerLikert('${expId}','${int.interactionId}',${oi})">${esc(o)}</div>`).join('') + `</div>`;
+      <div class="likert-opt ${saved&&saved.choice===oi?'selected':''}" onclick="answerLikert('${expId}','${int.interactionId}',${oi})">${o}</div>`).join('') + `</div>`;
   }
   else {
-    // short-answer style (prediction, reflection, elaboration, scenario, compare)
-    bodyHTML = `<textarea class="sa-input" id="sa-${int.interactionId}" placeholder="Write your response…" ${revealed?'disabled':''}>${esc(saved?saved.answer||'':'')}</textarea>`;
+    // short-answer style (prediction, reflection, scenario, compare)
+    bodyHTML = `<textarea class="sa-input" id="sa-${int.interactionId}" placeholder="Write your response…" ${revealed?'disabled':''}>${saved?saved.answer||'':''}</textarea>`;
   }
 
-  // ── v6: confidence prompt (executed when learningModel.confidenceCalibrationEnabled) ──
+  // for now disable confidence prompt
   let confHTML='';
-  const cp = int.confidencePrompt||{};
-  if(cp.enabled && LM.confidenceCalibrationEnabled && !saved && !revealed){
-    const mid=Math.round(((cp.scaleMin??1)+(cp.scaleMax??5))/2);
-    confHTML = `<div class="confidence">
-      <div class="confidence-label">◷ ${mdInline(cp.prompt||'How confident are you?')}</div>
-      <div class="confidence-row">
-        <input type="range" class="confidence-slider" min="${cp.scaleMin??1}" max="${cp.scaleMax??5}" value="${mid}"
-               id="conf-${int.interactionId}" oninput="document.getElementById('confval-${int.interactionId}').textContent=this.value+' / ${cp.scaleMax??5}'">
-        <span class="confidence-value" id="confval-${int.interactionId}">${mid} / ${cp.scaleMax??5}</span>
-      </div>
-      <div class="confidence-anchors"><span>Not sure</span><span>Certain</span></div>
-    </div>`;
-  }
+  // if(int.confidencePrompt?.enabled && LM.confidenceCalibrationEnabled && !revealed){
+  //   const cp=int.confidencePrompt, mid=Math.round(((cp.scaleMin||1)+(cp.scaleMax||5))/2);
+  //   const cur = saved?.confidence || mid;
+  //   confHTML = `<div class="confidence">
+  //     <div class="confidence-label">◷ ${cp.prompt||'How confident are you?'}</div>
+  //     <div class="confidence-row">
+  //       <input type="range" class="confidence-slider" min="${cp.scaleMin||1}" max="${cp.scaleMax||5}" value="${cur}"
+  //              id="conf-${int.interactionId}" oninput="document.getElementById('confval-${int.interactionId}').textContent=this.value+' / ${cp.scaleMax||5}'">
+  //       <span class="confidence-value" id="confval-${int.interactionId}">${cur} / ${cp.scaleMax||5}</span>
+  //     </div>
+  //     <div class="confidence-anchors"><span>Not sure</span><span>Certain</span></div>
+  //   </div>`;
+  // }
 
   // hints (hint-only or socratic feedback)
   const fb = int.feedback||{};
   let hintHTML='';
-  if((fb.hints||[]).length && !saved && !revealed){
+  if((fb.hints||[]).length){
     hintHTML = `<div id="hints-${int.interactionId}">
       <div class="submit-row"><button class="hint-btn" onclick="revealHint('${int.interactionId}')">💡 Need a hint?</button></div>
       <div class="hint-box" id="hintbox-${int.interactionId}"></div>
@@ -1828,49 +1371,22 @@ function renderInteraction(int, exp){
 
   // submit / feedback
   let submitHTML='', feedbackHTML='';
-  const needsSubmit = ['prediction','reflection','elaboration','scenario-analysis','compare-responses'].includes(int.interactionType)
+  const needsSubmit = ['prediction','reflection','scenario-analysis','compare-responses'].includes(int.interactionType)
                       && int.responseFormat!=='likert';
   if(needsSubmit && !revealed){
-    const label = int.interactionType==='reflection' ? 'Save reflection'
-                : int.interactionType==='elaboration' ? 'Save — in your own words'
-                : 'Submit & reveal';
+    const label = int.interactionType==='reflection' ? 'Save reflection' : 'Submit & reveal';
     submitHTML = `<div class="submit-row"><button class="btn btn-primary btn-sm" onclick="submitText('${expId}','${int.interactionId}')">${label}</button></div>`;
   } else if(needsSubmit && revealed){
     submitHTML = `<div class="submit-row"><span class="saved-flag">✓ Response recorded</span></div>`;
   }
 
+  // feedback shown if revealed (or MC/ranking answered)
   const showFb = revealed || (saved && ['multiple-choice','drag-drop'].includes(int.interactionType));
-  if(showFb) feedbackHTML = renderFeedback(fb, saved, int) + optionFeedbackHTML(int, saved) + calibrationHTML(int, saved);
+  if(showFb) feedbackHTML = renderFeedback(fb, saved, int) + optionFeedbackHTML(int, saved);
 
   return `<div class="interaction ${meta.cls}" id="int-${int.interactionId}">
     ${head}${bodyHTML}${confHTML}${hintHTML}${submitHTML}${feedbackHTML}
   </div>`;
-}
-
-// ── v6: calibration feedback (confidence × correctness) ────────────────────
-function interactionScore(int, saved){
-  if(!saved) return null;
-  if(int.interactionType==='multiple-choice' && saved.choice!=null) return saved.choice===int.correctIndex ? 1 : 0;
-  if(int.interactionType==='drag-drop' && Array.isArray(saved.order)){
-    if(Array.isArray(int.correctOrder) && int.correctOrder.length===saved.order.length)
-      return saved.order.filter((v,i)=>v===int.correctOrder[i]).length / saved.order.length;
-    return saved.order[0]===int.correctIndex ? 1 : 0.3;
-  }
-  return null;
-}
-function calibrationHTML(int, saved){
-  if(!saved || saved.confidence==null || !LM.confidenceCalibrationEnabled) return '';
-  const score = interactionScore(int, saved);
-  if(score==null) return '';
-  const cp=int.confidencePrompt||{};
-  const min=cp.scaleMin??1, max=cp.scaleMax??5, range=(max-min)||1;
-  const frac=(saved.confidence-min)/range;
-  const ok = score>=0.75;
-  if(!ok && frac>0.8)
-    return `<div class="calibration miscal">⚠ You were ${saved.confidence}/${max} confident and missed — a calibration gap worth noting${LM.reviewOnMiss?' · flagged in your review queue':''}.</div>`;
-  if(ok && frac<0.4)
-    return `<div class="calibration">◷ Correct despite low confidence (${saved.confidence}/${max})${LM.confidenceSchedulingEnabled?' — scheduled for one more pass to build trust':' — you know more than you think'}.</div>`;
-  return `<div class="calibration">◷ Confidence ${saved.confidence}/${max} · ${ok?'correct — well calibrated':'missed'}.</div>`;
 }
 
 function renderFeedback(fb, saved, int){
@@ -1885,38 +1401,28 @@ function renderFeedback(fb, saved, int){
   else if(fb.type==='socratic'){ cls='fb-socratic'; head='Consider'; body=(fb.hints||[]).join(' '); }
   else { body = fb.elaborativeFeedback || fb.correctiveFeedback || (fb.hints||[]).join(' '); }
   if(!body) return '';
-  return `<div class="feedback show ${cls}"><div class="fb-head">✦ ${head}</div>${smartMd(body)}</div>`;
+  return `<div class="feedback show ${cls}"><div class="fb-head">✦ ${head}</div>${body}</div>`;
 }
 
 // ── Interaction handlers ──────────────────────────────────────────────────
 function ansStore(expId,id,val){ state.answers[expId]=state.answers[expId]||{}; state.answers[expId][id]=val; saveState(); }
 function reveal(expId,id){ state.revealed[expId]=state.revealed[expId]||[]; add(state.revealed[expId],id); saveState(); }
-function readConfidence(intId){ const el=document.getElementById('conf-'+intId); return el ? +el.value : null; }
 
 function submitText(expId,intId){
   const ta=document.getElementById('sa-'+intId);
   const exp=curExp(); const int=exp.interactionSequence.find(i=>i.interactionId===intId);
   if(int.required && (!ta||!ta.value.trim())){ toast('This response is required'); return; }
-  ansStore(expId,intId,{answer:ta?ta.value:'',confidence:readConfidence(intId)});
+  const confEl=document.getElementById('conf-'+intId);
+  ansStore(expId,intId,{answer:ta?ta.value:'',confidence:confEl?+confEl.value:null});
   reveal(expId,intId);
   recordEvidence(exp.linkedCompetencies, 1, 'participation');
-  renderExp();
-  toast(int.interactionType==='reflection'?'Reflection saved'
-       :int.interactionType==='elaboration'?'Saved — putting it in your own words is the point'
-       :'Response recorded');
+  renderExp(); toast(int.interactionType==='reflection'?'Reflection saved':'Response recorded');
 }
 function answerMC(expId,intId,choice){
   const exp=curExp(); const int=exp.interactionSequence.find(i=>i.interactionId===intId);
-  const confidence=readConfidence(intId);
-  ansStore(expId,intId,{choice,confidence}); reveal(expId,intId);
-  const correct = choice===int.correctIndex;
-  recordEvidence(exp.linkedCompetencies, correct?1:0, 'mc');
-  // ── v6: review scheduling from misses and miscalibration ──
-  const cp=int.confidencePrompt||{}; const min=cp.scaleMin??1,max=cp.scaleMax??5,range=(max-min)||1;
-  const frac = confidence!=null ? (confidence-min)/range : null;
-  if(!correct && LM.reviewOnMiss) queueMissed(intId, {expId}, (frac!=null && frac>0.8) ? 'miscalibrated' : null);
-  if(correct && LM.confidenceSchedulingEnabled && frac!=null && frac<0.4) queueMissed(intId, {expId});
-  renderExp(); buildSidebar();
+  ansStore(expId,intId,{choice}); reveal(expId,intId);
+  recordEvidence(exp.linkedCompetencies, choice===int.correctIndex?1:0, 'mc');
+  renderExp();
 }
 function answerLikert(expId,intId,choice){
   const exp=curExp(); const int=exp.interactionSequence.find(i=>i.interactionId===intId);
@@ -1928,8 +1434,7 @@ function submitRanking(expId,intId){
   const list=document.getElementById('rank-'+intId);
   const order=[...list.querySelectorAll('.rank-item')].map(li=>+li.dataset.idx);
   const exp=curExp(); const int=exp.interactionSequence.find(i=>i.interactionId===intId);
-  const confidence=readConfidence(intId);
-  ansStore(expId,intId,{order,confidence}); reveal(expId,intId);
+  ansStore(expId,intId,{order}); reveal(expId,intId);
   let score;
   if(Array.isArray(int.correctOrder) && int.correctOrder.length===order.length){
     const hits = order.filter((v,i)=>v===int.correctOrder[i]).length;
@@ -1938,8 +1443,7 @@ function submitRanking(expId,intId){
     score = order[0]===int.correctIndex ? 1 : 0.3;
   }
   recordEvidence(exp.linkedCompetencies, score, 'ranking');
-  if(score<0.75 && LM.reviewOnMiss) queueMissed(intId, {expId});   // v6
-  renderExp(); buildSidebar(); toast(score>=0.99?'Perfect order':'Order locked — see explanation');
+  renderExp(); toast(score>=0.99?'Perfect order':'Order locked — see explanation');
 }
 let _hintIdx={};
 function revealHint(intId){
@@ -1950,7 +1454,7 @@ function revealHint(intId){
   if(_hintIdx[intId]>=hints.length){ toast('No more hints'); return; }
   const box=document.getElementById('hintbox-'+intId);
   box.classList.add('show');
-  box.innerHTML = hints.slice(0,_hintIdx[intId]+1).map((h,i)=>`<div style="${i>0?'margin-top:8px':''}"><span class="hint-n">Hint ${i+1}</span>${mdInline(h)}</div>`).join('');
+  box.innerHTML = hints.slice(0,_hintIdx[intId]+1).map((h,i)=>`<div style="${i>0?'margin-top:8px':''}"><span class="hint-n">Hint ${i+1}</span>${h}</div>`).join('');
   _hintIdx[intId]++;
 }
 
@@ -1975,12 +1479,12 @@ function renderRetrieval(r,exp){
     <div class="retrieval-banner">
       <div class="retrieval-top">
         <span class="retrieval-label">↻ Retrieval Practice ${renderDiffDots(r.difficulty,true)}</span>
-        <span class="retrieval-type">${esc(r.retrievalType||'')}</span>
+        <span class="retrieval-type">${r.retrievalType}</span>
       </div>
-      <div class="retrieval-prompt">${mdInline(r.prompt)}</div>
+      <div class="retrieval-prompt">${r.prompt}</div>
     </div>
     <div class="retrieval-body">
-      <textarea class="sa-input" id="sa-${r.retrievalItemId}" placeholder="Retrieve from memory — resist looking back." ${revealed?'disabled':''}>${esc(saved?saved.answer||'':'')}</textarea>
+      <textarea class="sa-input" id="sa-${r.retrievalItemId}" placeholder="Retrieve from memory — resist looking back." ${revealed?'disabled':''}>${saved?saved.answer||'':''}</textarea>
       ${footer}
     </div>
   </div>`;
@@ -2004,7 +1508,7 @@ function renderTransfer(t,exp){
   const expId=exp.experienceId;
   const saved=state.answers[expId][t.exerciseId];
   const rated = saved && saved.score!=null;
-  const crit=(t.successCriteria||[]).map(c=>`<li>${mdInline(c)}</li>`).join('');
+  const crit=(t.successCriteria||[]).map(c=>`<li>${c}</li>`).join('');
   let footer;
   if(!saved){
     footer=`<div class="submit-row"><button class="btn btn-primary btn-sm" onclick="submitTransfer('${expId}','${t.exerciseId}')">Submit transfer</button></div>`;
@@ -2015,12 +1519,12 @@ function renderTransfer(t,exp){
     footer=`<div class="submit-row"><span class="saved-flag">✓ Transfer recorded · self-rated</span></div>`;
   }
   return `<div class="transfer" id="tr-${t.exerciseId}">
-    <div class="transfer-label">⇄ Transfer Exercise <span class="transfer-ctx">${esc(t.context||'')}</span></div>
-    <div class="transfer-scenario">${smartMd(t.scenario||'')}</div>
-    <div class="transfer-task">${smartMd(t.task||'')}</div>
+    <div class="transfer-label">⇄ Transfer Exercise <span class="transfer-ctx">${t.context||''}</span></div>
+    <div class="transfer-scenario">${t.scenario||''}</div>
+    <div class="transfer-task">${t.task||''}</div>
     <div class="criteria-label">Success criteria</div>
     <ul class="criteria-list">${crit}</ul>
-    <textarea class="sa-input" id="sa-${t.exerciseId}" placeholder="Apply your reasoning to this new context…" ${saved?'disabled':''}>${esc(saved?saved.answer||'':'')}</textarea>
+    <textarea class="sa-input" id="sa-${t.exerciseId}" placeholder="Apply your reasoning to this new context…" ${saved?'disabled':''}>${saved?saved.answer||'':''}</textarea>
     ${footer}
   </div>`;
 }
@@ -2041,7 +1545,7 @@ function renderMastery(exp){
   const mv=exp.masteryVerification; if(!mv) return '';
   const rp=mv.requiredPerformance||{};
   const links=(mv.assessmentIds||[]).map(aId=>{
-    const a=findAssess(aId); return a?`<button class="btn btn-secondary btn-sm" onclick="openAssessment('${aId}')">Open ${esc(a.title)} →</button>`:'';
+    const a=findAssess(aId); return a?`<button class="btn btn-secondary btn-sm" onclick="openAssessment('${aId}')">Open ${a.title} →</button>`:'';
   }).join('');
   return `<div class="mastery-box">
     <h4>✓ Mastery verification</h4>
@@ -2066,37 +1570,77 @@ function finishSection(si){
 function openAssessment(aId){ state.assessId=aId; saveState(); goScreen('assess'); }
 function renderAssess(){
   const a=findAssess(state.assessId); if(!a){ goScreen('intro'); return; }
-  const aId=a.assessmentId;
-  const submitted=has(state.assessSubmitted,aId);
-  state.assessAnswers[aId]=state.assessAnswers[aId]||{};
-  state.adaptState=state.adaptState||{};
+  const submitted=has(state.assessSubmitted,a.assessmentId);
+  state.assessAnswers[a.assessmentId]=state.assessAnswers[a.assessmentId]||{};
 
-  // ── v6: adaptive serving is executed when adaptiveDifficulty is true ──
-  const adaptive = !!a.adaptiveDifficulty && LM.adaptiveDifficultyEnabled!==false && adaptMCs(a).length>0;
-  if(adaptive && !submitted){ renderAssessAdaptive(a); return; }
+  const comps=(a.linkedCompetencies||[]).map(cId=>{const c=findCompetency(cId);return c?`<span class="tag tag-line">${c.title}</span>`:'';}).join('');
 
-  const comps=(a.linkedCompetencies||[]).map(cId=>{const c=findCompetency(cId);return c?`<span class="tag tag-line">${esc(c.title)}</span>`:'';}).join('');
+  const questions=(a.questions||[]).map((q,qi)=>{
+    const isMC = q.questionType==='multiple-choice' && Array.isArray(q.options);
+    const ans=state.assessAnswers[a.assessmentId][q.questionId];
+    const rubric=q.rubric||{};
 
-  // for adaptive assessments the submitted view lists only served MC (in served order) + written questions
-  const st=state.adaptState[aId];
-  let qlist=(a.questions||[]);
-  if(adaptive && st && (st.served||[]).length){
-    const served=st.served.map(qid=>qlist.find(q=>q.questionId===qid)).filter(Boolean);
-    qlist=[...served, ...qlist.filter(q=>!(q.questionType==='multiple-choice'&&Array.isArray(q.options)))];
-  }
+    let inputHTML;
+    if(isMC){
+      inputHTML = `<div class="mc-options">` + q.options.map((o,oi)=>{
+        let cls='', click='';
+        if(submitted){
+          if(oi===q.correctIndex) cls='correct';
+          else if(ans===oi) cls='incorrect';
+          cls+=' locked';
+        } else {
+          if(ans===oi) cls='selected';
+          click=`onclick="answerAssessMC('${a.assessmentId}','${q.questionId}',${oi})"`;
+        }
+        return `<div class="mc-option ${cls}" ${click}><span class="mc-key">${String.fromCharCode(65+oi)}</span><span>${o}</span></div>`;
+      }).join('') + `</div>`;
+      if(submitted && ans!=null){
+        const of=(q.optionFeedback||[]).find(f=>f.optionIndex===ans);
+        if(of && of.feedback) inputHTML += `<div class="feedback show ${ans===q.correctIndex?'fb-correct':'fb-corrective'}" style="margin-top:10px"><div class="fb-head">✦ ${ans===q.correctIndex?'Correct':'Not quite'}</div>${of.feedback}</div>`;
+      }
+    } else {
+      inputHTML = `<textarea class="sa-input" id="aq-${a.assessmentId}-${q.questionId}" placeholder="Write your response…" ${submitted?'disabled':''}>${ans||''}</textarea>`;
+    }
 
-  const questions=qlist.map((q,qi)=>assessQuestionHTML(a,q,qi,submitted)).join('');
+    const rubricHTML = (submitted && !isMC) ? `
+      <div class="rubric">
+        <div class="rubric-title">Self-assess against the rubric</div>
+        <div class="rubric-row rubric-excellent"><span class="rubric-level">Excellent</span><span class="rubric-desc">${rubric.excellent||''}</span></div>
+        <div class="rubric-row rubric-adequate"><span class="rubric-level">Adequate</span><span class="rubric-desc">${rubric.adequate||''}</span></div>
+        <div class="rubric-row rubric-weak"><span class="rubric-level">Weak</span><span class="rubric-desc">${rubric.weak||''}</span></div>
+      </div>
+      ${(q.successCriteria||[]).length?`<div style="margin-top:14px"><div class="criteria-label">Success criteria</div><ul class="criteria-list">${q.successCriteria.map(c=>`<li>${c}</li>`).join('')}</ul></div>`:''}
+      ${renderErrorPatterns(q)}
+    `:'';
+
+    let selfRate='';
+    if(submitted && !isMC){
+      const rated=(state.assessSelfRatings[a.assessmentId]||{})[q.questionId];
+      selfRate = rated
+        ? `<div class="submit-row"><span class="saved-flag">✓ Self-rated: ${rated.label}</span></div>`
+        : selfGradeRow(`rateAssessQ('${a.assessmentId}','${q.questionId}',SCORE,'LBL')`, 'Rate your answer against the rubric',
+            [['Excellent',1,'good'],['Adequate',0.6,'gold'],['Weak',0.25,'warn']]);
+    }
+
+    return `<div class="q-card">
+      <div class="q-meta">Q${qi+1} · ${q.questionType} · Difficulty ${renderDiffDots(q.difficulty,true)}</div>
+      <div class="q-prompt">${q.prompt}</div>
+      ${inputHTML}
+      ${rubricHTML}
+      ${selfRate}
+    </div>`;
+  }).join('');
 
   document.getElementById('screen-assess').innerHTML=`
    <div class="stagger">
     <div class="assess-head">
-      <div class="eyebrow"><span class="rule"></span>${esc(a.assessmentType||'assessment')}</div>
-      <h2>${esc(a.title)}</h2>
+      <div class="eyebrow"><span class="rule"></span>${a.assessmentType}</div>
+      <h2>${a.title}</h2>
       <div style="margin:10px 0 8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span style="font-size:12px;color:var(--ink-faint)">Measures:</span> ${comps}</div>
-      ${a.adaptiveDifficulty?`<div style="font-size:13px;color:var(--indigo);display:flex;align-items:center;gap:6px"><span>⚡</span>Adaptive difficulty — questions were served one at a time and adjusted to your responses.</div>`:''}
+      ${a.adaptiveDifficulty?`<div style="font-size:13px;color:var(--indigo);display:flex;align-items:center;gap:6px"><span>⚡</span>Adaptive difficulty enabled — questions adjust to your responses.</div>`:''}
     </div>
     ${questions}
-    ${!submitted?`<button class="btn btn-primary" onclick="submitAssessment('${aId}')">Submit assessment</button>`
+    ${!submitted?`<button class="btn btn-primary" onclick="submitAssessment('${a.assessmentId}')">Submit assessment</button>`
       :`<div class="card" style="background:var(--good-wash);border-color:#bcd6c2">
           <h3 style="font-size:19px;margin-bottom:6px;color:var(--good)">Submitted ✓</h3>
           <p style="font-family:var(--read);font-size:15px;color:var(--ink-soft)">Multiple-choice answers were scored automatically. Rate each written answer against its rubric — your self-rating is recorded as mastery evidence. Error patterns show how specific mistakes map to misconceptions.</p>
@@ -2107,191 +1651,14 @@ function renderAssess(){
     </div>
    </div>`;
 }
-
-// one question card (shared by standard + submitted-adaptive views)
-function assessQuestionHTML(a,q,qi,submitted){
-  const aId=a.assessmentId;
-  const isMC = q.questionType==='multiple-choice' && Array.isArray(q.options);
-  const ans=state.assessAnswers[aId][q.questionId];
-  const rubric=q.rubric||{};
-
-  let inputHTML;
-  if(isMC){
-    inputHTML = `<div class="mc-options">` + q.options.map((o,oi)=>{
-      let cls='', click='';
-      if(submitted){
-        if(oi===q.correctIndex) cls='correct';
-        else if(ans===oi) cls='incorrect';
-        cls+=' locked';
-      } else {
-        if(ans===oi) cls='selected';
-        click=`onclick="answerAssessMC('${aId}','${q.questionId}',${oi})"`;
-      }
-      return `<div class="mc-option ${cls}" ${click}><span class="mc-key">${String.fromCharCode(65+oi)}</span><span>${esc(o)}</span></div>`;
-    }).join('') + `</div>`;
-    if(submitted && ans!=null) inputHTML += assessOptionFeedback(q, ans);
-  } else {
-    inputHTML = `<textarea class="sa-input" id="aq-${aId}-${q.questionId}" placeholder="Write your response…" ${submitted?'disabled':''}>${esc(ans||'')}</textarea>`;
-  }
-
-  const rubricHTML = (submitted && !isMC) ? `
-    <div class="rubric">
-      <div class="rubric-title">Self-assess against the rubric</div>
-      <div class="rubric-row rubric-excellent"><span class="rubric-level">Excellent</span><span class="rubric-desc">${mdInline(rubric.excellent||'')}</span></div>
-      <div class="rubric-row rubric-adequate"><span class="rubric-level">Adequate</span><span class="rubric-desc">${mdInline(rubric.adequate||'')}</span></div>
-      <div class="rubric-row rubric-weak"><span class="rubric-level">Weak</span><span class="rubric-desc">${mdInline(rubric.weak||'')}</span></div>
-    </div>
-    ${(q.successCriteria||[]).length?`<div style="margin-top:14px"><div class="criteria-label">Success criteria</div><ul class="criteria-list">${q.successCriteria.map(c=>`<li>${mdInline(c)}</li>`).join('')}</ul></div>`:''}
-    ${renderErrorPatterns(q)}
-  `:'';
-
-  let selfRate='';
-  if(submitted && !isMC){
-    const rated=(state.assessSelfRatings[aId]||{})[q.questionId];
-    selfRate = rated
-      ? `<div class="submit-row"><span class="saved-flag">✓ Self-rated: ${esc(rated.label)}</span></div>`
-      : selfGradeRow(`rateAssessQ('${aId}','${q.questionId}',SCORE,'LBL')`, 'Rate your answer against the rubric',
-          [['Excellent',1,'good'],['Adequate',0.6,'gold'],['Weak',0.25,'warn']]);
-  }
-
-  return `<div class="q-card">
-    <div class="q-meta">Q${qi+1} · ${esc(q.questionType||'')} · Difficulty ${renderDiffDots(q.difficulty,true)}</div>
-    <div class="q-prompt">${smartMd(q.prompt||'')}</div>
-    ${inputHTML}
-    ${rubricHTML}
-    ${selfRate}
-  </div>`;
-}
-function assessOptionFeedback(q, ans){
-  const ofs=q.optionFeedback||[]; let out='';
-  const block=(of,head,cls)=>{
-    if(!of||!of.feedback) return '';
-    const mis=of.linkedMisconceptionId?findMisconception(of.linkedMisconceptionId):null;
-    return `<div class="feedback show ${cls}" style="margin-top:10px"><div class="fb-head">✦ ${head}</div>${mdInline(of.feedback)}${mis?`<div style="margin-top:6px;font-size:13px;color:var(--ink-faint)">Common misconception: "${esc(mis.misconception)}"</div>`:''}</div>`;
-  };
-  const right = ans===q.correctIndex;
-  out += block(ofs.find(f=>f.optionIndex===ans), right?'Correct':'Not quite', right?'fb-correct':'fb-corrective');
-  if(!right) out += block(ofs.find(f=>f.optionIndex===q.correctIndex), 'Why '+String.fromCharCode(65+(q.correctIndex??0))+' is right', 'fb-elaborative');
-  return out;
-}
-
-// ── v6: adaptive serving ────────────────────────────────────────────────
-function adaptRules(a){
-  const r=a.adaptiveRules||{};
-  return { start:r.startDifficulty??2, promote:r.promoteAfter??2, demote:r.demoteAfter??1, perLevel:r.servePerLevel??2 };
-}
-function adaptMCs(a){
-  return (a.questions||[]).filter(q=>q.questionType==='multiple-choice'&&Array.isArray(q.options)&&q.correctIndex!=null);
-}
-function nextAdaptiveQ(a,st){
-  const pool=adaptMCs(a).filter(q=>!st.served.includes(q.questionId));
-  if(!pool.length) return null;
-  for(let d=0;d<=4;d++){
-    const lvls = d===0 ? [st.level] : [st.level+d, st.level-d];
-    for(const lvl of lvls){
-      if(lvl<1||lvl>5) continue;
-      const q=pool.find(q=>(q.difficulty||3)===lvl);
-      if(q){ st.level=lvl; return q; }
-    }
-  }
-  return pool[0];
-}
-function adaptiveQCard(a,q,idx,locked){
-  const aId=a.assessmentId;
-  const ans=state.assessAnswers[aId][q.questionId];
-  const opts=q.options.map((o,oi)=>{
-    let cls='', click='';
-    if(locked){
-      if(oi===q.correctIndex) cls='correct';
-      else if(ans===oi) cls='incorrect';
-      cls+=' locked';
-    } else {
-      click=`onclick="answerAdaptiveMC('${aId}','${q.questionId}',${oi})"`;
-    }
-    return `<div class="mc-option ${cls}" ${click}><span class="mc-key">${String.fromCharCode(65+oi)}</span><span>${esc(o)}</span></div>`;
-  }).join('');
-  return `<div class="q-card">
-    <div class="q-meta">Q${idx+1} · multiple-choice · Difficulty ${renderDiffDots(q.difficulty,true)}</div>
-    <div class="q-prompt">${smartMd(q.prompt||'')}</div>
-    <div class="mc-options">${opts}</div>
-    ${locked && ans!=null ? assessOptionFeedback(q, ans) + (ans!==q.correctIndex?renderErrorPatterns(q):'') : ''}
-  </div>`;
-}
-function renderAssessAdaptive(a){
-  const aId=a.assessmentId;
-  const rules=adaptRules(a);
-  const st=state.adaptState[aId]=state.adaptState[aId]||{served:[],level:rules.start,up:0,down:0,atLevel:0,pending:null};
-  const comps=(a.linkedCompetencies||[]).map(cId=>{const c=findCompetency(cId);return c?`<span class="tag tag-line">${esc(c.title)}</span>`:'';}).join('');
-  const total=adaptMCs(a).length;
-  let body='';
-  if(st.pending){
-    const q=(a.questions||[]).find(x=>x.questionId===st.pending);
-    body = (q?adaptiveQCard(a,q,st.served.indexOf(st.pending),true):'')
-         + `<div class="submit-row"><button class="btn btn-primary" onclick="continueAdaptive('${aId}')">Continue →</button></div>`;
-  } else {
-    const q=nextAdaptiveQ(a,st);
-    if(q){
-      body = adaptiveQCard(a,q,st.served.length,false);
-    } else {
-      const written=(a.questions||[]).filter(x=>!(x.questionType==='multiple-choice'&&Array.isArray(x.options)));
-      const servedCards = st.served.map((qid,i)=>{const sq=(a.questions||[]).find(x=>x.questionId===qid); return sq?adaptiveQCard(a,sq,i,true):'';}).join('');
-      body = `<div class="card" style="border-left:3px solid var(--good)"><b>Adaptive phase complete ✓</b><p style="font-family:var(--read);font-size:14.5px;color:var(--ink-soft);margin-top:6px">Every answer was scored as you went, and the difficulty adapted to your streaks.${written.length?' Finish the written questions below.':''}</p></div>`
-        + servedCards
-        + written.map((wq,qi)=>assessQuestionHTML(a,wq,st.served.length+qi,false)).join('')
-        + `<button class="btn btn-primary" onclick="submitAssessment('${aId}')">${written.length?'Submit written answers':'Finish assessment'}</button>`;
-    }
-  }
-  saveState();
-  document.getElementById('screen-assess').innerHTML=`
-   <div class="stagger">
-    <div class="assess-head">
-      <div class="eyebrow"><span class="rule"></span>${esc(a.assessmentType||'assessment')}</div>
-      <h2>${esc(a.title)}</h2>
-      <div style="margin:10px 0 8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span style="font-size:12px;color:var(--ink-faint)">Measures:</span> ${comps}</div>
-      <div style="font-size:13px;color:var(--indigo);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <span style="display:flex;align-items:center;gap:6px"><span>⚡</span>Adaptive — one question at a time</span>
-        <span style="font-family:var(--mono);font-size:12px">${Math.min(st.served.length+(st.pending?0:1),total)} / ${total} MC</span>
-        <span style="font-family:var(--mono);font-size:12px">Level ${renderDiffDots(st.level,true)}</span>
-      </div>
-    </div>
-    ${body}
-    <div class="nav-buttons">
-      <button class="btn btn-secondary" onclick="goScreen('exp',${state.sectionIdx},${state.expIdx})">← Back to experience</button>
-    </div>
-   </div>`;
-}
-function answerAdaptiveMC(aId,qId,oi){
-  const a=findAssess(aId); const st=(state.adaptState||{})[aId];
-  if(!a||!st||st.pending||has(state.assessSubmitted,aId)) return;
-  const q=(a.questions||[]).find(x=>x.questionId===qId);
-  if(!q||st.served.includes(qId)) return;
-  state.assessAnswers[aId]=state.assessAnswers[aId]||{};
-  state.assessAnswers[aId][qId]=oi;
-  st.served.push(qId); st.pending=qId; st.atLevel=(st.atLevel||0)+1;
-  const rules=adaptRules(a);
-  const correct = oi===q.correctIndex;
-  recordEvidence(a.linkedCompetencies||[], correct?1:0, 'assessment');
-  if(!correct && LM.reviewOnMiss) queueMissed(qId,{assessId:aId});          // v6: misses feed the review queue
-  if(correct){ st.up=(st.up||0)+1; st.down=0; } else { st.down=(st.down||0)+1; st.up=0; }
-  if(st.up>=rules.promote){ st.level=Math.min(5,st.level+1); st.up=0; st.atLevel=0; }
-  else if(st.down>=rules.demote){ st.level=Math.max(1,st.level-1); st.down=0; st.atLevel=0; }
-  else if(st.atLevel>=rules.perLevel){ st.level=Math.min(5,st.level+1); st.atLevel=0; st.up=0; st.down=0; }  // forced promotion
-  saveState(); renderAssess(); buildSidebar();
-}
-function continueAdaptive(aId){
-  const st=(state.adaptState||{})[aId]; if(st) st.pending=null;
-  saveState(); renderAssess();
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
 function renderErrorPatterns(q){
   const eps=q.errorPatterns||[]; if(!eps.length) return '';
   const rows=eps.map(ep=>{
     const mis=findMisconception(ep.linkedMisconceptionId);
     return `<div class="ep-item">
-      <b>${esc(ep.description)}</b>
-      ${mis?`<span style="display:block;margin-top:3px;color:var(--ink-faint)">Misconception: "${esc(mis.misconception)}"</span>`:''}
-      <span class="ep-remedy">${mdInline(ep.remediationAction||'')}</span>
+      <b>${ep.description}</b>
+      ${mis?`<span style="display:block;margin-top:3px;color:var(--ink-faint)">Misconception: "${mis.misconception}"</span>`:''}
+      <span class="ep-remedy">${ep.remediationAction}</span>
     </div>`;
   }).join('');
   return `<div class="error-patterns"><div class="ep-title">⚠ Watch for these error patterns</div>${rows}</div>`;
@@ -2308,12 +1675,10 @@ function answerAssessMC(aId,qId,oi){
 }
 function submitAssessment(aId){
   const a=findAssess(aId);
-  const st=(state.adaptState||{})[aId];
-  const wasAdaptive = !!(st && st.served && st.served.length);
-  let answered = wasAdaptive ? st.served.length : 0;
+  let answered=0;
   (a.questions||[]).forEach(q=>{
     if(q.questionType==='multiple-choice' && Array.isArray(q.options)){
-      if(!wasAdaptive && state.assessAnswers[aId][q.questionId]!=null) answered++;
+      if(state.assessAnswers[aId][q.questionId]!=null) answered++;
     } else {
       const ta=document.getElementById(`aq-${aId}-${q.questionId}`);
       if(ta){ state.assessAnswers[aId][q.questionId]=ta.value; if(ta.value.trim()) answered++; }
@@ -2321,20 +1686,14 @@ function submitAssessment(aId){
   });
   if(answered===0){ toast('Answer at least one question'); return; }
   add(state.assessSubmitted,aId); add(state.completedAssessments,aId);
-  if(st) st.pending=null;
-  // auto-score objective questions; adaptive assessments already recorded MC evidence per answer
-  if(!wasAdaptive){
-    (a.questions||[]).forEach(q=>{
-      if(q.questionType==='multiple-choice' && Array.isArray(q.options) && q.correctIndex!=null){
-        const ch=state.assessAnswers[aId][q.questionId];
-        if(ch!=null){
-          recordEvidence(a.linkedCompetencies||[], ch===q.correctIndex?1:0, 'assessment');
-          if(ch!==q.correctIndex && LM.reviewOnMiss) queueMissed(q.questionId,{assessId:aId});   // v6
-        }
-      }
-    });
-  }
-  saveState(); renderAssess(); buildSidebar(); toast('Submitted — self-rate your written answers below');
+  // auto-score the objective questions; written ones await self-rating
+  (a.questions||[]).forEach(q=>{
+    if(q.questionType==='multiple-choice' && Array.isArray(q.options) && q.correctIndex!=null){
+      const ch=state.assessAnswers[aId][q.questionId];
+      if(ch!=null) recordEvidence(a.linkedCompetencies||[], ch===q.correctIndex?1:0, 'assessment');
+    }
+  });
+  saveState(); renderAssess(); toast('Submitted — self-rate your written answers below');
 }
 function rateAssessQ(aId,qId,score,label){
   state.assessSelfRatings[aId]=state.assessSelfRatings[aId]||{};
@@ -2342,8 +1701,7 @@ function rateAssessQ(aId,qId,score,label){
   state.assessSelfRatings[aId][qId]={score,label};
   const a=findAssess(aId);
   recordEvidence(a.linkedCompetencies||[], score, 'assessment');
-  if(score<=0.25 && LM.reviewOnMiss) queueMissed(qId,{assessId:aId});   // v6: weak self-ratings return for review
-  saveState(); renderAssess(); buildSidebar(); toast('Self-rating recorded: '+label);
+  saveState(); renderAssess(); toast('Self-rating recorded: '+label);
 }
 
 // ════════════════════════════════════════════════════════════════════════
@@ -2355,7 +1713,7 @@ function renderComplete(){
   document.getElementById('screen-complete').innerHTML=`
     <div class="complete-seal">${(m.version?'v'+m.version:'✦')}</div>
     <h1>Course complete</h1>
-    <p class="c-sub">You've worked through every section, experience, and assessment in <em>${esc(m.title||'this course')}</em>. The reasoning reflexes you practiced here are built to transfer.</p>
+    <p class="c-sub">You've worked through every section, experience, and assessment in <em>${m.title||'this course'}</em>. The reasoning reflexes you practiced here are built to transfer.</p>
     <div class="complete-stats">
       <div class="cstat"><div class="cs-val">${state.completedExperiences.length}</div><div class="cs-key">Experiences</div></div>
       <div class="cstat"><div class="cs-val">${state.completedAssessments.length}</div><div class="cs-key">Assessments</div></div>
@@ -2372,9 +1730,9 @@ function renderComplete(){
 // ════════════════════════════════════════════════════════════════════════
 function renderGlossary(filter=''){
   const body=document.getElementById('glossary-body');
-  const terms=(C.glossary||[]).filter(g=>!filter || String(g.term||'').toLowerCase().includes(filter.toLowerCase()) || String(g.definition||'').toLowerCase().includes(filter.toLowerCase()));
+  const terms=(C.glossary||[]).filter(g=>!filter || g.term.toLowerCase().includes(filter.toLowerCase()) || g.definition.toLowerCase().includes(filter.toLowerCase()));
   if(!terms.length){ body.innerHTML=`<p style="padding:16px 24px;font-size:14px;color:var(--ink-faint)">No matching terms.</p>`; return; }
-  body.innerHTML=terms.map(g=>`<dl class="glossary-term"><dt>${esc(g.term)}</dt><dd>${mdInline(g.definition)}</dd></dl>`).join('');
+  body.innerHTML=terms.map(g=>`<dl class="glossary-term"><dt>${g.term}</dt><dd>${g.definition}</dd></dl>`).join('');
 }
 function filterGlossary(v){ renderGlossary(v); }
 function toggleGlossary(){
@@ -2443,7 +1801,7 @@ function optionFeedbackHTML(int, saved){
   const block=(of,head)=>{
     if(!of||!of.feedback) return '';
     const mis=of.linkedMisconceptionId?findMisconception(of.linkedMisconceptionId):null;
-    return `<div class="feedback show fb-elaborative" style="margin-top:10px"><div class="fb-head">✦ ${head}</div>${mdInline(of.feedback)}${mis?`<div style="margin-top:6px;font-size:13px;color:var(--ink-faint)">Common misconception: "${esc(mis.misconception)}"</div>`:''}</div>`;
+    return `<div class="feedback show fb-elaborative" style="margin-top:10px"><div class="fb-head">✦ ${head}</div>${of.feedback}${mis?`<div style="margin-top:6px;font-size:13px;color:var(--ink-faint)">Common misconception: "${mis.misconception}"</div>`:''}</div>`;
   };
   if(int.interactionType==='multiple-choice' && saved.choice!=null){
     out += block(ofs.find(f=>f.optionIndex===saved.choice),'About your choice');
@@ -2453,7 +1811,7 @@ function optionFeedbackHTML(int, saved){
   }
   if(int.interactionType==='drag-drop' && Array.isArray(int.correctOrder) && saved.order){
     const hits=saved.order.filter((v,i)=>v===int.correctOrder[i]).length;
-    out += `<div class="feedback show fb-elaborative" style="margin-top:10px"><div class="fb-head">✦ Expert order · you matched ${hits}/${int.correctOrder.length}</div><ol style="margin:6px 0 0 18px">${int.correctOrder.map(i=>`<li>${esc(int.options[i])}</li>`).join('')}</ol></div>`;
+    out += `<div class="feedback show fb-elaborative" style="margin-top:10px"><div class="fb-head">✦ Expert order · you matched ${hits}/${int.correctOrder.length}</div><ol style="margin:6px 0 0 18px">${int.correctOrder.map(i=>`<li>${int.options[i]}</li>`).join('')}</ol></div>`;
   }
   return out;
 }
@@ -2461,8 +1819,7 @@ function probeOptionFeedback(p,saved){
   if(!saved || saved.choice==null) return '';
   const of=(p.optionFeedback||[]).find(f=>f.optionIndex===saved.choice);
   if(!of||!of.feedback) return '';
-  const mis=of.linkedMisconceptionId?findMisconception(of.linkedMisconceptionId):null;
-  return `<div class="feedback show ${saved.choice===p.correctIndex?'fb-correct':'fb-corrective'}" style="margin:12px 0 0"><div class="fb-head">✦ About your answer</div>${mdInline(of.feedback)}${mis?`<div style="margin-top:6px;font-size:13px;color:var(--ink-faint)">Common misconception: "${esc(mis.misconception)}"</div>`:''}</div>`;
+  return `<div class="feedback show ${saved.choice===p.correctIndex?'fb-correct':'fb-corrective'}" style="margin:12px 0 0"><div class="fb-head">✦ About your answer</div>${of.feedback}</div>`;
 }
 
 // ════════════════════════════════════════════════════════════════════════
@@ -2511,14 +1868,14 @@ function dueReviews(){
   const now=Date.now();
   return Object.entries(state.reviewSchedule||{})
     .filter(([id,rec])=>rec.due<=now)
-    .map(([id,rec])=>({id,rec,src:findReviewSource(id)}))
-    .filter(x=>x.src);
+    .map(([id,rec])=>({id,rec,found:findRetrievalItem(id)}))
+    .filter(x=>x.found);
 }
 function interleaveByCompetency(items){
   // round-robin across each item's primary competency so adjacent items differ
   const groups={};
   items.forEach(x=>{
-    const k=((x.src&&x.src.comps)||['_'])[0]||'_';
+    const k=(x.found.exp.linkedCompetencies||['_'])[0];
     (groups[k]=groups[k]||[]).push(x);
   });
   Object.values(groups).forEach(g=>g.sort(()=>Math.random()-0.5));
@@ -2544,7 +1901,7 @@ function reviewCardHTML(){
   const due=dueReviews().length;
   if(due) return `<div class="card" style="display:flex;align-items:center;gap:16px;border-left:3px solid var(--moss)">
     <span style="font-size:22px">&#8635;</span>
-    <div style="flex:1"><b>${due} review${due>1?'s':''} due</b><div style="font-size:13px;color:var(--ink-soft)">Spaced recall is where the durable memory gets built.</div></div>
+    <div style="flex:1"><b>${due} retrieval review${due>1?'s':''} due</b><div style="font-size:13px;color:var(--ink-soft)">Spaced recall is where the durable memory gets built.</div></div>
     <button class="btn btn-primary btn-sm" onclick="goScreen('review')">Start reviews →</button></div>`;
   const nd=nextDueTs();
   return `<div class="card" style="display:flex;align-items:center;gap:16px"><span style="font-size:20px;color:var(--good)">✓</span><div style="flex:1"><b>Reviews up to date</b><div style="font-size:13px;color:var(--ink-soft)">Next review ${nd?fmtDue(nd):'—'}.</div></div></div>`;
@@ -2554,7 +1911,7 @@ function renderReview(){
   const scheduled=Object.keys(state.reviewSchedule||{}).length;
   let body;
   if(!scheduled){
-    body=`<div class="card"><b>Nothing scheduled yet.</b><p style="font-family:var(--read);color:var(--ink-soft);font-size:15px;margin-top:6px">Retrieval items enter this queue the first time you recall and grade them inside a lesson${LM.reviewOnMiss?', and any question you miss joins them automatically':''}. The engine then schedules each next review from the item's spacing parameters.</p></div>`;
+    body=`<div class="card"><b>Nothing scheduled yet.</b><p style="font-family:var(--read);color:var(--ink-soft);font-size:15px;margin-top:6px">Retrieval items enter this queue the first time you recall and grade them inside a lesson. The engine then schedules each next review from the item's spacing parameters.</p></div>`;
   } else if(!dueAll.length){
     body=`<div class="card" style="border-left:3px solid var(--good)"><b>All caught up ✓</b><p style="font-family:var(--read);color:var(--ink-soft);font-size:15px;margin-top:6px">Next review ${fmtDue(nextDueTs())}. The gap is the point — come back then.</p></div>`;
   } else {
@@ -2566,7 +1923,7 @@ function renderReview(){
     <h1 style="font-size:32px;margin-bottom:14px">Review queue</h1>
     <div class="review-head-card"><span style="font-size:22px">&#8635;</span><div>
       <h3>${dueAll.length?dueAll.length+' item'+(dueAll.length>1?'s':'')+' due':'Review schedule'}</h3>
-      <p>Answer from memory before grading yourself — the source content stays hidden on purpose. Items are interleaved across competencies${LM.reviewOnMiss?', missed questions cycle back until you nail them three times in a row,':''} and your self-grade sets the next interval.</p>
+      <p>Answer from memory before grading yourself — the source content stays hidden on purpose. Items are interleaved across competencies, and your self-grade sets the next interval.</p>
     </div></div>
     ${body}
     <div class="nav-buttons">
@@ -2576,43 +1933,32 @@ function renderReview(){
   window.scrollTo({top:0});
 }
 function renderReviewItem(x,i){
-  const src=x.src, rec=x.rec||{};
-  const comps=(src.comps||[]).map(cid=>{const c=findCompetency(cid);return c?`<span class="tag tag-line">${esc(c.title)}</span>`:'';}).join('');
-  let revisit='';
-  if(src.expId){ const [si,ei]=expIndices(src.expId); revisit=`<button class="review-lesson-link" onclick="goScreen('exp',${si},${ei})">revisit lesson ↗</button>`; }
-  else if(src.pkc){ revisit=`<button class="review-lesson-link" onclick="goScreen('pkc')">revisit knowledge check ↗</button>`; }
-  else if(src.assessId){ revisit=`<button class="review-lesson-link" onclick="openAssessment('${src.assessId}')">open assessment ↗</button>`; }
-  const kind = src.kind==='missed' ? `<span class="rev-kind">⚑ missed item${rec.streak?` · streak ${rec.streak}/3`:''}</span>` : '';
-  const flag = rec.flag==='miscalibrated' ? `<span class="rev-flag">⚠ high-confidence miss</span>` : '';
-  return `<div class="retrieval review-item" id="review-${esc(x.id)}">
+  const r=x.found.item, exp=x.found.exp;
+  const comps=(exp.linkedCompetencies||[]).map(cid=>{const c=findCompetency(cid);return c?`<span class="tag tag-line">${c.title}</span>`:'';}).join('');
+  const [si,ei]=expIndices(exp.experienceId);
+  return `<div class="retrieval review-item" id="review-${r.retrievalItemId}">
     <div class="retrieval-banner">
       <div class="retrieval-top">
-        <span class="retrieval-label">&#8635; Review ${i+1} ${src.diff?renderDiffDots(src.diff,true):''}</span>
-        <span class="retrieval-type">${esc(src.label||'')}</span>
+        <span class="retrieval-label">&#8635; Review ${i+1} ${renderDiffDots(r.difficulty,true)}</span>
+        <span class="retrieval-type">${r.retrievalType||''}</span>
       </div>
-      <div class="retrieval-prompt">${mdInline(src.prompt||'')}</div>
-      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">${kind}${flag}${comps}${revisit}</div>
+      <div class="retrieval-prompt">${r.prompt}</div>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">${comps}
+        <button class="review-lesson-link" onclick="goScreen('exp',${si},${ei})">revisit lesson ↗</button></div>
     </div>
     <div class="retrieval-body">
       <textarea class="sa-input" placeholder="Retrieve from memory — write or rehearse it, then grade yourself."></textarea>
-      ${selfGradeRow(`gradeReviewAny('${x.id}',SCORE)`,'How did the recall go?')}
+      ${selfGradeRow(`gradeReview('${r.retrievalItemId}',SCORE)`,'How did the recall go?')}
     </div>
   </div>`;
 }
-function gradeReviewAny(itemId,score){
-  const src=findReviewSource(itemId); if(!src) return;
-  recordEvidence(src.comps||[], score, 'retrieval');
-  if(src.kind==='retrieval' && src.expId){
-    scheduleReview(itemId, src.expId, score);
-  } else {
-    const r=gradeMissedReview(itemId,score);
-    if(r==='retired'){ toast('Nailed it 3 times in a row — retired from the queue ✓'); renderReview(); buildSidebar(); return; }
-  }
-  const rec=state.reviewSchedule[itemId];
-  toast((score>=0.75?'Scheduled — next review ':'No problem — it returns ')+(rec?fmtDue(rec.due):''));
+function gradeReview(itemId,score){
+  const found=findRetrievalItem(itemId); if(!found) return;
+  recordEvidence(found.exp.linkedCompetencies||[], score, 'retrieval');
+  scheduleReview(itemId, found.exp.experienceId, score);
+  toast((score>=0.75?'Scheduled — next review ':'No problem — it returns ')+fmtDue(state.reviewSchedule[itemId].due));
   renderReview(); buildSidebar();
 }
-function gradeReview(itemId,score){ gradeReviewAny(itemId,score); }   // legacy alias
 
 // ════════════════════════════════════════════════════════════════════════
 //  COURSE LOADER + VALIDATION
@@ -2674,42 +2020,12 @@ function validateCourse(c){
   });
   ((c.learningModel||{}).interleavingGroups||[]).forEach(g=>badComp(g.competencyIds,`interleavingGroup ${g.groupId}`));
   ((c.priorKnowledgeCheck||{}).probeQuestions||[]).forEach(pq=>badComp(pq.linkedCompetencies,`probe ${pq.probeId}`));
-
-  // ── v6 checks ──
-  (c.sections||[]).forEach(s=>{
-    const hookIds=new Set((s.motivationHooks||[]).map(h=>h.hookId).filter(Boolean));
-    (s.motivationHooks||[]).forEach(h=>{
-      if(h.type==='prediction-resolution' && h.resolvesHookId && !hookIds.has(h.resolvesHookId))
-        warnings.push(`section ${s.sectionId}: prediction-resolution resolvesHookId "${h.resolvesHookId}" matches no hookId in this section`);
-    });
-    if(s.sectionSummary && s.sectionSummary.resolvesHookId && !hookIds.has(s.sectionSummary.resolvesHookId))
-      warnings.push(`section ${s.sectionId}: sectionSummary.resolvesHookId "${s.sectionSummary.resolvesHookId}" matches no hookId in this section`);
-    (s.learningExperiences||[]).forEach(e=>{
-      (e.contentBlocks||[]).forEach(b=>{
-        if(b && b.type==='key-terms' && !(b.terms||[]).length)
-          warnings.push(`experience ${e.experienceId}: key-terms block ${b.blockId||'?'} has no terms`);
-      });
-      (e.workedExamples||[]).forEach(w=>{
-        const fv=w.fadedVariant;
-        if(fv && (fv.blankedStepPrompts||[]).length !== (fv.blankedStepAnswers||[]).length)
-          warnings.push(`experience ${e.experienceId}: fadedVariant in ${w.exampleId||'worked example'} has misaligned blankedStepPrompts/blankedStepAnswers`);
-      });
-    });
-  });
-  (c.assessments||[]).forEach(a=>{
-    if(a.adaptiveDifficulty){
-      const lv=new Set((a.questions||[]).filter(q=>q.questionType==='multiple-choice'&&Array.isArray(q.options)).map(q=>q.difficulty||3));
-      if(lv.size<3) warnings.push(`assessment ${a.assessmentId}: adaptiveDifficulty is true but MC questions span only ${lv.size} difficulty level(s) — needs 3+ to adapt meaningfully`);
-    }
-  });
-
   return {errors,warnings};
 }
 function loadCourse(obj){
   const {errors,warnings}=validateCourse(obj);
   if(errors.length){ showReport('Course failed to load',errors); return; }
   COURSE=obj; C=COURSE; LM=C.learningModel||{};
-  mergeKeyTerms();                                  // v6: key-terms blocks feed the glossary
   STORE_KEY='course-progress:'+(C.courseMetadata?.courseId||'default');
   state=loadState();
   buildSidebar(); renderGlossary(); goScreen('intro');
@@ -2789,7 +2105,6 @@ function showEmptyState(){
 }
 
 if (HAS_COURSE) {
-  mergeKeyTerms();   // v6: key-terms blocks feed the glossary
   buildSidebar();
   goScreen(state.screen||'intro', state.sectionIdx, state.expIdx);
 } else {

@@ -1,0 +1,386 @@
+{
+  "$schemaVersion": "6.0 — extends v5/v4.1. Values in this file are strings describing each field's type and allowed values. NEW IN V6: structured content blocks (markdown text, code, callout, table, key-terms), per-block checkpoints, section summaries with prediction-resolution hooks, executed confidence calibration, missed-item review scheduling, executed adaptive difficulty, and the elaboration interaction type. All v6 additions are optional-safe: a v5 course file is a valid v6 course file.",
+
+  "courseMetadata": {
+    "courseId": "string — unique ID. Keys learner progress (course-progress:<courseId>). Changing it orphans existing saves.",
+    "title": "string",
+    "description": "string",
+    "thumbnailImage": "url — optional",
+    "estimatedDurationMinutes": "integer",
+    "difficultyLevel": "novice | intermediate | advanced",
+    "version": "string — course content version, displayed on completion seal",
+    "schemaVersion": "string — NEW v6, optional. '6.0'. Absent = pre-v6 course; player treats text blocks as format:'plain' unless block says otherwise.",
+    "lastUpdated": "ISO-8601 date",
+    "language": "BCP-47 tag",
+    "tags": ["string"],
+    "prerequisites": [
+      {
+        "type": "knowledge | course | assessment",
+        "description": "string"
+      }
+    ]
+  },
+
+  "learningModel": {
+    "masteryThreshold": "float 0–1 — default mastery bar; per-competency masteryThreshold overrides",
+    "passingThreshold": "float 0–1 — informational",
+    "retrievalPracticeEnabled": "boolean",
+    "confidenceCalibrationEnabled": "boolean — v6: ENFORCED. When true, interactions with confidencePrompt.enabled render the slider; the rating is stored with the answer and shown back in calibration feedback after reveal.",
+    "confidenceSchedulingEnabled": "boolean — NEW v6, optional, default false. When true, confidence modulates review scheduling: a correct answer given at low confidence (< 40% of scale) schedules a review at initialReviewDays instead of skipping the queue; an incorrect answer given at high confidence (> 80% of scale) is flagged 'miscalibrated' in the review item.",
+    "adaptiveDifficultyEnabled": "boolean — v6: ENFORCED for assessments that set adaptiveDifficulty:true. See assessments[].adaptiveRules.",
+    "interleavingEnabled": "boolean — v6: when true AND interleavingGroups exist, the player injects up to interleavingGroups[].injectCount retrieval items from sibling competencies into grouped experiences (between content and mastery blocks). Review queue always interleaves regardless.",
+    "interleavingGroups": [
+      {
+        "groupId": "string",
+        "competencyIds": ["competencyId — linkage-validated"],
+        "experienceIds": ["experienceId"],
+        "injectCount": "integer — NEW v6, optional, default 1. Max sibling retrieval items injected per experience in this group.",
+        "rationaleNote": "string — author guidance, displayed on hover"
+      }
+    ],
+    "spacedRepetitionEnabled": "boolean",
+    "reviewOnMiss": "boolean — NEW v6, optional, default false. When true, any auto-scored item answered incorrectly (interaction MC/ranking, probe MC, assessment MC) is synthesized into a review-queue item keyed by its questionId/interactionId, scheduled per missedItemSchedule. Written items self-rated Weak also enter the queue.",
+    "missedItemSchedule": {
+      "initialReviewDays": "integer — NEW v6, optional, default 1",
+      "subsequentReviewDays": "integer[] — NEW v6, optional, default [3, 7, 14, 30]"
+    }
+  },
+
+  "priorKnowledgeCheck": {
+    "enabled": "boolean",
+    "placement": "before-course",
+    "probeQuestions": [
+      {
+        "probeId": "string — unique within course",
+        "prompt": "string — markdown permitted (inline only: bold, italics, inline code)",
+        "questionType": "multiple-choice | short-answer | scenario-analysis",
+        "options": ["string — required for multiple-choice"],
+        "correctIndex": "integer — required for multiple-choice; index into options[]",
+        "optionFeedback": [
+          {
+            "optionIndex": "integer",
+            "feedback": "string — markdown permitted (inline only)",
+            "linkedMisconceptionId": "misconceptionId — optional"
+          }
+        ],
+        "linkedCompetencies": ["competencyId"],
+        "scoringCriteria": ["string — shown for short-answer probes"],
+        "routingRules": [
+          {
+            "condition": "string",
+            "action": "string — advisory; displayed, not executed"
+          }
+        ]
+      }
+    ]
+  },
+
+  "competencies": [
+    {
+      "competencyId": "string — the hub ID everything links to",
+      "title": "string",
+      "description": "string",
+      "taxonomyLevel": "remember | understand | apply | analyze | evaluate | create",
+      "difficultyProfile": {
+        "overall": "integer 1–5",
+        "conceptualComplexity": "integer 1–5",
+        "ambiguity": "integer 1–5",
+        "technicalSkill": "integer 1–5",
+        "readingDemand": "integer 1–5"
+      },
+      "transferRequired": "boolean",
+      "masteryThreshold": "float 0–1 — enforced; overrides learningModel.masteryThreshold",
+      "desiredOutcomes": [
+        {
+          "outcomeId": "string",
+          "description": "string",
+          "verifiedBy": ["assessmentId or transfer exerciseId — linkage-validated"],
+          "verificationCriteria": "string"
+        }
+      ],
+      "commonMisconceptions": [
+        {
+          "misconceptionId": "string — referenced by optionFeedback and errorPatterns",
+          "misconception": "string — the wrong belief, learner-voiced; quoted verbatim in UI",
+          "whyIncorrect": "string",
+          "remediationStrategy": "string",
+          "linkedErrorPatterns": ["errorPatternId"]
+        }
+      ]
+    }
+  ],
+
+  "sections": [
+    {
+      "sectionId": "string — unique",
+      "title": "string",
+      "description": "string",
+      "learningObjectives": [
+        {
+          "objectiveId": "string",
+          "description": "string",
+          "linkedCompetencies": ["competencyId"]
+        }
+      ],
+      "motivationHooks": [
+        {
+          "type": "real-world-stakes | prediction-gap | curiosity-prompt | relevance-anchor | prediction-resolution",
+          "hookId": "string — NEW v6, optional. Lets sectionSummary.resolvesHookId and prediction-resolution hooks reference a specific opening hook.",
+          "prompt": "string — markdown permitted. NOTE: 'prediction-resolution' is NEW v6 — rendered at the END of the section (after the last experience, before the summary), explicitly resolving the opening prediction-gap. Pair via resolvesHookId.",
+          "resolvesHookId": "string — NEW v6, only on prediction-resolution hooks; the hookId of the prediction-gap being closed"
+        }
+      ],
+      "sectionSummary": {
+        "$comment": "NEW v6, optional. Rendered as a recap card after the section's last experience. Closes the loop the section opened.",
+        "content": "string — markdown. 'What you should now believe' recap. Keep to 3–6 key claims.",
+        "resolvesHookId": "string — optional; the prediction-gap hookId this summary answers",
+        "keyTakeaways": ["string — optional; rendered as a checklist beneath the prose"]
+      },
+      "furtherReading": [
+        {
+          "resourceId": "string",
+          "title": "string",
+          "resourceType": "string",
+          "url": "url",
+          "citation": "string",
+          "author": "string",
+          "rationaleNote": "string",
+          "linkedCompetencies": ["competencyId"]
+        }
+      ],
+      "learningExperiences": [
+        {
+          "experienceId": "string — unique; keys learner answers and review back-links",
+          "title": "string",
+          "experienceType": "guided-analysis | worked-example | case-study | simulation | discussion | self-guided-exercise",
+          "difficultyProfile": {
+            "overall": "integer 1–5",
+            "conceptualComplexity": "integer 1–5",
+            "ambiguity": "integer 1–5"
+          },
+          "estimatedDurationMinutes": "integer",
+          "linkedCompetencies": ["competencyId — every scored event here records evidence against these"],
+          "desiredCognitiveActions": ["prediction | analysis | reflection | retrieval | comparison | synthesis | elaboration"],
+
+          "contentBlocks": [
+            {
+              "$comment": "V6 CONTENT MODEL. type gains: code, callout, table, key-terms. Text blocks gain format. Any block may set checkpointAfter. ALL author-supplied strings are sanitized by the player before injection (see doc §Security).",
+              "blockId": "string — unique within experience",
+              "type": "text | code | callout | table | key-terms | image | video | audio | interactive",
+              "checkpointAfter": "boolean — NEW v6, optional, any block type. When any block in an experience sets this, the player renders the experience in progressive segments: content up to and including this block, then a 'Continue' checkpoint (with segment progress dots, e.g. '2 of 5'). Absent everywhere = single scroll, exactly as v5.",
+
+              "format": "markdown | plain — NEW v6, text blocks only. 'markdown' renders full CommonMark + GFM tables + fenced code. Default: 'markdown' when courseMetadata.schemaVersion >= 6.0, else 'plain'. Plain prose is valid markdown, so 'markdown' is always safe to set.",
+              "content": "string — for text: prose (markdown per format). For callout: body markdown. For interactive: label text. AUTHORING RULE (v6): never write pseudo-headings ('WHY THIS MATTERS: ...') inside prose; use markdown headings (##, ###), lists, and emphasis.",
+
+              "language": "string — code blocks only. Syntax-highlight language id (e.g. 'javascript', 'python', 'sql'). Optional; omit for plain code.",
+              "caption": "string — code and table blocks, optional",
+              "highlightLines": "integer[] — code blocks, optional; 1-based line numbers to emphasize",
+
+              "variant": "note | warning | insight | definition | example — callout blocks only. Controls the callout's color/icon treatment.",
+              "title": "string — callout blocks, optional heading",
+
+              "headers": ["string — table blocks: column headers"],
+              "rows": [["string — table blocks: row cells; inline markdown permitted"]],
+
+              "terms": [
+                {
+                  "$comment": "key-terms blocks only. Rendered as tappable definition chips.",
+                  "term": "string",
+                  "definition": "string — markdown permitted (inline only)",
+                  "addToGlossary": "boolean — optional, default true. When true the term is merged into the course glossary at load and auto-linked wherever it appears in rendered content."
+                }
+              ],
+
+              "url": "url — image/video/audio blocks",
+              "altText": "string — image blocks",
+              "captionOrTranscript": "string — video/audio blocks"
+            }
+          ],
+
+          "interactionSequence": [
+            {
+              "interactionId": "string — unique within experience",
+              "interactionType": "prediction | compare-responses | reflection | elaboration | multiple-choice | drag-drop | scenario-analysis",
+              "$elaborationNote": "'elaboration' is NEW v6: a free-text prompt placed AFTER an explanation or worked example, asking the learner to restate/apply in their own words ('In your own words, why does this matter for your current project?'). Scored as participation (0.15), same as reflection; distinct type exists so authors and analytics can distinguish generation-after-instruction from open reflection, and so the player can style it as a closing beat.",
+              "prompt": "string — markdown permitted",
+              "required": "boolean",
+              "responseFormat": "short-answer | multiple-choice | ranking | likert",
+              "revealCondition": "after-response | after-attempt | on-request",
+              "options": ["string — required for multiple-choice, drag-drop, likert"],
+              "correctIndex": "integer — required for multiple-choice; drag-drop fallback key",
+              "correctOrder": ["integer — drag-drop: option indices best-to-worst; enables positional scoring"],
+              "optionFeedback": [
+                {
+                  "optionIndex": "integer",
+                  "feedback": "string — markdown permitted (inline only)",
+                  "linkedMisconceptionId": "misconceptionId — optional"
+                }
+              ],
+              "feedback": {
+                "type": "elaborative | corrective | hint-only | socratic",
+                "elaborativeFeedback": "string — markdown permitted",
+                "correctiveFeedback": "string — markdown permitted",
+                "hints": ["string — revealed progressively on request"]
+              },
+              "confidencePrompt": {
+                "$comment": "v6: EXECUTED (was dormant in v5 player). Rendered before submit when learningModel.confidenceCalibrationEnabled. The rating is stored in the answer record as {confidence: integer} and echoed in post-reveal calibration feedback ('You were 5/5 confident and incorrect'). Feeds scheduling when confidenceSchedulingEnabled.",
+                "enabled": "boolean",
+                "scaleMin": "integer — default 1",
+                "scaleMax": "integer — default 5",
+                "prompt": "string — default 'How confident are you?'"
+              }
+            }
+          ],
+
+          "workedExamples": [
+            {
+              "exampleId": "string",
+              "problem": "string — markdown permitted",
+              "steps": ["string — markdown permitted; fenced code allowed inside steps"],
+              "conclusion": "string — markdown permitted",
+              "fadedVariant": {
+                "$comment": "NEW v6, optional. Renders immediately after the worked example as a partially-completed version of the same problem class — the middle rung of worked → faded → independent. Learner fills the blanked steps as free text and self-checks against blankedStepAnswers on reveal. Scored as participation (0.15).",
+                "problem": "string — markdown; a parallel problem",
+                "givenSteps": ["string — the steps provided to the learner"],
+                "blankedStepPrompts": ["string — one prompt per step the learner must supply"],
+                "blankedStepAnswers": ["string — model answers revealed after submission, index-aligned with blankedStepPrompts"]
+              }
+            }
+          ],
+
+          "selfGuidedExercise": {
+            "objective": "string",
+            "realWorldContext": "string",
+            "estimatedRealWorldDurationMinutes": "integer",
+            "instructions": ["string — markdown permitted"],
+            "materialsOrPrerequisites": ["string"],
+            "reflectionPrompts": ["string"],
+            "verification": {
+              "mode": "string",
+              "isGating": "boolean — must be false; self-guided exercises are formative only",
+              "selfAssessmentCriteria": ["string"]
+            }
+          },
+
+          "retrievalPractice": [
+            {
+              "retrievalItemId": "string — unique across the whole course; keys the review schedule",
+              "retrievalType": "free-recall | cued-recall | application | scenario-analysis | contrast",
+              "prompt": "string — markdown permitted",
+              "difficulty": "integer 1–5",
+              "schedule": {
+                "initialReviewDays": "integer — default 1",
+                "subsequentReviewDays": "integer[] — default [3, 7, 14, 30]",
+                "decayParameters": {
+                  "strengthMultiplier": "float — default 2",
+                  "minimumIntervalDays": "integer — default 1",
+                  "maximumIntervalDays": "integer — default 365",
+                  "decayRate": "float — reserved"
+                }
+              }
+            }
+          ],
+
+          "transferExercises": [
+            {
+              "exerciseId": "string",
+              "context": "string",
+              "scenario": "string — markdown permitted",
+              "task": "string — markdown permitted",
+              "successCriteria": ["string"]
+            }
+          ],
+
+          "masteryVerification": {
+            "assessmentIds": ["assessmentId — linkage-validated"],
+            "requiredPerformance": {
+              "minimumAccuracy": "float 0–1",
+              "minimumTransferScore": "float 0–1"
+            }
+          }
+        }
+      ]
+    }
+  ],
+
+  "assessments": [
+    {
+      "assessmentId": "string — referenced by masteryVerification and desiredOutcomes.verifiedBy",
+      "title": "string",
+      "assessmentType": "scenario-analysis | multiple-choice | short-answer | performance-task",
+      "linkedCompetencies": ["competencyId — all question scores land here"],
+      "adaptiveDifficulty": "boolean — v6: EXECUTED when true (was display-only). Questions are served one at a time, ordered by adaptiveRules; the badge now reflects real behavior.",
+      "adaptiveRules": {
+        "$comment": "NEW v6, optional; defaults apply when adaptiveDifficulty is true and this block is absent.",
+        "startDifficulty": "integer 1–5 — default 2. First question is the first unanswered question at this difficulty.",
+        "promoteAfter": "integer — default 2. Consecutive correct answers before stepping up one difficulty level.",
+        "demoteAfter": "integer — default 1. Consecutive incorrect answers before stepping down one level.",
+        "servePerLevel": "integer — default 2. Max questions served at a level before forced promotion (prevents stalling).",
+        "$note": "Adaptive serving applies to auto-scorable questions (multiple-choice). Written questions are appended after the adaptive phase in authored order. When adaptiveDifficulty is false, all questions render at once in authored order, exactly as v5."
+      },
+      "questions": [
+        {
+          "questionId": "string — unique within assessment. v6: also keys the missed-item review entry when reviewOnMiss is true.",
+          "difficulty": "integer 1–5 — v6: consumed by adaptive serving; still displayed",
+          "prompt": "string — markdown permitted; fenced code allowed",
+          "questionType": "short-answer | multiple-choice | scenario-analysis",
+          "options": ["string — required for multiple-choice"],
+          "correctIndex": "integer — required for multiple-choice",
+          "optionFeedback": [
+            {
+              "optionIndex": "integer",
+              "feedback": "string",
+              "linkedMisconceptionId": "misconceptionId"
+            }
+          ],
+          "successCriteria": ["string — shown post-submit for written questions"],
+          "rubric": {
+            "excellent": "string",
+            "adequate": "string",
+            "weak": "string"
+          },
+          "reviewPromptOverride": "string — NEW v6, optional. When this question enters the review queue via reviewOnMiss, this text is used as the recall cue instead of the raw prompt. Use it to strip answer-revealing context (e.g. drop the options list).",
+          "errorPatterns": [
+            {
+              "errorPatternId": "string",
+              "description": "string",
+              "linkedMisconceptionId": "misconceptionId — linkage-validated",
+              "remediationAction": "string"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "retrievalSystem": {
+    "algorithm": "string — declarative; per-item schedule blocks drive the scheduler",
+    "confidenceWeighting": "boolean",
+    "interleavingEnabled": "boolean",
+    "retrievalModes": ["string"]
+  },
+
+  "masterySystem": {
+    "masteryLevels": ["string — four labels, novice → mastered"],
+    "decayModelEnabled": "boolean — enforced; evidence weight halves per 30 days when true",
+    "reverificationRequired": "boolean — declared intent"
+  },
+
+  "analytics": {
+    "track": ["string"],
+    "errorAnalysis": {
+      "enabled": "boolean",
+      "errorPatternTracking": "boolean",
+      "misconceptionFrequencyLogging": "boolean",
+      "linkedToMisconceptionIds": ["misconceptionId"]
+    },
+    "calibrationTracking": "boolean — NEW v6, optional. When true (and confidence is collected), the engine retains {confidence, score} pairs per event in the evidence ledger, enabling a calibration report (overconfidence/underconfidence by competency)."
+  },
+
+  "glossary": [
+    {
+      "term": "string — v6: terms are auto-linked on first occurrence in rendered text/callout content; tapping opens the glossary drawer filtered to the term. key-terms blocks with addToGlossary:true merge in at load (course-file glossary wins on term collisions).",
+      "definition": "string"
+    }
+  ]
+}
