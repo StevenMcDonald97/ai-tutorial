@@ -1,5 +1,15 @@
 [
   {
+    "slug": "basic-adult-skills-course",
+    "courseId": "adulting-for-real",
+    "title": "Adulting for Real — A Quality-of-Life Course",
+    "description": "A practical course for young adults (roughly ages 22–30) covering the highest-leverage life skills that are rarely taught directly: meta-skills for starting and sticking with things, the physical base layer of sleep, cooking, and strength, money foundations, credit and consumer self-defense, growing and protecting wealth, communication and negotiation, navigating institutions and bureaucracy, housing and vehicles, and long-horizon life admin. Nine units, thirty-seven experiences, closing in an integrated capstone. Every unit pairs worked examples with faded variants and cross-domain transfer exercises, so a skill learned in one context (negotiating a contractor quote) is explicitly re-applied in another (a salary conversation, a lease renewal). Six interleaving threads run the length of the course: negotiation, institutional escalation, research-attempt-escalate triage, time-value-of-money, habit architecture, and resilience. Roughly 10 hours of in-app time, plus about 5 hours of real-world practice across 9 self-guided exercises. Note: tax, insurance, credit, retirement, and housing content is written for a United States context; learners elsewhere should treat specific institutions, thresholds, and legal rules as illustrative. Figures that change annually (brackets, contribution limits, rates) are deliberately presented as illustrative, with learners directed to primary sources.",
+    "duration": 646,
+    "durationLabel": "10h 46m",
+    "difficulty": "intermediate",
+    "ogImage": ""
+  },
+  {
     "slug": "reactCourse",
     "courseId": "advanced-react-architecture",
     "title": "Advanced React Architecture",
@@ -30,14 +40,14 @@
     "ogImage": "PLACEHOLDER"
   },
   {
-    "slug": "basic-adult-skills-course",
-    "courseId": "basic-adult-skills",
-    "title": "Basic Adult Skills",
-    "description": "A practical, intermediate-level course for mid-to-late-20-somethings covering the financial, interpersonal, and administrative skills adult life requires but rarely teaches directly: budgeting and banking, credit and debt, communication and negotiation, taxes and bureaucratic navigation, health and insurance, housing decisions, home and vehicle maintenance, working with contractors, and long-term planning. Every section pairs concrete worked examples with cross-domain transfer exercises so skills learned in one context (e.g., negotiating a price) are explicitly re-applied in another (e.g., a lease renewal or a contractor quote). Note: tax, insurance, credit, and housing content is written for a United States context; learners elsewhere should treat the specific institutions, thresholds, and legal rules as illustrative.",
+    "slug": "back-end-architecture-design.course",
+    "courseId": "back-end-architecture-design",
+    "title": "Back End Architecture Design for Front End Engineers",
+    "description": "An intermediate, project-driven course that converts working front end engineers into engineers who can design, build, defend, and operate server-side systems. Across eight sections you build and repeatedly refactor one real system — Meridian, a venue booking platform — under increasing constraints: concurrency, contracts, persistence, database internals, caching and identity, service decomposition, distributed correctness, and production readiness. Every section pairs an architectural decision space with a hands-on build, so you finish with a running multi-service system and the vocabulary to defend its design in a code review, a design review, or a system design interview.",
     "duration": 480,
     "durationLabel": "8h",
     "difficulty": "intermediate",
-    "ogImage": "https://cdn.example.com/courses/basic-adult-skills/thumbnail.jpg"
+    "ogImage": ""
   },
   {
     "slug": "uIUxCourseV5",
