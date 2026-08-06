@@ -534,6 +534,33 @@ h1,h2,h3,h4{font-family:var(--serif);font-weight:500;line-height:1.12;letter-spa
 .glossary-term dt{font-family:var(--serif);font-size:16px;font-weight:500;color:var(--accent)}
 .glossary-term dd{font-family:var(--read);font-size:15px;color:var(--ink-soft);margin-top:4px;line-height:1.5}
 
+/* ─── Notes / Scratchpad ─────────────────────────────── */
+#notes-btn{
+  position:fixed;bottom:24px;left:24px;background:var(--moss);color:#fff;border:none;
+  border-radius:99px;padding:11px 18px;font-size:13px;font-weight:600;font-family:var(--sans);
+  cursor:pointer;box-shadow:var(--shadow);z-index:120;display:flex;align-items:center;gap:7px;transition:all .2s;
+}
+#notes-btn:hover{background:#3a4a2c;transform:translateY(-2px)}
+#notes-popup{
+  position:fixed;bottom:76px;left:24px;width:340px;max-width:calc(100vw - 48px);
+  max-height:min(58vh,440px);background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);z-index:200;
+  display:flex;flex-direction:column;overflow:hidden;
+  transform:translateY(10px) scale(.97);opacity:0;pointer-events:none;
+  transition:transform .2s cubic-bezier(.22,1,.36,1),opacity .2s cubic-bezier(.22,1,.36,1);
+}
+#notes-popup.open{transform:none;opacity:1;pointer-events:auto}
+#notes-popup-header{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+#notes-popup-header h3{font-size:16px}
+#notes-popup-header .sub{font-size:10px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
+#notes-close{background:none;border:1px solid var(--line);border-radius:var(--radius);cursor:pointer;font-size:14px;color:var(--ink-soft);width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#notes-textarea{flex:1;resize:none;border:none;outline:none;padding:14px 18px;font-family:var(--read);font-size:14px;line-height:1.55;color:var(--ink);background:transparent;min-height:160px}
+#notes-textarea::placeholder{color:var(--ink-faint)}
+#notes-popup-footer{padding:9px 18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+#notes-status{font-size:11px;color:var(--ink-faint);letter-spacing:.02em}
+#notes-clear{background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;font-family:var(--sans);text-transform:uppercase;letter-spacing:.06em}
+#notes-clear:hover{color:var(--accent-deep)}
+
 /* ─── Complete ───────────────────────────────────────── */
 #screen-complete{text-align:center;padding:70px 20px}
 .complete-seal{
@@ -757,6 +784,22 @@ h2.md-h{font-size:24px}h3.md-h{font-size:19px}h4.md-h{font-size:16px;text-transf
   <div id="glossary-body"></div>
 </aside>
 
+<button id="notes-btn" onclick="toggleNotes()">✎ Notes</button>
+<div id="notes-popup">
+  <div id="notes-popup-header">
+    <div>
+      <h3>Notes</h3>
+      <div class="sub">Personal scratchpad</div>
+    </div>
+    <button id="notes-close" onclick="toggleNotes()">✕</button>
+  </div>
+  <textarea id="notes-textarea" placeholder="Jot down thoughts, questions, or anything worth remembering as you go…" oninput="queueSaveNotes()"></textarea>
+  <div id="notes-popup-footer">
+    <span id="notes-status">&nbsp;</span>
+    <button id="notes-clear" onclick="clearNotes()">Clear</button>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <input type="file" id="course-file" accept=".json,application/json" style="display:none" onchange="handleCourseFile(this.files[0]);this.value=''">
@@ -799,6 +842,8 @@ let LM = C.learningModel || {};
 // ── State ───────────────────────────────────────────────────────────────
 let STORE_KEY = 'course-progress:' + (C.courseMetadata?.courseId || 'default');
 let state = loadState();
+let NOTES_KEY = 'course-notes:' + (C.courseMetadata?.courseId || 'default');
+let notesSaveTimer = null;
 
 function freshState(){
   return {
@@ -2391,6 +2436,48 @@ function attachGlossaryLinks(){
 }
 
 // ════════════════════════════════════════════════════════════════════════
+//  NOTES / SCRATCHPAD
+// ════════════════════════════════════════════════════════════════════════
+function loadNotes(){ try{ return localStorage.getItem(NOTES_KEY) || ''; }catch(e){ return ''; } }
+function initNotes(){ const ta=document.getElementById('notes-textarea'); if(ta) ta.value = loadNotes(); }
+function queueSaveNotes(){
+  const status=document.getElementById('notes-status');
+  if(status) status.textContent = 'Saving…';
+  clearTimeout(notesSaveTimer);
+  notesSaveTimer = setTimeout(saveNotes, 500);
+}
+function saveNotes(){
+  try{
+    const ta=document.getElementById('notes-textarea');
+    localStorage.setItem(NOTES_KEY, ta ? ta.value : '');
+    const status=document.getElementById('notes-status');
+    if(status){
+      status.textContent = 'Saved ✓';
+      clearTimeout(status._t);
+      status._t = setTimeout(()=>{ if(status.textContent==='Saved ✓') status.textContent='\u00A0'; }, 1600);
+    }
+  }catch(e){}
+}
+function toggleNotes(){
+  const p=document.getElementById('notes-popup');
+  const open = p.classList.toggle('open');
+  if(open){ initNotes(); setTimeout(()=>document.getElementById('notes-textarea')?.focus(), 60); }
+  else { clearTimeout(notesSaveTimer); saveNotes(); }
+}
+function clearNotes(){
+  if(!confirm('Clear your notes for this course? This cannot be undone.')) return;
+  const ta=document.getElementById('notes-textarea');
+  if(ta) ta.value='';
+  saveNotes();
+}
+document.addEventListener('click', e=>{
+  const p=document.getElementById('notes-popup'), b=document.getElementById('notes-btn');
+  if(p && p.classList.contains('open') && !p.contains(e.target) && b && !b.contains(e.target)){
+    p.classList.remove('open'); clearTimeout(notesSaveTimer); saveNotes();
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════
 //  UTILITIES
 // ════════════════════════════════════════════════════════════════════════
 function cogColor(a){ return {prediction:'indigo',analysis:'plum',reflection:'gold',retrieval:'moss',comparison:'rust',synthesis:'accent'}[a]||'line'; }
@@ -2410,6 +2497,8 @@ function closeOverlays(){
   document.getElementById('glossary-drawer').classList.remove('open');
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('scrim').classList.remove('open');
+  const np=document.getElementById('notes-popup');
+  if(np && np.classList.contains('open')){ np.classList.remove('open'); clearTimeout(notesSaveTimer); saveNotes(); }
 }
 
 // drag-drop ranking wiring (event delegation)
@@ -2712,6 +2801,8 @@ function loadCourse(obj){
   mergeKeyTerms();                                  // v6: key-terms blocks feed the glossary
   STORE_KEY='course-progress:'+(C.courseMetadata?.courseId||'default');
   state=loadState();
+  NOTES_KEY='course-notes:'+(C.courseMetadata?.courseId||'default');
+  initNotes();
   buildSidebar(); renderGlossary(); goScreen('intro');
   if(warnings.length) showReport(`Loaded with ${warnings.length} warning${warnings.length>1?'s':''}`, warnings);
   else toast('Course loaded: '+(C.courseMetadata?.title||'untitled'));
@@ -2792,6 +2883,7 @@ if (HAS_COURSE) {
   mergeKeyTerms();   // v6: key-terms blocks feed the glossary
   buildSidebar();
   goScreen(state.screen||'intro', state.sectionIdx, state.expIdx);
+  initNotes();
 } else {
   showEmptyState();
 }
