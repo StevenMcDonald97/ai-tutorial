@@ -1404,10 +1404,6 @@ function renderPKC(){
       <div style="margin-bottom:12px">${comps}</div>
       ${inputHTML}
       ${saved?probeOptionFeedback(p,saved):''}
-      <div class="probe-routing ${saved?'show':''}" id="routing-${p.probeId}">
-        <div class="criteria-label">Scoring criteria</div>
-        <ul class="criteria-list">${crit}</ul>
-      </div>
     </div>`;
   }).join('');
 
