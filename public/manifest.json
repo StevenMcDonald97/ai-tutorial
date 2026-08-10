@@ -100,6 +100,16 @@
     "ogImage": "https://assets.coursebuilder.io/courses/mastering-the-fullstack-interview/thumbnail.png"
   },
   {
+    "slug": "Practical-AI-For-Developers",
+    "courseId": "practical-ai-for-developers",
+    "title": "Practical AI for Developers",
+    "description": "A hands-on course that takes a working software engineer from understanding what modern AI actually is to scoping, building, evaluating, deploying and operating LLM-powered systems inside a real engineering organisation. Learners ship three portfolio artifacts: a compounding retrieval-augmented capstone over a domain corpus they choose, a brownfield integration case study, and a small model-adaptation experiment benchmarked against a prompt-only baseline.",
+    "duration": 1200,
+    "durationLabel": "20h",
+    "difficulty": "intermediate",
+    "ogImage": ""
+  },
+  {
     "slug": "practicalAi",
     "courseId": "practical-ai",
     "title": "Practical AI for Working Professionals",
