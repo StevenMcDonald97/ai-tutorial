@@ -7,72 +7,349 @@
 <style>
   :root{
     --paper:#f4f1ea;--surface:#ffffff;--ink:#23211c;--ink-soft:#5f5a4f;
-    --ink-faint:#928c7d;--line:#ddd6c7;--accent:#7a2e1d;--radius:8px;
+    --ink-faint:#928c7d;--line:#ddd6c7;--accent:#7a2e1d;--accent-soft:#f0e4de;
+    --radius:8px;--radius-lg:12px;
     --serif:'Fraunces',Georgia,serif;--sans:'Spline Sans',-apple-system,sans-serif;
+    --shadow:0 14px 40px -22px rgba(47,40,28,.45);
+    --shadow-lift:0 22px 60px -24px rgba(47,40,28,.55);
   }
   *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
   body{font-family:var(--sans),sans-serif;background:var(--paper);color:var(--ink);
     line-height:1.6;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:880px;margin:0 auto;padding:64px 32px 96px}
+  .wrap{max-width:1040px;margin:0 auto;padding:40px 32px 96px}
+
+  /* ---- Masthead ------------------------------------------------------- */
+  .masthead{display:flex;align-items:center;gap:12px;padding-bottom:32px;
+    border-bottom:1px solid var(--line);margin-bottom:40px}
+  /* PLACEHOLDER LOGO — swap this <a> block for the real mark when it lands.
+     Keep the .logo-mark box at 34x34 and the wordmark in --serif. */
+  .logo{display:inline-flex;align-items:center;gap:11px;text-decoration:none;color:inherit;
+    border-radius:var(--radius);padding:4px;margin:-4px}
+  .logo-mark{width:34px;height:34px;flex:none;display:block}
+  .logo-word{font-family:var(--serif),serif;font-weight:500;font-size:19px;letter-spacing:-.01em}
+  .logo-word span{color:var(--ink-faint)}
+  .masthead .badge{margin-left:auto;font-size:11px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink-faint)}
+
+  /* ---- Header --------------------------------------------------------- */
   .eyebrow{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
     color:var(--accent);margin-bottom:10px}
   h1{font-family:var(--serif),serif;font-weight:500;font-size:38px;line-height:1.1;
     letter-spacing:-.01em;margin-bottom:8px}
-  .lede{color:var(--ink-soft);font-size:17px;margin-bottom:36px}
-  .search{width:100%;padding:12px 16px;border:1px solid var(--line);border-radius:var(--radius);
-    font-size:15px;font-family:inherit;background:var(--surface);margin-bottom:28px}
-  .grid{display:grid;gap:16px}
-  .course{display:block;text-decoration:none;color:inherit;background:var(--surface);
-    border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;
-    transition:transform .15s,box-shadow .15s,border-color .15s}
-  .course:hover{transform:translateY(-2px);border-color:var(--accent);
-    box-shadow:0 14px 40px -22px rgba(47,40,28,.45)}
-  .course h2{font-family:var(--serif),serif;font-weight:500;font-size:21px;margin-bottom:6px}
-  .course p{color:var(--ink-soft);font-size:15px;margin-bottom:14px}
-  .meta{display:flex;gap:8px;flex-wrap:wrap}
+  .lede{color:var(--ink-soft);font-size:17px;margin-bottom:28px;max-width:56ch}
+
+  /* ---- Search --------------------------------------------------------- */
+  .searchbar{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+  .search{flex:1 1 320px;padding:12px 16px;border:1px solid var(--line);border-radius:var(--radius);
+    font-size:15px;font-family:inherit;background:var(--surface);color:inherit}
+  .search::placeholder{color:var(--ink-faint)}
+  .count{font-size:13px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+
+  /* ---- Tile grid ------------------------------------------------------ */
+  .grid{display:grid;gap:20px;
+    grid-template-columns:repeat(auto-fill,minmax(min(100%,262px),1fr))}
+  .course{display:flex;flex-direction:column;text-align:left;text-decoration:none;color:inherit;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);
+    overflow:hidden;font:inherit;cursor:pointer;
+    transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+  .course:hover{transform:translateY(-3px);border-color:var(--accent);box-shadow:var(--shadow)}
+  .course:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  .thumb{aspect-ratio:16/10;width:100%;object-fit:cover;display:block;
+    background:var(--accent-soft);border-bottom:1px solid var(--line)}
+  .course-body{padding:18px 20px 20px;display:flex;flex-direction:column;gap:8px;flex:1}
+  .course h2{font-family:var(--serif),serif;font-weight:500;font-size:19px;line-height:1.25}
+  .course p{color:var(--ink-soft);font-size:14.5px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:6px}
   .tag{font-size:11px;font-weight:600;letter-spacing:.04em;padding:3px 10px;border-radius:99px;
-    background:#ece7dc;color:var(--ink-soft);text-transform:capitalize}
-  .empty,.err{color:var(--ink-faint);font-size:15px;padding:40px 0}
+    background:#ece7dc;color:var(--ink-soft);text-transform:capitalize;white-space:nowrap}
+
+  /* ---- Dialog --------------------------------------------------------- */
+  dialog{border:none;padding:0;background:transparent;max-width:min(560px,calc(100vw - 32px));
+    width:100%;color:var(--ink)}
+  dialog::backdrop{background:rgba(35,33,28,.52);backdrop-filter:blur(2px)}
+  .sheet{background:var(--surface);border-radius:var(--radius-lg);overflow:hidden;
+    box-shadow:var(--shadow-lift);max-height:calc(100vh - 48px);display:flex;flex-direction:column}
+  .sheet-hero{position:relative;flex:none}
+  .sheet-hero img{width:100%;aspect-ratio:16/7;object-fit:cover;display:block;background:var(--accent-soft)}
+  .close{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:99px;
+    border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);
+    font-size:17px;line-height:1;cursor:pointer;display:grid;place-items:center}
+  .close:hover{color:var(--ink);border-color:var(--accent)}
+  .close:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .sheet-body{padding:24px 28px;overflow-y:auto}
+  .sheet-body h2{font-family:var(--serif),serif;font-weight:500;font-size:26px;line-height:1.15;
+    letter-spacing:-.01em;margin-bottom:12px}
+  .sheet-body .meta{margin:0 0 16px;padding:0}
+  .sheet-body .desc{color:var(--ink-soft);font-size:15.5px;white-space:pre-wrap}
+  .sheet-foot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:18px 28px 24px;
+    border-top:1px solid var(--line);flex:none}
+  .start{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;
+    font-size:15px;font-weight:600;padding:11px 22px;border-radius:var(--radius);
+    transition:opacity .15s ease}
+  .start:hover{opacity:.9}
+  .start:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  .foot-note{font-size:13px;color:var(--ink-faint)}
+
+  .empty,.err{color:var(--ink-faint);font-size:15px;padding:48px 0;grid-column:1/-1}
+  .err strong{display:block;color:var(--ink-soft);font-weight:600;margin-bottom:4px}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  @media (max-width:560px){
+    .wrap{padding:28px 20px 72px}
+    h1{font-size:30px}
+    .sheet-body,.sheet-foot{padding-left:20px;padding-right:20px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important;animation:none!important}
+    .course:hover{transform:none}
+  }
 </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="eyebrow">Course Engine</div>
+
+    <!-- PLACEHOLDER LOGO -->
+    <header class="masthead">
+      <a class="logo" href="/" aria-label="Course Engine — home">
+        <svg class="logo-mark" viewBox="0 0 34 34" aria-hidden="true" focusable="false">
+          <rect width="34" height="34" rx="8" fill="#7a2e1d"/>
+          <rect x="9" y="9.5" width="16" height="3" rx="1.5" fill="#f4f1ea"/>
+          <rect x="9" y="15.5" width="16" height="3" rx="1.5" fill="#f4f1ea" opacity=".72"/>
+          <rect x="9" y="21.5" width="9" height="3" rx="1.5" fill="#f4f1ea" opacity=".45"/>
+        </svg>
+        <span class="logo-word">Course <span>Engine</span></span>
+      </a>
+      <span class="badge">Catalog</span>
+    </header>
+
+    <div class="eyebrow">Browse</div>
     <h1>Course catalog</h1>
-    <p class="lede">Choose a course to begin. Your progress is saved on this device.</p>
-    <input class="search" id="search" type="text" placeholder="Search courses…" oninput="filter(this.value)">
-    <div class="grid" id="grid"><div class="empty">Loading…</div></div>
+    <p class="lede">Pick a course to see what it covers, then start when you're ready. Your progress is saved on this device.</p>
+
+    <div class="searchbar">
+      <input class="search" id="search" type="search" placeholder="Search courses…"
+             aria-label="Search courses" autocomplete="off">
+      <span class="count" id="count" role="status" aria-live="polite"></span>
+    </div>
+
+    <div class="grid" id="grid"><div class="empty">Loading the catalog…</div></div>
   </div>
+
+  <dialog id="sheet" aria-labelledby="sheet-title">
+    <div class="sheet">
+      <div class="sheet-hero">
+        <img id="sheet-img" alt="">
+        <button class="close" id="sheet-close" type="button" aria-label="Close">&#10005;</button>
+      </div>
+      <div class="sheet-body">
+        <h2 id="sheet-title"></h2>
+        <div class="meta" id="sheet-meta"></div>
+        <p class="desc" id="sheet-desc"></p>
+      </div>
+      <div class="sheet-foot">
+        <a class="start" id="sheet-start" href="#">Start course</a>
+        <span class="foot-note" id="sheet-note"></span>
+      </div>
+    </div>
+  </dialog>
+
 <script>
-  let ALL = [];
-  function fmt(s){ return (s||'').charAt(0).toUpperCase() + (s||'').slice(1); }
+(function(){
+  'use strict';
+
+  var ALL = [], BY_SLUG = {}, current = null, lastFocus = null;
+  var grid   = document.getElementById('grid');
+  var count  = document.getElementById('count');
+  var sheet  = document.getElementById('sheet');
+
+  /* --- Course fields are author-supplied, so every string is escaped before
+         it reaches the DOM (schema v6 §Security). ------------------------- */
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(m){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+    });
+  }
+  function fmt(s){ s = String(s||''); return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  /* Only http(s) and root-relative image paths are allowed through. */
+  function safeUrl(u){
+    if(typeof u !== 'string') return '';
+    var t = u.trim();
+    return (/^https?:\/\//i.test(t) || /^\/[^/]/.test(t) || /^\.{0,2}\//.test(t)) ? t : '';
+  }
+
+  /* The manifest may name the course image several ways; take the first hit,
+     and fall back to a generated mark so a tile is never a blank box. */
+  function imageOf(c){
+    var cands = [c.image, c.imageUrl, c.coverImage, c.courseImage, c.thumbnail,
+                 c.heroImage, c.media, c.cover];
+    for(var i=0;i<cands.length;i++){
+      var v = cands[i];
+      if(v && typeof v === 'object') v = v.url || v.src;
+      var u = safeUrl(v);
+      if(u) return u;
+    }
+    return fallbackImage(c);
+  }
+  function altOf(c){
+    var v = c.image || c.media || c.cover;
+    var alt = (v && typeof v === 'object' && v.altText) || c.imageAlt || '';
+    return alt || '';
+  }
+  function fallbackImage(c){
+    var key = String(c.slug || c.title || '?');
+    var h = 0;
+    for(var i=0;i<key.length;i++) h = (h * 31 + key.charCodeAt(i)) % 360;
+    var initials = String(c.title||'?').split(/\s+/).slice(0,2)
+                     .map(function(w){ return w.charAt(0); }).join('').toUpperCase();
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">' +
+      '<rect width="320" height="200" fill="hsl(' + h + ' 26% 88%)"/>' +
+      '<circle cx="256" cy="34" r="96" fill="hsl(' + h + ' 30% 82%)"/>' +
+      '<text x="28" y="168" font-family="Georgia,serif" font-size="76" ' +
+      'fill="hsl(' + h + ' 34% 34%)">' + esc(initials) + '</text></svg>';
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  }
+
+  function metaTags(c){
+    var out = [];
+    if(c.durationLabel) out.push(esc(c.durationLabel));
+    if(c.difficulty)    out.push(fmt(esc(c.difficulty)));
+    return out;
+  }
+  function longDesc(c){
+    return c.longDescription || c.fullDescription || c.summary || c.description || '';
+  }
+
+  /* --- Resume state -----------------------------------------------------
+     Wire this to the player's progress store to turn "Start course" into
+     "Resume course". Return true when the learner has started this slug. */
+  function hasProgress(slug){
+    try {
+      /* return !!localStorage.getItem('course-progress:' + slug); */
+      return false;
+    } catch(e){ return false; }
+  }
+
+  /* --- Tiles ------------------------------------------------------------ */
   function card(c){
-    const meta = [];
-    if(c.durationLabel) meta.push(`<span class="tag">${c.durationLabel}</span>`);
-    if(c.difficulty)    meta.push(`<span class="tag">${fmt(c.difficulty)}</span>`);
-    return `<a class="course" href="/${encodeURIComponent(c.slug)}">
-      <h2>${esc(c.title)}</h2>
-      <p>${esc(c.description||'')}</p>
-      <div class="meta">${meta.join('')}</div>
-    </a>`;
+    var tags = metaTags(c).map(function(t){ return '<span class="tag">'+t+'</span>'; }).join('');
+    return '<a class="course" href="/' + encodeURIComponent(c.slug) + '" data-slug="' +
+      esc(c.slug) + '">' +
+      '<img class="thumb" src="' + esc(imageOf(c)) + '" alt="' + esc(altOf(c)) +
+      '" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=\'' +
+      esc(fallbackImage(c)) + '\'">' +
+      '<div class="course-body">' +
+        '<h2>' + esc(c.title) + '</h2>' +
+        '<p>' + esc(c.description || '') + '</p>' +
+        (tags ? '<div class="meta">' + tags + '</div>' : '') +
+      '</div></a>';
   }
-  function esc(s){ return String(s).replace(/[&<>"]/g, m => (
-    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+
   function render(list){
-    const g = document.getElementById('grid');
-    g.innerHTML = list.length ? list.map(card).join('')
-      : '<div class="empty">No courses match your search.</div>';
+    if(!list.length){
+      grid.innerHTML = '<div class="empty">No courses match that search. Try a shorter word, ' +
+        'or clear the box to see all ' + ALL.length + '.</div>';
+      count.textContent = '';
+      return;
+    }
+    grid.innerHTML = list.map(card).join('');
+    count.textContent = list.length + (list.length === 1 ? ' course' : ' courses');
   }
+
   function filter(q){
     q = q.trim().toLowerCase();
-    render(!q ? ALL : ALL.filter(c =>
-      (c.title+' '+(c.description||'')+' '+(c.difficulty||'')).toLowerCase().includes(q)));
+    if(!q) return render(ALL);
+    render(ALL.filter(function(c){
+      return (c.title + ' ' + (c.description||'') + ' ' + longDesc(c) + ' ' +
+              (c.difficulty||'') + ' ' + (c.tags||[]).join(' ')).toLowerCase().indexOf(q) > -1;
+    }));
   }
-  fetch('.//manifest.json')
-    .then(r => r.json())
-    .then(list => { ALL = list; render(ALL); })
-    .catch(() => { document.getElementById('grid').innerHTML =
-      '<div class="err">Could not load the catalog. Please try again.</div>'; });
+  document.getElementById('search').addEventListener('input', function(){ filter(this.value); });
+
+  /* --- Dialog -----------------------------------------------------------
+     Tiles stay real links, so ⌘-click / middle-click / "open in new tab"
+     still go straight to the course. A plain click opens the preview. */
+  grid.addEventListener('click', function(e){
+    var a = e.target.closest('a.course');
+    if(!a) return;
+    if(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+    open(a.dataset.slug, true);
+  });
+
+  function open(slug, push){
+    var c = BY_SLUG[slug];
+    if(!c) return;
+    current = slug;
+    lastFocus = document.activeElement;
+
+    var img = document.getElementById('sheet-img');
+    img.onerror = function(){ img.onerror = null; img.src = fallbackImage(c); };
+    img.src = imageOf(c);
+    img.alt = altOf(c);
+
+    document.getElementById('sheet-title').textContent = c.title || '';
+    var tags = metaTags(c).concat((c.tags||[]).map(function(t){ return fmt(esc(t)); }));
+    document.getElementById('sheet-meta').innerHTML =
+      tags.map(function(t){ return '<span class="tag">' + t + '</span>'; }).join('');
+    document.getElementById('sheet-desc').textContent = longDesc(c);
+
+    var started = hasProgress(slug);
+    var start = document.getElementById('sheet-start');
+    start.href = '/' + encodeURIComponent(slug);
+    start.textContent = started ? 'Resume course' : 'Start course';
+    document.getElementById('sheet-note').textContent =
+      started ? 'Picks up where you left off.' : 'Progress saves as you go.';
+
+    if(!sheet.open) sheet.showModal();
+    start.focus();
+    if(push && location.hash !== '#course=' + encodeURIComponent(slug)){
+      history.pushState({slug:slug}, '', '#course=' + encodeURIComponent(slug));
+    }
+  }
+
+  function close(){ if(sheet.open) sheet.close(); }
+
+  document.getElementById('sheet-close').addEventListener('click', function(){
+    if(location.hash.indexOf('#course=') === 0) history.back(); else close();
+  });
+  /* Click on the backdrop (outside the sheet) closes. */
+  sheet.addEventListener('click', function(e){
+    if(e.target === sheet){
+      if(location.hash.indexOf('#course=') === 0) history.back(); else close();
+    }
+  });
+  /* Fires for Esc too — clean up state and restore focus in one place. */
+  sheet.addEventListener('close', function(){
+    current = null;
+    if(location.hash.indexOf('#course=') === 0) history.replaceState({}, '', location.pathname);
+    if(lastFocus && document.contains(lastFocus)) lastFocus.focus();
+  });
+
+  function syncFromHash(){
+    var m = /^#course=(.+)$/.exec(location.hash);
+    var slug = m ? decodeURIComponent(m[1]) : null;
+    if(slug && BY_SLUG[slug]){ if(slug !== current) open(slug, false); }
+    else if(sheet.open) close();
+  }
+  window.addEventListener('popstate', syncFromHash);
+
+  /* --- Load ------------------------------------------------------------- */
+  fetch('./manifest.json')
+    .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function(list){
+      ALL = Array.isArray(list) ? list.filter(function(c){ return c && c.slug && c.title; }) : [];
+      ALL.forEach(function(c){ BY_SLUG[c.slug] = c; });
+      render(ALL);
+      syncFromHash();
+    })
+    .catch(function(){
+      grid.innerHTML = '<div class="err"><strong>The catalog didn\u2019t load.</strong>' +
+        'The course list is unavailable right now. Reload the page to try again.</div>';
+    });
+})();
 </script>
 </body>
 </html>
