@@ -3,7 +3,7 @@
     "courseId": "practical-ai",
     "title": "Practical AI for Working Professionals",
     "description": "Practical AI equips working professionals with an accurate mental model of modern artificial intelligence — from conceptual foundations through machine learning and neural networks to large language models — and the hands-on judgment to select, apply, and critically evaluate AI tools in real workflows. The course balances conceptual literacy (how these systems actually work), applied skill (using them well), and critical skill (knowing when not to trust them). Learners move through three acts: building a technical mental model, putting it to work, and learning to audit and verify AI outputs.",
-    "thumbnailImage": "https://cdn.practicalai.course/assets/thumbnail-v1.png",
+    "thumbnailImage": "/assets/ai-1-course.jpg",
     "estimatedDurationMinutes": 936,
     "difficultyLevel": "intermediate",
     "version": "1.1",

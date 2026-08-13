@@ -4,6 +4,7 @@
     "title": "Practical AI for Developers",
     "description": "A hands-on course that takes a working software engineer from understanding what modern AI actually is to scoping, building, evaluating, deploying and operating LLM-powered systems inside a real engineering organisation. Learners ship three portfolio artifacts: a compounding retrieval-augmented capstone over a domain corpus they choose, a brownfield integration case study, and a small model-adaptation experiment benchmarked against a prompt-only baseline.",
     "estimatedDurationMinutes": 1200,
+    "thumbnailImage": "/assets/ai-2-course.jpg",
     "difficultyLevel": "intermediate",
     "version": "1.0",
     "schemaVersion": "6.0",
