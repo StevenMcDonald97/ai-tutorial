@@ -3,7 +3,7 @@
     "courseId": "advanced-typescript",
     "title": "Advanced TypeScript: From Type-System Mechanics to Front-End Type Architecture",
     "description": "A rigorous, transfer-focused course that rebuilds your mental model of the TypeScript type system and assembles it into production architecture. You progress from foundations (structural typing, narrowing, erasure) through type-level programming (generics, conditional and mapped types), domain modelling (discriminated unions, branding, immutability), boundary validation (runtime schemas, type guards), and finally the design of a coherent SaaS front-end type layer with a single source of truth.",
-    "thumbnailImage": "PLACEHOLDER",
+    "thumbnailImage": "/assets/typescript-course.jpg",
     "estimatedDurationMinutes": 480,
     "difficultyLevel": "advanced",
     "version": "1.0",

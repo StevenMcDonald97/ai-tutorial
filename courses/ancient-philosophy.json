@@ -3,7 +3,7 @@
     "courseId": "ancient-philosophy",
     "title": "Ancient Philosophy: Greece, India, and China",
     "description": "An intermediate course exploring the major philosophical traditions of antiquity across three civilizations. Learners examine foundational arguments about reality, knowledge, and value from Greek, South Asian, and East Asian thinkers, develop primary-text reading skills, practice cross-tradition comparison, and apply ancient frameworks to contemporary problems.",
-    "thumbnailImage": "PLACEHOLDER",
+  "thumbnailImage": "/assets/philosophy-course.jpg",
     "estimatedDurationMinutes": 2000,
     "difficultyLevel": "intermediate",
     "version": "1.0",

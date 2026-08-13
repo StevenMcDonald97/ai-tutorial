@@ -3,7 +3,7 @@
     "courseId": "contemporary-ui-and-ux-mastery",
     "title": "Contemporary UI/UX Mastery",
     "description": "An advanced practitioner course for senior UI/UX designers who already command the fundamentals and are ready to operate at a systems, strategic, and organizational level. The course moves through a deliberate arc: from rigorous cognitive and perceptual science through visual design, interaction, motion, systems thinking, accessibility, AI-augmented workflows, design leadership, and ethics. The arc closes with a capstone synthesis requiring learners to translate all competencies into a coherent, defensible design strategy for a complex real-world product context.",
-    "thumbnailImage": "https://assets.contemporary-uiux-mastery.com/thumbnails/course-cover-v1.png",
+    "thumbnailImage": "/assets/ux-course.jpg",
     "estimatedDurationMinutes": 990,
     "difficultyLevel": "advanced",
     "version": "1.0",
