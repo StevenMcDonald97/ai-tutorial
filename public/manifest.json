@@ -7,7 +7,7 @@
     "duration": 646,
     "durationLabel": "10h 46m",
     "difficulty": "intermediate",
-    "courseImage": ""
+    "courseImage": "/assets/adulting-course.jpg"
   },
   {
     "slug": "reactCourse",
@@ -27,7 +27,7 @@
     "duration": 480,
     "durationLabel": "8h",
     "difficulty": "advanced",
-    "courseImage": "PLACEHOLDER"
+    "courseImage": "/assets/typescript-course.jpg"
   },
   {
     "slug": "ancient-philosophy",
@@ -37,7 +37,7 @@
     "duration": 2000,
     "durationLabel": "33h 20m",
     "difficulty": "intermediate",
-    "courseImage": "PLACEHOLDER"
+    "courseImage": "/assets/philosophy-course.jpg"
   },
   {
     "slug": "back-end-architecture-design.course",
@@ -57,7 +57,7 @@
     "duration": 990,
     "durationLabel": "16h 30m",
     "difficulty": "advanced",
-    "courseImage": "https://assets.contemporary-uiux-mastery.com/thumbnails/course-cover-v1.png"
+    "courseImage": "/assets/ux-course.jpg"
   },
   {
     "slug": "front-end-system-design-coursejson",
@@ -77,7 +77,7 @@
     "duration": 480,
     "durationLabel": "8h",
     "difficulty": "intermediate",
-    "courseImage": "PLACEHOLDER"
+    "courseImage": "/assets/joy-course.jpg"
   },
   {
     "slug": "timeguesser",
