@@ -3,7 +3,7 @@
     "courseId": "convince-friends-to-play-boardgames",
     "title": "Roll for Initiative: Convincing Friends to Play Boardgames",
     "description": "An intermediate course for boardgame enthusiasts who want to bring reluctant friends to the table and keep them coming back. Covers game taxonomy fluency, reluctance diagnosis, rhetorical pitching techniques, sustainable game night design, and community-finding strategies. Treats persuasion as a learnable craft grounded in understanding people, not just games.",
-    "thumbnailImage": "https://cdn.convince-friends-boardgames.course/assets/thumbnails/roll-for-initiative-thumb.jpg",
+    "thumbnailImage": "/assets/boardgame-course.jpg",
     "estimatedDurationMinutes": 180,
     "difficultyLevel": "intermediate",
     "version": "1.0",

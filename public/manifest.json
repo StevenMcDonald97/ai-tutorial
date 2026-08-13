@@ -107,7 +107,7 @@
     "duration": 1200,
     "durationLabel": "20h",
     "difficulty": "intermediate",
-    "courseImage": ""
+    "courseImage": "/assets/ai-2-course.jpg"
   },
   {
     "slug": "practicalAi",
@@ -117,7 +117,7 @@
     "duration": 936,
     "durationLabel": "15h 36m",
     "difficulty": "intermediate",
-    "courseImage": "https://cdn.practicalai.course/assets/thumbnail-v1.png"
+    "courseImage": "/assets/ai-1-course.jpg"
   },
   {
     "slug": "critical-thinking-101",
@@ -137,7 +137,7 @@
     "duration": 180,
     "durationLabel": "3h",
     "difficulty": "intermediate",
-    "courseImage": "https://cdn.convince-friends-boardgames.course/assets/thumbnails/roll-for-initiative-thumb.jpg"
+    "courseImage": "/assets/boardgame-course.jpg"
   },
   {
     "slug": "tea_foundation_complete",
