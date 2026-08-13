@@ -219,17 +219,13 @@
     return (/^https?:\/\//i.test(t) || /^\/[^/]/.test(t) || /^\.{0,2}\//.test(t)) ? t : '';
   }
 
-  /* The manifest may name the course image several ways; take the first hit,
-     and fall back to a generated mark so a tile is never a blank box. */
   function imageOf(c){
-    var cands = [c.image, c.imageUrl, c.coverImage, c.courseImage, c.thumbnail,
-                 c.heroImage, c.media, c.cover];
-    for(var i=0;i<cands.length;i++){
-      var v = cands[i];
-      if(v && typeof v === 'object') v = v.url || v.src;
-      var u = safeUrl(v);
-      if(u) return u;
-    }
+
+    var v = c.thumbnailImage;
+    if(v && typeof v === 'object') v = v.url || v.src;
+    var u = safeUrl(v);
+    if(u) return u;
+    
     return fallbackImage(c);
   }
   function altOf(c){
