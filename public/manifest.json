@@ -7,7 +7,7 @@
     "duration": 646,
     "durationLabel": "10h 46m",
     "difficulty": "intermediate",
-    "ogImage": ""
+    "courseImage": ""
   },
   {
     "slug": "reactCourse",
@@ -17,7 +17,7 @@
     "duration": 1055,
     "durationLabel": "17h 35m",
     "difficulty": "advanced",
-    "ogImage": "/assets/react-course.jpg"
+    "courseImage": "/assets/react-course.jpg"
   },
   {
     "slug": "typescrtipV4",
@@ -27,7 +27,7 @@
     "duration": 480,
     "durationLabel": "8h",
     "difficulty": "advanced",
-    "ogImage": "PLACEHOLDER"
+    "courseImage": "PLACEHOLDER"
   },
   {
     "slug": "ancient-philosophy",
@@ -37,7 +37,7 @@
     "duration": 2000,
     "durationLabel": "33h 20m",
     "difficulty": "intermediate",
-    "ogImage": "PLACEHOLDER"
+    "courseImage": "PLACEHOLDER"
   },
   {
     "slug": "back-end-architecture-design.course",
@@ -47,7 +47,7 @@
     "duration": 480,
     "durationLabel": "8h",
     "difficulty": "intermediate",
-    "ogImage": ""
+    "courseImage": ""
   },
   {
     "slug": "uIUxCourseV5",
@@ -57,7 +57,7 @@
     "duration": 990,
     "durationLabel": "16h 30m",
     "difficulty": "advanced",
-    "ogImage": "https://assets.contemporary-uiux-mastery.com/thumbnails/course-cover-v1.png"
+    "courseImage": "https://assets.contemporary-uiux-mastery.com/thumbnails/course-cover-v1.png"
   },
   {
     "slug": "front-end-system-design-coursejson",
@@ -67,7 +67,7 @@
     "duration": 480,
     "durationLabel": "8h",
     "difficulty": "intermediate",
-    "ogImage": "https://assets.example.com/courses/front-end-system-design/thumbnail.png"
+    "courseImage": "https://assets.example.com/courses/front-end-system-design/thumbnail.png"
   },
   {
     "slug": "joy-contentment-course",
@@ -77,7 +77,7 @@
     "duration": 480,
     "durationLabel": "8h",
     "difficulty": "intermediate",
-    "ogImage": "PLACEHOLDER"
+    "courseImage": "PLACEHOLDER"
   },
   {
     "slug": "timeguesser",
@@ -87,7 +87,7 @@
     "duration": 120,
     "durationLabel": "2h",
     "difficulty": "intermediate",
-    "ogImage": "PLACEHOLDER"
+    "courseImage": "PLACEHOLDER"
   },
   {
     "slug": "fullstack-interview",
@@ -97,7 +97,7 @@
     "duration": 480,
     "durationLabel": "8h",
     "difficulty": "intermediate",
-    "ogImage": "https://assets.coursebuilder.io/courses/mastering-the-fullstack-interview/thumbnail.png"
+    "courseImage": "https://assets.coursebuilder.io/courses/mastering-the-fullstack-interview/thumbnail.png"
   },
   {
     "slug": "Practical-AI-For-Developers",
@@ -107,7 +107,7 @@
     "duration": 1200,
     "durationLabel": "20h",
     "difficulty": "intermediate",
-    "ogImage": ""
+    "courseImage": ""
   },
   {
     "slug": "practicalAi",
@@ -117,7 +117,7 @@
     "duration": 936,
     "durationLabel": "15h 36m",
     "difficulty": "intermediate",
-    "ogImage": "https://cdn.practicalai.course/assets/thumbnail-v1.png"
+    "courseImage": "https://cdn.practicalai.course/assets/thumbnail-v1.png"
   },
   {
     "slug": "critical-thinking-101",
@@ -127,7 +127,7 @@
     "duration": 540,
     "durationLabel": "9h",
     "difficulty": "intermediate",
-    "ogImage": ""
+    "courseImage": ""
   },
   {
     "slug": "boardgameConvincing",
@@ -137,7 +137,7 @@
     "duration": 180,
     "durationLabel": "3h",
     "difficulty": "intermediate",
-    "ogImage": "https://cdn.convince-friends-boardgames.course/assets/thumbnails/roll-for-initiative-thumb.jpg"
+    "courseImage": "https://cdn.convince-friends-boardgames.course/assets/thumbnails/roll-for-initiative-thumb.jpg"
   },
   {
     "slug": "tea_foundation_complete",
@@ -147,7 +147,7 @@
     "duration": 600,
     "durationLabel": "10h",
     "difficulty": "novice",
-    "ogImage": "/assets/tea-course.jpg"
+    "courseImage": "/assets/tea-course.jpg"
   },
   {
     "slug": "musicThough10Artists",
@@ -157,6 +157,6 @@
     "duration": 594,
     "durationLabel": "9h 54m",
     "difficulty": "novice",
-    "ogImage": "/assets/music-course.jpg"
+    "courseImage": "/assets/music-course.jpg"
   }
 ]

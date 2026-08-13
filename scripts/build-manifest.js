@@ -15,7 +15,7 @@
  *     duration,        // RAW minutes  (courseMetadata.estimatedDurationMinutes)
  *     durationLabel,   // convenience display string, e.g. "9h" / "1h 30m"
  *     difficulty,      // courseMetadata.difficultyLevel  (verbatim pass-through)
- *     ogImage          // courseMetadata.thumbnailImage if non-empty, else ""
+ *     courseImage          // courseMetadata.thumbnailImage if non-empty, else ""
  *   }
  *
  * Run:  node scripts/build-manifest.js
@@ -97,7 +97,7 @@ function main() {
       duration,                              // raw minutes
       durationLabel: formatDuration(duration),
       difficulty:    meta.difficultyLevel || '', // verbatim
-      ogImage:       thumb,                  // "" -> Function uses site default
+      courseImage:       thumb,                  // "" -> Function uses site default
     });
 
     seenSlugs.add(slug);
