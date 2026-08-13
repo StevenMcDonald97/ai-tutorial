@@ -66,9 +66,6 @@
     background:#ece7dc;color:var(--ink-soft);text-transform:capitalize;white-space:nowrap}
 
   /* ---- Dialog --------------------------------------------------------- */
-  dialog{border:none;padding:0;background:transparent;max-width:min(560px,calc(100vw - 32px));
-    width:100%;color:var(--ink)}
-  dialog::backdrop{background:rgba(35,33,28,.52);backdrop-filter:blur(2px)}
   .sheet{background:var(--surface);border-radius:var(--radius-lg);overflow:hidden;
     box-shadow:var(--shadow-lift);max-height:calc(100vh - 48px);display:flex;flex-direction:column}
   .sheet-hero{position:relative;flex:none}
@@ -95,6 +92,49 @@
   .empty,.err{color:var(--ink-faint);font-size:15px;padding:48px 0;grid-column:1/-1}
   .err strong{display:block;color:var(--ink-soft);font-weight:600;margin-bottom:4px}
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  dialog {
+    color:var(--ink);
+    border:none;
+    padding:0;
+    background:transparent;
+    width: 100%;
+    max-width:min(560px,calc(100vw - 32px));
+    margin:auto;
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+    transition: 
+    opacity 0.4s ease,
+    transform 0.4s ease,
+    overlay 0.4s ease allow-discrete,
+    display 0.4s ease allow-discrete;
+  }
+  dialog[open] {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  @starting-style {
+    dialog[open] {
+      opacity: 0;
+      transform: scale(0.9) translateY(20px);
+    }
+  }
+  dialog::backdrop {
+    background:rgba(35,33,28,.52);
+    backdrop-filter:blur(2px);
+    transition: 
+      background-color 0.4s ease,
+      overlay 0.4s ease allow-discrete,
+      display 0.4s ease allow-discrete;
+  }
+  dialog[open]::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
+  @starting-style {
+    dialog[open]::backdrop {
+      background-color: rgba(0, 0, 0, 0);
+    }
+  }
 
   @media (max-width:560px){
     .wrap{padding:28px 20px 72px}
@@ -136,7 +176,7 @@
     <div class="grid" id="grid"><div class="empty">Loading the catalog…</div></div>
   </div>
 
-  <dialog id="sheet" aria-labelledby="sheet-title">
+  <dialog id="sheet" class="dialog-window" aria-labelledby="sheet-title">
     <div class="sheet">
       <div class="sheet-hero">
         <img id="sheet-img" alt="">
