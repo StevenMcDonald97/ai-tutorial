@@ -4,6 +4,7 @@
     "title": "Data Visualization for Design Leads",
     "description": "An intermediate course that takes practicing UI/UX designers from making charts to owning data visualization as a discipline. Covers what a dataset actually permits you to claim, the quantitative reasoning behind rates, change and distributions, how the visual system reads marks, how chart forms are composed and selected under real constraints, spatial, hierarchical and network encodings, the obligations of integrity, accessibility and narrative, and how to scale the practice through dashboards, metric governance, design systems, critique and measurement.",
     "estimatedDurationMinutes": 660,
+    "thumbnailImage": "/assets/data-visualization-course.jpg",
     "difficultyLevel": "intermediate",
     "version": "1.1",
     "schemaVersion": "6.0",

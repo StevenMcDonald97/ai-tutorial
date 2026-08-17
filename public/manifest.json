@@ -67,7 +67,7 @@
     "duration": 660,
     "durationLabel": "11h",
     "difficulty": "intermediate",
-    "courseImage": ""
+    "courseImage": "/assets/data-visualization-course.jpg"
   },
   {
     "slug": "front-end-system-design-coursejson",
