@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 320" width="880" height="320" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<rect width="880" height="320" fill="#FBFAF7"/>
+<text x="24.00" y="30.00" font-size="13" fill="#22201C" text-anchor="start" font-weight="600" opacity="1">Anscombe's quartet — identical summary statistics</text>
+<rect x="60.00" y="70.00" width="175.00" height="150.00" fill="#FFFFFF" stroke="#D6D2C8" stroke-width="1" rx="0" opacity="1"/>
+<line x1="69.72" y1="188.75" x2="225.28" y2="88.73" stroke="#8A857B" stroke-width="1.4" stroke-dasharray="4 3" opacity="1" stroke-linecap="round"/>
+<circle cx="137.78" cy="144.50" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="118.33" cy="158.12" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="166.94" cy="150.25" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="128.06" cy="134.88" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="147.50" cy="140.88" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="176.67" cy="120.50" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="98.89" cy="154.50" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="79.44" cy="191.75" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="157.22" cy="109.50" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="108.61" cy="184.75" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="89.17" cy="174.00" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<text x="60.00" y="236.00" font-size="10.5" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">dataset 1</text>
+<rect x="265.00" y="70.00" width="175.00" height="150.00" fill="#FFFFFF" stroke="#D6D2C8" stroke-width="1" rx="0" opacity="1"/>
+<line x1="274.72" y1="188.74" x2="430.28" y2="88.74" stroke="#8A857B" stroke-width="1.4" stroke-dasharray="4 3" opacity="1" stroke-linecap="round"/>
+<circle cx="342.78" cy="130.75" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="323.33" cy="143.25" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="371.94" cy="135.75" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="333.06" cy="135.38" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="352.50" cy="129.25" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="381.67" cy="143.75" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="303.89" cy="168.38" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="284.44" cy="206.25" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="362.22" cy="130.88" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="313.61" cy="154.25" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="294.17" cy="185.75" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<text x="265.00" y="236.00" font-size="10.5" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">dataset 2</text>
+<rect x="470.00" y="70.00" width="175.00" height="150.00" fill="#FFFFFF" stroke="#D6D2C8" stroke-width="1" rx="0" opacity="1"/>
+<line x1="479.72" y1="188.73" x2="635.28" y2="88.78" stroke="#8A857B" stroke-width="1.4" stroke-dasharray="4 3" opacity="1" stroke-linecap="round"/>
+<circle cx="547.78" cy="151.75" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="528.33" cy="160.38" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="576.94" cy="85.75" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="538.06" cy="156.12" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="557.50" cy="147.38" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="586.67" cy="134.50" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="508.89" cy="169.00" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="489.44" cy="177.62" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="567.22" cy="143.12" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="518.61" cy="164.75" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="499.17" cy="173.38" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<text x="470.00" y="236.00" font-size="10.5" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">dataset 3</text>
+<rect x="675.00" y="70.00" width="175.00" height="150.00" fill="#FFFFFF" stroke="#D6D2C8" stroke-width="1" rx="0" opacity="1"/>
+<line x1="684.72" y1="188.73" x2="840.28" y2="88.75" stroke="#8A857B" stroke-width="1.4" stroke-dasharray="4 3" opacity="1" stroke-linecap="round"/>
+<circle cx="733.33" cy="162.75" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="733.33" cy="173.00" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="733.33" cy="148.62" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="733.33" cy="134.50" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="733.33" cy="139.12" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="733.33" cy="157.00" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="733.33" cy="179.38" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="840.28" cy="88.75" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="733.33" cy="175.50" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="733.33" cy="146.12" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="733.33" cy="158.88" r="3.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<text x="675.00" y="236.00" font-size="10.5" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">dataset 4</text>
+<text x="24.00" y="262.00" font-size="11" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">All four: mean x = 9.0, mean y = 7.50, variance and correlation equal to two decimal places, same regression line.</text>
+<text x="24.00" y="282.00" font-size="11" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">Summary statistics without a plot conceal structure. Overplotting conceals it from the other direction —</text>
+<text x="24.00" y="302.00" font-size="11" fill="#C0503A" text-anchor="start" font-weight="400" opacity="1">which is why there is no neutral representation, only a choice about which structure to reveal.</text>
+</svg>

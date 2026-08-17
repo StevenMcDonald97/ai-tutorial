@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 340" width="880" height="340" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<rect width="880" height="340" fill="#FBFAF7"/>
+<text x="24.00" y="30.00" font-size="13" fill="#22201C" text-anchor="start" font-weight="600" opacity="1">Localisation is not a translation step</text>
+<text x="60.00" y="78.00" font-size="11.5" fill="#22201C" text-anchor="start" font-weight="400" opacity="1">English</text>
+<line x1="60.00" y1="212.00" x2="250.00" y2="212.00" stroke="#8A857B" stroke-width="1" opacity="1" stroke-linecap="round"/>
+<line x1="60.00" y1="92.00" x2="60.00" y2="212.00" stroke="#8A857B" stroke-width="1.4" opacity="1" stroke-linecap="round"/>
+<path d="M 60.00 160.57 L 100.00 140.00 L 140.00 117.71 L 180.00 107.43" fill="none" stroke="#C0503A" stroke-width="1.8" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="186.00" y="111.43" font-size="10" fill="#C0503A" text-anchor="start" font-weight="400" opacity="1">Enrolment</text>
+<path d="M 60.00 122.86 L 100.00 129.71 L 140.00 134.86 L 180.00 143.43" fill="none" stroke="#3A6EA5" stroke-width="1.8" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="186.00" y="147.43" font-size="10" fill="#3A6EA5" text-anchor="start" font-weight="400" opacity="1">Retention</text>
+<path d="M 60.00 177.71 L 100.00 167.43 L 140.00 158.86 L 180.00 146.86" fill="none" stroke="#6E8B3D" stroke-width="1.8" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="186.00" y="150.86" font-size="10" fill="#6E8B3D" text-anchor="start" font-weight="400" opacity="1">Completion</text>
+<text x="60.00" y="232.00" font-size="10" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">decimal: 1,240.50</text>
+<text x="332.00" y="78.00" font-size="11.5" fill="#22201C" text-anchor="start" font-weight="400" opacity="1">German</text>
+<line x1="332.00" y1="212.00" x2="522.00" y2="212.00" stroke="#8A857B" stroke-width="1" opacity="1" stroke-linecap="round"/>
+<line x1="332.00" y1="92.00" x2="332.00" y2="212.00" stroke="#8A857B" stroke-width="1.4" opacity="1" stroke-linecap="round"/>
+<path d="M 332.00 160.57 L 372.00 140.00 L 412.00 117.71 L 452.00 107.43" fill="none" stroke="#C0503A" stroke-width="1.8" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="458.00" y="111.43" font-size="10" fill="#C0503A" text-anchor="start" font-weight="400" opacity="1">Einschreibungen</text>
+<path d="M 332.00 122.86 L 372.00 129.71 L 412.00 134.86 L 452.00 143.43" fill="none" stroke="#3A6EA5" stroke-width="1.8" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="458.00" y="147.43" font-size="10" fill="#3A6EA5" text-anchor="start" font-weight="400" opacity="1">Kundenbindung</text>
+<path d="M 332.00 177.71 L 372.00 167.43 L 412.00 158.86 L 452.00 146.86" fill="none" stroke="#6E8B3D" stroke-width="1.8" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="458.00" y="150.86" font-size="10" fill="#6E8B3D" text-anchor="start" font-weight="400" opacity="1">Abschlussquote</text>
+<text x="332.00" y="232.00" font-size="10" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">decimal: 1.240,50</text>
+<text x="332.00" y="248.00" font-size="9.5" fill="#C0503A" text-anchor="start" font-weight="400" opacity="1">labels overflow the plot</text>
+<text x="604.00" y="78.00" font-size="11.5" fill="#22201C" text-anchor="start" font-weight="400" opacity="1">Arabic (RTL)</text>
+<line x1="604.00" y1="212.00" x2="794.00" y2="212.00" stroke="#8A857B" stroke-width="1" opacity="1" stroke-linecap="round"/>
+<line x1="794.00" y1="92.00" x2="794.00" y2="212.00" stroke="#8A857B" stroke-width="1.4" opacity="1" stroke-linecap="round"/>
+<path d="M 724.00 160.57 L 684.00 140.00 L 644.00 117.71 L 604.00 107.43" fill="none" stroke="#C0503A" stroke-width="1.8" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="598.00" y="111.43" font-size="10" fill="#C0503A" text-anchor="end" font-weight="400" opacity="1">التسجيل</text>
+<path d="M 724.00 122.86 L 684.00 129.71 L 644.00 134.86 L 604.00 143.43" fill="none" stroke="#3A6EA5" stroke-width="1.8" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="598.00" y="147.43" font-size="10" fill="#3A6EA5" text-anchor="end" font-weight="400" opacity="1">الاحتفاظ</text>
+<path d="M 724.00 177.71 L 684.00 167.43 L 644.00 158.86 L 604.00 146.86" fill="none" stroke="#6E8B3D" stroke-width="1.8" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="598.00" y="150.86" font-size="10" fill="#6E8B3D" text-anchor="end" font-weight="400" opacity="1">الإكمال</text>
+<text x="604.00" y="232.00" font-size="10" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">decimal: ١٢٤٠٫٥٠</text>
+<text x="794.00" y="248.00" font-size="9.5" fill="#C0503A" text-anchor="end" font-weight="400" opacity="1">axis and reading order mirror</text>
+<text x="24.00" y="282.00" font-size="11" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">Translated labels routinely run 40–60% longer and break direct labelling. Separators invert between locales.</text>
+<text x="24.00" y="304.00" font-size="11" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">Right-to-left layout mirrors axis direction and reading order, so the whole composition flips.</text>
+<text x="24.00" y="328.00" font-size="11" fill="#C0503A" text-anchor="start" font-weight="400" opacity="1">None of this is fixable by swapping strings in a finished design. They are layout rules.</text>
+</svg>

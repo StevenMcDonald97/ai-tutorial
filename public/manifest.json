@@ -60,6 +60,16 @@
     "courseImage": "/assets/ux-course.jpg"
   },
   {
+    "slug": "data-visualizations-course",
+    "courseId": "data-visualizations",
+    "title": "Data Visualization for Design Leads",
+    "description": "An intermediate course that takes practicing UI/UX designers from making charts to owning data visualization as a discipline. Covers what a dataset actually permits you to claim, the quantitative reasoning behind rates, change and distributions, how the visual system reads marks, how chart forms are composed and selected under real constraints, spatial, hierarchical and network encodings, the obligations of integrity, accessibility and narrative, and how to scale the practice through dashboards, metric governance, design systems, critique and measurement.",
+    "duration": 660,
+    "durationLabel": "11h",
+    "difficulty": "intermediate",
+    "courseImage": ""
+  },
+  {
     "slug": "front-end-system-design-coursejson",
     "courseId": "front-end-system-design",
     "title": "Front-End System Design: Architecting for Scale",

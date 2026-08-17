@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 310" width="780" height="310" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<rect width="780" height="310" fill="#FBFAF7"/>
+<text x="24.00" y="30.00" font-size="13" fill="#22201C" text-anchor="start" font-weight="600" opacity="1">Direct labelling removes a working-memory round-trip</text>
+<text x="60.00" y="60.00" font-size="11.5" fill="#22201C" text-anchor="start" font-weight="400" opacity="1">Legend</text>
+<line x1="60.00" y1="220.00" x2="290.00" y2="220.00" stroke="#8A857B" stroke-width="1" opacity="1" stroke-linecap="round"/>
+<path d="M 60.00 145.00 L 106.00 135.00 L 152.00 125.00 L 198.00 117.50 L 244.00 102.50 L 290.00 90.00" fill="none" stroke="#C0503A" stroke-width="2" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 60.00 90.00 L 106.00 97.50 L 152.00 102.50 L 198.00 110.00 L 244.00 115.00 L 290.00 122.50" fill="none" stroke="#3A6EA5" stroke-width="2" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 60.00 165.00 L 106.00 155.00 L 152.00 157.50 L 198.00 145.00 L 244.00 137.50 L 290.00 130.00" fill="none" stroke="#6E8B3D" stroke-width="2" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 60.00 117.50 L 106.00 115.00 L 152.00 120.00 L 198.00 110.00 L 244.00 105.00 L 290.00 107.50" fill="none" stroke="#8A6FA8" stroke-width="2" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="308.00" y="70.00" width="10.00" height="10.00" fill="#C0503A" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<text x="324.00" y="79.00" font-size="10.5" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">North</text>
+<rect x="308.00" y="90.00" width="10.00" height="10.00" fill="#3A6EA5" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<text x="324.00" y="99.00" font-size="10.5" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">South</text>
+<rect x="308.00" y="110.00" width="10.00" height="10.00" fill="#6E8B3D" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<text x="324.00" y="119.00" font-size="10.5" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">East</text>
+<rect x="308.00" y="130.00" width="10.00" height="10.00" fill="#8A6FA8" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<text x="324.00" y="139.00" font-size="10.5" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">West</text>
+<path d="M 120 110 C 210 60, 280 80, 304 92" fill="none" stroke="#8A857B" stroke-width="1" opacity="1" stroke-dasharray="3 3" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 304 100 C 260 140, 180 120, 122 114" fill="none" stroke="#8A857B" stroke-width="1" opacity="1" stroke-dasharray="3 3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="180.00" y="56.00" font-size="10" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">eye leaves the data and returns</text>
+<text x="420.00" y="60.00" font-size="11.5" fill="#22201C" text-anchor="start" font-weight="400" opacity="1">Direct labels</text>
+<line x1="420.00" y1="220.00" x2="650.00" y2="220.00" stroke="#8A857B" stroke-width="1" opacity="1" stroke-linecap="round"/>
+<path d="M 420.00 145.00 L 466.00 135.00 L 512.00 125.00 L 558.00 117.50 L 604.00 102.50 L 650.00 90.00" fill="none" stroke="#C0503A" stroke-width="2" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="656.00" y="94.00" font-size="10.5" fill="#C0503A" text-anchor="start" font-weight="600" opacity="1">North</text>
+<path d="M 420.00 90.00 L 466.00 97.50 L 512.00 102.50 L 558.00 110.00 L 604.00 115.00 L 650.00 122.50" fill="none" stroke="#3A6EA5" stroke-width="2" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="656.00" y="126.50" font-size="10.5" fill="#3A6EA5" text-anchor="start" font-weight="600" opacity="1">South</text>
+<path d="M 420.00 165.00 L 466.00 155.00 L 512.00 157.50 L 558.00 145.00 L 604.00 137.50 L 650.00 130.00" fill="none" stroke="#6E8B3D" stroke-width="2" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="656.00" y="134.00" font-size="10.5" fill="#6E8B3D" text-anchor="start" font-weight="600" opacity="1">East</text>
+<path d="M 420.00 117.50 L 466.00 115.00 L 512.00 120.00 L 558.00 110.00 L 604.00 105.00 L 650.00 107.50" fill="none" stroke="#8A6FA8" stroke-width="2" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="656.00" y="111.50" font-size="10.5" fill="#8A6FA8" text-anchor="start" font-weight="600" opacity="1">West</text>
+<line x1="390.00" y1="62.00" x2="390.00" y2="240.00" stroke="#D6D2C8" stroke-width="1" opacity="1" stroke-linecap="round"/>
+<text x="24.00" y="268.00" font-size="11" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">Each legend consultation is a round-trip: hold a colour, find the label, hold the pairing, re-find your place.</text>
+<text x="24.00" y="288.00" font-size="11" fill="#C0503A" text-anchor="start" font-weight="400" opacity="1">Past roughly six series, viewers stop consulting and start guessing.</text>
+</svg>

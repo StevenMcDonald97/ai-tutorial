@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 340" width="820" height="340" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<rect width="820" height="340" fill="#FBFAF7"/>
+<text x="24.00" y="30.00" font-size="13" fill="#22201C" text-anchor="start" font-weight="600" opacity="1">A map of counts is largely a map of population</text>
+<text x="70.00" y="62.00" font-size="11.5" fill="#22201C" text-anchor="start" font-weight="400" opacity="1">Total cases</text>
+<rect x="70.00" y="74.00" width="46.00" height="40.00" fill="#c1d4e8" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="118.00" y="74.00" width="46.00" height="40.00" fill="#5285b8" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="166.00" y="74.00" width="46.00" height="40.00" fill="#92b5d6" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="214.00" y="74.00" width="46.00" height="40.00" fill="#062653" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="262.00" y="74.00" width="46.00" height="40.00" fill="#32659e" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="310.00" y="74.00" width="46.00" height="40.00" fill="#3c71a9" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="70.00" y="116.00" width="46.00" height="40.00" fill="#d3e0ee" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="118.00" y="116.00" width="46.00" height="40.00" fill="#467ab1" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="166.00" y="116.00" width="46.00" height="40.00" fill="#a7c3de" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="214.00" y="116.00" width="46.00" height="40.00" fill="#c1d4e8" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="262.00" y="116.00" width="46.00" height="40.00" fill="#4277ae" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="310.00" y="116.00" width="46.00" height="40.00" fill="#144076" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="70.00" y="158.00" width="46.00" height="40.00" fill="#9ebddb" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="118.00" y="158.00" width="46.00" height="40.00" fill="#c4d6e9" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="166.00" y="158.00" width="46.00" height="40.00" fill="#2c5f99" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="214.00" y="158.00" width="46.00" height="40.00" fill="#c2d4e8" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="262.00" y="158.00" width="46.00" height="40.00" fill="#8fb3d5" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="310.00" y="158.00" width="46.00" height="40.00" fill="#3f74ac" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="70.00" y="200.00" width="46.00" height="40.00" fill="#c1d4e8" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="118.00" y="200.00" width="46.00" height="40.00" fill="#c8d9ea" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="166.00" y="200.00" width="46.00" height="40.00" fill="#6998c5" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="214.00" y="200.00" width="46.00" height="40.00" fill="#b7cee4" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="262.00" y="200.00" width="46.00" height="40.00" fill="#c9d9eb" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="310.00" y="200.00" width="46.00" height="40.00" fill="#4c7fb4" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<text x="70.00" y="260.00" font-size="10" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">same six-by-four region grid</text>
+<text x="450.00" y="62.00" font-size="11.5" fill="#22201C" text-anchor="start" font-weight="400" opacity="1">Cases per 1,000 residents</text>
+<rect x="450.00" y="74.00" width="46.00" height="40.00" fill="#5f90c0" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="498.00" y="74.00" width="46.00" height="40.00" fill="#123d73" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="546.00" y="74.00" width="46.00" height="40.00" fill="#6595c3" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="594.00" y="74.00" width="46.00" height="40.00" fill="#072855" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="642.00" y="74.00" width="46.00" height="40.00" fill="#0b3061" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="690.00" y="74.00" width="46.00" height="40.00" fill="#154178" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="450.00" y="116.00" width="46.00" height="40.00" fill="#144077" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="498.00" y="116.00" width="46.00" height="40.00" fill="#275993" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="546.00" y="116.00" width="46.00" height="40.00" fill="#18457c" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="594.00" y="116.00" width="46.00" height="40.00" fill="#7aa4cc" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="642.00" y="116.00" width="46.00" height="40.00" fill="#3569a2" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="690.00" y="116.00" width="46.00" height="40.00" fill="#0f386c" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="450.00" y="158.00" width="46.00" height="40.00" fill="#6796c4" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="498.00" y="158.00" width="46.00" height="40.00" fill="#0a2e5e" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="546.00" y="158.00" width="46.00" height="40.00" fill="#0c3162" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="594.00" y="158.00" width="46.00" height="40.00" fill="#4075ac" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="642.00" y="158.00" width="46.00" height="40.00" fill="#477bb1" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="690.00" y="158.00" width="46.00" height="40.00" fill="#396da6" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="450.00" y="200.00" width="46.00" height="40.00" fill="#4478af" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="498.00" y="200.00" width="46.00" height="40.00" fill="#062653" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="546.00" y="200.00" width="46.00" height="40.00" fill="#4377ae" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="594.00" y="200.00" width="46.00" height="40.00" fill="#90b4d5" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="642.00" y="200.00" width="46.00" height="40.00" fill="#81a9cf" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<rect x="690.00" y="200.00" width="46.00" height="40.00" fill="#19467e" stroke="#FFFFFF" stroke-width="1.2" rx="0" opacity="1"/>
+<text x="450.00" y="260.00" font-size="10" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">same six-by-four region grid</text>
+<rect x="214.00" y="74.00" width="46.00" height="40.00" fill="none" stroke="#C0503A" stroke-width="2" rx="0" opacity="1"/>
+<rect x="498.00" y="200.00" width="46.00" height="40.00" fill="none" stroke="#C0503A" stroke-width="2" rx="0" opacity="1"/>
+<text x="24.00" y="288.00" font-size="11" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">Darkest on the left is R03 — the most populous region. Darkest on the right is R31.</text>
+<text x="24.00" y="308.00" font-size="11" fill="#C0503A" text-anchor="start" font-weight="400" opacity="1">Normalization is not a refinement of a choropleth. It decides what the map is a map of.</text>
+</svg>

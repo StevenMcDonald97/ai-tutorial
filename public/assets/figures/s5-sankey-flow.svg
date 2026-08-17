@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 360" width="860" height="360" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<rect width="860" height="360" fill="#FBFAF7"/>
+<text x="24.00" y="30.00" font-size="13" fill="#22201C" text-anchor="start" font-weight="600" opacity="1">Flow between states: Sankey</text>
+<path d="M 250 70 C 430.0 70, 430.0 70, 610 70 L 610 118.0 C 430.0 118.0, 430.0 118.0, 250 118.0 Z" fill="#6E8B3D" stroke="none" stroke-width="1.5" opacity="0.45" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 250 118.0 C 430.0 118.0, 430.0 247.0, 610 247.0 L 610 265.0 C 430.0 265.0, 430.0 136.0, 250 136.0 Z" fill="#6E8B3D" stroke="none" stroke-width="1.5" opacity="0.45" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 250 136.0 C 430.0 136.0, 430.0 138.0, 610 138.0 L 610 144.0 C 430.0 144.0, 430.0 142.0, 250 142.0 Z" fill="#6E8B3D" stroke="none" stroke-width="1.5" opacity="0.45" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 250 150.0 C 430.0 150.0, 430.0 144.0, 610 144.0 L 610 186.0 C 430.0 186.0, 430.0 192.0, 250 192.0 Z" fill="#3A6EA5" stroke="none" stroke-width="1.5" opacity="0.45" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 250 192.0 C 430.0 192.0, 430.0 118.0, 610 118.0 L 610 124.0 C 430.0 124.0, 430.0 198.0, 250 198.0 Z" fill="#3A6EA5" stroke="none" stroke-width="1.5" opacity="0.45" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 250 198.0 C 430.0 198.0, 430.0 265.0, 610 265.0 L 610 271.0 C 430.0 271.0, 430.0 204.0, 250 204.0 Z" fill="#3A6EA5" stroke="none" stroke-width="1.5" opacity="0.45" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 250 212.0 C 430.0 212.0, 430.0 212.0, 610 212.0 L 610 236.0 C 430.0 236.0, 430.0 236.0, 250 236.0 Z" fill="#5E9AA5" stroke="none" stroke-width="1.5" opacity="0.45" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 250 236.0 C 430.0 236.0, 430.0 124.0, 610 124.0 L 610 130.0 C 430.0 130.0, 430.0 242.0, 250 242.0 Z" fill="#5E9AA5" stroke="none" stroke-width="1.5" opacity="0.45" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 250 242.0 C 430.0 242.0, 430.0 186.0, 610 186.0 L 610 192.0 C 430.0 192.0, 430.0 248.0, 250 248.0 Z" fill="#5E9AA5" stroke="none" stroke-width="1.5" opacity="0.45" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 250 256.0 C 430.0 256.0, 430.0 271.0, 610 271.0 L 610 334.0 C 430.0 334.0, 430.0 319.0, 250 319.0 Z" fill="#C89A3C" stroke="none" stroke-width="1.5" opacity="0.45" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 250 319.0 C 430.0 319.0, 430.0 192.0, 610 192.0 L 610 204.0 C 430.0 204.0, 430.0 331.0, 250 331.0 Z" fill="#C89A3C" stroke="none" stroke-width="1.5" opacity="0.45" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 250 331.0 C 430.0 331.0, 430.0 236.0, 610 236.0 L 610 239.0 C 430.0 239.0, 430.0 334.0, 250 334.0 Z" fill="#C89A3C" stroke="none" stroke-width="1.5" opacity="0.45" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="232.00" y="70.00" width="18.00" height="72.00" fill="#6E8B3D" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<text x="226.00" y="110.00" font-size="11" fill="#22201C" text-anchor="end" font-weight="400" opacity="1">Grassland</text>
+<rect x="232.00" y="150.00" width="18.00" height="54.00" fill="#3A6EA5" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<text x="226.00" y="181.00" font-size="11" fill="#22201C" text-anchor="end" font-weight="400" opacity="1">Woodland</text>
+<rect x="232.00" y="212.00" width="18.00" height="36.00" fill="#5E9AA5" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<text x="226.00" y="234.00" font-size="11" fill="#22201C" text-anchor="end" font-weight="400" opacity="1">Wetland</text>
+<rect x="232.00" y="256.00" width="18.00" height="78.00" fill="#C89A3C" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<text x="226.00" y="299.00" font-size="11" fill="#22201C" text-anchor="end" font-weight="400" opacity="1">Arable</text>
+<rect x="610.00" y="70.00" width="18.00" height="60.00" fill="#6E8B3D" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<text x="634.00" y="104.00" font-size="11" fill="#22201C" text-anchor="start" font-weight="400" opacity="1">Grassland</text>
+<rect x="610.00" y="138.00" width="18.00" height="66.00" fill="#3A6EA5" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<text x="634.00" y="175.00" font-size="11" fill="#22201C" text-anchor="start" font-weight="400" opacity="1">Woodland</text>
+<rect x="610.00" y="212.00" width="18.00" height="27.00" fill="#5E9AA5" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<text x="634.00" y="229.50" font-size="11" fill="#22201C" text-anchor="start" font-weight="400" opacity="1">Wetland</text>
+<rect x="610.00" y="247.00" width="18.00" height="87.00" fill="#C89A3C" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<text x="634.00" y="294.50" font-size="11" fill="#22201C" text-anchor="start" font-weight="400" opacity="1">Arable</text>
+<text x="232.00" y="56.00" font-size="11" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">2015 land use</text>
+<text x="610.00" y="56.00" font-size="11" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">2025 land use</text>
+<text x="24.00" y="330.00" font-size="11" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">Link width encodes quantity moving between states. Node ordering and link crossings are layout artifacts, not data —</text>
+<text x="24.00" y="348.00" font-size="11" fill="#C0503A" text-anchor="start" font-weight="400" opacity="1">so a Sankey must never be read as though vertical position or crossing pattern meant something.</text>
+</svg>

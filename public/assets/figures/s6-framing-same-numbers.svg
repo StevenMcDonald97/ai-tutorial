@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 350" width="880" height="350" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<rect width="880" height="350" fill="#FBFAF7"/>
+<text x="24.00" y="30.00" font-size="13" fill="#22201C" text-anchor="start" font-weight="600" opacity="1">Two charts. Opposite conclusions. Every number identical.</text>
+<text x="70.00" y="64.00" font-size="11" fill="#22201C" text-anchor="start" font-weight="400" opacity="1">Quarters 5–16: "Sustained recovery"</text>
+<line x1="70.00" y1="234.00" x2="280.00" y2="234.00" stroke="#8A857B" stroke-width="1" opacity="1" stroke-linecap="round"/>
+<path d="M 70.00 198.44 L 89.09 205.56 L 108.18 191.33 L 127.27 173.56 L 146.36 159.33 L 165.45 148.67 L 184.55 134.44 L 203.64 123.78 L 222.73 130.89 L 241.82 120.22 L 260.91 106.00 L 280.00 95.33" fill="none" stroke="#C0503A" stroke-width="2.2" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="70.00" cy="198.44" r="2.60" fill="#C0503A" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="127.27" cy="173.56" r="2.60" fill="#C0503A" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="184.55" cy="134.44" r="2.60" fill="#C0503A" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="241.82" cy="120.22" r="2.60" fill="#C0503A" stroke="none" stroke-width="1" opacity="1"/>
+<text x="330.00" y="64.00" font-size="11" fill="#22201C" text-anchor="start" font-weight="400" opacity="1">Quarters 1–12: "Continuing decline"</text>
+<line x1="330.00" y1="234.00" x2="540.00" y2="234.00" stroke="#8A857B" stroke-width="1" opacity="1" stroke-linecap="round"/>
+<path d="M 330.00 116.67 L 349.09 141.56 L 368.18 166.44 L 387.27 187.78 L 406.36 198.44 L 425.45 205.56 L 444.55 191.33 L 463.64 173.56 L 482.73 159.33 L 501.82 148.67 L 520.91 134.44 L 540.00 123.78" fill="none" stroke="#3A6EA5" stroke-width="2.2" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="330.00" cy="116.67" r="2.60" fill="#3A6EA5" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="387.27" cy="187.78" r="2.60" fill="#3A6EA5" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="444.55" cy="191.33" r="2.60" fill="#3A6EA5" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="501.82" cy="148.67" r="2.60" fill="#3A6EA5" stroke="none" stroke-width="1" opacity="1"/>
+<text x="590.00" y="64.00" font-size="11" fill="#22201C" text-anchor="start" font-weight="400" opacity="1">Full series, quarters 1–16</text>
+<line x1="590.00" y1="234.00" x2="800.00" y2="234.00" stroke="#8A857B" stroke-width="1" opacity="1" stroke-linecap="round"/>
+<path d="M 590.00 116.67 L 604.00 141.56 L 618.00 166.44 L 632.00 187.78 L 646.00 198.44 L 660.00 205.56 L 674.00 191.33 L 688.00 173.56 L 702.00 159.33 L 716.00 148.67 L 730.00 134.44 L 744.00 123.78 L 758.00 130.89 L 772.00 120.22 L 786.00 106.00 L 800.00 95.33" fill="none" stroke="#D6D2C8" stroke-width="4" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 646.00 198.44 L 660.00 205.56 L 674.00 191.33 L 688.00 173.56 L 702.00 159.33 L 716.00 148.67 L 730.00 134.44 L 744.00 123.78 L 758.00 130.89 L 772.00 120.22 L 786.00 106.00 L 800.00 95.33" fill="none" stroke="#C0503A" stroke-width="2" opacity="0.5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 590.00 116.67 L 604.00 141.56 L 618.00 166.44 L 632.00 187.78 L 646.00 198.44 L 660.00 205.56 L 674.00 191.33 L 688.00 173.56 L 702.00 159.33 L 716.00 148.67 L 730.00 134.44 L 744.00 123.78" fill="none" stroke="#3A6EA5" stroke-width="2" opacity="0.5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 590.00 116.67 L 604.00 141.56 L 618.00 166.44 L 632.00 187.78 L 646.00 198.44 L 660.00 205.56 L 674.00 191.33 L 688.00 173.56 L 702.00 159.33 L 716.00 148.67 L 730.00 134.44 L 744.00 123.78 L 758.00 130.89 L 772.00 120.22 L 786.00 106.00 L 800.00 95.33" fill="none" stroke="#22201C" stroke-width="2.2" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="590.00" cy="116.67" r="2.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="632.00" cy="187.78" r="2.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="674.00" cy="191.33" r="2.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="716.00" cy="148.67" r="2.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="758.00" cy="130.89" r="2.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="800.00" cy="95.33" r="2.60" fill="#22201C" stroke="none" stroke-width="1" opacity="1"/>
+<text x="24.00" y="278.00" font-size="11" fill="#C0503A" text-anchor="start" font-weight="400" opacity="1">Range selection is a framing choice: it changes the conclusion without falsifying a single value.</text>
+<text x="24.00" y="300.00" font-size="11" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">The same is true of the comparison group, the denominator, and the aggregation statistic.</text>
+<text x="24.00" y="326.00" font-size="11" fill="#22201C" text-anchor="start" font-weight="400" opacity="1">Arithmetic correctness is a necessary and badly insufficient condition for honesty.</text>
+</svg>

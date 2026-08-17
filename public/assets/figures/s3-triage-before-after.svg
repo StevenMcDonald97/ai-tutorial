@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 492" width="880" height="492" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<rect width="880" height="470" fill="#FBFAF7"/>
+<text x="24.00" y="30.00" font-size="13" fill="#22201C" text-anchor="start" font-weight="600" opacity="1">Re-encoding the triage display</text>
+<text x="70.00" y="60.00" font-size="12" fill="#22201C" text-anchor="start" font-weight="600" opacity="1">Before — acuity on hue, overdue on saturation of that hue</text>
+<rect x="70.00" y="72.00" width="56.00" height="36.00" fill="#C89A3C" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.5726315789473684"/>
+<rect x="134.00" y="72.00" width="56.00" height="36.00" fill="#5E9AA5" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.3589473684210526"/>
+<rect x="198.00" y="72.00" width="56.00" height="36.00" fill="#6E8B3D" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.5652631578947368"/>
+<rect x="262.00" y="72.00" width="56.00" height="36.00" fill="#8A6FA8" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.4842105263157894"/>
+<rect x="326.00" y="72.00" width="56.00" height="36.00" fill="#8A6FA8" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.6831578947368421"/>
+<rect x="390.00" y="72.00" width="56.00" height="36.00" fill="#6E8B3D" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.5652631578947368"/>
+<rect x="454.00" y="72.00" width="56.00" height="36.00" fill="#6E8B3D" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.43263157894736837"/>
+<rect x="518.00" y="72.00" width="56.00" height="36.00" fill="#C89A3C" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.5652631578947368"/>
+<rect x="70.00" y="116.00" width="56.00" height="36.00" fill="#8A6FA8" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.5357894736842105"/>
+<rect x="134.00" y="116.00" width="56.00" height="36.00" fill="#C89A3C" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.9778947368421052"/>
+<rect x="198.00" y="116.00" width="56.00" height="36.00" fill="#3A6EA5" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.6978947368421052"/>
+<rect x="262.00" y="116.00" width="56.00" height="36.00" fill="#3A6EA5" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.40315789473684205"/>
+<rect x="326.00" y="116.00" width="56.00" height="36.00" fill="#3A6EA5" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.7494736842105263"/>
+<rect x="390.00" y="116.00" width="56.00" height="36.00" fill="#3A6EA5" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.4547368421052631"/>
+<rect x="454.00" y="116.00" width="56.00" height="36.00" fill="#8A6FA8" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.3368421052631579"/>
+<rect x="518.00" y="116.00" width="56.00" height="36.00" fill="#3A6EA5" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.5357894736842105"/>
+<rect x="70.00" y="160.00" width="56.00" height="36.00" fill="#3A6EA5" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.491578947368421"/>
+<rect x="134.00" y="160.00" width="56.00" height="36.00" fill="#6E8B3D" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.874736842105263"/>
+<rect x="198.00" y="160.00" width="56.00" height="36.00" fill="#3A6EA5" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.5284210526315789"/>
+<rect x="262.00" y="160.00" width="56.00" height="36.00" fill="#3A6EA5" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.5210526315789473"/>
+<rect x="326.00" y="160.00" width="56.00" height="36.00" fill="#6E8B3D" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.6168421052631579"/>
+<rect x="390.00" y="160.00" width="56.00" height="36.00" fill="#3A6EA5" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.9484210526315788"/>
+<rect x="454.00" y="160.00" width="56.00" height="36.00" fill="#6E8B3D" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.491578947368421"/>
+<rect x="518.00" y="160.00" width="56.00" height="36.00" fill="#3A6EA5" stroke="#D6D2C8" stroke-width="1" rx="3" opacity="0.58"/>
+<text x="70.00" y="224.00" font-size="11" fill="#C0503A" text-anchor="start" font-weight="400" opacity="1">The overdue bay is one saturated square among twenty-four coloured squares. The target is a conjunction of</text>
+<text x="70.00" y="240.00" font-size="11" fill="#C0503A" text-anchor="start" font-weight="400" opacity="1">hue and saturation, so the nurse checks tiles one at a time — and search time grows with the number of bays.</text>
+<text x="70.00" y="288.00" font-size="12" fill="#22201C" text-anchor="start" font-weight="600" opacity="1">After — overdue on position + enclosure, minutes on length, acuity on ordered luminance</text>
+<rect x="64.00" y="300.00" width="760.00" height="82.00" fill="none" stroke="#C0503A" stroke-width="1.4" rx="4" opacity="1"/>
+<text x="78.00" y="316.00" font-size="10" fill="#C0503A" text-anchor="start" font-weight="600" opacity="1">OVERDUE</text>
+<text x="200.00" y="316.00" font-size="10.5" fill="#22201C" text-anchor="end" font-weight="400" opacity="1">Bay 09</text>
+<rect x="210.00" y="306.00" width="349.60" height="12.00" fill="#C0503A" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<text x="566.60" y="316.00" font-size="9.5" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">92 min</text>
+<rect x="700.00" y="306.00" width="18.00" height="12.00" fill="#062653" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<text x="724.00" y="316.00" font-size="10" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">acuity 5</text>
+<text x="200.00" y="336.00" font-size="10.5" fill="#22201C" text-anchor="end" font-weight="400" opacity="1">Bay 21</text>
+<rect x="210.00" y="326.00" width="334.40" height="12.00" fill="#8A857B" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<text x="551.40" y="336.00" font-size="9.5" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">88 min</text>
+<rect x="700.00" y="326.00" width="18.00" height="12.00" fill="#5b8cbe" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<text x="724.00" y="336.00" font-size="10" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">acuity 2</text>
+<text x="200.00" y="356.00" font-size="10.5" fill="#22201C" text-anchor="end" font-weight="400" opacity="1">Bay 17</text>
+<rect x="210.00" y="346.00" width="296.40" height="12.00" fill="#8A857B" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<text x="513.40" y="356.00" font-size="9.5" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">78 min</text>
+<rect x="700.00" y="346.00" width="18.00" height="12.00" fill="#18457c" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<text x="724.00" y="356.00" font-size="10" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">acuity 4</text>
+<text x="200.00" y="398.00" font-size="10.5" fill="#8A857B" text-anchor="end" font-weight="400" opacity="1">Bay 12</text>
+<rect x="210.00" y="388.00" width="231.80" height="12.00" fill="#D6D2C8" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<rect x="700.00" y="388.00" width="18.00" height="12.00" fill="#5b8cbe" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<text x="724.00" y="398.00" font-size="10" fill="#D6D2C8" text-anchor="start" font-weight="400" opacity="1">acuity 2</text>
+<text x="200.00" y="418.00" font-size="10.5" fill="#8A857B" text-anchor="end" font-weight="400" opacity="1">Bay 10</text>
+<rect x="210.00" y="408.00" width="205.20" height="12.00" fill="#D6D2C8" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<rect x="700.00" y="408.00" width="18.00" height="12.00" fill="#5b8cbe" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<text x="724.00" y="418.00" font-size="10" fill="#D6D2C8" text-anchor="start" font-weight="400" opacity="1">acuity 2</text>
+<text x="200.00" y="438.00" font-size="10.5" fill="#8A857B" text-anchor="end" font-weight="400" opacity="1">Bay 04</text>
+<rect x="210.00" y="428.00" width="197.60" height="12.00" fill="#D6D2C8" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<rect x="700.00" y="428.00" width="18.00" height="12.00" fill="#8cb1d4" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<text x="724.00" y="438.00" font-size="10" fill="#D6D2C8" text-anchor="start" font-weight="400" opacity="1">acuity 1</text>
+<text x="200.00" y="458.00" font-size="10.5" fill="#8A857B" text-anchor="end" font-weight="400" opacity="1">Bay 20</text>
+<rect x="210.00" y="448.00" width="163.40" height="12.00" fill="#D6D2C8" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<rect x="700.00" y="448.00" width="18.00" height="12.00" fill="#18457c" stroke="none" stroke-width="1" rx="1" opacity="1"/>
+<text x="724.00" y="458.00" font-size="10" fill="#D6D2C8" text-anchor="start" font-weight="400" opacity="1">acuity 4</text>
+<line x1="476.00" y1="300.00" x2="476.00" y2="452.00" stroke="#22201C" stroke-width="1.2" stroke-dasharray="4 3" opacity="1" stroke-linecap="round"/>
+<text x="482.00" y="482.00" font-size="10" fill="#22201C" text-anchor="start" font-weight="400" opacity="1">observation threshold</text>
+<text x="210.00" y="482.00" font-size="10" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">minutes since last observation</text>
+</svg>

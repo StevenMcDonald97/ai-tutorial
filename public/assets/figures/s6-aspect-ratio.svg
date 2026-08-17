@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 330" width="880" height="330" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<rect width="880" height="330" fill="#FBFAF7"/>
+<text x="24.00" y="30.00" font-size="13" fill="#22201C" text-anchor="start" font-weight="600" opacity="1">The same trend at three aspect ratios</text>
+<line x1="70.00" y1="262.00" x2="180.00" y2="262.00" stroke="#8A857B" stroke-width="1" opacity="1" stroke-linecap="round"/>
+<line x1="70.00" y1="92.00" x2="70.00" y2="262.00" stroke="#8A857B" stroke-width="1" opacity="1" stroke-linecap="round"/>
+<path d="M 70.00 245.81 L 77.33 233.67 L 84.67 237.71 L 92.00 217.48 L 99.33 209.38 L 106.67 213.43 L 114.00 193.19 L 121.33 181.05 L 128.67 185.10 L 136.00 164.86 L 143.33 152.71 L 150.67 156.76 L 158.00 136.52 L 165.33 124.38 L 172.67 128.43 L 180.00 108.19" fill="none" stroke="#22201C" stroke-width="2" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="70.00" y="82.00" font-size="10.5" fill="#22201C" text-anchor="start" font-weight="400" opacity="1">Compressed — reads as a cliff</text>
+<line x1="280.00" y1="172.00" x2="550.00" y2="172.00" stroke="#8A857B" stroke-width="1" opacity="1" stroke-linecap="round"/>
+<line x1="280.00" y1="92.00" x2="280.00" y2="172.00" stroke="#8A857B" stroke-width="1" opacity="1" stroke-linecap="round"/>
+<path d="M 280.00 164.38 L 298.00 158.67 L 316.00 160.57 L 334.00 151.05 L 352.00 147.24 L 370.00 149.14 L 388.00 139.62 L 406.00 133.90 L 424.00 135.81 L 442.00 126.29 L 460.00 120.57 L 478.00 122.48 L 496.00 112.95 L 514.00 107.24 L 532.00 109.14 L 550.00 99.62" fill="none" stroke="#22201C" stroke-width="2" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="280.00" y="82.00" font-size="10.5" fill="#22201C" text-anchor="start" font-weight="400" opacity="1">Banked near 45° — slopes judged most accurately</text>
+<line x1="600.00" y1="262.00" x2="830.00" y2="262.00" stroke="#8A857B" stroke-width="1" opacity="1" stroke-linecap="round"/>
+<line x1="600.00" y1="92.00" x2="600.00" y2="262.00" stroke="#8A857B" stroke-width="1" opacity="1" stroke-linecap="round"/>
+<path d="M 600.00 245.81 L 615.33 233.67 L 630.67 237.71 L 646.00 217.48 L 661.33 209.38 L 676.67 213.43 L 692.00 193.19 L 707.33 181.05 L 722.67 185.10 L 738.00 164.86 L 753.33 152.71 L 768.67 156.76 L 784.00 136.52 L 799.33 124.38 L 814.67 128.43 L 830.00 108.19" fill="none" stroke="#22201C" stroke-width="2" opacity="1" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="600.00" y="82.00" font-size="10.5" fill="#22201C" text-anchor="start" font-weight="400" opacity="1">Stretched — reads as flat</text>
+<text x="24.00" y="292.00" font-size="11" fill="#8A857B" text-anchor="start" font-weight="400" opacity="1">Identical values. Perceived steepness is set by the plot's proportions, not by the data.</text>
+<text x="24.00" y="314.00" font-size="11" fill="#C0503A" text-anchor="start" font-weight="400" opacity="1">Aspect ratio is a quantitative choice with a defensible target. "Resize to fit the slide" is a substantive edit.</text>
+</svg>
