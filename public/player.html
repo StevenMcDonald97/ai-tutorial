@@ -146,6 +146,43 @@ h1,h2,h3,h4{font-family:var(--serif);font-weight:500;line-height:1.12;letter-spa
 .sub-nav-label{flex:1;line-height:1.3}
 .sub-kind{font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint)}
 
+/* ─── Language switch (discreet) ─────────────────────── */
+#sidebar-header{position:relative}
+.lang-switch{position:absolute;top:26px;right:24px}
+#topbar .lang-switch{position:relative;margin-left:auto}
+.lang-switch-btn{
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  background:none;border:1px solid var(--line);border-radius:50%;
+  font-size:13px;color:var(--ink-faint);cursor:pointer;transition:all .15s;
+  padding:0;line-height:1;
+}
+.lang-switch-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-wash)}
+.lang-switch-menu{
+  position:absolute;top:calc(100% + 6px);right:0;min-width:152px;
+  background:var(--surface-raised);border:1px solid var(--line);
+  border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:5px;display:none;flex-direction:column;gap:1px;z-index:60;
+}
+.lang-switch-menu.open{display:flex}
+.lang-switch-menu button{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
+  background:none;border:none;text-align:left;padding:7px 10px;
+  font-family:var(--sans);font-size:12.5px;color:var(--ink-soft);
+  border-radius:3px;cursor:pointer;transition:background .12s,color .12s;
+}
+.lang-switch-menu button:hover{background:var(--paper-deep);color:var(--ink)}
+.lang-switch-menu button.active{color:var(--accent);font-weight:600}
+.lang-switch-menu button.active::after{content:'✓';font-size:11px}
+
+/* Neutralize Google Translate's default banner/toolbar so our own
+   control is the only visible UI — the widget itself stays functional. */
+.goog-te-banner-frame.skiptranslate{display:none !important}
+body{top:0 !important}
+.goog-te-gadget{height:0;overflow:hidden;display:block}
+#google_translate_element{display:none !important}
+.goog-tooltip,.goog-tooltip:hover{display:none !important}
+.goog-text-highlight{background:none !important;box-shadow:none !important}
+
 /* ─── Main ───────────────────────────────────────────── */
 #main-wrap{flex:1;min-width:0;position:relative}
 #topbar{
@@ -730,6 +767,17 @@ h2.md-h{font-size:24px}h3.md-h{font-size:19px}h4.md-h{font-size:16px;text-transf
         <div class="brand-seal" id="brand-seal">C</div>
         <div class="brand-name">Course Engine</div>
       </div>-->
+      <div class="lang-switch" data-lang-switch>
+        <button type="button" class="lang-switch-btn" aria-haspopup="true" aria-expanded="false" title="Language">&#127760;</button>
+        <div class="lang-switch-menu" role="menu">
+          <button type="button" role="menuitem" data-lang="en">English</button>
+          <button type="button" role="menuitem" data-lang="hi">हिन्दी</button>
+          <button type="button" role="menuitem" data-lang="es">Español</button>
+          <button type="button" role="menuitem" data-lang="fr">Français</button>
+          <button type="button" role="menuitem" data-lang="zh-CN">中文</button>
+          <button type="button" role="menuitem" data-lang="ar">العربية</button>
+        </div>
+      </div>
       <div class="course-eyebrow" id="sidebar-eyebrow">Course</div>
       <h2 id="sidebar-title" onClick="goScreen('intro')" style="cursor:pointer"></h2>
       <div id="progress-meta">
@@ -757,7 +805,19 @@ h2.md-h{font-size:24px}h3.md-h{font-size:19px}h4.md-h{font-size:16px;text-transf
     <div id="topbar">
       <button id="menu-toggle" onclick="toggleSidebar()" aria-label="Menu">☰</button>
       <div class="tb-title" id="tb-title"></div>
+      <div class="lang-switch" data-lang-switch>
+        <button type="button" class="lang-switch-btn" aria-haspopup="true" aria-expanded="false" title="Language">&#127760;</button>
+        <div class="lang-switch-menu" role="menu">
+          <button type="button" role="menuitem" data-lang="en">English</button>
+          <button type="button" role="menuitem" data-lang="hi">हिन्दी</button>
+          <button type="button" role="menuitem" data-lang="es">Español</button>
+          <button type="button" role="menuitem" data-lang="fr">Français</button>
+          <button type="button" role="menuitem" data-lang="zh-CN">中文</button>
+          <button type="button" role="menuitem" data-lang="ar">العربية</button>
+        </div>
+      </div>
     </div>
+    <div id="google_translate_element"></div>
     <main id="main">
       <div id="screen-intro"    class="screen active"></div>
       <div id="screen-pkc"      class="screen"></div>
@@ -2853,6 +2913,74 @@ window.addEventListener('drop',e=>{
 // keyboard: Esc closes overlays
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeOverlays(); });
 
+// ════════════════════════════════════════════════════════════════════════
+//  LANGUAGE SWITCH  (drives the hidden Google Translate widget)
+// ════════════════════════════════════════════════════════════════════════
+const LANG_STORAGE_KEY='course-lang-pref';
+
+function googleTranslateElementInit(){
+  new google.translate.TranslateElement({
+    pageLanguage:'en',
+    includedLanguages:'en,hi,es,fr,zh-CN,ar',
+    autoDisplay:false
+  }, 'google_translate_element');
+}
+window.googleTranslateElementInit = googleTranslateElementInit;
+
+function waitForTranslateWidget(cb, attempts){
+  attempts = attempts||0;
+  const sel = document.querySelector('#google_translate_element select.goog-te-combo');
+  if(sel){ cb(sel); return; }
+  if(attempts>40) return; // ~10s — give up quietly if the widget never loads (e.g. offline)
+  setTimeout(()=>waitForTranslateWidget(cb, attempts+1), 250);
+}
+
+function applyTranslation(lang){
+  waitForTranslateWidget(sel=>{
+    sel.value = lang==='en' ? '' : lang; // empty value restores the original text
+    sel.dispatchEvent(new Event('change'));
+  });
+}
+
+function setCourseLanguage(lang){
+  localStorage.setItem(LANG_STORAGE_KEY, lang);
+  markActiveLanguage(lang);
+  applyTranslation(lang);
+}
+
+function markActiveLanguage(lang){
+  document.querySelectorAll('.lang-switch-menu button[data-lang]').forEach(b=>{
+    b.classList.toggle('active', b.dataset.lang===lang);
+  });
+}
+
+function initLangSwitch(){
+  document.querySelectorAll('[data-lang-switch]').forEach(wrap=>{
+    const btn=wrap.querySelector('.lang-switch-btn'), menu=wrap.querySelector('.lang-switch-menu');
+    if(!btn||!menu) return;
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      document.querySelectorAll('.lang-switch-menu.open').forEach(m=>{ if(m!==menu) m.classList.remove('open'); });
+      const open=menu.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open?'true':'false');
+    });
+    menu.querySelectorAll('button[data-lang]').forEach(item=>{
+      item.addEventListener('click',()=>{
+        setCourseLanguage(item.dataset.lang);
+        menu.classList.remove('open');
+        btn.setAttribute('aria-expanded','false');
+      });
+    });
+  });
+  document.addEventListener('click',()=>{
+    document.querySelectorAll('.lang-switch-menu.open').forEach(m=>m.classList.remove('open'));
+  });
+
+  const saved = localStorage.getItem(LANG_STORAGE_KEY) || 'en';
+  markActiveLanguage(saved);
+  if(saved!=='en') applyTranslation(saved);
+}
+
 // ── INIT ────────────────────────────────────────────────────────────────
 function showEmptyState(){
   document.getElementById('sidebar-title').textContent = 'No course loaded';
@@ -2883,7 +3011,9 @@ if (HAS_COURSE) {
 } else {
   showEmptyState();
 }
+initLangSwitch();
 
 </script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
 </body>
 </html>
