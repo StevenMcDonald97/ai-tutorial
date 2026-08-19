@@ -130,6 +130,16 @@
     "courseImage": "/assets/ai-1-course.jpg"
   },
   {
+    "slug": "front-end-understanding-foundation",
+    "courseId": "front-end-understanding",
+    "title": "React Front End Stack: From Runtime to Delivery",
+    "description": "A practical, transfer-focused course for software and UI/UX professionals who are joining or contributing to a React codebase. It covers the JavaScript runtime beneath React, TypeScript modelling at data boundaries, the rendering and component model, CSS and motion, debugging unfamiliar code, state placement, server state and routing, forms and internationalization, performance and accessibility, testing, client security, delivery gates, and an orientation to server rendering. The goal is not familiarity with APIs but the judgement to place state correctly, diagnose a defect from a symptom, and ship a change that does not break other things.",
+    "duration": 693,
+    "durationLabel": "11h 33m",
+    "difficulty": "intermediate",
+    "courseImage": ""
+  },
+  {
     "slug": "critical-thinking-101",
     "courseId": "critical-thinking-101",
     "title": "Reading the Evidence",
