@@ -3,7 +3,7 @@
     "courseId": "front-end-understanding",
     "title": "React Front End Stack: From Runtime to Delivery",
     "description": "A practical, transfer-focused course for software and UI/UX professionals who are joining or contributing to a React codebase. It covers the JavaScript runtime beneath React, TypeScript modelling at data boundaries, the rendering and component model, CSS and motion, debugging unfamiliar code, state placement, server state and routing, forms and internationalization, performance and accessibility, testing, client security, delivery gates, and an orientation to server rendering. The goal is not familiarity with APIs but the judgement to place state correctly, diagnose a defect from a symptom, and ship a change that does not break other things.",
-    "estimatedDurationMinutes": 693,
+    "estimatedDurationMinutes": 703,
     "difficultyLevel": "intermediate",
     "version": "1.0",
     "schemaVersion": "6.0",
@@ -9207,6 +9207,122 @@
           ]
         },
         {
+          "experienceId": "exp-s3-rules-of-hooks",
+          "title": "The rule hooks depend on: call order, not names",
+          "experienceType": "guided-analysis",
+          "difficultyProfile": {
+            "overall": 2,
+            "conceptualComplexity": 2,
+            "ambiguity": 1
+          },
+          "estimatedDurationMinutes": 4,
+          "linkedCompetencies": [
+            "fe-react-rendering-model"
+          ],
+          "desiredCognitiveActions": [
+            "analysis",
+            "prediction",
+            "retrieval"
+          ],
+          "contentBlocks": [
+            {
+              "blockId": "fe-s3-hooks-eb-01",
+              "type": "text",
+              "format": "markdown",
+              "content": "## React matches hooks by call order, not by name\n\nReact does not look up a hook by name. Underneath `useState`, `useEffect`, `useCallback`, and every other hook, React keeps a plain, ordered list of slots for each component instance. On every render, it walks that list in the order hooks are called and hands each call the next slot. There is no name matching involved — only position.\n\nThat single fact produces both rules:\n\n1. **Only call hooks at the top level** — never inside `if`, a loop, a nested function, or after an early `return`.\n2. **Only call hooks from a React function component or another hook** — never from a plain function or a class method.\n\nBreak rule 1 and the *position* of a hook call can shift between renders, so React hands it — silently — the slot that belonged to a different hook last time."
+            },
+            {
+              "blockId": "fe-s3-hooks-eb-02",
+              "type": "text",
+              "format": "markdown",
+              "checkpointAfter": true,
+              "content": "## What breaks, concretely\n\n```tsx\n// ✗ the hook after this one shifts slots whenever `user` is null\nfunction Profile({ user }: Props) {\n  if (!user) return <Spinner />;\n  const [tab, setTab] = useState('posts');\n  ...\n}\n```\n\n```tsx\n// ✓ the hook always runs; the condition moves inside the component instead\nfunction Profile({ user }: Props) {\n  const [tab, setTab] = useState('posts');\n  if (!user) return <Spinner />;\n  ...\n}\n```\n\nThe fixed version doesn't avoid calling the hook conditionally by adding a check inside `useState` — it avoids the problem by making sure the hook itself is always reached, every render, in the same position. This is also why a custom hook is just a function that follows the same two rules internally: React does not treat `useState` as special syntax, so anything that calls hooks in a stable order is a valid hook."
+            },
+            {
+              "blockId": "fe-s3-hooks-eb-03",
+              "type": "key-terms",
+              "terms": [
+                {
+                  "term": "Hook call order",
+                  "definition": "The sequence in which a component calls its hooks during a render. React uses this order — not the hook's name — to match each call to its stored state, so the order must be identical on every render.",
+                  "addToGlossary": true
+                }
+              ]
+            }
+          ],
+          "interactionSequence": [
+            {
+              "interactionId": "fe-s3-hooks-int-01",
+              "interactionType": "multiple-choice",
+              "prompt": "A component calls `useState` inside an `if (isEditing) { ... }` block that only runs on some renders. What actually goes wrong?",
+              "required": true,
+              "responseFormat": "multiple-choice",
+              "revealCondition": "after-response",
+              "options": [
+                "Nothing, as long as `isEditing` doesn't change on every single render",
+                "React can no longer reliably match this hook call — and every hook called after it — to the correct stored state, because the call order now depends on `isEditing`",
+                "It only breaks in Strict Mode, which double-invokes conditional hooks specifically",
+                "TypeScript rejects it at compile time, so it can never reach the browser"
+              ],
+              "correctIndex": 1,
+              "optionFeedback": [
+                {
+                  "optionIndex": 0,
+                  "feedback": "The risk isn't how often `isEditing` changes — it's that the hook's position in the call sequence becomes conditional at all. One render where it's skipped is enough to misalign every hook that follows it."
+                },
+                {
+                  "optionIndex": 1,
+                  "feedback": "Correct. React has no idea this `useState` call is “the editing-tab state” — it only knows it's whichever hook call happens to land in this position this render. Skip it once, and everything downstream reads the wrong slot."
+                },
+                {
+                  "optionIndex": 2,
+                  "feedback": "Strict Mode's double-invocation surfaces missing-cleanup bugs in effects; it doesn't specifically target conditional hooks, and the misalignment happens with or without Strict Mode."
+                },
+                {
+                  "optionIndex": 3,
+                  "feedback": "TypeScript checks types, not call order. This compiles fine and fails at runtime, which is exactly what makes it a hard defect to catch."
+                }
+              ],
+              "feedback": {
+                "type": "elaborative",
+                "elaborativeFeedback": "This is the same category of bug as an index key on a reordering list, a few experiences from now: a stable position is being used as an identity, and something changes what occupies that position. There, it's DOM state attached to the wrong list item. Here, it's a hook reading the wrong stored value — sometimes silently, since the misread value can simply be the wrong type of plausible-looking data rather than an obvious crash.",
+                "hints": [
+                  "Does React know this call is specifically the `isEditing` state, or only that it's the second hook called this render?"
+                ]
+              },
+              "confidencePrompt": {
+                "enabled": true,
+                "scaleMin": 1,
+                "scaleMax": 5,
+                "prompt": "How confident are you?"
+              }
+            }
+          ],
+          "retrievalPractice": [
+            {
+              "retrievalItemId": "fe-s3-hooks-retrieval-01",
+              "retrievalType": "cued-recall",
+              "prompt": "What does React use to match a hook call to its stored state across renders — and why does that make calling a hook inside a conditional unsafe?",
+              "difficulty": 2,
+              "schedule": {
+                "initialReviewDays": 1,
+                "subsequentReviewDays": [
+                  3,
+                  8,
+                  21,
+                  60
+                ],
+                "decayParameters": {
+                  "decayRate": 0.12,
+                  "strengthMultiplier": 2,
+                  "minimumIntervalDays": 1,
+                  "maximumIntervalDays": 365
+                }
+              }
+            }
+          ]
+        },
+        {
           "experienceId": "exp-s3-render-reconcile-commit",
           "title": "Render, reconcile, commit — and what actually triggers a re-render",
           "experienceType": "guided-analysis",
@@ -9652,6 +9768,159 @@
               "minimumTransferScore": 0.75
             }
           }
+        },
+        {
+          "experienceId": "exp-s3-refs",
+          "title": "Refs: a value that survives renders without causing one",
+          "experienceType": "guided-analysis",
+          "difficultyProfile": {
+            "overall": 2,
+            "conceptualComplexity": 2,
+            "ambiguity": 1
+          },
+          "estimatedDurationMinutes": 4,
+          "linkedCompetencies": [
+            "fe-react-rendering-model"
+          ],
+          "desiredCognitiveActions": [
+            "analysis",
+            "comparison",
+            "retrieval"
+          ],
+          "contentBlocks": [
+            {
+              "blockId": "fe-s3-ref-eb-01",
+              "type": "text",
+              "format": "markdown",
+              "content": "## A mutable box outside the render triggers\n\n```tsx\nconst renderCount = useRef(0);\nrenderCount.current++;   // updates immediately — no re-render, no re-run\n```\n\n`useRef(initialValue)` returns a plain object with a single property, `.current`, seeded with `initialValue`. That object's identity is stable for the component's entire lifetime — the same object comes back on every render. Writing to `.current` changes the value immediately, but it is not one of the four re-render triggers from earlier in this section: not state, not context, not a parent re-rendering, not a hook signalling a change. Nothing about the screen updates because a ref changed."
+            },
+            {
+              "blockId": "fe-s3-ref-eb-02",
+              "type": "table",
+              "caption": "useState vs. useRef",
+              "headers": [
+                "",
+                "useState",
+                "useRef"
+              ],
+              "rows": [
+                [
+                  "Triggers a re-render on change?",
+                  "Yes",
+                  "No"
+                ],
+                [
+                  "Persists across renders?",
+                  "Yes",
+                  "Yes"
+                ],
+                [
+                  "Same object identity every render?",
+                  "No — new value each render",
+                  "Yes — one stable object"
+                ],
+                [
+                  "Typical use",
+                  "Anything the UI needs to display",
+                  "DOM node handles; a mutable value effects need without re-subscribing; an ID or timer handle that must outlive renders"
+                ]
+              ]
+            },
+            {
+              "blockId": "fe-s3-ref-eb-03",
+              "type": "text",
+              "format": "markdown",
+              "checkpointAfter": true,
+              "content": "## The other common use: a handle to a DOM node\n\n```tsx\nconst inputRef = useRef<HTMLInputElement>(null);\nuseEffect(() => { inputRef.current?.focus(); }, []);\nreturn <input ref={inputRef} />;\n```\n\nPassed to a built-in element's `ref` attribute, React populates `.current` with the real DOM node once it exists — after commit, which is why reading it is typically done inside an effect. Section 9 uses exactly this pattern to manage focus around a dialog.\n\nPassing `ref` to **your own** component doesn't work the same way automatically — a component function only receives its declared props, and `ref` isn't one of them by default. Reaching for this is usually a sign the component should either forward the ref explicitly or expose the behaviour (`focus()`, `scrollIntoView()`) through a regular prop instead."
+            },
+            {
+              "blockId": "fe-s3-ref-eb-04",
+              "type": "key-terms",
+              "terms": [
+                {
+                  "term": "Ref",
+                  "definition": "An object returned by `useRef`, with a single mutable `.current` property, whose identity persists for the component's entire lifetime. Updating `.current` does not trigger a re-render.",
+                  "addToGlossary": true
+                },
+                {
+                  "term": "DOM ref",
+                  "definition": "A ref passed to a built-in element's `ref` attribute. React populates it with the real DOM node after commit, making it the standard way to call imperative browser APIs such as `.focus()` from React.",
+                  "addToGlossary": true
+                }
+              ]
+            }
+          ],
+          "interactionSequence": [
+            {
+              "interactionId": "fe-s3-ref-int-01",
+              "interactionType": "multiple-choice",
+              "prompt": "An event handler does `clickCount.current++` on a ref, and nothing else. What happens on screen right after the click?",
+              "required": true,
+              "responseFormat": "multiple-choice",
+              "revealCondition": "after-response",
+              "options": [
+                "The component re-renders immediately and the new count is visible",
+                "Nothing changes on screen yet — the value updated, but updating a ref never schedules a render",
+                "React throws an error, because refs cannot be mutated inside event handlers",
+                "Only the DOM node the ref is attached to updates, not the rest of the component"
+              ],
+              "correctIndex": 1,
+              "optionFeedback": [
+                {
+                  "optionIndex": 0,
+                  "feedback": "A re-render happens only when one of the four triggers from earlier in this section fires — own state, context, a parent re-rendering, or a hook signalling a change. Mutating `.current` isn't among them."
+                },
+                {
+                  "optionIndex": 1,
+                  "feedback": "Correct. The number really did change — `clickCount.current` now holds the new value — but nothing told React to call the component function again, so nothing on screen reflects it yet."
+                },
+                {
+                  "optionIndex": 2,
+                  "feedback": "Refs are designed to be mutated freely from event handlers and effects alike — that permissiveness, not an error, is the entire point of them."
+                },
+                {
+                  "optionIndex": 3,
+                  "feedback": "This ref isn't even attached to a DOM element here — it's just holding a number. Even a DOM ref's `.current` update doesn't itself cause React to re-render anything."
+                }
+              ],
+              "feedback": {
+                "type": "elaborative",
+                "elaborativeFeedback": "This is exactly the property the next experience relies on: a ref can hold “the latest value of something” for a callback to read later, without that update ever causing a re-render or forcing an effect to resubscribe. Where a value needs to be *displayed*, that silence is a bug. Where a value only needs to be *available later* — the current agent ID for a log line, the previous focused element to restore — it's exactly the behaviour you want.",
+                "hints": [
+                  "Is updating `.current` one of the four re-render triggers from earlier in this section?"
+                ]
+              },
+              "confidencePrompt": {
+                "enabled": true,
+                "scaleMin": 1,
+                "scaleMax": 5,
+                "prompt": "How confident are you?"
+              }
+            }
+          ],
+          "retrievalPractice": [
+            {
+              "retrievalItemId": "fe-s3-ref-retrieval-01",
+              "retrievalType": "contrast",
+              "prompt": "Contrast `useState` and `useRef`: which one triggers a re-render on change, and which one keeps the same object identity across every render?",
+              "difficulty": 2,
+              "schedule": {
+                "initialReviewDays": 1,
+                "subsequentReviewDays": [
+                  3,
+                  8,
+                  21,
+                  60
+                ],
+                "decayParameters": {
+                  "decayRate": 0.12,
+                  "strengthMultiplier": 2,
+                  "minimumIntervalDays": 1,
+                  "maximumIntervalDays": 365
+                }
+              }
+            }
+          ]
         },
         {
           "experienceId": "exp-s3-effects-and-closures",
@@ -16598,7 +16867,7 @@
             "conceptualComplexity": 3,
             "ambiguity": 3
           },
-          "estimatedDurationMinutes": 9,
+          "estimatedDurationMinutes": 11,
           "linkedCompetencies": [
             "fe-routing-url-state",
             "fe-state-tier-selection"
@@ -16614,6 +16883,28 @@
               "type": "text",
               "format": "markdown",
               "content": "## A route is five things at once\n\nA URL, a code-splitting boundary, a data-loading boundary, an error boundary, and a layout boundary. **Code splitting at the route level** gives the most value, because it matches what a user actually needs on arrival — but measure it: `React.lazy` around a component already reachable through some other, non-lazy import saves nothing.\n\n**Prefetching on intent** — hover or focus of a link — hides most navigation delay for free."
+            },
+            {
+              "blockId": "fe-s7-eb-suspense-01",
+              "type": "text",
+              "format": "markdown",
+              "content": "## What `lazy` and `Suspense` actually do\n\n```tsx\nconst FieldDetail = lazy(() => import('./FieldDetail'));\n\nfunction App() {\n  return (\n    <Suspense fallback={<PageSpinner />}>\n      <Routes>\n        <Route path=\"/fields/:fieldId\" element={<FieldDetail />} />\n      </Routes>\n    </Suspense>\n  );\n}\n```\n\n`lazy()` wraps a dynamic `import()` so that component's code is not requested until it is first rendered — this is the mechanism behind “code splitting at the route level” above. `Suspense` is what makes the resulting wait visible on purpose: while a lazy component inside its boundary is still loading, React shows `fallback` instead, then swaps in the real content once the code arrives — no manually managed loading flag required for this specific case.\n\nA `Suspense` boundary is not optional scaffolding around a lazy import: a lazy component with no `Suspense` ancestor throws at render time the first time it's reached. One boundary near the router root covers every route beneath it; nested boundaries around slower individual regions let the rest of the page render immediately instead of waiting on the slowest piece."
+            },
+            {
+              "blockId": "fe-s7-eb-suspense-02",
+              "type": "key-terms",
+              "terms": [
+                {
+                  "term": "Suspense boundary",
+                  "definition": "A `<Suspense fallback={...}>` element wrapping part of the tree. While anything inside it — a lazy-loaded component, for instance — isn't ready, React renders `fallback` in its place, then swaps in the real content once it resolves.",
+                  "addToGlossary": true
+                },
+                {
+                  "term": "lazy",
+                  "definition": "`React.lazy(() => import(...))` defers requesting a component's code until it is first rendered. It must be rendered inside a `Suspense` boundary, which supplies what to show while that code loads.",
+                  "addToGlossary": true
+                }
+              ]
             },
             {
               "blockId": "fe-s7-eb-08",
@@ -16667,6 +16958,52 @@
                 "elaborativeFeedback": "This is Section 2's boundary-validation habit, applied to a boundary that is easy to forget is a boundary at all, because a URL feels like part of your own application's state rather than like external input someone else supplied — but a hand-edited or old, bookmarked URL is exactly as untrusted as a fetch response.",
                 "hints": [
                   "What did Section 2 teach about handling data that enters the application from outside, whatever its source?"
+                ]
+              },
+              "confidencePrompt": {
+                "enabled": true,
+                "scaleMin": 1,
+                "scaleMax": 5,
+                "prompt": "How confident are you?"
+              }
+            },
+            {
+              "interactionId": "fe-s7-int-suspense-01",
+              "interactionType": "multiple-choice",
+              "prompt": "A route renders `<FieldDetail />`, which is defined with `lazy(() => import('./FieldDetail'))`, but no `Suspense` ancestor wraps it anywhere in the tree. What happens?",
+              "required": true,
+              "responseFormat": "multiple-choice",
+              "revealCondition": "after-response",
+              "options": [
+                "React silently renders nothing until the code finishes loading, then shows it",
+                "It throws at render time — a lazy component needs a Suspense boundary above it to know what to show while its code loads",
+                "The import happens eagerly instead, defeating the code-splitting but otherwise working fine",
+                "It works exactly the same as with a Suspense boundary, just without a fallback"
+              ],
+              "correctIndex": 1,
+              "optionFeedback": [
+                {
+                  "optionIndex": 0,
+                  "feedback": "There's no silent fallback behaviour built in — without a Suspense ancestor telling React what to render meanwhile, there's nothing to show, and React throws instead of guessing."
+                },
+                {
+                  "optionIndex": 1,
+                  "feedback": "Correct. Suspense isn't decoration around lazy — it's the mechanism that supplies the fallback UI. Without it, React has a component that isn't ready and no instructions for what to do about that."
+                },
+                {
+                  "optionIndex": 2,
+                  "feedback": "The dynamic import still only fires on first render, exactly as declared; missing Suspense doesn't change when the code is requested, only what happens while it's in flight."
+                },
+                {
+                  "optionIndex": 3,
+                  "feedback": "Suspense is required, not optional; there's no zero-fallback mode that renders once the import resolves and does nothing before that."
+                }
+              ],
+              "feedback": {
+                "type": "elaborative",
+                "elaborativeFeedback": "This pairing — lazy defers the request, Suspense covers the wait — is why route-level code splitting is usually one boundary near the router root rather than one per lazy import: it's simpler to reason about a single loading state for route transitions than to scatter fallbacks through the tree, unless a specific slow region genuinely benefits from resolving independently.",
+                "hints": [
+                  "What tells React what to render while a lazy component's code is still being requested?"
                 ]
               },
               "confidencePrompt": {
