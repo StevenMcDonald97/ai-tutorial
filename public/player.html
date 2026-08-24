@@ -570,6 +570,110 @@ body{top:0 !important}
 .glossary-term{padding:14px 24px;border-bottom:1px solid var(--line-soft)}
 .glossary-term dt{font-family:var(--serif);font-size:16px;font-weight:500;color:var(--accent)}
 .glossary-term dd{font-family:var(--read);font-size:15px;color:var(--ink-soft);margin-top:4px;line-height:1.5}
+#flash-btn{
+  position:fixed;bottom:120px;right:24px;background:var(--indigo);color:#fff;border:none;
+  border-radius:99px;padding:11px 18px;font-size:13px;font-weight:600;font-family:var(--sans);
+  cursor:pointer;box-shadow:var(--shadow);z-index:120;display:flex;align-items:center;gap:7px;transition:all .2s;
+}
+#flash-btn:hover{background:#28376a;transform:translateY(-2px)}
+
+/* ─── Flashcards (glossary popup) ────────────────────── */
+#flash-modal{
+  position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:rgba(35,33,28,.5);backdrop-filter:blur(3px);
+  opacity:0;pointer-events:none;transition:opacity .22s;
+}
+#flash-modal.open{opacity:1;pointer-events:auto}
+#flash-panel{
+  width:min(600px,100%);max-height:min(88vh,720px);background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);display:flex;flex-direction:column;overflow:hidden;
+  transform:translateY(12px) scale(.97);transition:transform .26s cubic-bezier(.22,1,.36,1);
+}
+#flash-modal.open #flash-panel{transform:none}
+#flash-head{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-shrink:0}
+#flash-head h3{font-size:19px}
+#flash-head .sub{font-size:10.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.1em;margin-top:3px}
+#flash-close{background:none;border:1px solid var(--line);border-radius:var(--radius);cursor:pointer;font-size:15px;color:var(--ink-soft);width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#flash-setup{padding:16px 22px 4px;overflow-y:auto}
+#flash-setup .fs-lede{font-family:var(--read);font-size:15.5px;color:var(--ink-soft);line-height:1.5;margin-bottom:18px}
+.fs-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.11em;color:var(--ink-faint);margin:0 0 9px}
+.fs-sources{display:flex;flex-direction:column;gap:7px;margin-bottom:20px}
+.fs-src{
+  display:flex;align-items:center;gap:11px;padding:11px 14px;background:var(--surface-raised);
+  border:1px solid var(--line);border-radius:var(--radius);cursor:pointer;transition:all .18s;
+}
+.fs-src:hover{border-color:var(--indigo)}
+.fs-src.on{border-color:var(--indigo);background:var(--indigo-wash)}
+.fs-src.empty{opacity:.45;cursor:not-allowed}
+.fs-src input{accent-color:var(--indigo);width:15px;height:15px;flex-shrink:0}
+.fs-src .fs-name{font-size:13.5px;font-weight:600;font-family:var(--sans);color:var(--ink)}
+.fs-src .fs-desc{font-size:12px;color:var(--ink-faint);margin-top:2px;line-height:1.4}
+.fs-src .fs-n{margin-left:auto;font-family:var(--serif);font-size:17px;color:var(--indigo);flex-shrink:0}
+#flash-modes{display:flex;gap:6px;padding:0 0 4px;flex-wrap:wrap;flex-shrink:0}
+#flash-card .fc-ctx{position:absolute;top:12px;left:16px;font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-faint);max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#flash-card .fc-q{font-family:var(--read);font-size:19px;color:var(--ink);line-height:1.5;max-width:46ch}
+#flash-card .fc-a{font-family:var(--read);font-size:17px;color:var(--ink);line-height:1.55;max-width:46ch;text-align:left}
+#flash-card .fc-a ul,#flash-card .fc-a ol{margin:0 0 0 20px}
+#flash-card .fc-a li{margin-bottom:5px}
+#flash-card .fc-a .fc-a-lead{font-family:var(--serif);font-size:21px;color:var(--accent);text-align:center;display:block;margin-bottom:8px}
+#flash-card .fc-a .fc-note{display:block;margin-top:10px;font-size:14.5px;color:var(--ink-soft)}
+.fc-mode{
+  background:var(--surface-raised);border:1px solid var(--line);border-radius:99px;padding:5px 12px;
+  font-size:11px;font-family:var(--sans);font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--ink-soft);cursor:pointer;transition:all .18s;
+}
+.fc-mode:hover{border-color:var(--indigo);color:var(--indigo)}
+.fc-mode.on{background:var(--indigo-wash);border-color:var(--indigo);color:var(--indigo)}
+#flash-body{flex:1;overflow-y:auto;padding:16px 22px 4px;display:flex;flex-direction:column}
+#flash-progress{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-shrink:0}
+#flash-bar{flex:1;height:4px;background:var(--line-soft);border-radius:99px;overflow:hidden}
+#flash-bar span{display:block;height:100%;background:var(--indigo);border-radius:99px;transition:width .3s}
+#flash-count{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);white-space:nowrap}
+#flash-card{
+  position:relative;flex:1;min-height:230px;background:var(--surface-raised);border:1px solid var(--line);
+  border-left:3px solid var(--indigo);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);
+  padding:30px 28px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;cursor:pointer;transition:box-shadow .2s,transform .12s;
+}
+#flash-card:hover{box-shadow:var(--shadow)}
+#flash-card.flipping{transform:rotateX(6deg) scale(.99)}
+#flash-card .fc-side{font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-faint);margin-bottom:14px}
+#flash-card .fc-term{font-family:var(--serif);font-size:30px;font-weight:500;color:var(--accent);line-height:1.2}
+#flash-card .fc-def{font-family:var(--read);font-size:17.5px;color:var(--ink);line-height:1.55;max-width:44ch}
+#flash-card .fc-def .md-code{font-size:.85em}
+#flash-card .fc-hint{margin-top:18px;font-size:11px;letter-spacing:.06em;color:var(--ink-faint)}
+#flash-card .fc-answer{margin-top:16px;padding-top:16px;border-top:1px dashed var(--line);width:100%}
+.fc-badge{position:absolute;top:12px;right:14px;font-size:10px;text-transform:uppercase;letter-spacing:.09em;padding:3px 9px;border-radius:99px}
+.fc-badge.known{background:var(--good-wash);color:var(--good)}
+.fc-badge.again{background:var(--warn-wash);color:var(--warn)}
+#flash-foot{padding:14px 22px 18px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex-shrink:0}
+#flash-foot .spacer{flex:1}
+.fc-btn{
+  border:1px solid var(--line);background:var(--surface-raised);border-radius:99px;padding:8px 15px;
+  font-size:12.5px;font-family:var(--sans);font-weight:600;color:var(--ink-soft);cursor:pointer;transition:all .18s;
+}
+.fc-btn:hover:not(:disabled){border-color:var(--ink-soft);color:var(--ink)}
+.fc-btn:disabled{opacity:.4;cursor:not-allowed}
+.fc-btn.good{border-color:var(--good);color:var(--good)}
+.fc-btn.good:hover{background:var(--good-wash)}
+.fc-btn.again{border-color:var(--warn);color:var(--warn)}
+.fc-btn.again:hover{background:var(--warn-wash)}
+.fc-btn.primary{background:var(--indigo);border-color:var(--indigo);color:#fff}
+.fc-btn.primary:hover{background:#28376a;color:#fff}
+#flash-done{text-align:center;padding:34px 10px}
+#flash-done .fd-seal{width:64px;height:64px;border:2px solid var(--indigo);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:24px;color:var(--indigo);margin:0 auto 18px}
+#flash-done h4{font-family:var(--serif);font-size:24px;margin-bottom:8px}
+#flash-done p{font-family:var(--read);font-size:16px;color:var(--ink-soft);line-height:1.5}
+#flash-done .fd-stats{display:flex;justify-content:center;gap:30px;margin:22px 0 26px}
+#flash-done .fd-val{font-family:var(--serif);font-size:26px;color:var(--indigo)}
+#flash-done .fd-key{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-faint);margin-top:3px}
+@media(max-width:600px){
+  #flash-modal{padding:12px}
+  #flash-card{padding:24px 18px;min-height:200px}
+  #flash-card .fc-term{font-size:24px}
+  #flash-card .fc-def{font-size:16px}
+  #flash-foot{padding:12px 16px 14px}
+}
 
 /* ─── Notes / Scratchpad ─────────────────────────────── */
 #notes-btn{
@@ -843,6 +947,23 @@ h2.md-h{font-size:24px}h3.md-h{font-size:19px}h4.md-h{font-size:16px;text-transf
   <input id="glossary-search" type="text" placeholder="Search terms…" oninput="filterGlossary(this.value)">
   <div id="glossary-body"></div>
 </aside>
+
+<button id="flash-btn" onclick="openFlashcards()">◈ Flashcards</button>
+
+<div id="flash-modal" onclick="if(event.target===this) closeFlashcards()">
+  <div id="flash-panel" role="dialog" aria-modal="true" aria-label="Flashcards">
+    <div id="flash-head">
+      <div>
+        <h3>Flashcards</h3>
+        <div class="sub" id="flash-sub">Randomised recall practice</div>
+      </div>
+      <button id="flash-close" onclick="closeFlashcards()" aria-label="Close flashcards">✕</button>
+    </div>
+    <div id="flash-setup"></div>
+    <div id="flash-body"></div>
+    <div id="flash-foot"></div>
+  </div>
+</div>
 
 <button id="notes-btn" onclick="toggleNotes()">✎ Notes</button>
 <div id="notes-popup">
@@ -2490,6 +2611,328 @@ function attachGlossaryLinks(){
     if(g){ el.title=g.definition; el.onclick=()=>{ if(!document.getElementById('glossary-drawer').classList.contains('open')) toggleGlossary(); filterGlossary(g.term); document.getElementById('glossary-search').value=g.term; }; }
   });
 }
+
+// ════════════════════════════════════════════════════════════════════════
+//  FLASHCARDS — randomised recall decks built from the course JSON
+//  Sources: glossary/key-terms, MC + drag-drop interactions, PKC probes,
+//  assessment MC questions, faded worked-example steps, section takeaways,
+//  and misconceptions that carry a correction.
+// ════════════════════════════════════════════════════════════════════════
+const FC_SOURCES = [
+  {id:'terms',          name:'Glossary terms',        desc:'Term ↔ definition, including key-terms blocks'},
+  {id:'questions',      name:'Lesson questions',      desc:'Multiple-choice and ordering items, plus prior-knowledge probes'},
+  {id:'assessment',     name:'Assessment questions',  desc:'Multiple-choice questions from formal assessments'},
+  {id:'faded',          name:'Worked-example steps',  desc:'Blanked steps from faded examples with their model answers'},
+  {id:'takeaways',      name:'Section takeaways',     desc:'What you should be able to state after each section'},
+  {id:'misconceptions', name:'Misconceptions',        desc:'A common wrong belief paired with its correction'}
+];
+let FC = { deck:[], i:0, flipped:false, mode:'term', results:{}, sel:new Set(['terms']), phase:'setup' };
+
+function shuffled(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+const fcTxt = v => String(v==null?'':v).trim();
+
+// ── collectors ────────────────────────────────────────────────────────────
+function fcTerms(){
+  return (C.glossary||[]).filter(g=>g && fcTxt(g.term) && fcTxt(g.definition))
+    .map(g=>({src:'terms', term:g.term, definition:g.definition, ctx:'Glossary'}));
+}
+function fcMCCard(item, ctx, src){
+  const opts=item.options, ci=item.correctIndex;
+  if(!Array.isArray(opts) || ci==null || opts[ci]==null) return null;
+  const prompt = fcTxt(item.reviewPromptOverride) || fcTxt(item.prompt);
+  if(!prompt) return null;
+  const fb=(item.optionFeedback||[]).find(f=>f.optionIndex===ci);
+  const note = fcTxt(fb&&fb.feedback) || fcTxt(item.feedback&&item.feedback.elaborativeFeedback);
+  return {
+    src, ctx,
+    frontLabel:'Question', frontHTML:`<div class="fc-q">${mdInline(prompt)}</div>`,
+    backLabel:'Answer',
+    backHTML:`<div class="fc-a"><span class="fc-a-lead">${mdInline(String(opts[ci]))}</span>${note?`<span class="fc-note">${mdInline(note)}</span>`:''}</div>`
+  };
+}
+function fcOrderCard(item, ctx, src){
+  const opts=item.options, order=item.correctOrder;
+  const prompt = fcTxt(item.reviewPromptOverride) || fcTxt(item.prompt);
+  if(!Array.isArray(opts) || !Array.isArray(order) || !order.length || !prompt) return null;
+  if(order.some(i=>opts[i]==null)) return null;
+  return {
+    src, ctx,
+    frontLabel:'Put in order', frontHTML:`<div class="fc-q">${mdInline(prompt)}</div>`,
+    backLabel:'Correct order',
+    backHTML:`<div class="fc-a"><ol>${order.map(i=>`<li>${mdInline(String(opts[i]))}</li>`).join('')}</ol></div>`
+  };
+}
+function fcQuestions(){
+  const out=[];
+  (C.sections||[]).forEach(sec=>{
+    (sec.learningExperiences||[]).forEach(exp=>{
+      const ctx=`${fcTxt(sec.title)}${exp.title?' · '+fcTxt(exp.title):''}`;
+      (exp.interactionSequence||[]).forEach(int=>{
+        const c = int.interactionType==='multiple-choice' ? fcMCCard(int,ctx,'questions')
+                : int.interactionType==='drag-drop'       ? fcOrderCard(int,ctx,'questions')
+                : null;
+        if(c) out.push(c);
+      });
+    });
+  });
+  const pkc=C.priorKnowledgeCheck;
+  if(pkc && (pkc.probeQuestions||[]).length){
+    (pkc.probeQuestions||[]).forEach(p=>{
+      const c=fcMCCard(p,'Prior-knowledge check','questions'); if(c) out.push(c);
+    });
+  }
+  return out;
+}
+function fcAssessment(){
+  const out=[];
+  (C.assessments||[]).forEach(a=>{
+    const ctx=fcTxt(a.title)||'Assessment';
+    (a.questions||[]).forEach(q=>{
+      if(q.questionType!=='multiple-choice') return;
+      const c=fcMCCard(q,ctx,'assessment'); if(c) out.push(c);
+    });
+  });
+  return out;
+}
+function fcFaded(){
+  const out=[];
+  (C.sections||[]).forEach(sec=>{
+    (sec.learningExperiences||[]).forEach(exp=>{
+      (exp.workedExamples||[]).forEach(w=>{
+        const fv=w.fadedVariant; if(!fv) return;
+        const ps=fv.blankedStepPrompts||[], as=fv.blankedStepAnswers||[];
+        if(!ps.length || ps.length!==as.length) return;   // misaligned pairs are unsafe to card
+        const ctx=`${fcTxt(sec.title)} · ${fcTxt(w.title)||'Worked example'}`;
+        ps.forEach((p,i)=>{
+          if(!fcTxt(p) || !fcTxt(as[i])) return;
+          out.push({
+            src:'faded', ctx,
+            frontLabel:'Supply the step', frontHTML:`<div class="fc-q">${mdInline(p)}</div>`,
+            backLabel:'Model answer', backHTML:`<div class="fc-a">${mdInline(as[i])}</div>`
+          });
+        });
+      });
+    });
+  });
+  return out;
+}
+function fcTakeaways(){
+  const out=[];
+  (C.sections||[]).forEach(sec=>{
+    const ss=sec.sectionSummary; if(!ss) return;
+    const ks=(ss.keyTakeaways||[]).filter(t=>fcTxt(t));
+    if(!ks.length) return;
+    out.push({
+      src:'takeaways', ctx:'Section takeaways',
+      frontLabel:'Recall', frontHTML:`<div class="fc-q">What should you now be able to state about <b>${esc(fcTxt(sec.title))}</b>?</div>`,
+      backLabel:`${ks.length} takeaway${ks.length===1?'':'s'}`,
+      backHTML:`<div class="fc-a"><ul>${ks.map(t=>`<li>${mdInline(t)}</li>`).join('')}</ul></div>`
+    });
+  });
+  return out;
+}
+const FC_FIX_KEYS = ['correction','correctUnderstanding','correctConception','correctBelief','resolution','remediation','remediationAction','whyIncorrect'];
+function fcMisconceptions(){
+  const out=[];
+  (C.competencies||[]).forEach(c=>{
+    (c.commonMisconceptions||[]).forEach(m=>{
+      const wrong=fcTxt(m.misconception); if(!wrong) return;
+      const key=FC_FIX_KEYS.find(k=>fcTxt(m[k]));
+      if(!key) return;                                   // no correction authored → not a card
+      out.push({
+        src:'misconceptions', ctx:fcTxt(c.name)||'Misconception',
+        frontLabel:'Why is this wrong?', frontHTML:`<div class="fc-q">“${mdInline(wrong)}”</div>`,
+        backLabel:'Correction', backHTML:`<div class="fc-a">${mdInline(m[key])}</div>`
+      });
+    });
+  });
+  return out;
+}
+function fcCollect(id){
+  try{
+    return ({terms:fcTerms, questions:fcQuestions, assessment:fcAssessment,
+             faded:fcFaded, takeaways:fcTakeaways, misconceptions:fcMisconceptions}[id]||(()=>[]))();
+  }catch(e){ return []; }
+}
+function fcCounts(){
+  const o={}; FC_SOURCES.forEach(s=>o[s.id]=fcCollect(s.id).length); return o;
+}
+
+// ── deck ──────────────────────────────────────────────────────────────────
+function buildFlashDeck(cards){
+  let pool = cards || [...FC.sel].flatMap(id=>fcCollect(id));
+  FC.deck = shuffled(pool).map(c=>c.src==='terms'
+    ? Object.assign({}, c, {side: FC.mode==='mixed' ? (Math.random()<.5?'term':'def') : FC.mode})
+    : Object.assign({}, c));
+  FC.i=0; FC.flipped=false; FC.results={};
+}
+function openFlashcards(){
+  const counts=fcCounts(), total=Object.values(counts).reduce((a,b)=>a+b,0);
+  if(!total){ toast('This course has nothing to build flashcards from yet'); return; }
+  FC.sel = new Set([...FC.sel].filter(id=>counts[id]>0));
+  if(!FC.sel.size){ const first=FC_SOURCES.find(s=>counts[s.id]>0); if(first) FC.sel.add(first.id); }
+  FC.phase='setup';
+  document.getElementById('flash-modal').classList.add('open');
+  renderFlash();
+}
+function closeFlashcards(){ document.getElementById('flash-modal').classList.remove('open'); }
+function toggleFlashSource(id){
+  const counts=fcCounts(); if(!counts[id]) return;
+  if(FC.sel.has(id)) FC.sel.delete(id); else FC.sel.add(id);
+  renderFlash();
+}
+function setFlashMode(mode){
+  FC.mode=mode;
+  if(FC.phase==='study'){ buildFlashDeck(); }
+  renderFlash();
+}
+function startFlashcards(){
+  if(!FC.sel.size){ toast('Pick at least one source'); return; }
+  buildFlashDeck();
+  if(!FC.deck.length){ toast('No cards in that selection'); return; }
+  FC.phase='study';
+  renderFlash();
+}
+function backToFlashSetup(){ FC.phase='setup'; renderFlash(); }
+function flipFlash(){
+  if(FC.phase!=='study' || FC.i>=FC.deck.length) return;
+  FC.flipped=!FC.flipped;
+  const card=document.getElementById('flash-card');
+  if(card){ card.classList.add('flipping'); setTimeout(()=>card.classList.remove('flipping'),120); }
+  renderFlash();
+}
+function markFlash(status){
+  if(FC.phase!=='study' || FC.i>=FC.deck.length) return;
+  FC.results[FC.i]=status; nextFlash();
+}
+function nextFlash(){ if(FC.phase==='study' && FC.i<FC.deck.length){ FC.i++; FC.flipped=false; renderFlash(); } }
+function prevFlash(){ if(FC.phase==='study' && FC.i>0){ FC.i--; FC.flipped=false; renderFlash(); } }
+function reshuffleFlash(){ buildFlashDeck(); renderFlash(); toast('Deck reshuffled'); }
+function retryMissedFlash(){
+  const missed=FC.deck.filter((c,idx)=>FC.results[idx]==='again');
+  if(!missed.length) return;
+  buildFlashDeck(missed); renderFlash();
+}
+
+// ── render ────────────────────────────────────────────────────────────────
+function renderFlash(){
+  const setup=document.getElementById('flash-setup'),
+        body=document.getElementById('flash-body'),
+        foot=document.getElementById('flash-foot'),
+        sub=document.getElementById('flash-sub');
+  if(!setup||!body||!foot) return;
+
+  if(FC.phase==='setup'){
+    const counts=fcCounts();
+    const total=[...FC.sel].reduce((n,id)=>n+counts[id],0);
+    setup.style.display='block'; body.style.display='none';
+    if(sub) sub.textContent='Build a deck';
+    setup.innerHTML=`
+      <p class="fs-lede">Pick what to study. Cards are drawn from the course file and shuffled into a random order every run.</p>
+      <div class="fs-label">Sources</div>
+      <div class="fs-sources">
+        ${FC_SOURCES.map(s=>{
+          const n=counts[s.id], on=FC.sel.has(s.id)&&n>0;
+          return `<label class="fs-src ${on?'on':''} ${n?'':'empty'}" ${n?`onclick="event.preventDefault();toggleFlashSource('${s.id}')"`:''}>
+            <input type="checkbox" ${on?'checked':''} ${n?'':'disabled'} tabindex="-1">
+            <span><span class="fs-name">${esc(s.name)}</span><span class="fs-desc">${esc(s.desc)}</span></span>
+            <span class="fs-n">${n}</span>
+          </label>`;
+        }).join('')}
+      </div>
+      ${FC.sel.has('terms')?`<div class="fs-label">Term cards face</div>
+      <div id="flash-modes">
+        <button class="fc-mode ${FC.mode==='term'?'on':''}" onclick="setFlashMode('term')">Term → Definition</button>
+        <button class="fc-mode ${FC.mode==='def'?'on':''}" onclick="setFlashMode('def')">Definition → Term</button>
+        <button class="fc-mode ${FC.mode==='mixed'?'on':''}" onclick="setFlashMode('mixed')">Mixed</button>
+      </div>`:''}`;
+    foot.innerHTML=`
+      <span style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint)">${total} card${total===1?'':'s'} selected</span>
+      <span class="spacer"></span>
+      <button class="fc-btn" onclick="closeFlashcards()">Cancel</button>
+      <button class="fc-btn primary" onclick="startFlashcards()" ${total?'':'disabled'}>Shuffle &amp; start →</button>`;
+    return;
+  }
+
+  setup.style.display='none'; body.style.display='flex';
+  const total=FC.deck.length;
+
+  if(FC.i>=total){
+    const known=Object.values(FC.results).filter(r=>r==='known').length;
+    const again=Object.values(FC.results).filter(r=>r==='again').length;
+    if(sub) sub.textContent='Deck complete';
+    body.innerHTML=`
+      <div id="flash-done">
+        <div class="fd-seal">✦</div>
+        <h4>Deck complete</h4>
+        <p>You worked through ${total} card${total===1?'':'s'}.</p>
+        <div class="fd-stats">
+          <div><div class="fd-val">${known}</div><div class="fd-key">Got it</div></div>
+          <div><div class="fd-val">${again}</div><div class="fd-key">To review</div></div>
+        </div>
+      </div>`;
+    foot.innerHTML=`
+      ${again?`<button class="fc-btn primary" onclick="retryMissedFlash()">Review the ${again} you missed</button>`:''}
+      <button class="fc-btn" onclick="reshuffleFlash()">⇄ Reshuffle</button>
+      <button class="fc-btn" onclick="backToFlashSetup()">⚙ Change deck</button>
+      <span class="spacer"></span>
+      <button class="fc-btn" onclick="closeFlashcards()">Done</button>`;
+    return;
+  }
+
+  const c=FC.deck[FC.i], pct=Math.round((FC.i/total)*100), status=FC.results[FC.i];
+  let frontLabel, frontHTML, backLabel, backHTML;
+  if(c.src==='terms'){
+    const isTerm = c.side==='term';
+    frontLabel = isTerm?'Term':'Definition';
+    frontHTML  = isTerm?`<div class="fc-term">${esc(c.term)}</div>`:`<div class="fc-def">${mdInline(c.definition)}</div>`;
+    backLabel  = isTerm?'Definition':'Term';
+    backHTML   = isTerm?`<div class="fc-def">${mdInline(c.definition)}</div>`:`<div class="fc-term">${esc(c.term)}</div>`;
+  } else {
+    frontLabel=c.frontLabel; frontHTML=c.frontHTML; backLabel=c.backLabel; backHTML=c.backHTML;
+  }
+  if(sub) sub.textContent=`${total} card${total===1?'':'s'} · shuffled`;
+
+  body.innerHTML=`
+    <div id="flash-progress">
+      <div id="flash-bar"><span style="width:${pct}%"></span></div>
+      <div id="flash-count">Card ${FC.i+1} / ${total}</div>
+    </div>
+    <div id="flash-card" onclick="flipFlash()" title="Click to flip">
+      ${c.ctx?`<span class="fc-ctx">${esc(c.ctx)}</span>`:''}
+      ${status?`<span class="fc-badge ${status}">${status==='known'?'Got it':'Review'}</span>`:''}
+      <div class="fc-side">${esc(frontLabel)}</div>
+      ${frontHTML}
+      ${FC.flipped
+        ? `<div class="fc-answer"><div class="fc-side">${esc(backLabel)}</div>${backHTML}</div>`
+        : `<div class="fc-hint">Click or press Space to reveal</div>`}
+    </div>`;
+
+  foot.innerHTML=`
+    <button class="fc-btn" onclick="prevFlash()" ${FC.i===0?'disabled':''}>← Prev</button>
+    <button class="fc-btn" onclick="flipFlash()">${FC.flipped?'Hide':'Flip'}</button>
+    <span class="spacer"></span>
+    <button class="fc-btn again" onclick="markFlash('again')">Need review</button>
+    <button class="fc-btn good" onclick="markFlash('known')">Got it</button>
+    <button class="fc-btn" onclick="nextFlash()">Skip →</button>`;
+}
+document.addEventListener('keydown', e=>{
+  const m=document.getElementById('flash-modal');
+  if(!m || !m.classList.contains('open')) return;
+  if(e.key==='Escape'){ closeFlashcards(); return; }
+  if(FC.phase!=='study') return;
+  if(/^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName||'')) return;
+  if(e.key===' '||e.key==='Enter'){ e.preventDefault(); flipFlash(); }
+  else if(e.key==='ArrowRight'){ e.preventDefault(); nextFlash(); }
+  else if(e.key==='ArrowLeft'){ e.preventDefault(); prevFlash(); }
+  else if(e.key==='1'){ markFlash('again'); }
+  else if(e.key==='2'){ markFlash('known'); }
+});
+
 
 // ════════════════════════════════════════════════════════════════════════
 //  NOTES / SCRATCHPAD
