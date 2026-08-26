@@ -1,0 +1,58 @@
+<svg viewBox="0 0 940 520" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <marker id="arrB2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="940" height="520" fill="#ffffff"/>
+
+  <text x="470" y="34" text-anchor="middle" font-size="21" font-weight="700" fill="#1e293b">Build Tooling Decision Tree</text>
+  <text x="470" y="55" text-anchor="middle" font-size="13" fill="#64748b">Two questions settle it &#8212; decide explicitly at project start, not by default</text>
+
+  <!-- Q1 -->
+  <polygon points="200,90 340,150 200,210 60,150" fill="#eef2ff" stroke="#4338ca" stroke-width="1.8"/>
+  <text x="200" y="142" text-anchor="middle" font-size="12.5" fill="#312e81" font-weight="700">Do you need SSR, SSG,</text>
+  <text x="200" y="160" text-anchor="middle" font-size="12.5" fill="#312e81" font-weight="700">or edge rendering?</text>
+
+  <line x1="340" y1="150" x2="440" y2="150" stroke="#16a34a" stroke-width="2" marker-end="url(#arrB2)"/>
+  <text x="390" y="140" text-anchor="middle" font-size="12" fill="#16a34a" font-weight="700">yes</text>
+
+  <rect x="450" y="105" width="440" height="90" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.8"/>
+  <text x="470" y="132" font-size="15" font-weight="700" fill="#14532d">Next.js (App Router) or Remix</text>
+  <text x="470" y="154" font-size="11.5" fill="#166534">SEO-critical public pages, server-side data</text>
+  <text x="470" y="171" font-size="11.5" fill="#166534">fetching that must stay off the client, edge personalization</text>
+
+  <line x1="200" y1="210" x2="200" y2="250" stroke="#64748b" stroke-width="2" marker-end="url(#arrB2)"/>
+  <text x="216" y="235" font-size="12" fill="#64748b" font-weight="700">no</text>
+
+  <!-- Q2 -->
+  <polygon points="200,250 340,310 200,370 60,310" fill="#eef2ff" stroke="#4338ca" stroke-width="1.8"/>
+  <text x="200" y="298" text-anchor="middle" font-size="12" fill="#312e81" font-weight="700">Need meta-framework</text>
+  <text x="200" y="315" text-anchor="middle" font-size="12" fill="#312e81" font-weight="700">conventions?</text>
+  <text x="200" y="332" text-anchor="middle" font-size="10" fill="#4338ca">(file-based routing, API routes)</text>
+
+  <line x1="340" y1="310" x2="440" y2="310" stroke="#16a34a" stroke-width="2" marker-end="url(#arrB2)"/>
+  <text x="390" y="300" text-anchor="middle" font-size="12" fill="#16a34a" font-weight="700">yes</text>
+
+  <rect x="450" y="265" width="440" height="90" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.8"/>
+  <text x="470" y="292" font-size="15" font-weight="700" fill="#14532d">Next.js Pages Router or Remix</text>
+  <text x="470" y="314" font-size="11.5" fill="#166534">You want the framework's conventions even</text>
+  <text x="470" y="331" font-size="11.5" fill="#166534">without a hard SSR requirement</text>
+
+  <line x1="200" y1="370" x2="200" y2="410" stroke="#64748b" stroke-width="2" marker-end="url(#arrB2)"/>
+  <text x="216" y="395" font-size="12" fill="#64748b" font-weight="700">no</text>
+
+  <rect x="30" y="415" width="340" height="90" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.8"/>
+  <text x="50" y="442" font-size="15" font-weight="700" fill="#14532d">Vite + React Router</text>
+  <text x="50" y="464" font-size="11.5" fill="#166534">The correct default for a React SPA without</text>
+  <text x="50" y="481" font-size="11.5" fill="#166534">SSR &#8212; near-instant HMR, Rollup tree-shaking</text>
+  <text x="50" y="498" font-size="11.5" fill="#166534">at build time</text>
+
+  <!-- side note -->
+  <rect x="450" y="380" width="460" height="125" rx="10" fill="#fffbeb" stroke="#fde68a"/>
+  <text x="470" y="405" font-size="12.5" font-weight="700" fill="#92400e">The constraint to communicate up front</text>
+  <text x="470" y="427" font-size="11.5" fill="#78350f">Migrating from a Vite SPA to Next.js later is a significant</text>
+  <text x="470" y="444" font-size="11.5" fill="#78350f">refactor &#8212; routing model, data fetching patterns, and</text>
+  <text x="470" y="461" font-size="11.5" fill="#78350f">deployment infrastructure all change at once.</text>
+  <text x="470" y="483" font-size="11.5" fill="#78350f" font-weight="700">Make this decision explicitly at project start.</text>
+</svg>

@@ -1,0 +1,114 @@
+<svg viewBox="0 0 980 1060" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="980" height="1060" fill="#ffffff"/>
+
+  <text x="490" y="34" text-anchor="middle" font-size="21" font-weight="700" fill="#1e293b">State Classification Flowchart</text>
+  <text x="490" y="55" text-anchor="middle" font-size="13" fill="#64748b">Classify first, choose the mechanism second &#8212; walk the questions in order</text>
+
+  <!-- shared geometry -->
+  <!-- Diamonds centered x=190, width 200 height 100 -->
+  <!-- Outcomes: rounded rect x=430..900 width 380 height 78 -->
+
+  <!-- Q1 -->
+  <polygon points="190,100 300,150 190,200 80,150" fill="#eef2ff" stroke="#4338ca" stroke-width="1.8"/>
+  <text x="190" y="140" text-anchor="middle" font-size="12" fill="#312e81" font-weight="700">Does it originate</text>
+  <text x="190" y="156" text-anchor="middle" font-size="12" fill="#312e81" font-weight="700">on the server?</text>
+  <text x="190" y="172" text-anchor="middle" font-size="10.5" fill="#4338ca">(fetched via API)</text>
+
+  <line x1="300" y1="150" x2="425" y2="150" stroke="#16a34a" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="362" y="140" text-anchor="middle" font-size="12" fill="#16a34a" font-weight="700">yes</text>
+  <rect x="430" y="111" width="380" height="78" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.8"/>
+  <text x="450" y="138" font-size="14" font-weight="700" fill="#14532d">Server cache state</text>
+  <text x="450" y="158" font-size="11.5" fill="#166534">Owner: server + client cache</text>
+  <text x="450" y="175" font-size="11.5" fill="#166534" font-family="ui-monospace, monospace">TanStack Query / SWR</text>
+
+  <line x1="190" y1="200" x2="190" y2="235" stroke="#64748b" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="206" y="222" font-size="12" fill="#64748b" font-weight="700">no</text>
+
+  <!-- Q2 -->
+  <polygon points="190,235 300,285 190,335 80,285" fill="#eef2ff" stroke="#4338ca" stroke-width="1.8"/>
+  <text x="190" y="275" text-anchor="middle" font-size="12" fill="#312e81" font-weight="700">Can it be computed</text>
+  <text x="190" y="291" text-anchor="middle" font-size="12" fill="#312e81" font-weight="700">from other state?</text>
+  <text x="190" y="307" text-anchor="middle" font-size="10.5" fill="#4338ca">(a filter, a total, a flag)</text>
+
+  <line x1="300" y1="285" x2="425" y2="285" stroke="#16a34a" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="362" y="275" text-anchor="middle" font-size="12" fill="#16a34a" font-weight="700">yes</text>
+  <rect x="430" y="246" width="380" height="78" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.8"/>
+  <text x="450" y="273" font-size="14" font-weight="700" fill="#14532d">Derived state</text>
+  <text x="450" y="293" font-size="11.5" fill="#166534">Owner: nowhere &#8212; compute it</text>
+  <text x="450" y="310" font-size="11.5" fill="#166534" font-family="ui-monospace, monospace">compute in render / useMemo</text>
+
+  <line x1="190" y1="335" x2="190" y2="370" stroke="#64748b" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="206" y="357" font-size="12" fill="#64748b" font-weight="700">no</text>
+
+  <!-- Q3 -->
+  <polygon points="190,370 300,420 190,470 80,420" fill="#eef2ff" stroke="#4338ca" stroke-width="1.8"/>
+  <text x="190" y="410" text-anchor="middle" font-size="12" fill="#312e81" font-weight="700">Does it live only for</text>
+  <text x="190" y="426" text-anchor="middle" font-size="12" fill="#312e81" font-weight="700">one interaction?</text>
+  <text x="190" y="442" text-anchor="middle" font-size="10.5" fill="#4338ca">(a tooltip, a hover)</text>
+
+  <line x1="300" y1="420" x2="425" y2="420" stroke="#16a34a" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="362" y="410" text-anchor="middle" font-size="12" fill="#16a34a" font-weight="700">yes</text>
+  <rect x="430" y="381" width="380" height="78" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.8"/>
+  <text x="450" y="408" font-size="14" font-weight="700" fill="#14532d">Ephemeral state</text>
+  <text x="450" y="428" font-size="11.5" fill="#166534">Owner: the component</text>
+  <text x="450" y="445" font-size="11.5" fill="#166534" font-family="ui-monospace, monospace">useState / useRef</text>
+
+  <line x1="190" y1="470" x2="190" y2="505" stroke="#64748b" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="206" y="492" font-size="12" fill="#64748b" font-weight="700">no</text>
+
+  <!-- Q4 -->
+  <polygon points="190,505 300,555 190,605 80,555" fill="#eef2ff" stroke="#4338ca" stroke-width="1.8"/>
+  <text x="190" y="545" text-anchor="middle" font-size="12" fill="#312e81" font-weight="700">Is it input in progress</text>
+  <text x="190" y="561" text-anchor="middle" font-size="12" fill="#312e81" font-weight="700">toward a submission?</text>
+  <text x="190" y="577" text-anchor="middle" font-size="10.5" fill="#4338ca">(field values, validity)</text>
+
+  <line x1="300" y1="555" x2="425" y2="555" stroke="#16a34a" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="362" y="545" text-anchor="middle" font-size="12" fill="#16a34a" font-weight="700">yes</text>
+  <rect x="430" y="516" width="380" height="78" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.8"/>
+  <text x="450" y="543" font-size="14" font-weight="700" fill="#14532d">Form state</text>
+  <text x="450" y="563" font-size="11.5" fill="#166534">Owner: the form layer</text>
+  <text x="450" y="580" font-size="11.5" fill="#166534" font-family="ui-monospace, monospace">React Hook Form</text>
+
+  <line x1="190" y1="605" x2="190" y2="640" stroke="#64748b" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="206" y="627" font-size="12" fill="#64748b" font-weight="700">no</text>
+
+  <!-- Q5 -->
+  <polygon points="190,640 300,690 190,740 80,690" fill="#eef2ff" stroke="#4338ca" stroke-width="1.8"/>
+  <text x="190" y="680" text-anchor="middle" font-size="12" fill="#312e81" font-weight="700">Do multiple unrelated</text>
+  <text x="190" y="696" text-anchor="middle" font-size="12" fill="#312e81" font-weight="700">parts of the app need it?</text>
+  <text x="190" y="712" text-anchor="middle" font-size="10.5" fill="#4338ca">(read across the tree)</text>
+
+  <line x1="300" y1="690" x2="425" y2="690" stroke="#16a34a" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="362" y="680" text-anchor="middle" font-size="12" fill="#16a34a" font-weight="700">yes</text>
+  <rect x="430" y="651" width="380" height="78" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.8"/>
+  <text x="450" y="678" font-size="14" font-weight="700" fill="#14532d">Global client state</text>
+  <text x="450" y="698" font-size="11.5" fill="#166534">Owner: the application</text>
+  <text x="450" y="715" font-size="11.5" fill="#166534" font-family="ui-monospace, monospace">Zustand / Redux Toolkit</text>
+
+  <line x1="190" y1="740" x2="190" y2="800" stroke="#64748b" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="206" y="775" font-size="12" fill="#64748b" font-weight="700">no</text>
+
+  <!-- final outcome directly below -->
+  <rect x="40" y="800" width="300" height="90" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.8"/>
+  <text x="60" y="830" font-size="14" font-weight="700" fill="#14532d">Local UI state</text>
+  <text x="60" y="850" font-size="11.5" fill="#166534">Owner: the component (colocate)</text>
+  <text x="60" y="868" font-size="11.5" fill="#166534" font-family="ui-monospace, monospace">useState / useReducer</text>
+
+  <!-- footer note -->
+  <rect x="430" y="800" width="510" height="90" rx="10" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="450" y="825" font-size="12.5" fill="#334155" font-weight="700">Reordered from the course's own six questions</text>
+  <text x="450" y="845" font-size="11.5" fill="#475569">into a single non-overlapping decision path, so every</text>
+  <text x="450" y="862" font-size="11.5" fill="#475569">piece of state lands in exactly one bucket &#8212; not several.</text>
+  <text x="450" y="880" font-size="11.5" fill="#475569">See Section 8 for the library mapped to each mechanism.</text>
+
+  <!-- bottom banner -->
+  <rect x="40" y="925" width="900" height="100" rx="10" fill="#fffbeb" stroke="#fde68a"/>
+  <text x="490" y="953" text-anchor="middle" font-size="13.5" font-weight="700" fill="#92400e">The most common misclassification</text>
+  <text x="490" y="975" text-anchor="middle" font-size="12" fill="#78350f">Treating server cache state as global client state &#8212; fetching from an API and storing it in Redux/Zustand.</text>
+  <text x="490" y="994" text-anchor="middle" font-size="12" fill="#78350f">That means hand-rolling loading flags, refetch logic, and cache invalidation that a query library gives you for free.</text>
+</svg>

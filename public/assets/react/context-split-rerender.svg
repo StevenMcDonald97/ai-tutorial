@@ -1,0 +1,93 @@
+<svg viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <marker id="arrC" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1000" height="600" fill="#ffffff"/>
+
+  <text x="500" y="34" text-anchor="middle" font-size="21" font-weight="700" fill="#1e293b">Context: One Value vs. Value/Dispatch Split</text>
+  <text x="500" y="55" text-anchor="middle" font-size="13" fill="#64748b">Every consumer of a changed context re-renders &#8212; regardless of which field it actually reads</text>
+
+  <!-- trigger note -->
+  <rect x="330" y="70" width="340" height="26" rx="13" fill="#fffbeb" stroke="#fde68a"/>
+  <text x="500" y="88" text-anchor="middle" font-size="11.5" fill="#92400e" font-family="ui-monospace, monospace">notifications: 3 &#8594; 4  (an unrelated field updates)</text>
+
+  <!-- ===================== LEFT: single context ===================== -->
+  <text x="235" y="118" text-anchor="middle" font-size="14.5" font-weight="700" fill="#b91c1c">One combined AppContext</text>
+  <text x="235" y="134" text-anchor="middle" font-size="10.5" fill="#b91c1c" font-family="ui-monospace, monospace">{ user, theme, notifications, dispatch }</text>
+
+  <rect x="55" y="145" width="360" height="40" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="1.8"/>
+  <text x="235" y="170" text-anchor="middle" font-size="11.5" fill="#991b1b" font-family="ui-monospace, monospace">AppContext.Provider value={ {&#8230;} }</text>
+
+  <line x1="235" y1="185" x2="235" y2="200" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrC)"/>
+
+  <g font-size="11">
+    <rect x="55" y="210" width="80" height="56" rx="7" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+    <text x="95" y="234" text-anchor="middle" font-weight="700" fill="#7f1d1d">ProfileCard</text>
+    <text x="95" y="250" text-anchor="middle" font-size="9" fill="#7f1d1d">reads user</text>
+
+    <rect x="145" y="210" width="80" height="56" rx="7" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+    <text x="185" y="234" text-anchor="middle" font-weight="700" fill="#7f1d1d">ThemeToggle</text>
+    <text x="185" y="250" text-anchor="middle" font-size="9" fill="#7f1d1d">reads theme</text>
+
+    <rect x="235" y="210" width="90" height="56" rx="7" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+    <text x="280" y="230" text-anchor="middle" font-weight="700" fill="#7f1d1d">Notification</text>
+    <text x="280" y="243" text-anchor="middle" font-weight="700" fill="#7f1d1d">Badge</text>
+    <text x="280" y="257" text-anchor="middle" font-size="9" fill="#7f1d1d">reads notifications</text>
+
+    <rect x="335" y="210" width="80" height="56" rx="7" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+    <text x="375" y="234" text-anchor="middle" font-weight="700" fill="#7f1d1d">ActionButton</text>
+    <text x="375" y="250" text-anchor="middle" font-size="9" fill="#7f1d1d">only dispatches</text>
+  </g>
+
+  <rect x="55" y="280" width="360" height="46" rx="8" fill="#fef2f2" stroke="#fecaca"/>
+  <text x="235" y="300" text-anchor="middle" font-size="12" font-weight="700" fill="#7f1d1d">All 4 re-render</text>
+  <text x="235" y="316" text-anchor="middle" font-size="10.5" fill="#991b1b">including ThemeToggle and ActionButton, which never touch notifications</text>
+
+  <!-- ===================== RIGHT: split context ===================== -->
+  <text x="765" y="118" text-anchor="middle" font-size="14.5" font-weight="700" fill="#15803d">Value and dispatch, separated</text>
+  <text x="765" y="134" text-anchor="middle" font-size="10.5" fill="#15803d" font-family="ui-monospace, monospace">UserStateContext + UserDispatchContext</text>
+
+  <rect x="600" y="135" width="330" height="26" rx="6" fill="#eff6ff" stroke="#2563eb" stroke-width="1.6"/>
+  <text x="765" y="153" text-anchor="middle" font-size="10.5" fill="#1d4ed8" font-family="ui-monospace, monospace">UserStateContext.Provider value={state}</text>
+
+  <line x1="700" y1="161" x2="700" y2="205" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrC)"/>
+  <line x1="765" y1="161" x2="765" y2="205" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrC)"/>
+  <line x1="835" y1="161" x2="835" y2="205" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrC)"/>
+
+  <g font-size="11">
+    <rect x="600" y="210" width="90" height="56" rx="7" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+    <text x="645" y="234" text-anchor="middle" font-weight="700" fill="#7f1d1d">ProfileCard</text>
+    <text x="645" y="250" text-anchor="middle" font-size="9" fill="#7f1d1d">reads user</text>
+
+    <rect x="700" y="210" width="90" height="56" rx="7" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+    <text x="745" y="234" text-anchor="middle" font-weight="700" fill="#7f1d1d">ThemeToggle</text>
+    <text x="745" y="250" text-anchor="middle" font-size="9" fill="#7f1d1d">reads theme</text>
+
+    <rect x="800" y="210" width="95" height="56" rx="7" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+    <text x="847" y="230" text-anchor="middle" font-weight="700" fill="#7f1d1d">Notification</text>
+    <text x="847" y="243" text-anchor="middle" font-weight="700" fill="#7f1d1d">Badge</text>
+    <text x="847" y="257" text-anchor="middle" font-size="9" fill="#7f1d1d">reads notifications</text>
+  </g>
+
+  <rect x="600" y="290" width="330" height="26" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.6"/>
+  <text x="765" y="308" text-anchor="middle" font-size="10.5" fill="#166534" font-family="ui-monospace, monospace">UserDispatchContext.Provider value={dispatch}</text>
+
+  <line x1="765" y1="316" x2="765" y2="336" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrC)"/>
+
+  <rect x="720" y="341" width="90" height="50" rx="7" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="765" y="363" text-anchor="middle" font-size="11" font-weight="700" fill="#166534">ActionButton</text>
+  <text x="765" y="378" text-anchor="middle" font-size="9" fill="#166534">only dispatches</text>
+
+  <rect x="600" y="405" width="330" height="60" rx="8" fill="#f0fdf4" stroke="#bbf7d0"/>
+  <text x="765" y="426" text-anchor="middle" font-size="12" font-weight="700" fill="#14532d">3 re-render, 1 doesn't</text>
+  <text x="765" y="444" text-anchor="middle" font-size="10.5" fill="#166534">ActionButton consumes only the dispatch function &#8212; a stable</text>
+  <text x="765" y="459" text-anchor="middle" font-size="10.5" fill="#166534">reference that never changes, so it's spared entirely.</text>
+
+  <!-- bottom banner -->
+  <rect x="45" y="500" width="910" height="80" rx="10" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="500" y="525" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">Context is dependency injection, not a state manager</text>
+  <text x="500" y="547" text-anchor="middle" font-size="11.5" fill="#475569">Every consumer re-renders when the value it subscribes to changes by reference &#8212; splitting state from dispatch</text>
+  <text x="500" y="564" text-anchor="middle" font-size="11.5" fill="#475569">is the standard fix, but it only saves the consumers that genuinely don't need the changing value.</text>
+</svg>

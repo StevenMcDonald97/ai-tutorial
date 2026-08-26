@@ -1,0 +1,71 @@
+<svg viewBox="0 0 1000 780" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <rect x="0" y="0" width="1000" height="780" fill="#ffffff"/>
+
+  <text x="500" y="34" text-anchor="middle" font-size="21" font-weight="700" fill="#1e293b">The Six Audit Lenses</text>
+  <text x="500" y="55" text-anchor="middle" font-size="13" fill="#64748b">Every lens maps back to a section you've already worked through</text>
+
+  <!-- spokes (drawn first so hub + nodes sit on top) -->
+  <g stroke="#cbd5e1" stroke-width="2.4">
+    <line x1="500" y1="400" x2="500" y2="180"/>
+    <line x1="500" y1="400" x2="690" y2="290"/>
+    <line x1="500" y1="400" x2="690" y2="510"/>
+    <line x1="500" y1="400" x2="500" y2="620"/>
+    <line x1="500" y1="400" x2="310" y2="510"/>
+    <line x1="500" y1="400" x2="310" y2="290"/>
+  </g>
+
+  <!-- hub -->
+  <circle cx="500" cy="400" r="80" fill="#1e293b"/>
+  <text x="500" y="392" text-anchor="middle" font-size="13.5" font-weight="700" fill="#ffffff">Structured</text>
+  <text x="500" y="410" text-anchor="middle" font-size="13.5" font-weight="700" fill="#ffffff">Codebase Audit</text>
+  <text x="500" y="428" text-anchor="middle" font-size="8.5" fill="#cbd5e1">a remediation plan,</text>
+  <text x="500" y="440" text-anchor="middle" font-size="8.5" fill="#cbd5e1">not just an opinion</text>
+
+  <!-- Lens 1: top -->
+  <rect x="390" y="130" width="220" height="100" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="500" y="153" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1d4ed8">Lens 1 &#183; Rendering Model</text>
+  <text x="500" y="169" text-anchor="middle" font-size="10" fill="#1d4ed8">Section 1</text>
+  <text x="500" y="190" text-anchor="middle" font-size="10" fill="#1e40af" font-style="italic">Re-render cascades? memo</text>
+  <text x="500" y="204" text-anchor="middle" font-size="10" fill="#1e40af" font-style="italic">used speculatively?</text>
+
+  <!-- Lens 2: upper right -->
+  <rect x="580.5" y="240" width="220" height="100" rx="10" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+  <text x="690.5" y="263" text-anchor="middle" font-size="12.5" font-weight="700" fill="#6d28d9">Lens 2 &#183; Async Boundaries</text>
+  <text x="690.5" y="279" text-anchor="middle" font-size="10" fill="#6d28d9">Section 2</text>
+  <text x="690.5" y="300" text-anchor="middle" font-size="10" fill="#5b21b6" font-style="italic">Boundary granularity right?</text>
+  <text x="690.5" y="314" text-anchor="middle" font-size="10" fill="#5b21b6" font-style="italic">Any waterfall fetches?</text>
+
+  <!-- Lens 3: lower right -->
+  <rect x="580.5" y="460" width="220" height="100" rx="10" fill="#fdf2f8" stroke="#db2777" stroke-width="2"/>
+  <text x="690.5" y="483" text-anchor="middle" font-size="12.5" font-weight="700" fill="#9d174d">Lens 3 &#183; Type Contracts</text>
+  <text x="690.5" y="499" text-anchor="middle" font-size="10" fill="#9d174d">Section 3</text>
+  <text x="690.5" y="520" text-anchor="middle" font-size="10" fill="#831843" font-style="italic">Any used? States modeled</text>
+  <text x="690.5" y="534" text-anchor="middle" font-size="10" fill="#831843" font-style="italic">as unions, not loose flags?</text>
+
+  <!-- Lens 4: bottom -->
+  <rect x="390" y="570" width="220" height="100" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="2"/>
+  <text x="500" y="593" text-anchor="middle" font-size="12.5" font-weight="700" fill="#92400e">Lens 4 &#183; State Topology</text>
+  <text x="500" y="609" text-anchor="middle" font-size="10" fill="#92400e">Section 5</text>
+  <text x="500" y="630" text-anchor="middle" font-size="10" fill="#78350f" font-style="italic">Server state stuck in a store?</text>
+  <text x="500" y="644" text-anchor="middle" font-size="10" fill="#78350f" font-style="italic">Context misused as state?</text>
+
+  <!-- Lens 5: lower left -->
+  <rect x="199.5" y="460" width="220" height="100" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <text x="309.5" y="483" text-anchor="middle" font-size="12.5" font-weight="700" fill="#15803d">Lens 5 &#183; Component Design</text>
+  <text x="309.5" y="499" text-anchor="middle" font-size="10" fill="#15803d">Section 6</text>
+  <text x="309.5" y="520" text-anchor="middle" font-size="10" fill="#14532d" font-style="italic">Monolithic components?</text>
+  <text x="309.5" y="534" text-anchor="middle" font-size="10" fill="#14532d" font-style="italic">Headless-hook opportunity?</text>
+
+  <!-- Lens 6: upper left -->
+  <rect x="199.5" y="240" width="220" height="100" rx="10" fill="#ecfeff" stroke="#0891b2" stroke-width="2"/>
+  <text x="309.5" y="263" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0e7490">Lens 6 &#183; Perf &amp; Testing</text>
+  <text x="309.5" y="279" text-anchor="middle" font-size="10" fill="#0e7490">Sections 9&#8211;10</text>
+  <text x="309.5" y="300" text-anchor="middle" font-size="10" fill="#155e75" font-style="italic">Heavy deps code-split?</text>
+  <text x="309.5" y="314" text-anchor="middle" font-size="10" fill="#155e75" font-style="italic">Tests verify behavior?</text>
+
+  <!-- bottom banner -->
+  <rect x="40" y="695" width="920" height="70" rx="10" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="500" y="720" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">Walk all six before writing the plan</text>
+  <text x="500" y="740" text-anchor="middle" font-size="11" fill="#475569">A codebase can pass one lens and fail another &#8212; e.g. clean type contracts (Lens 3) with a badly split state topology (Lens 4).</text>
+  <text x="500" y="756" text-anchor="middle" font-size="11" fill="#475569">The audit's value is in covering all six, not stopping at the first finding.</text>
+</svg>

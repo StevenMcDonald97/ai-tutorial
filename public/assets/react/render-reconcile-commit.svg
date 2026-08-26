@@ -1,0 +1,88 @@
+<svg viewBox="0 0 1000 650" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <marker id="arrM" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#475569"/>
+    </marker>
+    <marker id="arrTeal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#0891b2"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1000" height="650" fill="#ffffff"/>
+
+  <text x="500" y="34" text-anchor="middle" font-size="21" font-weight="700" fill="#1e293b">Render &#8594; Reconcile &#8594; Commit</text>
+  <text x="500" y="55" text-anchor="middle" font-size="13" fill="#64748b">Every React update passes through the same three phases, in order</text>
+
+  <!-- ===== Top-level pipeline ===== -->
+  <rect x="40" y="85" width="260" height="92" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.8"/>
+  <text x="170" y="112" text-anchor="middle" font-size="14.5" font-weight="700" fill="#1d4ed8">1. Render</text>
+  <text x="170" y="133" text-anchor="middle" font-size="11" fill="#1e40af">Calls your component function.</text>
+  <text x="170" y="149" text-anchor="middle" font-size="11" fill="#1e40af">Pure. Not the DOM yet.</text>
+  <text x="170" y="165" text-anchor="middle" font-size="11" fill="#1e40af">Cascades to all children.</text>
+
+  <line x1="300" y1="131" x2="360" y2="131" stroke="#475569" stroke-width="2.2" marker-end="url(#arrM)"/>
+
+  <rect x="370" y="85" width="260" height="92" rx="10" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.8"/>
+  <text x="500" y="112" text-anchor="middle" font-size="14.5" font-weight="700" fill="#6d28d9">2. Reconcile</text>
+  <text x="500" y="133" text-anchor="middle" font-size="11" fill="#5b21b6">Diffs the new element tree</text>
+  <text x="500" y="149" text-anchor="middle" font-size="11" fill="#5b21b6">against the fiber tree.</text>
+  <text x="500" y="165" text-anchor="middle" font-size="11" fill="#5b21b6">Produces a list of effects.</text>
+
+  <line x1="630" y1="131" x2="690" y2="131" stroke="#475569" stroke-width="2.2" marker-end="url(#arrM)"/>
+
+  <rect x="700" y="85" width="260" height="92" rx="10" fill="#fdf2f8" stroke="#db2777" stroke-width="1.8"/>
+  <text x="830" y="112" text-anchor="middle" font-size="14.5" font-weight="700" fill="#9d174d">3. Commit</text>
+  <text x="830" y="133" text-anchor="middle" font-size="11" fill="#9d174d">Applies effects to the DOM.</text>
+  <text x="830" y="149" text-anchor="middle" font-size="11" fill="#9d174d">Synchronous, uninterruptible.</text>
+  <text x="830" y="165" text-anchor="middle" font-size="11" fill="#9d174d">Expands into 3 sub-phases &#8595;</text>
+
+  <!-- zoom bracket from commit box down to expanded timeline -->
+  <path d="M830,177 L830,210" stroke="#db2777" stroke-width="1.8" stroke-dasharray="5,4"/>
+
+  <!-- ===== Expanded commit timeline ===== -->
+  <text x="500" y="228" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1e293b">Inside commit &#8212; and where each effect hook actually fires</text>
+
+  <rect x="40" y="250" width="215" height="70" rx="8" fill="#fdf2f8" stroke="#db2777" stroke-width="1.6"/>
+  <text x="147" y="275" text-anchor="middle" font-size="12" font-weight="700" fill="#9d174d">Before mutation</text>
+  <text x="147" y="292" text-anchor="middle" font-size="10" fill="#9d174d">getSnapshotBeforeUpdate</text>
+  <text x="147" y="306" text-anchor="middle" font-size="10" fill="#9d174d">fires here</text>
+
+  <line x1="255" y1="285" x2="285" y2="285" stroke="#475569" stroke-width="2" marker-end="url(#arrM)"/>
+
+  <rect x="295" y="250" width="215" height="70" rx="8" fill="#fdf2f8" stroke="#db2777" stroke-width="1.6"/>
+  <text x="402" y="275" text-anchor="middle" font-size="12" font-weight="700" fill="#9d174d">Mutation</text>
+  <text x="402" y="292" text-anchor="middle" font-size="10" fill="#9d174d">DOM nodes created,</text>
+  <text x="402" y="306" text-anchor="middle" font-size="10" fill="#9d174d">updated, deleted. Refs attach.</text>
+
+  <line x1="510" y1="285" x2="540" y2="285" stroke="#475569" stroke-width="2" marker-end="url(#arrM)"/>
+
+  <rect x="550" y="250" width="215" height="70" rx="8" fill="#fdf2f8" stroke="#db2777" stroke-width="1.6"/>
+  <text x="657" y="275" text-anchor="middle" font-size="12" font-weight="700" fill="#9d174d">Layout</text>
+  <text x="657" y="292" text-anchor="middle" font-size="10" fill="#9d174d" font-family="ui-monospace, monospace">useLayoutEffect</text>
+  <text x="657" y="306" text-anchor="middle" font-size="10" fill="#9d174d">runs synchronously here</text>
+
+  <!-- paint marker -->
+  <line x1="800" y1="235" x2="800" y2="335" stroke="#0891b2" stroke-width="2.4" stroke-dasharray="3,4"/>
+  <rect x="745" y="335" width="110" height="24" rx="12" fill="#cffafe" stroke="#0891b2"/>
+  <text x="800" y="352" text-anchor="middle" font-size="10.5" fill="#0e7490" font-weight="700">Browser paints</text>
+
+  <line x1="765" y1="285" x2="795" y2="285" stroke="#475569" stroke-width="2" marker-end="url(#arrTeal)"/>
+
+  <rect x="805" y="250" width="155" height="70" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.6"/>
+  <text x="882" y="275" text-anchor="middle" font-size="12" font-weight="700" fill="#0e7490" font-family="ui-monospace, monospace">useEffect</text>
+  <text x="882" y="292" text-anchor="middle" font-size="10" fill="#0e7490">runs after paint,</text>
+  <text x="882" y="306" text-anchor="middle" font-size="10" fill="#0e7490">not during commit</text>
+
+  <!-- ===== Key insight banner ===== -->
+  <rect x="40" y="400" width="920" height="130" rx="10" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="500" y="428" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1e293b">Key insight: the timing difference is the whole point</text>
+  <text x="500" y="455" text-anchor="middle" font-size="12" fill="#0e7490" font-weight="700">useEffect fires after the browser paints</text>
+  <text x="500" y="474" text-anchor="middle" font-size="11.5" fill="#475569">Safe for non-visual side effects &#8212; data fetching, subscriptions &#8212; without delaying the paint.</text>
+  <text x="500" y="497" text-anchor="middle" font-size="12" fill="#9d174d" font-weight="700">useLayoutEffect fires synchronously, before the browser paints</text>
+  <text x="500" y="516" text-anchor="middle" font-size="11.5" fill="#475569">Use it only to read DOM layout measurements &#8212; it blocks paint, so overusing it causes jank.</text>
+
+  <!-- Reconciler heuristics side note -->
+  <rect x="40" y="550" width="920" height="82" rx="10" fill="#f5f3ff" stroke="#ddd6fe"/>
+  <text x="60" y="573" font-size="12" font-weight="700" fill="#5b21b6">What reconciliation actually compares:</text>
+  <text x="60" y="592" font-size="11" fill="#4c1d95">Different element types &#8594; tear down the subtree.  &#183;  Same type &#8594; diff and patch props in place.</text>
+  <text x="60" y="609" font-size="11" fill="#4c1d95">Keys &#8594; identify which children are which across renders (no keys = fragile positional matching).</text>
+</svg>

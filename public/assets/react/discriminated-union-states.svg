@@ -1,0 +1,94 @@
+<svg viewBox="0 0 1000 660" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <rect x="0" y="0" width="1000" height="660" fill="#ffffff"/>
+
+  <text x="500" y="34" text-anchor="middle" font-size="21" font-weight="700" fill="#1e293b">Impossible States: Booleans vs. Discriminated Union</text>
+  <text x="500" y="55" text-anchor="middle" font-size="13" fill="#64748b">Same feature, two type designs &#8212; only one makes bad states impossible to construct</text>
+
+  <!-- LEFT: booleans -->
+  <text x="255" y="90" text-anchor="middle" font-size="14.5" font-weight="700" fill="#1e293b">3 independent booleans &#8594; 8 combinations</text>
+  <text x="255" y="107" text-anchor="middle" font-size="11" fill="#64748b" font-family="ui-monospace, monospace">{ isLoading, isError, data? }</text>
+
+  <!-- 8 cards, 4 cols x 2 rows -->
+  <!-- valid: FFF, TFF, FTF, FFT | invalid: TTF, TFT, FTT, TTT -->
+  <g font-size="10.5">
+    <!-- row 1 -->
+    <rect x="40" y="125" width="105" height="92" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.8"/>
+    <text x="92" y="148" text-anchor="middle" font-family="ui-monospace, monospace" fill="#166534">L:F E:F D:F</text>
+    <text x="92" y="172" text-anchor="middle" font-size="18" fill="#16a34a">&#10003;</text>
+    <text x="92" y="200" text-anchor="middle" font-weight="700" fill="#166534">idle</text>
+
+    <rect x="155" y="125" width="105" height="92" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.8"/>
+    <text x="207" y="148" text-anchor="middle" font-family="ui-monospace, monospace" fill="#166534">L:T E:F D:F</text>
+    <text x="207" y="172" text-anchor="middle" font-size="18" fill="#16a34a">&#10003;</text>
+    <text x="207" y="200" text-anchor="middle" font-weight="700" fill="#166534">loading</text>
+
+    <rect x="270" y="125" width="105" height="92" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.8"/>
+    <text x="322" y="148" text-anchor="middle" font-family="ui-monospace, monospace" fill="#166534">L:F E:T D:F</text>
+    <text x="322" y="172" text-anchor="middle" font-size="18" fill="#16a34a">&#10003;</text>
+    <text x="322" y="200" text-anchor="middle" font-weight="700" fill="#166534">error</text>
+
+    <rect x="385" y="125" width="105" height="92" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.8"/>
+    <text x="437" y="148" text-anchor="middle" font-family="ui-monospace, monospace" fill="#166534">L:F E:F D:T</text>
+    <text x="437" y="172" text-anchor="middle" font-size="18" fill="#16a34a">&#10003;</text>
+    <text x="437" y="200" text-anchor="middle" font-weight="700" fill="#166534">success</text>
+
+    <!-- row 2: invalid -->
+    <rect x="40" y="227" width="105" height="92" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="1.8"/>
+    <text x="92" y="250" text-anchor="middle" font-family="ui-monospace, monospace" fill="#7f1d1d">L:T E:T D:F</text>
+    <text x="92" y="274" text-anchor="middle" font-size="18" fill="#dc2626">&#10007;</text>
+    <text x="92" y="302" text-anchor="middle" font-size="10" fill="#7f1d1d">loading + error?</text>
+
+    <rect x="155" y="227" width="105" height="92" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="1.8"/>
+    <text x="207" y="250" text-anchor="middle" font-family="ui-monospace, monospace" fill="#7f1d1d">L:T E:F D:T</text>
+    <text x="207" y="274" text-anchor="middle" font-size="18" fill="#dc2626">&#10007;</text>
+    <text x="207" y="302" text-anchor="middle" font-size="10" fill="#7f1d1d">loading + data?</text>
+
+    <rect x="270" y="227" width="105" height="92" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="1.8"/>
+    <text x="322" y="250" text-anchor="middle" font-family="ui-monospace, monospace" fill="#7f1d1d">L:F E:T D:T</text>
+    <text x="322" y="274" text-anchor="middle" font-size="18" fill="#dc2626">&#10007;</text>
+    <text x="322" y="302" text-anchor="middle" font-size="10" fill="#7f1d1d">error + data?</text>
+
+    <rect x="385" y="227" width="105" height="92" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="1.8"/>
+    <text x="437" y="250" text-anchor="middle" font-family="ui-monospace, monospace" fill="#7f1d1d">L:T E:T D:T</text>
+    <text x="437" y="274" text-anchor="middle" font-size="18" fill="#dc2626">&#10007;</text>
+    <text x="437" y="302" text-anchor="middle" font-size="10" fill="#7f1d1d">all three at once?</text>
+  </g>
+
+  <text x="255" y="345" text-anchor="middle" font-size="11.5" fill="#475569">TypeScript compiles all 8. Only 4 are meaningful &#8212;</text>
+  <text x="255" y="362" text-anchor="middle" font-size="11.5" fill="#475569">the other 4 are runtime bugs waiting to happen.</text>
+
+  <!-- divider -->
+  <line x1="530" y1="80" x2="530" y2="560" stroke="#e2e8f0" stroke-width="1.4"/>
+
+  <!-- RIGHT: discriminated union -->
+  <text x="765" y="90" text-anchor="middle" font-size="14.5" font-weight="700" fill="#1e293b">Discriminated union &#8594; 4 states, by construction</text>
+  <text x="765" y="107" text-anchor="middle" font-size="11" fill="#64748b" font-family="ui-monospace, monospace">type UserState = &#8230;</text>
+
+  <g font-size="12">
+    <rect x="570" y="130" width="390" height="66" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.8"/>
+    <text x="588" y="155" font-weight="700" fill="#1d4ed8" font-family="ui-monospace, monospace">{ status: 'idle' }</text>
+    <text x="588" y="176" font-size="10.5" fill="#1e40af">No payload &#8212; nothing to access yet.</text>
+
+    <rect x="570" y="206" width="390" height="66" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.8"/>
+    <text x="588" y="231" font-weight="700" fill="#1d4ed8" font-family="ui-monospace, monospace">{ status: 'loading' }</text>
+    <text x="588" y="252" font-size="10.5" fill="#1e40af">No payload &#8212; render a skeleton.</text>
+
+    <rect x="570" y="282" width="390" height="66" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.8"/>
+    <text x="588" y="307" font-weight="700" fill="#1d4ed8" font-family="ui-monospace, monospace">{ status: 'success', data: User }</text>
+    <text x="588" y="328" font-size="10.5" fill="#1e40af">data is guaranteed present &#8212; TS narrows it.</text>
+
+    <rect x="570" y="358" width="390" height="66" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.8"/>
+    <text x="588" y="383" font-weight="700" fill="#1d4ed8" font-family="ui-monospace, monospace">{ status: 'error', error: Error }</text>
+    <text x="588" y="404" font-size="10.5" fill="#1e40af">error is guaranteed present &#8212; TS narrows it.</text>
+  </g>
+
+  <text x="765" y="450" text-anchor="middle" font-size="11.5" fill="#475569">There is no fifth combination to construct &#8212;</text>
+  <text x="765" y="467" text-anchor="middle" font-size="11.5" fill="#475569">the type only has these four shapes.</text>
+
+  <!-- bottom shared banner -->
+  <rect x="40" y="500" width="920" height="130" rx="10" fill="#fffbeb" stroke="#fde68a"/>
+  <text x="500" y="528" text-anchor="middle" font-size="13.5" font-weight="700" fill="#92400e">The union doesn't just document the valid states &#8212; it deletes the invalid ones</text>
+  <text x="500" y="552" text-anchor="middle" font-size="11.5" fill="#78350f">With three booleans, "loading + error + data all true" still compiles. A reviewer has to notice it's wrong.</text>
+  <text x="500" y="571" text-anchor="middle" font-size="11.5" fill="#78350f">With the union, that combination has no type to compile into &#8212; the compiler rejects it before a reviewer ever sees it.</text>
+  <text x="500" y="595" text-anchor="middle" font-size="11.5" fill="#78350f" font-weight="700">Add an exhaustiveness check (a "never" assertion in the default case) so a fifth state added later can't be silently unhandled.</text>
+</svg>

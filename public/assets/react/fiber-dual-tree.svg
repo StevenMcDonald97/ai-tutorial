@@ -1,0 +1,99 @@
+<svg viewBox="0 0 960 600" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrowPurple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#7c3aed"/>
+    </marker>
+    <marker id="arrowGray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="960" height="600" fill="#ffffff"/>
+
+  <!-- Title -->
+  <text x="480" y="34" text-anchor="middle" font-size="21" font-weight="700" fill="#1e293b">React's Two Fiber Trees</text>
+  <text x="480" y="55" text-anchor="middle" font-size="13" fill="#64748b">React never mutates the tree on screen &#8212; it builds a second tree first, then swaps</text>
+
+  <!-- Panel headers -->
+  <rect x="55" y="78" width="410" height="30" rx="6" fill="#dbeafe"/>
+  <text x="260" y="98" text-anchor="middle" font-size="14.5" font-weight="700" fill="#1d4ed8">Current Tree &#8212; what's on screen</text>
+
+  <rect x="495" y="78" width="410" height="30" rx="6" fill="#ede9fe"/>
+  <text x="700" y="98" text-anchor="middle" font-size="14.5" font-weight="700" fill="#6d28d9">Work-in-Progress Tree &#8212; what React is computing</text>
+
+  <!-- LEFT TREE edges -->
+  <g stroke="#2563eb" stroke-width="2" fill="none">
+    <path d="M250,162 L250,195 L170,195 L170,218" marker-end="url(#arrowBlue)"/>
+    <path d="M250,162 L250,195 L330,195 L330,218" marker-end="url(#arrowBlue)"/>
+    <path d="M330,262 L330,295 L250,295 L250,318" marker-end="url(#arrowBlue)"/>
+    <path d="M330,262 L330,295 L410,295 L410,318" marker-end="url(#arrowBlue)"/>
+  </g>
+
+  <!-- LEFT TREE nodes -->
+  <g font-size="12.5" fill="#1e293b">
+    <rect x="190" y="140" width="120" height="42" rx="7" fill="#eff6ff" stroke="#2563eb" stroke-width="1.6"/>
+    <text x="250" y="166" text-anchor="middle" font-weight="700">App</text>
+
+    <rect x="110" y="220" width="120" height="42" rx="7" fill="#eff6ff" stroke="#2563eb" stroke-width="1.6"/>
+    <text x="170" y="246" text-anchor="middle" font-weight="700">Sidebar</text>
+
+    <rect x="270" y="220" width="120" height="42" rx="7" fill="#eff6ff" stroke="#2563eb" stroke-width="1.6"/>
+    <text x="330" y="246" text-anchor="middle" font-weight="700">MainContent</text>
+
+    <rect x="190" y="320" width="120" height="42" rx="7" fill="#eff6ff" stroke="#2563eb" stroke-width="1.6"/>
+    <text x="250" y="346" text-anchor="middle" font-weight="700">Header</text>
+
+    <rect x="350" y="320" width="120" height="42" rx="7" fill="#eff6ff" stroke="#2563eb" stroke-width="1.6"/>
+    <text x="410" y="346" text-anchor="middle" font-weight="700">ChartPanel</text>
+  </g>
+
+  <!-- RIGHT TREE edges -->
+  <g stroke="#7c3aed" stroke-width="2" fill="none">
+    <path d="M690,162 L690,195 L610,195 L610,218" marker-end="url(#arrowPurple)"/>
+    <path d="M690,162 L690,195 L770,195 L770,218" marker-end="url(#arrowPurple)"/>
+    <path d="M770,262 L770,295 L690,295 L690,318" marker-end="url(#arrowPurple)"/>
+    <path d="M770,262 L770,295 L850,295 L850,318" marker-end="url(#arrowPurple)"/>
+  </g>
+
+  <!-- RIGHT TREE nodes -->
+  <g font-size="12.5" fill="#1e293b">
+    <rect x="630" y="140" width="120" height="42" rx="7" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.6"/>
+    <text x="690" y="166" text-anchor="middle" font-weight="700">App</text>
+
+    <rect x="550" y="220" width="120" height="42" rx="7" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.6"/>
+    <text x="610" y="246" text-anchor="middle" font-weight="700">Sidebar</text>
+
+    <rect x="710" y="220" width="120" height="42" rx="7" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.6"/>
+    <text x="770" y="246" text-anchor="middle" font-weight="700">MainContent</text>
+
+    <rect x="630" y="320" width="120" height="42" rx="7" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.6"/>
+    <text x="690" y="346" text-anchor="middle" font-weight="700">Header</text>
+
+    <rect x="790" y="320" width="120" height="42" rx="7" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.6"/>
+    <text x="850" y="346" text-anchor="middle" font-weight="700">ChartPanel</text>
+  </g>
+
+  <!-- alternate connector (App <-> App only, for clarity) -->
+  <line x1="310" y1="161" x2="630" y2="161" stroke="#94a3b8" stroke-width="1.6" stroke-dasharray="5,4" marker-end="url(#arrowGray)" marker-start="url(#arrowGray)"/>
+  <rect x="405" y="120" width="150" height="24" rx="12" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="480" y="136" text-anchor="middle" font-size="11.5" fill="#475569" font-style="italic">fiber.alternate</text>
+
+  <!-- caption about alternate pointers -->
+  <text x="480" y="386" text-anchor="middle" font-size="12" fill="#64748b">Every fiber &#8212; not just the roots &#8212; carries an alternate pointer to its counterpart in the other tree</text>
+  <text x="480" y="404" text-anchor="middle" font-size="12" fill="#64748b">(only one connector shown above, for clarity).</text>
+
+  <!-- bottom banner -->
+  <rect x="55" y="420" width="850" height="150" rx="10" fill="#f8fafc" stroke="#e2e8f0"/>
+  <circle cx="100" cy="460" r="16" fill="#16a34a"/>
+  <path d="M92,460 l6,6 l12,-13" stroke="white" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="128" y="466" font-size="14.5" font-weight="700" fill="#1e293b">On commit: the work-in-progress tree becomes the new current tree</text>
+  <text x="100" y="500" font-size="12.8" fill="#475569">
+    <tspan x="100" dy="0">&#8226; The old current tree becomes the next work-in-progress tree &#8212; React reuses the fiber objects rather than</tspan>
+    <tspan x="100" dy="20">&#160;&#160;allocating new ones each render.</tspan>
+    <tspan x="100" dy="24">&#8226; This is why render-phase side effects are unsafe: React can render the work-in-progress tree, discard it</tspan>
+    <tspan x="100" dy="20">&#160;&#160;entirely if a higher-priority update arrives, and start over &#8212; it never touches the current tree until commit.</tspan>
+  </text>
+</svg>
