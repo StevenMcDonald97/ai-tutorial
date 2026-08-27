@@ -859,6 +859,42 @@ h2.md-h{font-size:24px}h3.md-h{font-size:19px}h4.md-h{font-size:16px;text-transf
 #report-card h3{font-size:20px;margin-bottom:14px}
 .report-line{font-size:13.5px;color:var(--ink-soft);padding:7px 0;border-bottom:1px solid var(--line-soft);font-family:var(--mono);line-height:1.45}
 .report-line:last-child{border-bottom:none}
+
+/* ─── Home / today's session ─────── */
+.home-topline{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:26px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.home-streak{display:flex;align-items:baseline;gap:8px;font-family:var(--sans);font-size:13px;color:var(--ink-soft)}
+.home-streak-n{font-family:var(--serif);font-style:italic;font-size:21px;color:var(--accent)}
+.home-goal{display:flex;align-items:center;gap:10px;font-family:var(--sans);font-size:12.5px;color:var(--ink-faint)}
+.home-goal-track{width:76px;height:5px;background:var(--paper-deep);border-radius:99px;overflow:hidden}
+.home-goal-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .4s ease}
+.home-list{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
+.home-item{display:flex;align-items:center;gap:13px;padding:13px 16px;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--surface-raised);cursor:pointer;transition:border-color .15s,transform .15s}
+.home-item:hover{border-color:var(--ink-faint);transform:translateY(-1px)}
+.home-item-current{background:var(--accent-wash);border-color:var(--accent-line)}
+.home-item-review{border-left:3px solid var(--moss)}
+.home-item-ico{width:26px;height:26px;border-radius:50%;background:var(--paper-deep);color:var(--ink-faint);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-family:var(--sans);font-weight:600}
+.ico-current{background:var(--accent);color:#fff;font-size:10px}
+.ico-review{background:var(--moss-wash);color:var(--moss);font-size:13px}
+.home-item-body{flex:1;min-width:0}
+.home-item-title{font-size:14px;font-weight:600;color:var(--ink)}
+.home-item-sub{font-size:12px;color:var(--ink-soft);margin-top:2px}
+.home-item-arrow{color:var(--accent);font-size:15px;flex-shrink:0}
+.home-comps{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+.home-comp-row{display:flex;justify-content:space-between;font-size:12.5px;font-family:var(--sans);margin-bottom:4px}
+.home-comp-track{height:5px;background:var(--paper-deep);border-radius:99px;overflow:hidden}
+.home-comp-fill{height:100%;border-radius:99px;transition:width .4s ease}
+
+/* ─── Lesson-complete celebration ─────── */
+#lesson-complete-overlay{position:fixed;inset:0;background:rgba(35,33,28,.4);backdrop-filter:blur(2px);z-index:400;display:none;align-items:center;justify-content:center;padding:20px}
+#lesson-complete-overlay.open{display:flex}
+#lesson-complete-card{background:var(--surface-raised);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);max-width:400px;width:100%;padding:30px 26px;text-align:center}
+.lc-seal{width:52px;height:52px;border:1.5px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;color:var(--accent);font-size:19px;animation:sealIn .5s cubic-bezier(.22,1,.36,1)}
+.lc-title{font-family:var(--serif);font-style:italic;font-size:19px;margin-bottom:6px}
+.lc-line{font-family:var(--sans);font-size:13.5px;color:var(--ink-soft);line-height:1.5;margin-bottom:16px}
+.lc-chip{display:inline-flex;align-items:center;gap:6px;background:var(--moss-wash);color:var(--moss);font-family:var(--sans);font-size:11.5px;font-weight:600;padding:5px 12px;border-radius:99px;margin-bottom:20px}
+.lc-foot{border-top:1px solid var(--line);padding-top:16px}
+.lc-next-label{font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px}
+.lc-next-title{font-family:var(--sans);font-size:14px;font-weight:600;margin-bottom:14px;color:var(--ink)}
 </style>
 </head>
 <body>
@@ -883,7 +919,7 @@ h2.md-h{font-size:24px}h3.md-h{font-size:19px}h4.md-h{font-size:16px;text-transf
         </div>
       </div>
       <div class="course-eyebrow" id="sidebar-eyebrow">Course</div>
-      <h2 id="sidebar-title" onClick="goScreen('intro')" style="cursor:pointer"></h2>
+      <h2 id="sidebar-title" onClick="goScreen(hasStarted()?'home':'intro')" style="cursor:pointer"></h2>
       <div id="progress-meta">
         <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
         <div id="progress-label"></div>
@@ -923,6 +959,7 @@ h2.md-h{font-size:24px}h3.md-h{font-size:19px}h4.md-h{font-size:16px;text-transf
     </div>
     <div id="google_translate_element"></div>
     <main id="main">
+      <div id="screen-home"     class="screen"></div>
       <div id="screen-intro"    class="screen active"></div>
       <div id="screen-pkc"      class="screen"></div>
       <div id="screen-section"  class="screen"></div>
@@ -993,6 +1030,10 @@ h2.md-h{font-size:24px}h3.md-h{font-size:19px}h4.md-h{font-size:16px;text-transf
   </div>
 </div>
 
+<div id="lesson-complete-overlay">
+  <div id="lesson-complete-card"></div>
+</div>
+
 <script>
 /* ════════════════════════════════════════════════════════════════════════
    COURSE DATA — conforms to Course Engine JSON Schema v4 (v1.0 reference)
@@ -1038,7 +1079,10 @@ function freshState(){
     assessSubmitted:[], assessSelfRatings:{},
     checkpoint:{},                     // expId -> last unlocked segment index
     adaptState:{},                     // assessId -> adaptive serving state
-    pkcDone:false, pkcAnswers:{}
+    pkcDone:false, pkcAnswers:{},
+    sessionLog:[],                     // ['YYYY-MM-DD', ...] one entry per day visited, for streaks
+    dailyActiveMs:{},                  // 'YYYY-MM-DD' -> milliseconds active on-page that day
+    lastActiveScreen:null              // last non-'home' screen, so "Continue" on the home screen resumes the right place
   };
 }
 function loadState(){
@@ -1054,6 +1098,46 @@ function resetProgress(){
 // helpers for set-like arrays
 const has = (arr,v)=> Array.isArray(arr) && arr.includes(v);
 const add = (arr,v)=>{ if(!arr.includes(v)) arr.push(v); };
+
+// ── Home screen: streaks, daily active time, "what's next" ────────────────
+const DAILY_GOAL_MIN = 60;   // target minutes/day shown on the home screen
+function todayKey(d){ d=d||new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function logSessionDay(){
+  state.sessionLog = state.sessionLog||[];
+  const k = todayKey();
+  if(!state.sessionLog.includes(k)){
+    state.sessionLog.push(k);
+    if(state.sessionLog.length>400) state.sessionLog = state.sessionLog.slice(-400); // cap growth
+    saveState();
+  }
+}
+function computeStreak(){
+  const days = new Set(state.sessionLog||[]);
+  if(!days.size) return 0;
+  let streak=0, d=new Date();
+  while(days.has(todayKey(d))){ streak++; d.setDate(d.getDate()-1); }
+  return streak;
+}
+function dailyMinutesToday(){ return Math.round(((state.dailyActiveMs||{})[todayKey()]||0)/60000); }
+function tickActiveTime(){
+  if(document.visibilityState!=='visible') return;
+  const k = todayKey();
+  state.dailyActiveMs = state.dailyActiveMs||{};
+  state.dailyActiveMs[k] = (state.dailyActiveMs[k]||0) + 20000;
+  saveState();
+}
+setInterval(tickActiveTime, 20000);
+function hasStarted(){
+  return !!(state.pkcDone || doneUnits()>0 || Object.keys(state.reviewSchedule||{}).length || (state.lastActiveScreen && state.lastActiveScreen!=='intro'));
+}
+function nextExpPointer(si, ei){
+  const sec = C.sections?.[si]; if(!sec) return null;
+  const exps = sec.learningExperiences||[];
+  if(ei+1 < exps.length) return {si, ei:ei+1, exp:exps[ei+1]};
+  const nsec = C.sections?.[si+1];
+  if(nsec && (nsec.learningExperiences||[]).length) return {si:si+1, ei:0, exp:nsec.learningExperiences[0]};
+  return null;
+}
 
 // ════════════════════════════════════════════════════════════════════════
 //  v6 UTILITIES — sanitization, markdown, code highlighting
@@ -1333,6 +1417,7 @@ function overallPct(){ const t=totalUnits(); return t? Math.round(doneUnits()/t*
 // ════════════════════════════════════════════════════════════════════════
 function goScreen(screen, sIdx, eIdx){
   closeOverlays();
+  if(screen!=='home') state.lastActiveScreen = screen;   // so "Continue" on the home screen knows where to resume
   state.screen = screen;
   if(sIdx!=null) state.sectionIdx = sIdx;
   if(eIdx!=null) state.expIdx = eIdx;
@@ -1340,7 +1425,8 @@ function goScreen(screen, sIdx, eIdx){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const el = document.getElementById('screen-'+screen);
 
-  if(screen==='intro') renderIntro();
+  if(screen==='home') renderHome();
+  else if(screen==='intro') renderIntro();
   else if(screen==='pkc') renderPKC();
   else if(screen==='section') renderSection();
   else if(screen==='exp') renderExp();
@@ -1357,7 +1443,8 @@ function goScreen(screen, sIdx, eIdx){
 }
 function updateTopbar(){
   let t = C.courseMetadata?.title || 'Course';
-  if(state.screen==='exp'){ const e=curExp(); if(e) t=e.title; }
+  if(state.screen==='home'){ t='Today'; }
+  else if(state.screen==='exp'){ const e=curExp(); if(e) t=e.title; }
   else if(state.screen==='section'){ const s=C.sections[state.sectionIdx]; if(s) t=s.title; }
   else if(state.screen==='assess'){ const a=findAssess(state.assessId); if(a) t=a.title; }
   else if(state.screen==='review'){ t='Review queue'; }
@@ -1553,6 +1640,104 @@ function renderIntro(){
 }
 
 // ════════════════════════════════════════════════════════════════════════
+//  HOME — "today's session" landing screen
+//  Built entirely from data the engine already tracks (progress, review
+//  schedule, competency evidence) — no course-file changes required.
+// ════════════════════════════════════════════════════════════════════════
+function renderHome(){
+  const streak = computeStreak();
+  const minToday = dailyMinutesToday();
+  const goalPct = Math.min(100, Math.round(minToday/DAILY_GOAL_MIN*100));
+
+  const sec = curSection(), exp = curExp();
+  const nextPtr = exp ? nextExpPointer(state.sectionIdx, state.expIdx) : null;
+  const due = dueReviews().length;
+
+  let items = '', totalMin = 0;
+
+  if(exp){
+    const isDone = has(state.completedExperiences, exp.experienceId);
+    totalMin += exp.estimatedDurationMinutes||0;
+    items += `<div class="home-item home-item-current" onclick="goScreen('exp',${state.sectionIdx},${state.expIdx})">
+      <div class="home-item-ico ico-current">${isDone?'&#10003;':'&#9654;'}</div>
+      <div class="home-item-body">
+        <div class="home-item-title">${esc(exp.title)}</div>
+        <div class="home-item-sub">${isDone?'Completed &middot; revisit':'In progress'} &middot; ${exp.estimatedDurationMinutes||'—'} min</div>
+      </div>
+      <span class="home-item-arrow">→</span>
+    </div>`;
+  }
+  if(nextPtr){
+    totalMin += nextPtr.exp.estimatedDurationMinutes||0;
+    items += `<div class="home-item" onclick="goScreen('exp',${nextPtr.si},${nextPtr.ei})">
+      <div class="home-item-ico">${nextPtr.ei+1}</div>
+      <div class="home-item-body">
+        <div class="home-item-title">${esc(nextPtr.exp.title)}</div>
+        <div class="home-item-sub">${nextPtr.exp.estimatedDurationMinutes||'—'} min</div>
+      </div>
+    </div>`;
+  }
+  if(due){
+    totalMin += Math.max(5, Math.round(due*1.5));
+    items += `<div class="home-item home-item-review" onclick="goScreen('review')">
+      <div class="home-item-ico ico-review">↻</div>
+      <div class="home-item-body">
+        <div class="home-item-title">Retrieval queue</div>
+        <div class="home-item-sub">${due} card${due>1?'s':''} due</div>
+      </div>
+    </div>`;
+  }
+  if(!items){
+    items = `<div class="home-item" style="cursor:default"><div class="home-item-body">
+      <div class="home-item-title">Nothing queued right now</div>
+      <div class="home-item-sub">Pick a section from the left to start something new.</div>
+    </div></div>`;
+  }
+
+  // Competencies with recorded evidence first (most relevant to show progress on), capped at 4.
+  const comps = (C.competencies||[]).map(c=>({c, p:compProgress(c.competencyId), hasEv:!!state.competencyEvidence[c.competencyId]}))
+    .sort((a,b)=> (b.hasEv-a.hasEv) || (b.p-a.p)).slice(0,4);
+  const compHTML = comps.map(({c,p})=>{
+    const lvl = compLevel(p,c), color = compColor(p,c);
+    return `<div class="home-comp">
+      <div class="home-comp-row"><span>${esc(c.title)}</span><span style="color:${color};font-weight:600;text-transform:capitalize">${esc(lvl)}</span></div>
+      <div class="home-comp-track"><div class="home-comp-fill" style="width:${Math.round(p*100)}%;background:${color}"></div></div>
+    </div>`;
+  }).join('');
+
+  // "Continue" resumes whatever screen the learner was actually on, not just the lesson list.
+  const last = state.lastActiveScreen;
+  const continueTarget = last==='assess' ? `goScreen('assess')`
+    : last==='review' ? `goScreen('review')`
+    : exp ? `goScreen('exp',${state.sectionIdx},${state.expIdx})`
+    : nextPtr ? `goScreen('exp',${nextPtr.si},${nextPtr.ei})`
+    : `goScreen('section',0,0)`;
+
+  document.getElementById('screen-home').innerHTML = `
+   <div class="stagger">
+    <div class="home-topline">
+      <div class="home-streak">${streak>0
+        ? `<span class="home-streak-n">${streak}</span><span>day streak</span>`
+        : `<span>Start your streak today</span>`}</div>
+      <div class="home-goal">
+        <span>${minToday} of ${DAILY_GOAL_MIN} min today</span>
+        <div class="home-goal-track"><div class="home-goal-fill" style="width:${goalPct}%"></div></div>
+      </div>
+    </div>
+
+    <div class="eyebrow"><span class="rule"></span>Today's session</div>
+    <h2 style="margin-bottom:2px">${totalMin? `About ${totalMin} min`:'Pick up where you left off'}</h2>
+    <p style="font-family:var(--sans);color:var(--ink-soft);font-size:14px;margin-bottom:18px">Picks up right where you left off.</p>
+
+    <div class="home-list">${items}</div>
+
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin:22px 0 34px" onclick="${continueTarget}">Continue session →</button>
+
+    ${compHTML?`<div class="eyebrow"><span class="rule"></span>Competency mastery</div><div class="home-comps">${compHTML}</div>`:''}
+   </div>`;
+}
+
+// ════════════════════════════════════════════════════════════════════════
 //  PRIOR KNOWLEDGE CHECK
 // ════════════════════════════════════════════════════════════════════════
 function renderPKC(){
@@ -1708,6 +1893,7 @@ function renderFurther(sec){
 
 function renderExp(){
   const sec = curSection(); const exp = curExp(); if(!exp) return;
+  snapshotMasteryFor(exp);
   const si=state.sectionIdx, ei=state.expIdx;
   const isLast = ei === sec.learningExperiences.length-1;
   state.revealed[exp.experienceId] = state.revealed[exp.experienceId]||[];
@@ -1755,7 +1941,9 @@ function renderExp(){
     const closing   = isLast ? renderSectionClose(sec) : '';
 
     const nextLabel = isLast ? 'Complete section →' : 'Next experience →';
-    const nextAction = isLast ? `completeExp('${exp.experienceId}');finishSection(${si})` : `completeExp('${exp.experienceId}');goScreen('exp',${si},${ei+1})`;
+    const nextAction = isLast
+      ? `completeExp('${exp.experienceId}', {next:'section-complete', si:${si}})`
+      : `completeExp('${exp.experienceId}', {next:'exp', si:${si}, ei:${ei+1}})`;
     const prevAction = ei>0 ? `goScreen('exp',${si},${ei-1})` : `goScreen('section',${si})`;
 
     tail = `${worked}${selfGuided}${interactions}${retrieval}${interleaved}${transfer}${mastery}${closing}
@@ -2276,7 +2464,81 @@ function renderMastery(exp){
 }
 
 // ── Completion of experiences/sections ──────────────────────────────────────
-function completeExp(expId){ add(state.completedExperiences,expId); recordEvidence(expCompetencies(expId), 1, 'participation'); saveState(); }
+// Mastery snapshot taken the moment a lesson is first opened (see renderExp),
+// so the celebration can show how much a competency moved during THIS visit.
+let _snapshotExpId=null, _snapshotVals={};
+function snapshotMasteryFor(exp){
+  if(!exp || _snapshotExpId===exp.experienceId) return;
+  _snapshotExpId = exp.experienceId;
+  _snapshotVals = {};
+  (exp.linkedCompetencies||[]).forEach(id=>{ _snapshotVals[id]=compProgress(id); });
+}
+
+const CELEBRATION_LINES = [
+  'Nice work.', "That's one more down.", 'Good pace — keep it up.',
+  'Solid work through a dense one.', "You're building real momentum.",
+  'Steady progress.', 'That\u2019s a wrap on this one.', 'Onward.'
+];
+let _lastCelebration = -1;
+function pickCelebrationLine(){
+  let i = Math.floor(Math.random()*CELEBRATION_LINES.length);
+  if(CELEBRATION_LINES.length>1 && i===_lastCelebration) i = (i+1)%CELEBRATION_LINES.length;
+  _lastCelebration = i;
+  return CELEBRATION_LINES[i];
+}
+
+let _pendingNav = null;
+function completeExp(expId, nav){
+  const exp = curExp();
+  const wasNew = !has(state.completedExperiences, expId);
+  add(state.completedExperiences, expId);
+  recordEvidence(expCompetencies(expId), 1, 'participation');
+  if(wasNew && exp && exp.experienceId===expId) showLessonComplete(exp, nav);
+  else runNav(nav);
+}
+function runNav(nav){
+  if(!nav) return;
+  if(nav.next==='exp') goScreen('exp', nav.si, nav.ei);
+  else if(nav.next==='section-complete') finishSection(nav.si);
+}
+function showLessonComplete(exp, nav){
+  const comps = expCompetencies(exp.experienceId);
+  let bestId=null, bestDelta=-1;
+  comps.forEach(id=>{
+    const before = _snapshotVals[id]!=null ? _snapshotVals[id] : 0;
+    const delta = compProgress(id) - before;
+    if(delta>bestDelta){ bestDelta=delta; bestId=id; }
+  });
+  const bestComp = bestId ? findCompetency(bestId) : null;
+  const chip = bestComp
+    ? `<div class="lc-chip">↗ ${esc(bestComp.title)} now ${Math.round(compProgress(bestId)*100)}% ${esc(compLevel(compProgress(bestId),bestComp))}</div>`
+    : '';
+
+  let nextTitle = '';
+  if(nav && nav.next==='exp'){
+    const e = C.sections?.[nav.si]?.learningExperiences?.[nav.ei];
+    nextTitle = e ? e.title : '';
+  } else if(nav && nav.next==='section-complete'){
+    nextTitle = (nav.si+1<C.sections.length) ? C.sections[nav.si+1].title : 'Course summary';
+  }
+
+  document.getElementById('lesson-complete-card').innerHTML = `
+    <div class="lc-seal">✓</div>
+    <div class="lc-title">Lesson complete</div>
+    <div class="lc-line">${esc(pickCelebrationLine())}</div>
+    ${chip}
+    <div class="lc-foot">
+      ${nextTitle?`<div class="lc-next-label">Up next</div><div class="lc-next-title">${esc(nextTitle)}</div>`:''}
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="dismissLessonComplete()">Continue →</button>
+    </div>`;
+  _pendingNav = nav;
+  document.getElementById('lesson-complete-overlay').classList.add('open');
+}
+function dismissLessonComplete(){
+  document.getElementById('lesson-complete-overlay').classList.remove('open');
+  const nav = _pendingNav; _pendingNav = null;
+  runNav(nav);
+}
 function finishSection(si){
   if(si===C.sections.length-1) goScreen('complete');
   else goScreen('section',si+1,0);
@@ -2996,6 +3258,7 @@ function closeOverlays(){
   document.getElementById('glossary-drawer').classList.remove('open');
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('scrim').classList.remove('open');
+  document.getElementById('lesson-complete-overlay').classList.remove('open');
   const np=document.getElementById('notes-popup');
   if(np && np.classList.contains('open')){ np.classList.remove('open'); clearTimeout(notesSaveTimer); saveNotes(); }
 }
@@ -3449,7 +3712,9 @@ function showEmptyState(){
 if (HAS_COURSE) {
   mergeKeyTerms();   // v6: key-terms blocks feed the glossary
   buildSidebar();
-  goScreen(state.screen||'intro', state.sectionIdx, state.expIdx);
+  logSessionDay();
+  const initialScreen = hasStarted() ? 'home' : (state.screen||'intro');
+  goScreen(initialScreen, state.sectionIdx, state.expIdx);
   initNotes();
 } else {
   showEmptyState();
