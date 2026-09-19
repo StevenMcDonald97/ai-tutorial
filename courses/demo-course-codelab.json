@@ -1,0 +1,364 @@
+{
+  "courseMetadata": {
+    "courseId": "codelab-demo-v61",
+    "title": "Testing JavaScript with Jest",
+    "description": "A short, hands-on tour of the v6.1 runnable-code widgets — playgrounds, graded challenges, predictions, and an interactive Jest tutorial.",
+    "estimatedDurationMinutes": 35,
+    "difficultyLevel": "intermediate",
+    "version": "1.0",
+    "schemaVersion": "6.1",
+    "prerequisites": [
+      { "type": "knowledge", "description": "Comfortable writing JavaScript functions and using `const`/`let`." }
+    ]
+  },
+
+  "learningModel": {
+    "masteryThreshold": 0.8,
+    "confidenceCalibrationEnabled": true,
+    "reviewOnMiss": true,
+    "missedItemSchedule": { "initialReviewDays": 1, "subsequentReviewDays": [3, 7, 14] }
+  },
+
+  "competencies": [
+    {
+      "competencyId": "comp-array-reduce",
+      "title": "Aggregating arrays",
+      "description": "Collapse a list into a single value with reduce, including the empty case.",
+      "masteryThreshold": 0.8,
+      "difficultyProfile": { "overall": 2, "conceptualComplexity": 3, "ambiguity": 1 },
+      "commonMisconceptions": [
+        {
+          "misconceptionId": "mis-reduce-seed",
+          "misconception": "reduce always starts from the first element, so the initial value is optional.",
+          "whyIncorrect": "Without an initial value, `reduce` uses element 0 as the seed and starts at index 1. On an **empty** array that throws a TypeError, and on an array of objects it makes the accumulator an object rather than a number."
+        }
+      ]
+    },
+    {
+      "competencyId": "comp-jest-basics",
+      "title": "Writing Jest tests",
+      "description": "Express behaviour as describe/it blocks and choose matchers that actually constrain the code.",
+      "masteryThreshold": 0.8,
+      "difficultyProfile": { "overall": 3, "conceptualComplexity": 3, "ambiguity": 2 },
+      "commonMisconceptions": [
+        {
+          "misconceptionId": "mis-test-happy-path",
+          "misconception": "If the happy path passes, the function works.",
+          "whyIncorrect": "A test suite is only as strong as its least convenient case. Empty inputs, boundaries and error paths are where real defects live."
+        }
+      ]
+    }
+  ],
+
+  "sections": [
+    {
+      "sectionId": "sec-1",
+      "title": "Running code, not reading it",
+      "description": "Every idea in this section is something you execute rather than take on faith.",
+      "learningObjectives": [
+        { "objectiveId": "obj-1", "description": "Predict and verify what a program prints.", "linkedCompetencies": ["comp-array-reduce"] }
+      ],
+      "motivationHooks": [
+        { "type": "prediction-gap", "hookId": "hook-s1", "prompt": "You have read that `reduce` collapses an array. Can you say, precisely, what it does when the array is empty?" }
+      ],
+      "sectionSummary": {
+        "content": "You should now believe three things: running code beats reading it, `reduce` needs an explicit seed to be safe, and a test that only covers the happy path is barely a test.",
+        "resolvesHookId": "hook-s1",
+        "keyTakeaways": [
+          "`reduce` without an initial value throws on an empty array",
+          "A prediction you committed to is worth more than one you didn't",
+          "Tests should include at least one case that could plausibly fail"
+        ]
+      },
+
+      "learningExperiences": [
+        {
+          "experienceId": "exp-1-1",
+          "title": "The shape of reduce",
+          "experienceType": "guided-analysis",
+          "estimatedDurationMinutes": 12,
+          "linkedCompetencies": ["comp-array-reduce"],
+          "desiredCognitiveActions": ["prediction", "analysis"],
+
+          "contentBlocks": [
+            {
+              "blockId": "b-1",
+              "type": "text",
+              "format": "markdown",
+              "content": "## Start by running something\n\nThe fastest way to understand `reduce` is to watch it work. The block below is live — press **Run** and see."
+            },
+            {
+              "blockId": "b-2",
+              "type": "code",
+              "language": "javascript",
+              "runnable": true,
+              "caption": "A read-only example you can still execute.",
+              "content": "const nums = [1, 2, 3, 4];\nconst sum = nums.reduce((acc, n) => acc + n, 0);\nconsole.log('sum:', sum);\nconsole.log('unchanged:', nums);"
+            },
+            {
+              "blockId": "b-3",
+              "type": "callout",
+              "variant": "insight",
+              "title": "The seed is the whole story",
+              "content": "That `0` at the end is the **initial accumulator**. Drop it and `reduce` quietly changes behaviour: it uses element 0 as the seed and begins at index 1."
+            },
+            { "blockId": "b-4", "type": "text", "format": "markdown",
+              "content": "Try it yourself. Remove the `, 0` below and run it against an empty array.", "checkpointAfter": true },
+            {
+              "blockId": "b-5",
+              "type": "code-playground",
+              "caption": "Scratch space — nothing here is graded.",
+              "codeExercise": {
+                "language": "javascript",
+                "starterCode": "const nums = [];\nconsole.log(nums.reduce((a, b) => a + b, 0));\n\n// Now delete the `, 0` and run it again."
+              }
+            }
+          ],
+
+          "interactionSequence": [
+            {
+              "interactionId": "int-predict-1",
+              "interactionType": "predict-run",
+              "prompt": "Read this carefully. **What exactly does it print?** Commit to an answer before you run it.",
+              "codeExercise": {
+                "language": "javascript",
+                "code": "const xs = [1, 2, 3];\nconst ys = xs;\nys.push(4);\nconsole.log(xs.length);",
+                "explanation": "`ys = xs` copies the **reference**, not the array. There is only one array here, and both names point at it. This is the single most common source of \"but I never touched that variable\" bugs."
+              }
+            },
+            {
+              "interactionId": "int-challenge-1",
+              "interactionType": "code-challenge",
+              "prompt": "Implement `total` so it returns the sum of every item's `price`.\n\nIt must return `0` for an empty list.",
+              "codeExercise": {
+                "language": "javascript",
+                "functionName": "total",
+                "starterCode": "function total(items) {\n  // [[edit]]\n  return 0;\n  // [[/edit]]\n}",
+                "linkedMisconceptionId": "mis-reduce-seed",
+                "solution": "function total(items) {\n  return items.reduce((sum, item) => sum + item.price, 0);\n}",
+                "solutionNote": "The seed `0` is what makes the empty case work.",
+                "solutionAfter": 3,
+                "check": {
+                  "mode": "cases",
+                  "cases": [
+                    { "args": [[{ "price": 2 }, { "price": 3 }]], "expected": 5 },
+                    { "args": [[{ "price": 10 }]], "expected": 10 },
+                    { "args": [[]], "expected": 0, "linkedMisconceptionId": "mis-reduce-seed" }
+                  ]
+                }
+              },
+              "feedback": {
+                "type": "hint-only",
+                "hints": [
+                  "`reduce` takes a callback and an initial value.",
+                  "The callback receives `(accumulator, currentItem)`.",
+                  "Start the accumulator at `0` so an empty list has an answer."
+                ],
+                "elaborativeFeedback": "`reduce` with an explicit seed is total: it has a defined answer for every input, including the empty array."
+              },
+              "confidencePrompt": { "enabled": true, "scaleMin": 1, "scaleMax": 5, "prompt": "How sure are you before checking?" }
+            },
+            {
+              "interactionId": "int-challenge-2",
+              "interactionType": "code-challenge",
+              "prompt": "Print a countdown from `3` to `1`, one number per line.",
+              "codeExercise": {
+                "language": "javascript",
+                "starterCode": "// [[edit]]\nfor (let i = 3; i > 0; i--) {\n  \n}\n// [[/edit]]",
+                "solution": "for (let i = 3; i > 0; i--) {\n  console.log(i);\n}",
+                "check": { "mode": "stdout", "expectedOutput": "3\n2\n1", "match": "trim" }
+              },
+              "feedback": { "hints": ["`console.log` prints one line per call."] }
+            }
+          ],
+
+          "retrievalPractice": [
+            {
+              "retrievalItemId": "ret-1",
+              "retrievalType": "cued-recall",
+              "prompt": "Why does `reduce` need an initial value to be safe?",
+              "difficulty": 2,
+              "schedule": { "initialReviewDays": 1, "subsequentReviewDays": [3, 7] }
+            }
+          ]
+        },
+
+        {
+          "experienceId": "exp-1-2",
+          "title": "Writing tests that mean something",
+          "experienceType": "worked-example",
+          "estimatedDurationMinutes": 18,
+          "linkedCompetencies": ["comp-jest-basics"],
+          "desiredCognitiveActions": ["analysis", "synthesis"],
+
+          "contentBlocks": [
+            {
+              "blockId": "b-6",
+              "type": "text",
+              "format": "markdown",
+              "content": "## The grammar of a Jest test\n\nA Jest suite is three nested ideas:\n\n- `describe(name, fn)` groups related tests\n- `it(name, fn)` is one behaviour you claim is true\n- `expect(value).toBe(other)` is the claim itself\n\nEverything else is detail."
+            },
+            {
+              "blockId": "b-7",
+              "type": "callout",
+              "variant": "note",
+              "title": "About this environment",
+              "content": "These exercises run against a **Jest-compatible subset** built into the course player, not Jest itself. `describe`, `it`, `expect`, the common matchers, the `beforeEach`/`afterEach` hooks and `jest.fn()` all behave as they do in Jest. Module mocking, snapshots and the CLI are out of scope here."
+            },
+            {
+              "blockId": "b-8",
+              "type": "code",
+              "language": "javascript",
+              "runnable": true,
+              "caption": "A complete, passing suite. Run it.",
+              "content": "function double(n) {\n  return n * 2;\n}\n\nconsole.log(double(21));"
+            }
+          ],
+
+          "workedExamples": [
+            {
+              "exampleId": "we-1",
+              "title": "From behaviour to assertion",
+              "problem": "You are handed `slugify(s)` and asked to prove it works.",
+              "steps": [
+                "Name the behaviour out loud: \"it lowercases the text\".",
+                "Turn that sentence into an `it(...)` title, unchanged.",
+                "Write the smallest `expect` that would fail if the behaviour broke."
+              ],
+              "conclusion": "A good test title is a sentence about behaviour. If you cannot write the sentence, you do not yet know what you are testing."
+            }
+          ],
+
+          "interactionSequence": [
+            {
+              "interactionId": "int-jest-1",
+              "interactionType": "code-challenge",
+              "prompt": "`slugify` is already written. **Write the tests.**\n\nYou need at least three `it(...)` blocks, and they all have to pass. Think about whitespace and about input that is already a slug.",
+              "codeExercise": {
+                "language": "javascript",
+                "starterCode": "function slugify(s) {\n  return s.trim().toLowerCase().replace(/\\s+/g, '-');\n}\n\n// [[edit]]\ndescribe('slugify', () => {\n  it('lowercases the text', () => {\n    expect(slugify('Hello')).toBe('hello');\n  });\n});\n// [[/edit]]",
+                "linkedMisconceptionId": "mis-test-happy-path",
+                "solution": "describe('slugify', () => {\n  it('lowercases the text', () => {\n    expect(slugify('Hello')).toBe('hello');\n  });\n\n  it('replaces spaces with hyphens', () => {\n    expect(slugify('hello world')).toBe('hello-world');\n  });\n\n  it('collapses runs of whitespace', () => {\n    expect(slugify('a   b')).toBe('a-b');\n  });\n\n  it('trims the edges', () => {\n    expect(slugify('  padded  ')).toBe('padded');\n  });\n});",
+                "solutionNote": "Four tests, each one a sentence about behaviour.",
+                "solutionAfter": 3,
+                "check": { "mode": "tests", "minimumTests": 3 }
+              },
+              "feedback": {
+                "hints": [
+                  "What should `slugify('hello world')` return? Assert it.",
+                  "Try a string with several spaces in a row.",
+                  "What about leading and trailing whitespace?"
+                ],
+                "elaborativeFeedback": "Notice that you never changed `slugify`. Tests are a description of behaviour you can execute."
+              }
+            },
+            {
+              "interactionId": "int-jest-2",
+              "interactionType": "code-challenge",
+              "prompt": "Now the other direction. The tests are written for you and they are **failing**. Fix `capitalize` until they pass.",
+              "codeExercise": {
+                "language": "javascript",
+                "starterCode": "// [[edit]]\nfunction capitalize(s) {\n  return s;\n}\n// [[/edit]]",
+                "testSource": "describe('capitalize', () => {\n  it('uppercases the first letter', () => {\n    expect(capitalize('hello')).toBe('Hello');\n  });\n\n  it('leaves the rest alone', () => {\n    expect(capitalize('hELLO')).toBe('HELLO');\n  });\n\n  it('handles the empty string', () => {\n    expect(capitalize('')).toBe('');\n  });\n});",
+                "solution": "function capitalize(s) {\n  if (!s) return s;\n  return s[0].toUpperCase() + s.slice(1);\n}",
+                "solutionAfter": 3,
+                "check": { "mode": "tests", "minimumTests": 3 }
+              },
+              "feedback": {
+                "hints": [
+                  "`s[0]` is the first character.",
+                  "`String.prototype.toUpperCase` uppercases a string.",
+                  "Guard the empty string before you index into it."
+                ]
+              }
+            },
+            {
+              "interactionId": "int-reflect-1",
+              "interactionType": "elaboration",
+              "prompt": "In your own words: what makes a test suite weak, even when every test in it passes?",
+              "required": true,
+              "feedback": {
+                "type": "elaborative",
+                "elaborativeFeedback": "A suite is weak when its cases could not plausibly fail — when it only exercises the path the author already had in mind."
+              }
+            }
+          ],
+
+          "transferExercises": [
+            {
+              "exerciseId": "tx-1",
+              "context": "Your own codebase",
+              "scenario": "You inherit a function with no tests and no documentation.",
+              "task": "Write three test titles — just the sentences, no code — that would tell the next reader what the function guarantees.",
+              "successCriteria": [
+                "Each title describes behaviour, not implementation",
+                "At least one covers an edge case",
+                "None of them mention internal variable names"
+              ]
+            }
+          ],
+
+          "masteryVerification": {
+            "assessmentIds": ["assess-1"],
+            "requiredPerformance": { "minimumAccuracy": 0.8 }
+          }
+        }
+      ]
+    }
+  ],
+
+  "assessments": [
+    {
+      "assessmentId": "assess-1",
+      "title": "Checkpoint — reduce and tests",
+      "assessmentType": "multiple-choice",
+      "linkedCompetencies": ["comp-array-reduce", "comp-jest-basics"],
+      "adaptiveDifficulty": false,
+      "questions": [
+        {
+          "questionId": "q-1",
+          "difficulty": 2,
+          "questionType": "multiple-choice",
+          "prompt": "What does `[].reduce((a, b) => a + b)` do?",
+          "options": [
+            "Returns 0",
+            "Returns undefined",
+            "Throws a TypeError",
+            "Returns an empty array"
+          ],
+          "correctIndex": 2,
+          "reviewPromptOverride": "What happens when you reduce an empty array with no initial value?",
+          "optionFeedback": [
+            { "optionIndex": 0, "feedback": "That is what happens *with* an initial value of `0`.", "linkedMisconceptionId": "mis-reduce-seed" },
+            { "optionIndex": 2, "feedback": "Correct — with no seed and nothing to seed from, there is no answer to give." }
+          ]
+        },
+        {
+          "questionId": "q-2",
+          "difficulty": 3,
+          "questionType": "multiple-choice",
+          "prompt": "Which of these is the strongest test?",
+          "options": [
+            "expect(sum([1,2])).toBe(3)",
+            "expect(sum([])).toBe(0)",
+            "expect(typeof sum).toBe('function')",
+            "expect(sum([1,2])).toBeTruthy()"
+          ],
+          "correctIndex": 1,
+          "optionFeedback": [
+            { "optionIndex": 1, "feedback": "The empty case is the one most likely to be wrong, so it carries the most information." },
+            { "optionIndex": 3, "feedback": "`toBeTruthy` passes for `3`, `'banana'` and `[]` alike — it barely constrains anything." }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "glossary": [
+    { "term": "accumulator", "definition": "The running value `reduce` carries from one element to the next." },
+    { "term": "matcher", "definition": "The assertion method chained onto `expect(...)`, such as `toBe` or `toEqual`." }
+  ],
+
+  "analytics": { "calibrationTracking": true },
+  "masterySystem": { "decayModelEnabled": false }
+}

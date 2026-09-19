@@ -160,6 +160,16 @@
     "courseImage": "/assets/boardgame-course.jpg"
   },
   {
+    "slug": "demo-course-codelab",
+    "courseId": "codelab-demo-v61",
+    "title": "Testing JavaScript with Jest",
+    "description": "A short, hands-on tour of the v6.1 runnable-code widgets — playgrounds, graded challenges, predictions, and an interactive Jest tutorial.",
+    "duration": 35,
+    "durationLabel": "35m",
+    "difficulty": "intermediate",
+    "courseImage": ""
+  },
+  {
     "slug": "tea_foundation_complete",
     "courseId": "tea",
     "title": "The World in a Cup — A Complete Guide to Tea",

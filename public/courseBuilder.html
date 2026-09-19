@@ -416,7 +416,7 @@
   </section>
 
   <footer>
-    <span>Course Engine Schema · v4.1</span>
+    <span>Course Engine Schema · v6.1</span>
     <span>Prompt Studio</span>
   </footer>
 </div>
@@ -424,76 +424,84 @@
 <script>
 // ---- The schema, embedded so Prompt 3 is fully self-contained ----
 const SCHEMA = `{
-  "$schemaVersion": "6.0 — extends v5/v4.1. Values in this file are strings describing each field's type and allowed values. NEW IN V6: structured content blocks (markdown text, code, callout, table, key-terms), per-block checkpoints, section summaries with prediction-resolution hooks, executed confidence calibration, missed-item review scheduling, executed adaptive difficulty, and the elaboration interaction type. All v6 additions are optional-safe: a v5 course file is a valid v6 course file.",
+  "$schemaVersion": "6.1 — extends v6/v5/v4.1. Document revision 3, reconciled against Course Engine Player v6.1. Values in this file are strings describing each field's type and allowed values. Each description begins with a STATUS marker: EXECUTED (engine behavior depends on it), DISPLAYED (rendered, no behavior), VALIDATED (linkage-checked at load only), INERT (accepted but neither displayed nor executed by this player). v6.1 adds runnable code (code-playground blocks, code-challenge and predict-run interactions) via the companion file codelab.js; every addition is optional-safe, so a valid v6 course file is a valid v6.1 course file.",
+
+  "$v61RunnableCode": {
+    "$comment": "REFERENCE ONLY — not a schema key. Runnable code needs codelab.js beside player.html (or at window.CODELAB_SRC). It is fetched lazily, only for courses that use it, and only three languages execute: JavaScript (always offline), Python (Pyodide, lazy CDN, ~10MB first use) and SQL (sql.js, lazy CDN, ~1MB first use). Anything else renders as a plain code block with a load-time warning. Learner code runs in a sandboxed opaque-origin iframe, inside a Worker, so it cannot reach the player's DOM, localStorage or course object, and an infinite loop is terminated rather than freezing the page. If codelab.js cannot be loaded, each widget renders an explained placeholder and the rest of the lesson is unaffected.",
+    "$evidence": "Code challenges record 'code' evidence at weight 0.6 — ONCE per challenge, at the first passing Check or at a solution reveal, never once per Check. Score ladder: 1.0 / 0.8 / 0.6 by attempt, floor 0.4, minus 0.1 per hint revealed, capped at 0.3 if the solution was shown. predict-run records 'participation' at weight 0.15.",
+    "$editableRegions": "Any line CONTAINING [[edit]] opens an editable region and [[/edit]] closes it, so the markers work in //, # and -- comment syntax. Marker lines are stripped before display and execution. Locked lines render dimmed and uneditable. With no markers, the whole program is editable. This is the code analogue of workedExamples.fadedVariant — prefer it over an empty editor."
+  },
 
   "courseMetadata": {
-    "courseId": "string — unique ID. Keys learner progress (course-progress:<courseId>). Changing it orphans existing saves.",
-    "title": "string",
-    "description": "string",
-    "thumbnailImage": "url — optional",
-    "estimatedDurationMinutes": "integer",
-    "difficultyLevel": "novice | intermediate | advanced",
-    "version": "string — course content version, displayed on completion seal",
-    "schemaVersion": "string — NEW v6, optional. '6.0'. Absent = pre-v6 course; player treats text blocks as format:'plain' unless block says otherwise.",
-    "lastUpdated": "ISO-8601 date",
-    "language": "BCP-47 tag",
-    "tags": ["string"],
+    "courseId": "EXECUTED. string — unique ID. Keys learner progress (course-progress:<courseId>) and notes (course-notes:<courseId>). Changing it orphans existing saves.",
+    "title": "DISPLAYED. string — plain text, not markdown.",
+    "description": "DISPLAYED. string — inline markdown (bold, italics, inline code, links).",
+    "thumbnailImage": "DISPLAYED. url — optional cover art. Sanitized: http(s), protocol-relative, relative paths, blob:, and data:image/* are accepted; anything else falls back to the completion seal.",
+    "estimatedDurationMinutes": "DISPLAYED. integer — formatted as 'Nh Nm' on the cover.",
+    "difficultyLevel": "DISPLAYED. novice | intermediate | advanced. Falls back into the completion seal when version is absent.",
+    "version": "DISPLAYED. string — course content version, shown on the completion seal as 'v<version>'.",
+    "schemaVersion": "EXECUTED. string, optional. '6.0'. Parsed with parseFloat; >= 6 makes text blocks default to format:'markdown'. Absent = pre-v6 course; text blocks default to format:'plain'.",
+    "lastUpdated": "INERT. ISO-8601 date — never displayed.",
+    "language": "INERT. BCP-47 tag — never read. The player ships a Google Translate widget instead.",
+    "tags": ["INERT. string — tag rendering is commented out in the current player."],
     "prerequisites": [
       {
-        "type": "knowledge | course | assessment",
-        "description": "string"
+        "type": "DISPLAYED. knowledge | course | assessment — shown capitalized as a label.",
+        "description": "DISPLAYED. string — inline markdown."
       }
     ]
   },
 
   "learningModel": {
-    "masteryThreshold": "float 0–1 — default mastery bar; per-competency masteryThreshold overrides",
-    "passingThreshold": "float 0–1 — informational",
-    "retrievalPracticeEnabled": "boolean",
-    "confidenceCalibrationEnabled": "boolean — v6: ENFORCED. When true, interactions with confidencePrompt.enabled render the slider; the rating is stored with the answer and shown back in calibration feedback after reveal.",
-    "confidenceSchedulingEnabled": "boolean — NEW v6, optional, default false. When true, confidence modulates review scheduling: a correct answer given at low confidence (< 40% of scale) schedules a review at initialReviewDays instead of skipping the queue; an incorrect answer given at high confidence (> 80% of scale) is flagged 'miscalibrated' in the review item.",
-    "adaptiveDifficultyEnabled": "boolean — v6: ENFORCED for assessments that set adaptiveDifficulty:true. See assessments[].adaptiveRules.",
-    "interleavingEnabled": "boolean — v6: when true AND interleavingGroups exist, the player injects up to interleavingGroups[].injectCount retrieval items from sibling competencies into grouped experiences (between content and mastery blocks). Review queue always interleaves regardless.",
+    "masteryThreshold": "EXECUTED. float 0–1 — default mastery bar, default 0.85. Per-competency masteryThreshold overrides. Also sets the 65% / 30% boundaries for intermediate mastery labels.",
+    "passingThreshold": "INERT. float 0–1 — never read or displayed. Previously documented as 'informational'; it is not shown anywhere.",
+    "retrievalPracticeEnabled": "DISPLAYED. boolean — renders as a cover pill only. Retrieval items render regardless of this flag.",
+    "spacedRepetitionEnabled": "DISPLAYED. boolean — cover pill only. The review queue operates regardless.",
+    "confidenceCalibrationEnabled": "EXECUTED. boolean. When true, interactions with confidencePrompt.enabled render the slider before submit; the rating is stored in the answer record and echoed in calibration feedback after reveal. Calibration feedback appears only for multiple-choice and drag-drop (the only scorable interaction types).",
+    "confidenceSchedulingEnabled": "EXECUTED. boolean, optional, default false. When true, confidence modulates review scheduling: a correct multiple-choice answer given at low confidence (< 40% of scale) schedules a review at missedItemSchedule.initialReviewDays; an incorrect answer given at high confidence (> 80% of scale) is flagged 'miscalibrated' and badged in the review queue.",
+    "adaptiveDifficultyEnabled": "EXECUTED, DEFAULTS ON. boolean. Adaptive serving runs for any assessment with adaptiveDifficulty:true UNLESS this is explicitly false. An absent flag does NOT disable adaptivity. See assessments[].adaptiveRules.",
+    "interleavingEnabled": "EXECUTED. boolean. When true, the player injects up to interleavingGroups[].injectCount retrieval items into grouped experiences (rendered after retrieval/interleaved flow, before the mastery block). The review queue always interleaves regardless.",
     "interleavingGroups": [
       {
-        "groupId": "string",
-        "competencyIds": ["competencyId — linkage-validated"],
-        "experienceIds": ["experienceId"],
-        "injectCount": "integer — NEW v6, optional, default 1. Max sibling retrieval items injected per experience in this group.",
-        "rationaleNote": "string — author guidance, displayed on hover"
+        "$comment": "CORRECTED IN REVISION 2: sibling selection is driven by experienceIds, NOT competencyIds. A group whose siblings are described only by competencyIds injects nothing.",
+        "groupId": "DISPLAYED. string — used in validation messages.",
+        "competencyIds": ["VALIDATED ONLY. competencyId — linkage-checked at load; never used to select injected items."],
+        "experienceIds": ["EXECUTED. experienceId — the actual selection pool. When the learner is in one of these experiences, retrievalPractice items belonging to the OTHER listed experiences become injection candidates, ranked due-first, then previously-practiced, then most-recently-reviewed. Needs at least two entries to inject anything."],
+        "injectCount": "EXECUTED. integer, optional, default 1. Max sibling retrieval items injected per experience in this group. 0 keeps the group advisory-only.",
+        "rationaleNote": "INERT. string — author guidance; not rendered anywhere."
       }
     ],
-    "spacedRepetitionEnabled": "boolean",
-    "reviewOnMiss": "boolean — NEW v6, optional, default false. When true, any auto-scored item answered incorrectly (interaction MC/ranking, probe MC, assessment MC) is synthesized into a review-queue item keyed by its questionId/interactionId, scheduled per missedItemSchedule. Written items self-rated Weak also enter the queue.",
+    "reviewOnMiss": "EXECUTED. boolean, optional, default false. When true, any auto-scored item answered incorrectly is synthesized into a review-queue item keyed by its interactionId/probeId/questionId and scheduled per missedItemSchedule. Sources: interaction multiple-choice; interaction drag-drop scoring below 0.75; scored PKC probes; assessment multiple-choice (standard and adaptive paths); written assessment answers self-rated Weak.",
     "missedItemSchedule": {
-      "initialReviewDays": "integer — NEW v6, optional, default 1",
-      "subsequentReviewDays": "integer[] — NEW v6, optional, default [3, 7, 14, 30]"
+      "initialReviewDays": "EXECUTED. integer, optional, default 1.",
+      "subsequentReviewDays": "EXECUTED. integer[], optional, default [3, 7, 14, 30]. Together with initialReviewDays this forms the ladder. In review: self-grade >= 0.75 steps up and increments a streak (3 consecutive successes retire the item); >= 0.4 halves the interval and resets the streak; below 0.4 resets to the first rung."
     }
   },
 
   "priorKnowledgeCheck": {
-    "enabled": "boolean",
-    "placement": "before-course",
+    "enabled": "EXECUTED. boolean — gates the pre-course screen and the cover's start-button label.",
+    "placement": "INERT. before-course — the only supported placement; not read.",
     "probeQuestions": [
       {
-        "probeId": "string — unique within course",
-        "prompt": "string — markdown permitted (inline only: bold, italics, inline code)",
-        "questionType": "multiple-choice | short-answer | scenario-analysis",
-        "options": ["string — required for multiple-choice"],
-        "correctIndex": "integer — required for multiple-choice; index into options[]",
+        "probeId": "EXECUTED. string — unique within course. Keys answers and missed-item review entries.",
+        "prompt": "DISPLAYED. string — block markdown (headings, lists, fenced code all render).",
+        "questionType": "EXECUTED. multiple-choice | short-answer | scenario-analysis. Only 'multiple-choice' renders options and auto-scores; everything else renders a textarea and records participation evidence.",
+        "options": ["EXECUTED. string — required for multiple-choice. PLAIN TEXT: escaped, markdown NOT rendered."],
+        "correctIndex": "EXECUTED. integer — required for multiple-choice; index into options[]. Auto-scored as 'pkc' evidence, weight 0.4.",
         "optionFeedback": [
           {
-            "optionIndex": "integer",
-            "feedback": "string — markdown permitted (inline only)",
-            "linkedMisconceptionId": "misconceptionId — optional"
+            "optionIndex": "EXECUTED. integer",
+            "feedback": "DISPLAYED. string — inline markdown.",
+            "linkedMisconceptionId": "DISPLAYED. misconceptionId — optional; the misconception text is quoted beneath the feedback."
           }
         ],
-        "linkedCompetencies": ["competencyId"],
-        "scoringCriteria": ["string — shown for short-answer probes"],
+        "linkedCompetencies": ["EXECUTED, VALIDATED. competencyId"],
+        "scoringCriteria": ["DISPLAYED. string — inline markdown. Rendered beneath short-answer probes under the heading 'What a strong answer covers'. Not shown for multiple-choice probes."],
+        "reviewPromptOverride": "EXECUTED (FLASHCARDS ONLY). string, optional — NEW IN REVISION 2. Used as the flashcard front for this probe, replacing the raw prompt. Note: the review queue does NOT use overrides on probes, only on assessment questions.",
         "routingRules": [
           {
-            "condition": "string",
-            "action": "string — advisory; displayed, not executed"
+            "condition": "INERT. string — not rendered.",
+            "action": "INERT. string — revision 1 described these as 'displayed, not executed'. They are neither; the player has no routing UI. Orphaned CSS for it remains in the stylesheet."
           }
         ]
       }
@@ -502,34 +510,34 @@ const SCHEMA = `{
 
   "competencies": [
     {
-      "competencyId": "string — the hub ID everything links to",
-      "title": "string",
-      "description": "string",
-      "taxonomyLevel": "remember | understand | apply | analyze | evaluate | create",
+      "competencyId": "EXECUTED. string — the hub ID everything links to.",
+      "title": "DISPLAYED. string — used on every competency tag and in the mastery sidebar.",
+      "description": "DISPLAYED. string",
+      "taxonomyLevel": "INERT. remember | understand | apply | analyze | evaluate | create — not read.",
       "difficultyProfile": {
-        "overall": "integer 1–5",
-        "conceptualComplexity": "integer 1–5",
-        "ambiguity": "integer 1–5",
-        "technicalSkill": "integer 1–5",
-        "readingDemand": "integer 1–5"
+        "overall": "DISPLAYED. integer 1–5",
+        "conceptualComplexity": "DISPLAYED. integer 1–5",
+        "ambiguity": "DISPLAYED. integer 1–5",
+        "technicalSkill": "INERT. integer 1–5 — not read.",
+        "readingDemand": "INERT. integer 1–5 — not read."
       },
-      "transferRequired": "boolean",
-      "masteryThreshold": "float 0–1 — enforced; overrides learningModel.masteryThreshold",
+      "transferRequired": "INERT. boolean — not read; transfer exercises are never gated on it.",
+      "masteryThreshold": "EXECUTED. float 0–1 — overrides learningModel.masteryThreshold.",
       "desiredOutcomes": [
         {
-          "outcomeId": "string",
-          "description": "string",
-          "verifiedBy": ["assessmentId or transfer exerciseId — linkage-validated"],
-          "verificationCriteria": "string"
+          "outcomeId": "VALIDATED. string — used in warning messages.",
+          "description": "DISPLAYED. string — inline markdown; listed on the cover as course outcomes.",
+          "verifiedBy": ["VALIDATED. assessmentId or transfer exerciseId — warned if it matches neither."],
+          "verificationCriteria": "INERT. string — not read."
         }
       ],
       "commonMisconceptions": [
         {
-          "misconceptionId": "string — referenced by optionFeedback and errorPatterns",
-          "misconception": "string — the wrong belief, learner-voiced; quoted verbatim in UI",
-          "whyIncorrect": "string",
-          "remediationStrategy": "string",
-          "linkedErrorPatterns": ["errorPatternId"]
+          "misconceptionId": "EXECUTED. string — referenced by optionFeedback and errorPatterns.",
+          "misconception": "DISPLAYED. string — the wrong belief, learner-voiced; quoted verbatim in feedback and as a flashcard front. Plain text.",
+          "whyIncorrect": "EXECUTED (FLASHCARDS). string — the preferred correction side of a misconception flashcard. remediationStrategy is used as a fallback when this is absent; a misconception with neither produces no card.",
+          "remediationStrategy": "EXECUTED (FLASHCARDS, FALLBACK). string — used as the misconception flashcard correction when whyIncorrect is absent. Not displayed anywhere else. Prefer whyIncorrect for the learner-facing correction.",
+          "linkedErrorPatterns": ["INERT. errorPatternId — not read. The reverse link, errorPatterns[].linkedMisconceptionId, is the one that works."]
         }
       ]
     }
@@ -537,170 +545,211 @@ const SCHEMA = `{
 
   "sections": [
     {
-      "sectionId": "string — unique",
-      "title": "string",
-      "description": "string",
+      "sectionId": "VALIDATED. string — unique; used in warning messages.",
+      "title": "DISPLAYED. string — plain text.",
+      "description": "DISPLAYED. string — inline markdown.",
       "learningObjectives": [
         {
-          "objectiveId": "string",
-          "description": "string",
-          "linkedCompetencies": ["competencyId"]
+          "objectiveId": "VALIDATED. string",
+          "description": "DISPLAYED. string — inline markdown.",
+          "linkedCompetencies": ["VALIDATED. competencyId — rendered as tags."]
         }
       ],
       "motivationHooks": [
         {
-          "type": "real-world-stakes | prediction-gap | curiosity-prompt | relevance-anchor | prediction-resolution",
-          "hookId": "string — NEW v6, optional. Lets sectionSummary.resolvesHookId and prediction-resolution hooks reference a specific opening hook.",
-          "prompt": "string — markdown permitted. NOTE: 'prediction-resolution' is NEW v6 — rendered at the END of the section (after the last experience, before the summary), explicitly resolving the opening prediction-gap. Pair via resolvesHookId.",
-          "resolvesHookId": "string — NEW v6, only on prediction-resolution hooks; the hookId of the prediction-gap being closed"
+          "type": "EXECUTED. real-world-stakes | prediction-gap | curiosity-prompt | relevance-anchor | prediction-resolution. All types except prediction-resolution render on the section intro; prediction-resolution renders at the END of the section, after the last experience and before the sectionSummary. Unrecognized types still render, with a generic icon.",
+          "hookId": "EXECUTED. string, optional — lets sectionSummary.resolvesHookId and prediction-resolution hooks reference a specific opening hook.",
+          "prompt": "DISPLAYED. string — inline markdown.",
+          "resolvesHookId": "EXECUTED. string — only on prediction-resolution hooks; the hookId of the prediction-gap being closed. The original hook's prompt is quoted back to the learner. Warned at load if it matches no hookId in the same section."
         }
       ],
       "sectionSummary": {
-        "$comment": "NEW v6, optional. Rendered as a recap card after the section's last experience. Closes the loop the section opened.",
-        "content": "string — markdown. 'What you should now believe' recap. Keep to 3–6 key claims.",
-        "resolvesHookId": "string — optional; the prediction-gap hookId this summary answers",
-        "keyTakeaways": ["string — optional; rendered as a checklist beneath the prose"]
+        "$comment": "Optional. Rendered as a recap card after the section's last experience, following any prediction-resolution hook. Renders only if content or a non-empty keyTakeaways is present.",
+        "content": "DISPLAYED. string — block markdown. 'What you should now believe' recap. Keep to 3–6 key claims.",
+        "resolvesHookId": "VALIDATED. string, optional — warned if it matches no hookId in the section. The summary itself renders no back-link; only prediction-resolution hooks do that.",
+        "keyTakeaways": ["EXECUTED. string, optional — inline markdown. Rendered as a checklist beneath the prose AND collected into the flashcard deck as a 'section takeaways' card."]
       },
       "furtherReading": [
         {
-          "resourceId": "string",
-          "title": "string",
-          "resourceType": "string",
-          "url": "url",
-          "citation": "string",
-          "author": "string",
-          "rationaleNote": "string",
-          "linkedCompetencies": ["competencyId"]
+          "resourceId": "VALIDATED. string",
+          "title": "DISPLAYED. string — plain text; becomes the link text when url is present.",
+          "resourceType": "DISPLAYED. string — shown as a small type label.",
+          "url": "DISPLAYED. url — sanitized (http:, https:, mailto:, and fragment URLs only).",
+          "citation": "DISPLAYED. string — rendered only when url is absent.",
+          "author": "DISPLAYED. string",
+          "rationaleNote": "DISPLAYED. string — inline markdown.",
+          "linkedCompetencies": ["VALIDATED. competencyId — rendered as tags."]
         }
       ],
       "learningExperiences": [
         {
-          "experienceId": "string — unique; keys learner answers and review back-links",
-          "title": "string",
-          "experienceType": "guided-analysis | worked-example | case-study | simulation | discussion | self-guided-exercise",
+          "experienceId": "EXECUTED. string — unique; keys learner answers, checkpoint position, and review back-links.",
+          "title": "DISPLAYED. string — plain text.",
+          "experienceType": "DISPLAYED. guided-analysis | worked-example | case-study | simulation | discussion | self-guided-exercise — label only.",
           "difficultyProfile": {
-            "overall": "integer 1–5",
-            "conceptualComplexity": "integer 1–5",
-            "ambiguity": "integer 1–5"
+            "overall": "DISPLAYED. integer 1–5 — rendered as difficulty dots.",
+            "conceptualComplexity": "DISPLAYED. integer 1–5 — shown in the header when non-zero.",
+            "ambiguity": "DISPLAYED. integer 1–5 — shown in the header when non-zero."
           },
-          "estimatedDurationMinutes": "integer",
-          "linkedCompetencies": ["competencyId — every scored event here records evidence against these"],
-          "desiredCognitiveActions": ["prediction | analysis | reflection | retrieval | comparison | synthesis | elaboration"],
+          "estimatedDurationMinutes": "DISPLAYED. integer",
+          "linkedCompetencies": ["EXECUTED, VALIDATED. competencyId — every scored event in this experience records evidence against these."],
+          "desiredCognitiveActions": ["DISPLAYED. prediction | analysis | reflection | retrieval | comparison | synthesis | elaboration — colored tags."],
 
           "contentBlocks": [
             {
-              "$comment": "V6 CONTENT MODEL. type gains: code, callout, table, key-terms. Text blocks gain format. Any block may set checkpointAfter. ALL author-supplied strings are sanitized by the player before injection (see doc §Security).",
-              "blockId": "string — unique within experience",
-              "type": "text | code | callout | table | key-terms | image | video | audio | interactive",
-              "checkpointAfter": "boolean — NEW v6, optional, any block type. When any block in an experience sets this, the player renders the experience in progressive segments: content up to and including this block, then a 'Continue' checkpoint (with segment progress dots, e.g. '2 of 5'). Absent everywhere = single scroll, exactly as v5.",
+              "$comment": "V6 CONTENT MODEL. Nine types. Unknown types render nothing and produce a load-time warning. All author-supplied strings are HTML-escaped before markdown transform; url fields go through a media-specific sanitizer instead.",
+              "blockId": "VALIDATED. string — unique within experience; used in warning messages.",
+              "type": "EXECUTED. text | code | callout | table | key-terms | image | video | audio | interactive | code-playground (v6.1). Unknown values render nothing and produce a load-time warning.",
+              "checkpointAfter": "EXECUTED. boolean, optional, any block type. When any block in an experience sets this, the player renders the experience in progressive segments: content up to and including this block, then a 'Continue' checkpoint with progress dots ('2 of 5'). The final segment carries everything after the last checkpoint (worked examples, interactions, retrieval, transfer, mastery, section close). A checkpoint on the LAST block is ignored rather than creating an empty segment. Position persists in state.checkpoint. Absent everywhere = single scroll, exactly as v5.",
 
-              "format": "markdown | plain — NEW v6, text blocks only. 'markdown' renders full CommonMark + GFM tables + fenced code. Default: 'markdown' when courseMetadata.schemaVersion >= 6.0, else 'plain'. Plain prose is valid markdown, so 'markdown' is always safe to set.",
-              "content": "string — for text: prose (markdown per format). For callout: body markdown. For interactive: label text. AUTHORING RULE (v6): never write pseudo-headings ('WHY THIS MATTERS: ...') inside prose; use markdown headings (##, ###), lists, and emphasis.",
+              "format": "EXECUTED. markdown | plain — text blocks only. Default: 'markdown' when courseMetadata.schemaVersion >= 6.0, else 'plain'. 'plain' escapes the string and preserves newlines (rendered with white-space:pre-wrap), so pre-v6 courses keep their line breaks; markdown syntax is not interpreted.",
+              "content": "string — for text: prose, rendered per format. For callout: block markdown body. For interactive: label text only (the interactive block is a styled placeholder and embeds nothing). AUTHORING RULE: never write pseudo-headings ('WHY THIS MATTERS: ...'); use markdown headings (##, ###), lists, and emphasis. Markdown support is a subset: headings, lists, fenced code, blockquotes, hr, GFM tables, and inline formatting. NESTED LISTS, reference links, setext headings, footnotes and task lists are NOT supported.",
 
-              "language": "string — code blocks only. Syntax-highlight language id (e.g. 'javascript', 'python', 'sql'). Optional; omit for plain code.",
-              "caption": "string — code and table blocks, optional",
-              "highlightLines": "integer[] — code blocks, optional; 1-based line numbers to emphasize",
+              "language": "EXECUTED. string — code blocks only. Mapped onto three keyword sets: C-family/JS (js, jsx, ts, tsx, javascript, typescript, json, java, c, cpp, csharp, go, rust, swift, kotlin, php, scala, dart), Python-family (py, python, rb, ruby, sh, bash, shell, yaml, yml, r), and SQL (sql, postgres, mysql, sqlite). Any other value still shows as a language label with string/number highlighting. Optional; omit for plain monospace.",
+              "caption": "DISPLAYED. string — code, table and code-playground blocks, optional. Inline markdown.",
+              "highlightLines": "EXECUTED. integer[] — code blocks, optional; 1-based line numbers to emphasize.",
+              "runnable": "EXECUTED (v6.1). boolean — code blocks only, optional, default false. Adds a Run button beneath a read-only example. Requires a runnable language (js/python/sql); with anything else the block renders normally and the loader warns. Ungraded; records no evidence.",
 
-              "variant": "note | warning | insight | definition | example — callout blocks only. Controls the callout's color/icon treatment.",
-              "title": "string — callout blocks, optional heading",
+              "variant": "EXECUTED. note | warning | insight | definition | example — callout blocks only. Controls color/icon. Unrecognized values fall back to 'note'.",
+              "title": "DISPLAYED. string — callout blocks, optional heading. Inline markdown (the one title field that is not plain text).",
 
-              "headers": ["string — table blocks: column headers"],
-              "rows": [["string — table blocks: row cells; inline markdown permitted"]],
+              "headers": ["DISPLAYED. string — table blocks: column headers. Inline markdown. Omit or leave empty for a header-less table."],
+              "rows": [["DISPLAYED. string — table blocks: row cells; inline markdown permitted."]],
 
               "terms": [
                 {
-                  "$comment": "key-terms blocks only. Rendered as tappable definition chips.",
-                  "term": "string",
-                  "definition": "string — markdown permitted (inline only)",
-                  "addToGlossary": "boolean — optional, default true. When true the term is merged into the course glossary at load and auto-linked wherever it appears in rendered content."
+                  "$comment": "key-terms blocks only. Rendered as collapsible definition chips. An empty or missing terms array renders nothing and produces a load warning.",
+                  "term": "DISPLAYED. string — plain text.",
+                  "definition": "DISPLAYED. string — inline markdown.",
+                  "addToGlossary": "EXECUTED. boolean, optional, default true. When true the term is merged into the course glossary at load and auto-linked wherever it appears in rendered text, callout, and section-summary content. The course-file glossary wins on term collisions."
                 }
               ],
 
-              "url": "url — image/video/audio blocks",
-              "altText": "string — image blocks",
-              "captionOrTranscript": "string — video/audio blocks"
+              "codeExercise": {
+                "$comment": "EXECUTED (v6.1). code-playground blocks only. An editable, runnable scratch space — ungraded, records no evidence, contents persist in learner state (keyed by blockId, so give every playground one). For the full codeExercise definition see interactionSequence[].codeExercise below; a playground reads only language and starterCode.",
+                "language": "EXECUTED. javascript | python | sql (plus aliases js, jsx, node, py, python3, sqlite). Warned at load if unrunnable.",
+                "starterCode": "EXECUTED. string — what the editor opens with. [[edit]] markers work here too."
+              },
+
+              "url": "DISPLAYED. url — image/video/audio blocks. Sanitized: http(s), protocol-relative, relative paths (assets/x.png, /media/x.mp4), blob:, and data:image/* are accepted; javascript:, vbscript:, data:text/html and other schemes are rejected. An absent OR rejected url renders the labelled placeholder.",
+              "altText": "DISPLAYED. string — image blocks. Plain text; used as both the alt attribute and the visible caption.",
+              "captionOrTranscript": "DISPLAYED. string — video/audio blocks. Rendered in a collapsible 'Transcript' disclosure; newlines become line breaks."
             }
           ],
 
           "interactionSequence": [
             {
-              "interactionId": "string — unique within experience",
-              "interactionType": "prediction | compare-responses | reflection | elaboration | multiple-choice | drag-drop | scenario-analysis",
-              "$elaborationNote": "'elaboration' is NEW v6: a free-text prompt placed AFTER an explanation or worked example, asking the learner to restate/apply in their own words ('In your own words, why does this matter for your current project?'). Scored as participation (0.15), same as reflection; distinct type exists so authors and analytics can distinguish generation-after-instruction from open reflection, and so the player can style it as a closing beat.",
-              "prompt": "string — markdown permitted",
-              "required": "boolean",
-              "responseFormat": "short-answer | multiple-choice | ranking | likert",
-              "revealCondition": "after-response | after-attempt | on-request",
-              "options": ["string — required for multiple-choice, drag-drop, likert"],
-              "correctIndex": "integer — required for multiple-choice; drag-drop fallback key",
-              "correctOrder": ["integer — drag-drop: option indices best-to-worst; enables positional scoring"],
+              "interactionId": "EXECUTED. string — unique within experience. Keys answers, reveal state, and missed-item review entries.",
+              "interactionType": "EXECUTED. prediction | compare-responses | reflection | elaboration | multiple-choice | drag-drop | scenario-analysis | code-challenge (v6.1) | predict-run (v6.1). WARNING: any value outside this list renders a textarea with NO submit button — it will display and never record, and now produces a load-time warning. 'elaboration' is a free-text prompt placed AFTER an explanation or worked example, asking the learner to restate/apply in their own words. Mechanically identical to reflection (participation evidence, weight 0.15); it exists as a distinct type so authoring and analytics can distinguish generation-after-instruction from open reflection, and so the player can style it as a closing beat.",
+              "prompt": "DISPLAYED. string — block markdown.",
+              "required": "EXECUTED (free-text only). boolean — free-text interactions refuse to submit empty. No effect on multiple-choice, drag-drop, or likert.",
+              "responseFormat": "PARTIALLY EXECUTED. short-answer | multiple-choice | ranking | likert. Only 'likert' does anything, and only combined with interactionType:'reflection'. Otherwise the input type is chosen from interactionType and this field is inert.",
+              "revealCondition": "INERT. after-response | after-attempt | on-request — not read. Everything reveals immediately after response.",
+              "options": ["EXECUTED. string — required for multiple-choice, drag-drop, and likert. PLAIN TEXT: escaped, markdown NOT rendered. Revision 1 wrongly listed options as inline-markdown."],
+              "correctIndex": "EXECUTED. integer — required for multiple-choice; drag-drop fallback key when correctOrder is absent or mismatched (first-position-correct scores 1, otherwise 0.3).",
+              "correctOrder": ["EXECUTED. integer — drag-drop: option indices best-to-worst; enables positional scoring (fraction of positions matched)."],
               "optionFeedback": [
                 {
-                  "optionIndex": "integer",
-                  "feedback": "string — markdown permitted (inline only)",
-                  "linkedMisconceptionId": "misconceptionId — optional"
+                  "optionIndex": "EXECUTED. integer",
+                  "feedback": "DISPLAYED. string — inline markdown.",
+                  "linkedMisconceptionId": "DISPLAYED. misconceptionId — optional."
                 }
               ],
               "feedback": {
-                "type": "elaborative | corrective | hint-only | socratic",
-                "elaborativeFeedback": "string — markdown permitted",
-                "correctiveFeedback": "string — markdown permitted",
-                "hints": ["string — revealed progressively on request"]
+                "type": "EXECUTED. elaborative | corrective | hint-only | socratic. 'socratic' concatenates hints into the feedback body. 'hint-only' and any unrecognized value fall through to whichever of elaborativeFeedback, correctiveFeedback, or joined hints is present. For multiple-choice the header is chosen from correctness regardless of this value.",
+                "elaborativeFeedback": "DISPLAYED. string — block markdown.",
+                "correctiveFeedback": "DISPLAYED. string — block markdown.",
+                "hints": ["DISPLAYED. string — inline markdown; revealed one at a time on request, and only before the interaction is answered."]
               },
+              "codeExercise": {
+                "$comment": "EXECUTED (v6.1). REQUIRED for interactionType code-challenge and predict-run; warned at load if absent. Needs codelab.js — see $v61RunnableCode at the top of this file. The interaction's own prompt is rendered by the widget, and feedback.hints[] work as they do elsewhere (each hint revealed costs 0.1 of the final score).",
+                "language": "EXECUTED. javascript | python | sql (plus aliases js, jsx, node, py, python3, sqlite). Anything else is warned at load and cannot run.",
+                "starterCode": "EXECUTED. string — code-challenge: what the editor opens with. Supports [[edit]] markers for locked scaffolding. Keep under ~25 lines; beyond that, lock most of it.",
+                "code": "EXECUTED. string — predict-run ONLY: the read-only program whose output the learner predicts. REQUIRED for predict-run; warned at load if absent.",
+                "functionName": "EXECUTED. string — REQUIRED when check.mode is 'cases'. The function the checker calls. Must be a plain identifier; anything else is rejected at run time.",
+                "testSource": "EXECUTED. string — check.mode 'tests': author-supplied tests, appended after the learner's code. Use this for 'fix the broken code' exercises; leave it empty and let the learner write the tests for 'prove it works' exercises.",
+                "showTests": "EXECUTED. boolean, optional, default true. Whether author testSource is shown to the learner read-only. Rarely set false — the tests are the specification.",
+                "setupSql": "EXECUTED. string — SQL only. Schema and seed rows, run before the learner's query.",
+                "solution": "EXECUTED. string — worked solution. Revealed on request only after solutionAfter failed Checks, or once every hint has been used. Revealing it caps the recorded score at 0.3.",
+                "solutionNote": "DISPLAYED. string, optional — block markdown, shown beneath the revealed solution.",
+                "solutionAfter": "EXECUTED. integer, optional, default 3. Failed Checks before the 'Show solution' control appears.",
+                "linkedMisconceptionId": "EXECUTED + VALIDATED. misconceptionId — surfaced on failure, quoting the misconception and its whyIncorrect. Warned at load if unresolved. A per-case link (check.cases[].linkedMisconceptionId) overrides this one.",
+                "explanation": "DISPLAYED. string — predict-run only. Shown after the prediction resolves. Falls back to feedback.elaborativeFeedback.",
+                "check": {
+                  "$comment": "EXECUTED. code-challenge only. Defines what 'correct' means. A challenge with no mode, or mode 'none', is ALWAYS marked correct and is warned at load.",
+                  "mode": "EXECUTED. cases | stdout | tests | none. 'cases' compares return values from calling functionName (clearest feedback — prefer it). 'stdout' compares printed output and renders a line-aligned diff with whitespace made visible. 'tests' requires a suite to run and fully pass.",
+                  "cases": [
+                    {
+                      "$comment": "EXECUTED. check.mode 'cases'. An empty cases[] is warned — it would always pass.",
+                      "args": "EXECUTED. any[] — spread into the call. [[1,2]] passes ONE array argument; [1,2] passes two.",
+                      "expected": "EXECUTED. any — compared by deep equality.",
+                      "name": "DISPLAYED. string, optional — shown instead of the generated call signature.",
+                      "linkedMisconceptionId": "EXECUTED. misconceptionId, optional — the first FAILING case that declares one wins, overriding the exercise-level link. Attach it to the case that actually exposes the wrong belief."
+                    }
+                  ],
+                  "expectedOutput": "EXECUTED. string — REQUIRED when mode is 'stdout'; warned at load if absent. With match 'regex' this is a regular expression instead.",
+                  "match": "EXECUTED. trim (default) | exact | normalize-whitespace | regex. Controls stdout strictness. 'trim' ignores surrounding whitespace; 'normalize-whitespace' also collapses runs and trims each line.",
+                  "minimumTests": "EXECUTED. integer, optional, default 1. check.mode 'tests': how many tests must exist. Set above 1 for 'write the tests' exercises — otherwise one trivial passing test scores full marks. When all tests pass but there are too few, the learner is told exactly that.",
+                  "timeoutMs": "EXECUTED. integer, optional. Execution deadline. Default 5000, or 15000 for Python."
+                }
+              },
+
               "confidencePrompt": {
-                "$comment": "v6: EXECUTED (was dormant in v5 player). Rendered before submit when learningModel.confidenceCalibrationEnabled. The rating is stored in the answer record as {confidence: integer} and echoed in post-reveal calibration feedback ('You were 5/5 confident and incorrect'). Feeds scheduling when confidenceSchedulingEnabled.",
-                "enabled": "boolean",
-                "scaleMin": "integer — default 1",
-                "scaleMax": "integer — default 5",
-                "prompt": "string — default 'How confident are you?'"
+                "$comment": "EXECUTED when learningModel.confidenceCalibrationEnabled is true. Rendered before submit on unanswered interactions. The rating is stored in the answer record ({choice|order|answer, confidence}), in exported progress files, and — when analytics.calibrationTracking is true — in the evidence ledger as a normalised c value. Calibration feedback after reveal appears only for multiple-choice and drag-drop, the only scorable types; likert interactions do not capture confidence at all. Confidence prompts exist only on interactions — not on probes or assessment questions.",
+                "enabled": "EXECUTED. boolean",
+                "scaleMin": "EXECUTED. integer — default 1",
+                "scaleMax": "EXECUTED. integer — default 5",
+                "prompt": "DISPLAYED. string — inline markdown; default 'How confident are you?'. The slider starts at the midpoint of the scale."
               }
             }
           ],
 
           "workedExamples": [
             {
-              "exampleId": "string",
-              "problem": "string — markdown permitted",
-              "steps": ["string — markdown permitted; fenced code allowed inside steps"],
-              "conclusion": "string — markdown permitted",
+              "exampleId": "EXECUTED. string — keys the faded-variant answer record.",
+              "title": "DISPLAYED. string, optional — NEW IN REVISION 2. Used as the flashcard context label for faded steps; falls back to 'Worked example'.",
+              "problem": "DISPLAYED. string — block markdown.",
+              "steps": ["DISPLAYED. string — block markdown; fenced code allowed inside steps. Rendered as an ordered list."],
+              "conclusion": "DISPLAYED. string — block markdown.",
               "fadedVariant": {
-                "$comment": "NEW v6, optional. Renders immediately after the worked example as a partially-completed version of the same problem class — the middle rung of worked → faded → independent. Learner fills the blanked steps as free text and self-checks against blankedStepAnswers on reveal. Scored as participation (0.15).",
-                "problem": "string — markdown; a parallel problem",
-                "givenSteps": ["string — the steps provided to the learner"],
-                "blankedStepPrompts": ["string — one prompt per step the learner must supply"],
-                "blankedStepAnswers": ["string — model answers revealed after submission, index-aligned with blankedStepPrompts"]
+                "$comment": "EXECUTED. Optional. Renders immediately after the worked example as a partially-completed version of the same problem class — the middle rung of worked → faded → independent. Learner fills the blanked steps as free text and self-checks against blankedStepAnswers on reveal. Scored as participation (weight 0.15). Also contributes one flashcard per aligned prompt/answer pair.",
+                "problem": "DISPLAYED. string — block markdown; a parallel problem.",
+                "givenSteps": ["DISPLAYED. string — block markdown; the steps provided to the learner."],
+                "blankedStepPrompts": ["EXECUTED. string — one prompt per step the learner must supply."],
+                "blankedStepAnswers": ["EXECUTED. string — model answers revealed after submission, index-aligned with blankedStepPrompts. Misaligned lengths produce a load warning and suppress flashcards for this variant."]
               }
             }
           ],
 
           "selfGuidedExercise": {
-            "objective": "string",
-            "realWorldContext": "string",
-            "estimatedRealWorldDurationMinutes": "integer",
-            "instructions": ["string — markdown permitted"],
-            "materialsOrPrerequisites": ["string"],
-            "reflectionPrompts": ["string"],
+            "$comment": "Entirely formative — records no evidence of its own.",
+            "objective": "DISPLAYED. string — block markdown.",
+            "realWorldContext": "DISPLAYED. string — inline markdown, labelled 'Where'.",
+            "estimatedRealWorldDurationMinutes": "DISPLAYED. integer",
+            "instructions": ["DISPLAYED. string — INLINE markdown only. Revision 1 wrongly listed this as full markdown; a fenced code block here renders as literal backticks."],
+            "materialsOrPrerequisites": ["DISPLAYED. string — inline markdown."],
+            "reflectionPrompts": ["DISPLAYED. string — inline markdown."],
             "verification": {
-              "mode": "string",
-              "isGating": "boolean — must be false; self-guided exercises are formative only",
-              "selfAssessmentCriteria": ["string"]
+              "mode": "DISPLAYED. string — shown as a meta chip unless the value is 'none'.",
+              "isGating": "INERT. boolean — not read. Self-guided exercises never gate. Author it as false.",
+              "selfAssessmentCriteria": ["DISPLAYED. string — inline markdown."]
             }
           },
 
           "retrievalPractice": [
             {
-              "retrievalItemId": "string — unique across the whole course; keys the review schedule",
-              "retrievalType": "free-recall | cued-recall | application | scenario-analysis | contrast",
-              "prompt": "string — markdown permitted",
-              "difficulty": "integer 1–5",
+              "retrievalItemId": "EXECUTED. string — unique across the WHOLE course; keys the review schedule.",
+              "retrievalType": "DISPLAYED. free-recall | cued-recall | application | scenario-analysis | contrast — label.",
+              "prompt": "DISPLAYED. string — INLINE markdown only (also in the review queue). Revision 1 implied full markdown.",
+              "difficulty": "DISPLAYED. integer 1–5 — difficulty dots.",
               "schedule": {
-                "initialReviewDays": "integer — default 1",
-                "subsequentReviewDays": "integer[] — default [3, 7, 14, 30]",
+                "initialReviewDays": "EXECUTED. integer — default 1",
+                "subsequentReviewDays": "EXECUTED. integer[] — default [3, 7, 14, 30]",
                 "decayParameters": {
-                  "strengthMultiplier": "float — default 2",
-                  "minimumIntervalDays": "integer — default 1",
-                  "maximumIntervalDays": "integer — default 365",
-                  "decayRate": "float — reserved"
+                  "strengthMultiplier": "EXECUTED. float — default 2",
+                  "minimumIntervalDays": "EXECUTED. integer — default 1",
+                  "maximumIntervalDays": "EXECUTED. integer — default 365",
+                  "decayRate": "INERT. float — reserved; not read."
                 }
               }
             }
@@ -708,19 +757,19 @@ const SCHEMA = `{
 
           "transferExercises": [
             {
-              "exerciseId": "string",
-              "context": "string",
-              "scenario": "string — markdown permitted",
-              "task": "string — markdown permitted",
-              "successCriteria": ["string"]
+              "exerciseId": "EXECUTED. string — also a valid target for desiredOutcomes.verifiedBy.",
+              "context": "DISPLAYED. string — short label beside the section header.",
+              "scenario": "DISPLAYED. string — block markdown.",
+              "task": "DISPLAYED. string — block markdown.",
+              "successCriteria": ["DISPLAYED. string — inline markdown. The 'Success criteria' heading renders even when this array is empty. Self-rated on a three-point scale (1 / 0.55 / 0.15), recorded as 'transfer' evidence, weight 0.8."]
             }
           ],
 
           "masteryVerification": {
-            "assessmentIds": ["assessmentId — linkage-validated"],
+            "assessmentIds": ["EXECUTED, VALIDATED. assessmentId — renders a button opening each assessment."],
             "requiredPerformance": {
-              "minimumAccuracy": "float 0–1",
-              "minimumTransferScore": "float 0–1"
+              "minimumAccuracy": "DISPLAYED ONLY. float 0–1 — shown as a percentage badge; nothing gates on it.",
+              "minimumTransferScore": "DISPLAYED ONLY. float 0–1 — shown as a percentage badge; nothing gates on it."
             }
           }
         }
@@ -730,47 +779,47 @@ const SCHEMA = `{
 
   "assessments": [
     {
-      "assessmentId": "string — referenced by masteryVerification and desiredOutcomes.verifiedBy",
-      "title": "string",
-      "assessmentType": "scenario-analysis | multiple-choice | short-answer | performance-task",
-      "linkedCompetencies": ["competencyId — all question scores land here"],
-      "adaptiveDifficulty": "boolean — v6: EXECUTED when true (was display-only). Questions are served one at a time, ordered by adaptiveRules; the badge now reflects real behavior.",
+      "assessmentId": "EXECUTED. string — referenced by masteryVerification and desiredOutcomes.verifiedBy.",
+      "title": "DISPLAYED. string — plain text.",
+      "assessmentType": "DISPLAYED. scenario-analysis | multiple-choice | short-answer | performance-task — label only.",
+      "linkedCompetencies": ["EXECUTED, VALIDATED. competencyId — all question scores land here."],
+      "adaptiveDifficulty": "EXECUTED. boolean. When true, questions are served one at a time per adaptiveRules — unless learningModel.adaptiveDifficultyEnabled is explicitly false, or the assessment has no scorable multiple-choice questions. When false, all questions render at once in authored order, exactly as v5.",
       "adaptiveRules": {
-        "$comment": "NEW v6, optional; defaults apply when adaptiveDifficulty is true and this block is absent.",
-        "startDifficulty": "integer 1–5 — default 2. First question is the first unanswered question at this difficulty.",
-        "promoteAfter": "integer — default 2. Consecutive correct answers before stepping up one difficulty level.",
-        "demoteAfter": "integer — default 1. Consecutive incorrect answers before stepping down one level.",
-        "servePerLevel": "integer — default 2. Max questions served at a level before forced promotion (prevents stalling).",
-        "$note": "Adaptive serving applies to auto-scorable questions (multiple-choice). Written questions are appended after the adaptive phase in authored order. When adaptiveDifficulty is false, all questions render at once in authored order, exactly as v5."
+        "$comment": "Optional; defaults apply when adaptiveDifficulty is true and this block is absent.",
+        "startDifficulty": "EXECUTED. integer 1–5 — default 2. The level the serving loop starts at.",
+        "promoteAfter": "EXECUTED. integer — default 2. Consecutive correct answers before stepping up one level.",
+        "demoteAfter": "EXECUTED. integer — default 1. Consecutive incorrect answers before stepping down one level.",
+        "servePerLevel": "EXECUTED. integer — default 2. Questions served at a level before forced promotion (prevents stalling).",
+        "$note": "Serving picks the nearest unanswered question to the current level, searching outward by distance and preferring the higher level on ties; questions with no difficulty are treated as level 3, and levels are clamped to 1–5. Adaptive serving applies only to multiple-choice questions that have both options and correctIndex; written questions are appended after the adaptive phase in authored order. The loader warns when MC questions span fewer than three difficulty levels."
       },
       "questions": [
         {
-          "questionId": "string — unique within assessment. v6: also keys the missed-item review entry when reviewOnMiss is true.",
-          "difficulty": "integer 1–5 — v6: consumed by adaptive serving; still displayed",
-          "prompt": "string — markdown permitted; fenced code allowed",
-          "questionType": "short-answer | multiple-choice | scenario-analysis",
-          "options": ["string — required for multiple-choice"],
-          "correctIndex": "integer — required for multiple-choice",
+          "questionId": "EXECUTED. string — unique within assessment. Keys the missed-item review entry when reviewOnMiss is true.",
+          "difficulty": "EXECUTED + DISPLAYED. integer 1–5 — consumed by adaptive serving (missing is treated as 3) and shown as dots.",
+          "prompt": "DISPLAYED. string — block markdown; fenced code allowed.",
+          "questionType": "EXECUTED. short-answer | multiple-choice | scenario-analysis. Only 'multiple-choice' with a valid options array is auto-scored (as 'assessment' evidence, weight 1.0); everything else renders free text with a rubric and a self-rating row (Excellent 1 / Adequate 0.6 / Weak 0.25).",
+          "options": ["EXECUTED. string — required for multiple-choice. PLAIN TEXT: escaped, markdown NOT rendered."],
+          "correctIndex": "EXECUTED. integer — required for multiple-choice.",
           "optionFeedback": [
             {
-              "optionIndex": "integer",
-              "feedback": "string",
-              "linkedMisconceptionId": "misconceptionId"
+              "optionIndex": "EXECUTED. integer",
+              "feedback": "DISPLAYED. string — inline markdown. The chosen option's feedback is shown, plus the correct option's feedback when the answer was wrong.",
+              "linkedMisconceptionId": "DISPLAYED. misconceptionId"
             }
           ],
-          "successCriteria": ["string — shown post-submit for written questions"],
+          "successCriteria": ["DISPLAYED. string — inline markdown; shown post-submit for written questions."],
           "rubric": {
-            "excellent": "string",
-            "adequate": "string",
-            "weak": "string"
+            "excellent": "DISPLAYED. string — inline markdown; drives the self-rating row (score 1).",
+            "adequate": "DISPLAYED. string — inline markdown (score 0.6).",
+            "weak": "DISPLAYED. string — inline markdown (score 0.25; a Weak self-rating enters the review queue when reviewOnMiss is true)."
           },
-          "reviewPromptOverride": "string — NEW v6, optional. When this question enters the review queue via reviewOnMiss, this text is used as the recall cue instead of the raw prompt. Use it to strip answer-revealing context (e.g. drop the options list).",
+          "reviewPromptOverride": "EXECUTED. string, optional. Used as the recall cue when this question enters the review queue via reviewOnMiss, and as the flashcard front. Use it to strip answer-revealing context (e.g. drop the options list). This is the only place the REVIEW QUEUE honors an override; interactions and probes support it for flashcards only.",
           "errorPatterns": [
             {
-              "errorPatternId": "string",
-              "description": "string",
-              "linkedMisconceptionId": "misconceptionId — linkage-validated",
-              "remediationAction": "string"
+              "errorPatternId": "VALIDATED. string — used in warning messages.",
+              "description": "DISPLAYED. string — plain text.",
+              "linkedMisconceptionId": "VALIDATED + DISPLAYED. misconceptionId — warned if unresolved; the misconception is quoted when it resolves.",
+              "remediationAction": "DISPLAYED. string — inline markdown. Shown after submission for written questions and after a wrong adaptive answer."
             }
           ]
         }
@@ -779,35 +828,41 @@ const SCHEMA = `{
   ],
 
   "retrievalSystem": {
-    "algorithm": "string — declarative; per-item schedule blocks drive the scheduler",
-    "confidenceWeighting": "boolean",
-    "interleavingEnabled": "boolean",
-    "retrievalModes": ["string"]
+    "$comment": "INERT BLOCK. The player never reads retrievalSystem. Per-item retrievalPractice[].schedule blocks drive the actual scheduler. Keep it for documentation only.",
+    "algorithm": "INERT. string",
+    "confidenceWeighting": "INERT. boolean — confidence does not weight evidence; see learningModel.confidenceSchedulingEnabled for the behavior that does exist.",
+    "interleavingEnabled": "INERT. boolean — the executed flag is learningModel.interleavingEnabled.",
+    "retrievalModes": ["INERT. string"]
   },
 
   "masterySystem": {
-    "masteryLevels": ["string — four labels, novice → mastered"],
-    "decayModelEnabled": "boolean — enforced; evidence weight halves per 30 days when true",
-    "reverificationRequired": "boolean — declared intent"
+    "masteryLevels": ["EXECUTED. string — four labels, novice → mastered. Defaults ['novice','developing','proficient','mastered']. Assigned at the competency's threshold, 65% of it, and 30% of it."],
+    "decayModelEnabled": "EXECUTED. boolean — when true, each evidence attempt's weight is multiplied by 0.5 ^ (days / 30).",
+    "reverificationRequired": "INERT. boolean — declared intent; not read."
   },
 
   "analytics": {
-    "track": ["string"],
+    "$comment": "MIXED BLOCK. calibrationTracking is executed; track and errorAnalysis remain inert. When calibrationTracking is true and a confidence rating was captured, each evidence attempt gains a normalised confidence field (c, 0-1) alongside {s, w, t, k}, and a per-competency calibration readout appears under the competency progress bar on the home screen once three rated attempts exist.",
+    "track": ["INERT. string"],
     "errorAnalysis": {
-      "enabled": "boolean",
-      "errorPatternTracking": "boolean",
-      "misconceptionFrequencyLogging": "boolean",
-      "linkedToMisconceptionIds": ["misconceptionId"]
+      "enabled": "INERT. boolean",
+      "errorPatternTracking": "INERT. boolean",
+      "misconceptionFrequencyLogging": "INERT. boolean",
+      "linkedToMisconceptionIds": ["INERT. misconceptionId"]
     },
-    "calibrationTracking": "boolean — NEW v6, optional. When true (and confidence is collected), the engine retains {confidence, score} pairs per event in the evidence ledger, enabling a calibration report (overconfidence/underconfidence by competency)."
+    "calibrationTracking": "EXECUTED. boolean, optional. When true AND a confidence rating was captured, the evidence attempt records c = the rating normalised to 0-1 against its own scaleMin/scaleMax. Drives the home-screen calibration readout: mean confidence when correct vs. incorrect, plus an overconfident/underconfident verdict (miss above 80% of scale = overconfident; correct below 40% = underconfident). Only the three interaction paths that capture confidence contribute: free-text, multiple-choice, and drag-drop."
   },
 
   "glossary": [
     {
-      "term": "string — v6: terms are auto-linked on first occurrence in rendered text/callout content; tapping opens the glossary drawer filtered to the term. key-terms blocks with addToGlossary:true merge in at load (course-file glossary wins on term collisions).",
-      "definition": "string"
+      "term": "EXECUTED. string — auto-linked on first occurrence per experience screen in rendered text blocks, callout bodies, and section-summary bodies (longest-match-first, whole-word, case-insensitive). Code blocks, links, buttons, disclosure summaries, prompts, and options are never auto-linked. Tapping opens the glossary drawer filtered to the term. key-terms blocks with addToGlossary:true merge in at load; the course-file glossary wins on collisions.",
+      "definition": "DISPLAYED. string — inline markdown in the drawer; used verbatim as the link tooltip. Also the back of a 'glossary terms' flashcard."
     }
-  ]
+  ],
+
+  "$flashcards": {
+    "$comment": "NOT A SCHEMA KEY — reference only. The player assembles shuffled recall decks from existing course content. Nothing here is authored directly; this records which fields become cards so authors know what they are feeding. Sources: (1) glossary terms, including merged key-terms — term ↔ definition, both directions; (2) lesson questions — interaction multiple-choice and drag-drop, front from reviewPromptOverride or prompt, back from the correct option plus its optionFeedback or elaborativeFeedback; (3) prior-knowledge probes — multiple-choice only, same shape; (4) assessment questions — multiple-choice only, same shape; (5) worked-example steps — one card per aligned fadedVariant blankedStepPrompt/blankedStepAnswer pair, contexted by workedExamples.title; (6) section takeaways — one card per section with a non-empty sectionSummary.keyTakeaways; (7) misconceptions — the misconception quoted on the front, whyIncorrect on the back, skipped entirely when whyIncorrect is absent."
+  }
 }
 `
 const ID_LINKS = `KEY ID LINKAGES (every reference must resolve to a real ID defined elsewhere):
@@ -825,7 +880,116 @@ const ID_LINKS = `KEY ID LINKAGES (every reference must resolve to a real ID def
 - assessments[].questions[].optionFeedback[].linkedMisconceptionId (optional) -> competencies[].commonMisconceptions[].misconceptionId
 - priorKnowledgeCheck.probeQuestions[].optionFeedback[].linkedMisconceptionId (optional) -> competencies[].commonMisconceptions[].misconceptionId
 - correctIndex, correctOrder[], and optionFeedback[].optionIndex all index into the SAME item's options[] (0-based, must be in range)
+- interactionSequence[].codeExercise.linkedMisconceptionId (optional) -> competencies[].commonMisconceptions[].misconceptionId
+- interactionSequence[].codeExercise.check.cases[].linkedMisconceptionId (optional) -> competencies[].commonMisconceptions[].misconceptionId
 All IDs unique within their collection and case-sensitive.`;
+
+/* ────────────────────────────────────────────────────────────────────────
+   RUNNABLE CODE GUIDANCE
+   Deliberately NOT a user-facing toggle. Most courses are not code courses,
+   so asking every author "do you want code exercises?" would be noise. These
+   blocks go into every prompt and gate themselves on the topic — the model
+   decides, and is told explicitly to skip the whole thing when the subject
+   is not technical.
+   ──────────────────────────────────────────────────────────────────────── */
+
+// Stage 2 (content): what raw material a code course needs to produce.
+const CODE_CONTENT = `RUNNABLE CODE — APPLIES ONLY IF THIS COURSE TEACHES CODE
+Decide once, from the topic: must a learner READ OR WRITE code to demonstrate competence?
+If NO — history, management, design, biology, writing, most subjects — skip this entire block.
+Produce no code material, and do not mention its absence. Most courses are not code courses.
+
+If YES, the course engine can EXECUTE code, so write the material that makes that possible.
+Executable languages are JavaScript, Python and SQL ONLY. If you are teaching a different
+language (Rust, Java, C++, Go...), still write code examples — they will display normally —
+but do NOT invent exercises that depend on running them, and say so plainly in your output.
+
+For a code course, additionally produce per section:
+1. RUNNABLE EXAMPLES — short, self-contained programs that print something. Give the EXACT
+   expected output, character for character. Prefer programs under 15 lines.
+2. PREDICT-THE-OUTPUT SNIPPETS — 1-2 short programs per section whose behaviour learners
+   routinely get wrong (reference vs copy, closure capture, integer division, mutation,
+   operator precedence, NULL semantics). Give the exact real output and a one-paragraph
+   explanation of why intuition fails here.
+3. CODING EXERCISES — for each, supply ALL of:
+     - the task, stated as a single sentence
+     - starter code, marking which lines the learner fills in and which are scaffolding
+     - a reference solution that actually works
+     - AT LEAST 3 test cases: a typical case, a boundary case, and an empty/zero/null case
+     - for each test case, the exact expected return value
+     - 2-3 progressive hints that narrow without giving the answer
+     - which misconception a plausible wrong answer reveals, named by its architecture ID
+4. TEST-SUITE EXERCISES (if the course covers testing at all) — in BOTH directions:
+     (a) working code + a brief for the learner to write tests proving it correct
+     (b) deliberately broken code + finished tests the learner must make pass
+   Note: the engine provides a Jest-COMPATIBLE subset (describe/it/expect, common matchers,
+   beforeEach/afterEach, jest.fn) — not Jest itself. No module mocking, snapshots or fake
+   timers. For Python it uses the standard library's unittest. Write exercises accordingly,
+   and include one sentence in the course text telling learners this.`;
+
+// Stage 3 (JSON): how to encode that material against the schema.
+const CODE_JSON = `RUNNABLE CODE WIDGETS — USE ONLY IF THIS COURSE TEACHES CODE
+If the subject does not require reading or writing code, emit NONE of these. Do not add a token
+code block to a non-code course. Most courses are not code courses, and an unnecessary code
+widget is worse than none.
+
+If it does, the schema offers four devices. Executable languages: javascript, python, sql ONLY
+(aliases js/jsx/node/py/python3/sqlite). For any other language use a plain "code" block WITHOUT
+runnable:true — it will render correctly but cannot execute.
+
+  A. Read-only example that runs — contentBlock type "code" with runnable: true.
+     Use liberally. Near-zero cost, and it makes the lesson live. Any example worth printing
+     is worth being runnable.
+
+  B. Scratch space — contentBlock type "code-playground" (needs blockId; carries codeExercise
+     with language + starterCode). Ungraded. Place it immediately after a claim you want the
+     learner to falsify themselves ("delete the seed and run it against an empty list").
+
+  C. Graded challenge — interactionSequence item, interactionType "code-challenge", with a
+     codeExercise carrying a check. Pick the checker deliberately:
+       check.mode "cases"  — BEST DEFAULT. Needs codeExercise.functionName and check.cases[]
+                             ({args, expected}). args are SPREAD: [[1,2]] passes one array,
+                             [1,2] passes two. Clearest feedback of the three.
+       check.mode "tests"  — a suite must run and fully pass. Set check.minimumTests above 1.
+                             Put author tests in codeExercise.testSource (shown read-only) for
+                             "fix the broken code"; leave testSource empty for "write the tests".
+       check.mode "stdout" — only when printing IS the skill. Set check.match ("trim" default,
+                             or "normalize-whitespace" to forgive formatting). Fragile: it
+                             fails on trailing spaces and teaches formatting, not thinking.
+     Always also give: solution (a working reference), feedback.hints[] (2-3, progressive), and
+     linkedMisconceptionId — ideally on the specific check.cases[] entry that exposes the wrong
+     belief, so the learner meets the remediation exactly when they trip over it.
+
+  D. Predict-then-run — interactionType "predict-run", codeExercise.code (the read-only program,
+     REQUIRED) plus codeExercise.explanation. Place it BEFORE the explanation, never after —
+     its whole value is the commitment. Pairs naturally with a prediction-gap motivationHook.
+
+SCAFFOLDING — use [[edit]] markers in starterCode:
+  "function total(items) {\\n  // [[edit]]\\n  return 0;\\n  // [[/edit]]\\n}"
+Lines between the markers are editable; everything else renders locked and dimmed. Any line
+CONTAINING [[edit]] opens a region and [[/edit]] closes it, so the same markers work in //, #
+and -- comments. This is the code equivalent of a faded worked example — three editable lines
+inside twenty of context is a far better first exercise than an empty editor, and it keeps the
+functionName contract stable. With no markers the whole program is editable, which is right only
+for the final independent exercise in a progression.
+
+PEDAGOGICAL SEQUENCING for a code section — follow it:
+  runnable example (A)  ->  predict-then-run (D)  ->  heavily scaffolded challenge (C, [[edit]])
+  ->  lightly scaffolded challenge  ->  unscaffolded challenge
+That is worked -> faded -> independent, which the rest of the schema already encodes with
+workedExamples.fadedVariant. Keep them consistent.
+
+RULES THAT MATTER
+- Every challenge needs a case that could plausibly FAIL: the empty list, zero, a boundary, a
+  null. A challenge whose cases only exercise the happy path teaches the happy path.
+- Never author check.mode "none" — it marks every submission correct.
+- Keep starterCode under ~25 lines; beyond that, lock most of it with [[edit]].
+- Code challenges record "code" evidence at weight 0.6, ONCE, on first pass. Learners are
+  expected to iterate, so do not write prompts that imply one attempt only.
+- If the course uses Python or SQL, add one sentence of course text saying the first run needs
+  a network connection (those runtimes download once, then cache). JavaScript always works offline.
+- If the course uses check.mode "tests", state plainly in the course text that the environment
+  is a Jest-compatible subset, not Jest.`;
 
 function slugify(s) {
   return s.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').slice(0, 48) || 'course';
@@ -931,6 +1095,7 @@ DESIGN PRINCIPLES TO APPLY
 - For each competency, classify its cognitive demand using Bloom's taxonomy (remember/understand/apply/analyze/evaluate/create) and note whether transfer to novel contexts should be required.
 - Identify, per competency, the 1-3 most COMMON MISCONCEPTIONS learners hold, and why each is wrong.
 - For each section, write clear, measurable learning objectives and map each objective to one or more competencies.
+- IF AND ONLY IF this topic requires reading or writing code: mark which competencies are verifiable by EXECUTING code rather than by discussion, and note for each whether the natural proof is "makes a function return the right values", "makes a failing test suite pass", or "correctly predicts what a program outputs". The engine can run JavaScript, Python and SQL, so prefer those where the topic allows a choice. If the topic is not about code, ignore this bullet entirely and do not mention it.
 
 OUTPUT FORMAT (Markdown, no JSON yet)
 1. Course overview: one-paragraph description + the overarching narrative arc.
@@ -959,6 +1124,8 @@ CORE KNOWLEDGE
 
 REQUIRED CONTENT FEATURES (from course configuration):
 ${featureBlock(f)}
+
+${CODE_CONTENT}
 
 WRITING PRINCIPLES
 - Tone and example style: follow the requirements above exactly.
@@ -1022,6 +1189,8 @@ ${featureBlock(f)}
 12. glossary: include all key terms defined in step 2.
 13. courseMetadata: courseId "${slug}", difficultyLevel "${d.difficulty}", language "${d.language}", estimatedDurationMinutes ${d.duration}, version "1.0", a fitting title/description, sensible tags and prerequisites.
 
+${CODE_JSON}
+
 CRITICAL OUTPUT RULES
 - Output ONLY the JSON object. No prose, no markdown fences, no commentary.
 - It MUST be valid, parseable JSON.
@@ -1064,6 +1233,8 @@ ALSO OUTPUT, AFTER the JSON, a short plain-text "SECTION BUILD PLAN": an ordered
 MANDATORY CONTENT FEATURES — these must be satisfied when sections are built in the next step. Include them in the SECTION BUILD PLAN so each per-section prompt inherits them:
 ${featureBlock(f)}
 
+IF THIS COURSE TEACHES CODE: add a "CODE PLAN" line per section to the SECTION BUILD PLAN naming, for that section, which runnable examples, predict-then-run snippets and graded challenges it should carry, and which competency each challenge proves. Name the language (javascript, python or sql — the only executable ones). If the course does not teach code, omit the CODE PLAN entirely and do not mention it.
+
 OUTPUT RULES
 - First the JSON object (valid, parseable, no markdown fences), then a line "---SECTION BUILD PLAN---", then the plan.
 - Real, specific content — never placeholders like "string" or "TODO".
@@ -1090,12 +1261,14 @@ OUTPUT RULES
 SCHEMA FOR A SINGLE SECTION OBJECT (one element of the "sections" array):
 { "sectionId","title","description",
   "learningObjectives[]{objectiveId,description,linkedCompetencies[]},
-  "motivationHooks[]{type (real-world-stakes|prediction-gap|curiosity-prompt|relevance-anchor),prompt},
+  "motivationHooks[]{type (real-world-stakes|prediction-gap|curiosity-prompt|relevance-anchor|prediction-resolution),hookId,prompt,resolvesHookId (prediction-resolution only — the hookId it closes; renders at the END of the section)},
+  "sectionSummary{content (block markdown — 'what you should now believe', 3-6 claims),resolvesHookId (optional),keyTakeaways[] (rendered as a checklist AND collected into the flashcard deck)},
   "furtherReading[]{resourceId,title,resourceType (article|book|paper|video|website|other),url (optional),citation (optional),author (optional),rationaleNote (optional),linkedCompetencies[] (optional)} (OPTIONAL — supplementary resources; never gates progression),
   "learningExperiences": [{ experienceId,title,experienceType (guided-analysis|worked-example|case-study|simulation|discussion|self-guided-exercise),difficultyProfile{overall,conceptualComplexity,ambiguity},estimatedDurationMinutes,linkedCompetencies[],desiredCognitiveActions[] (prediction|analysis|reflection|retrieval|comparison|synthesis),
-    contentBlocks[]{blockId,type (text|image|video|audio|interactive),content,url,altText,captionOrTranscript},
-    interactionSequence[]{interactionId,interactionType,prompt,required,responseFormat,revealCondition,options[] (REQUIRED for multiple-choice/drag-drop/likert),correctIndex (REQUIRED for multiple-choice),correctOrder[] (REQUIRED for drag-drop — option indices best to worst),optionFeedback[]{optionIndex,feedback,linkedMisconceptionId (optional — must be a foundation misconceptionId)},feedback{type (elaborative|corrective|hint-only|socratic),elaborativeFeedback,correctiveFeedback,hints[]},confidencePrompt{enabled,scaleMin,scaleMax,prompt}},
-    workedExamples[]{exampleId,problem,steps[],conclusion},
+    contentBlocks[]{blockId,type (text|code|callout|table|key-terms|image|video|audio|interactive|code-playground),format (markdown|plain — text blocks),content,language (code blocks),caption,highlightLines[],runnable (code blocks — true adds a Run button; javascript|python|sql only),variant (callout: note|warning|insight|definition|example),title (callout),headers[]/rows[][] (table),terms[]{term,definition,addToGlossary} (key-terms),codeExercise{language,starterCode} (code-playground — also needs blockId),checkpointAfter,url,altText,captionOrTranscript},
+    interactionSequence[]{interactionId,interactionType (prediction|compare-responses|reflection|elaboration|multiple-choice|drag-drop|scenario-analysis|code-challenge|predict-run),prompt,required,responseFormat,revealCondition,options[] (REQUIRED for multiple-choice/drag-drop/likert),correctIndex (REQUIRED for multiple-choice),correctOrder[] (REQUIRED for drag-drop — option indices best to worst),optionFeedback[]{optionIndex,feedback,linkedMisconceptionId (optional — must be a foundation misconceptionId)},feedback{type (elaborative|corrective|hint-only|socratic),elaborativeFeedback,correctiveFeedback,hints[]},confidencePrompt{enabled,scaleMin,scaleMax,prompt},
+      codeExercise{language (javascript|python|sql),starterCode ([[edit]] markers mark the editable region),code (REQUIRED for predict-run — the read-only program),functionName (REQUIRED for check.mode cases),testSource,showTests,setupSql (sql),solution,solutionNote,solutionAfter,linkedMisconceptionId,explanation (predict-run),check{mode (cases|stdout|tests|none),cases[]{args[],expected,name,linkedMisconceptionId},expectedOutput,match (trim|exact|normalize-whitespace|regex),minimumTests,timeoutMs}} (REQUIRED for code-challenge and predict-run)},
+    workedExamples[]{exampleId,title,problem,steps[],conclusion,fadedVariant{problem,givenSteps[],blankedStepPrompts[],blankedStepAnswers[] (index-aligned with blankedStepPrompts — mismatched lengths are a load warning)}},
     selfGuidedExercise{exerciseId,realWorldContext,objective,instructions[],estimatedRealWorldDurationMinutes (optional),materialsOrPrerequisites[] (optional),reflectionPrompts[],verification{mode (self-attested|reflection-submission|none),isGating (MUST be false),selfAssessmentCriteria[] (optional)},linkedCompetencies[] (optional)} (present when experienceType is self-guided-exercise),
     retrievalPractice[]{retrievalItemId,retrievalType,prompt,difficulty (1-5),schedule{initialReviewDays,subsequentReviewDays[],decayParameters{decayRate,strengthMultiplier,minimumIntervalDays,maximumIntervalDays}}},
     transferExercises[]{exerciseId,context,scenario,task,successCriteria[]},
@@ -1118,6 +1291,9 @@ LEARNING-MAXIMISING RULES FOR THIS SECTION
 
 MANDATORY CONTENT FEATURES FOR THIS SECTION:
 ${featureBlock(f)}
+
+${CODE_JSON}
+If the SECTION BUILD PLAN carries a CODE PLAN line for this section, build exactly what it names.
 
 OUTPUT RULES
 - Output ONLY the single JSON section object for the requested section (valid, parseable, no markdown fences, no commentary).

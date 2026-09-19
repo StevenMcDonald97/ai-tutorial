@@ -336,6 +336,7 @@ body{top:0 !important}
 /* content blocks */
 .cb-text{font-family:var(--read);font-size:18px;line-height:1.68;color:var(--ink);margin-bottom:20px;background:#fefefe;padding:18px 20px;border-radius:var(--radius-lg);border:1px solid var(--line)}
 .cb-text:first-letter{}
+.cb-text.is-plain{white-space:pre-wrap}
 .cb-media{margin-bottom:22px}
 .cb-media img{width:100%;border-radius:var(--radius-lg);border:1px solid var(--line);display:block}
 .cb-media video,.cb-media audio{width:100%;border-radius:var(--radius-lg)}
@@ -756,6 +757,23 @@ h2.md-h{font-size:24px}h3.md-h{font-size:19px}h4.md-h{font-size:16px;text-transf
 .cb-code .cb-caption{background:var(--surface);padding:8px 14px;margin:0;border-top:1px solid var(--line)}
 .tok-k{color:#e0a458;font-weight:500}.tok-s{color:#a3be8c}.tok-n{color:#88b3c8}.tok-c{color:#7a7462;font-style:italic}
 
+/* ─── v6.1: runnable code ────────────────────────────── */
+/* codelab.js ships its own .clab-* styles. These few rules only cover the
+   seam where a runnable block meets the player's own static code block. */
+.cb-runnable{margin:0 0 22px}
+.cb-runnable .cb-code{margin:0;border-radius:var(--radius-lg) var(--radius-lg) 0 0;border-bottom:0}
+.cb-runnable .clab-inline{border:1px solid var(--line);border-top:0;
+  border-radius:0 0 var(--radius-lg) var(--radius-lg);overflow:hidden}
+/* Placeholder shown while codelab.js is still downloading. */
+.cb-loading{margin:0 0 22px;border:1px dashed var(--line);border-radius:var(--radius-lg);
+  padding:22px;text-align:center;color:var(--ink-faint);font-size:13px;background:var(--surface)}
+.cb-loading.is-error{border-color:var(--accent-line);background:var(--warn-wash);color:var(--warn);
+  border-style:solid;text-align:left}
+.int-code::before{background:var(--gold)}
+.int-code .int-label{color:var(--gold)}
+.int-predict::before{background:var(--indigo)}
+.int-predict .int-label{color:var(--indigo)}
+
 /* ─── v6: callouts ───────────────────────────────────── */
 .callout{border:1px solid var(--line);border-left-width:3px;border-radius:0 var(--radius-lg) var(--radius-lg) 0;padding:16px 20px;margin:0 0 20px;background:var(--surface-raised)}
 .callout-head{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:7px}
@@ -882,6 +900,7 @@ h2.md-h{font-size:24px}h3.md-h{font-size:19px}h4.md-h{font-size:16px;text-transf
 .home-comps{display:flex;flex-direction:column;gap:12px;margin-top:4px}
 .home-comp-row{display:flex;justify-content:space-between;font-size:12.5px;font-family:var(--sans);margin-bottom:4px}
 .home-comp-track{height:5px;background:var(--paper-deep);border-radius:99px;overflow:hidden}
+.home-comp-cal{font-size:11.5px;color:var(--ink-faint);font-family:var(--sans);margin-top:5px;letter-spacing:.01em}
 .home-comp-fill{height:100%;border-radius:99px;transition:width .4s ease}
 
 /* ─── Lesson-complete celebration ─────── */
@@ -1150,6 +1169,17 @@ function esc(s){ return String(s??'').replace(/[&<>"]/g,c=>ESC_MAP[c]); }
 function escC(s){ return String(s??'').replace(/[&<>]/g,c=>ESC_MAP[c]); }   // element-content only (code)
 function escBr(s){ return esc(s).replace(/\n/g,'<br>'); }
 function safeUrl(u){ u=String(u||'').trim(); return /^(https?:|mailto:|#)/i.test(u) ? u.replace(/"/g,'&quot;') : '#'; }
+// media sources: allow http(s), protocol-relative, data:image, and relative paths;
+// reject anything carrying a scheme we don't recognise (javascript:, data:text/html, vbscript:, …)
+function safeMediaUrl(u){
+  u = String(u||'').trim().replace(/[\u0000-\u001F\u007F]/g,'');
+  if(!u) return '';
+  const scheme = u.match(/^([a-z][a-z0-9+.-]*):/i);
+  const ok = scheme
+    ? /^(https?|blob)$/i.test(scheme[1]) || /^data:image\/[a-z0-9.+-]+[,;]/i.test(u)
+    : true;                                   // no scheme → relative path or //host, allowed
+  return ok ? u.replace(/"/g,'&quot;') : '';
+}
 function mdDefault(){ return parseFloat(C.courseMetadata?.schemaVersion||'0') >= 6; }
 
 // inline markdown: code spans, links, bold, italics, strikethrough
@@ -1351,19 +1381,54 @@ function findReviewSource(itemId){
 // lucky answer can't reach mastery and unused knowledge drifts down when
 // masterySystem.decayModelEnabled is true.
 const EVIDENCE_W = {            // base evidence weight by kind
-  assessment:1.0, transfer:0.8, mc:0.5, ranking:0.5, retrieval:0.5,
+  assessment:1.0, transfer:0.8, code:0.6, mc:0.5, ranking:0.5, retrieval:0.5,
   pkc:0.4, participation:0.15
 };
+// v6.1: 'code' sits between mc (0.5) and transfer (0.8) on purpose — a passing
+// code challenge is stronger evidence than picking the right option, and weaker
+// than a self-rated transfer task.
 const EVIDENCE_TARGET = 3.0;    // total (decayed) weight needed for full credit
 const DECAY_HALF_LIFE = 30;     // days — evidence halves in influence
 
-function recordEvidence(compIds, score, kind, weightOverride){
+function recordEvidence(compIds, score, kind, weightOverride, confidenceFrac){
   const w = weightOverride!=null ? weightOverride : (EVIDENCE_W[kind] ?? 0.3);
   (compIds||[]).forEach(id=>{
     const ev = state.competencyEvidence[id] = state.competencyEvidence[id] || {attempts:[]};
-    ev.attempts.push({ s: Math.max(0, Math.min(1, score)), w, t: Date.now(), k: kind });
+    const rec = { s: Math.max(0, Math.min(1, score)), w, t: Date.now(), k: kind };
+    // v6: retain confidence alongside the score when analytics.calibrationTracking is on.
+    // Stored normalised to 0–1 (c) so scales of different lengths stay comparable.
+    if(confidenceFrac!=null && C.analytics?.calibrationTracking) rec.c = confidenceFrac;
+    ev.attempts.push(rec);
   });
   saveState(); updateSidebarProgress();
+}
+// normalise a raw confidence rating against its prompt's scale → 0–1, or null
+function confFrac(rating, cp){
+  if(rating==null) return null;
+  const min=(cp&&cp.scaleMin)??1, max=(cp&&cp.scaleMax)??5, range=(max-min)||1;
+  return Math.max(0, Math.min(1, (rating-min)/range));
+}
+// one-line calibration readout for a competency; '' when there isn't enough evidence
+function calibrationLine(compId){
+  const cal = calibrationFor(compId);
+  if(!cal) return '';
+  const pct = v => v==null ? '—' : Math.round(v*100)+'%';
+  let verdict = 'well calibrated';
+  if(cal.overconfident > cal.underconfident && cal.overconfident) verdict = 'leaning overconfident';
+  else if(cal.underconfident > cal.overconfident && cal.underconfident) verdict = 'leaning underconfident';
+  return `<div class="home-comp-cal" title="Based on ${cal.n} rated answers">
+    ◷ Confidence ${pct(cal.whenRight)} when right · ${pct(cal.whenWrong)} when wrong — ${verdict}</div>`;
+}
+// calibration summary for a competency: mean confidence when correct vs. incorrect
+function calibrationFor(compId){
+  const ev = state.competencyEvidence[compId];
+  if(!ev) return null;
+  const scored = ev.attempts.filter(a=>a.c!=null);
+  if(scored.length < 3) return null;
+  const hit = scored.filter(a=>a.s>=0.75), miss = scored.filter(a=>a.s<0.75);
+  const mean = xs => xs.length ? xs.reduce((t,a)=>t+a.c,0)/xs.length : null;
+  const over = miss.filter(a=>a.c>0.8).length, under = hit.filter(a=>a.c<0.4).length;
+  return { n:scored.length, whenRight:mean(hit), whenWrong:mean(miss), overconfident:over, underconfident:under };
 }
 function compProgress(compId){
   const ev = state.competencyEvidence[compId];
@@ -1599,8 +1664,9 @@ function renderIntro(){
   const startScreen = C.priorKnowledgeCheck?.enabled && !state.pkcDone ? "goScreen('pkc')" : "goScreen('section',0,0)";
   const startLabel  = C.priorKnowledgeCheck?.enabled && !state.pkcDone ? 'Begin with a knowledge check' : 'Begin the course';
 
-  const coverArt = m.thumbnailImage
-    ? `<img src="${m.thumbnailImage}" alt="${esc(m.title||'')}">`
+  const coverSrc = safeMediaUrl(m.thumbnailImage);
+  const coverArt = coverSrc
+    ? `<img src="${coverSrc}" alt="${esc(m.title||'')}">`
     : `<div class="seal">${seal||'✦'}</div>`;
 
   document.getElementById('screen-intro').innerHTML = `
@@ -1702,6 +1768,7 @@ function renderHome(){
     return `<div class="home-comp">
       <div class="home-comp-row"><span>${esc(c.title)}</span><span style="color:${color};font-weight:600;text-transform:capitalize">${esc(lvl)}</span></div>
       <div class="home-comp-track"><div class="home-comp-fill" style="width:${Math.round(p*100)}%;background:${color}"></div></div>
+      ${calibrationLine(c.competencyId)}
     </div>`;
   }).join('');
 
@@ -1750,8 +1817,9 @@ function renderPKC(){
       const c=findCompetency(cId); return c?`<span class="tag tag-line" style="margin-left:4px">${esc(c.title)}</span>`:'';
     }).join('');
 
+    const isMC = p.questionType==='multiple-choice' && !!p.options;
     let inputHTML='';
-    if(p.questionType==='multiple-choice' && p.options){
+    if(isMC){
       inputHTML = `<div class="mc-options" id="pkc-mc-${p.probeId}">` + p.options.map((o,oi)=>`
         <div class="mc-option ${saved&&saved.choice===oi?'selected':''} ${saved?'locked':''} ${saved&&saved.choice===oi&&oi===p.correctIndex?'correct':''} ${saved&&saved.choice===oi&&oi!==p.correctIndex?'incorrect':''} ${saved&&oi===p.correctIndex&&saved.choice!==oi?'correct':''}"
              onclick="answerProbeMC('${p.probeId}',${oi},${p.correctIndex})">
@@ -1763,12 +1831,17 @@ function renderPKC(){
     }
 
     const crit = (p.scoringCriteria||[]).map(c=>`<li>${mdInline(c)}</li>`).join('');
+    const critHTML = (!isMC && crit)
+      ? `<div style="margin-top:14px"><div class="criteria-label">What a strong answer covers</div>
+         <ul class="criteria-list">${crit}</ul></div>`
+      : '';
 
     return `<div class="probe-card" id="probe-${p.probeId}">
       <div class="probe-num">Probe ${i+1} · ${esc(p.questionType)}</div>
       <div class="int-prompt">${smartMd(p.prompt)}</div>
       <div style="margin-bottom:12px">${comps}</div>
       ${inputHTML}
+      ${critHTML}
       ${saved?probeOptionFeedback(p,saved):''}
     </div>`;
   }).join('');
@@ -1912,6 +1985,7 @@ function renderExp(){
   const atEnd = !chunked || cur === segs.length-1;
 
   let content='';
+  CB_EXP_ID = exp.experienceId;                 // v6.1: lets code blocks key their state
   for(let s=0; s<=(chunked?cur:segs.length-1); s++){
     content += `<div class="exp-seg" id="seg-${exp.experienceId}-${s}">` + segs[s].map(renderContentBlock).join('') + `</div>`;
   }
@@ -1970,6 +2044,8 @@ function renderExp(){
    ${tail}`;
   autoLinkGlossary(document.getElementById('screen-exp'));
   attachGlossaryLinks();
+  // v6.1: attach editors and buttons to any code widgets this screen rendered.
+  if(codeLabReady()) CodeLab.mount(document.getElementById('screen-exp'));
 }
 
 // ── v6: chunking helpers ────────────────────────────────────────────────
@@ -2042,15 +2118,35 @@ function renderSectionClose(sec){
   return out ? `<div class="section-close">${out}</div>` : '';
 }
 
+/* Set by renderExp before it maps over the blocks. Content blocks have no
+   back-reference to their experience, but v6.1 widgets need one to key their
+   saved state, so the current id is parked here for the duration of the render. */
+let CB_EXP_ID = null;
+
 function renderContentBlock(b){
   if(!b || typeof b!=='object') return '';
   const t = b.type||'text';
   if(t==='text'){
     const useMd = b.format ? b.format==='markdown' : mdDefault();
-    return `<div class="cb-text">${useMd ? md(b.content) : esc(b.content||'')}</div>`;
+    // plain text keeps its newlines (is-plain sets white-space:pre-wrap) so v5 courses
+    // that relied on line breaks in flat strings render as they always did
+    return useMd ? `<div class="cb-text">${md(b.content)}</div>`
+                 : `<div class="cb-text is-plain">${esc(b.content||'')}</div>`;
   }
   if(t==='code'){
-    return codeHTML(b.content, b.language, b.caption, b.highlightLines);
+    const staticHTML = codeHTML(b.content, b.language, b.caption, b.highlightLines);
+    // v6.1: `runnable:true` bolts a Run button onto an otherwise read-only example.
+    if(!b.runnable) return staticHTML;
+    if(!codeLabReady()) return `<div class="cb-runnable">${staticHTML}</div>` + codeLabPlaceholder('the runner');
+    if(!CodeLab.isRunnable(b.language)) return staticHTML;   // e.g. a Rust sample — just show it
+    return `<div class="cb-runnable">${staticHTML}${CodeLab.renderInlineRunner({
+      stateKey: (CB_EXP_ID||'block')+'::run-'+(b.blockId||Math.random().toString(36).slice(2)),
+      language: b.language,
+      sourceOverride: b.content || ''
+    })}</div>`;
+  }
+  if(t==='code-playground'){
+    return renderCodePlayground(b, {experienceId: CB_EXP_ID||'block'});
   }
   if(t==='callout'){
     const v = ['note','warning','insight','definition','example'].includes(b.variant) ? b.variant : 'note';
@@ -2073,22 +2169,23 @@ function renderContentBlock(b){
       terms.map(x=>`<details class="kt-item"><summary>${esc(x.term)}</summary><div class="kt-def">${mdInline(x.definition||'')}</div></details>`).join('')
     }</div>`;
   }
+  const mediaSrc = (t==='image'||t==='video'||t==='audio') ? safeMediaUrl(b.url) : '';
   if(t==='image'){
     return `<figure class="cb-media">${
-      b.url ? `<img src="${(b.url)}" alt="${esc(b.altText||'')}">`
-            : `<div class="cb-placeholder"><span class="ph-ico">🖼</span><span>${esc(b.altText||'Image')}</span></div>`
+      mediaSrc ? `<img src="${mediaSrc}" alt="${esc(b.altText||'')}">`
+            : `<div class="cb-placeholder"><span class="ph-ico">\u{1F5BC}</span><span>${esc(b.altText||'Image')}</span></div>`
     }${b.altText?`<figcaption class="cb-caption">${esc(b.altText)}</figcaption>`:''}</figure>`;
   }
   if(t==='video'){
     return `<figure class="cb-media">${
-      b.url ? `<video controls src="${(b.url)}"></video>`
-            : `<div class="cb-placeholder"><span class="ph-ico">▶</span><span>Video</span></div>`
+      mediaSrc ? `<video controls src="${mediaSrc}"></video>`
+            : `<div class="cb-placeholder"><span class="ph-ico">\u25B6</span><span>Video</span></div>`
     }${b.captionOrTranscript?`<details class="cb-transcript"><summary>Transcript</summary><p>${escBr(b.captionOrTranscript)}</p></details>`:''}</figure>`;
   }
   if(t==='audio'){
     return `<figure class="cb-media">${
-      b.url ? `<audio controls src="${(b.url)}"></audio>`
-            : `<div class="cb-placeholder"><span class="ph-ico">♪</span><span>Audio</span></div>`
+      mediaSrc ? `<audio controls src="${mediaSrc}"></audio>`
+            : `<div class="cb-placeholder"><span class="ph-ico">\u266A</span><span>Audio</span></div>`
     }${b.captionOrTranscript?`<details class="cb-transcript"><summary>Transcript</summary><p>${escBr(b.captionOrTranscript)}</p></details>`:''}</figure>`;
   }
   if(t==='interactive') return `<div class="cb-interactive">⚡ ${esc(b.content||'Interactive element')}</div>`;
@@ -2161,6 +2258,196 @@ function renderSelfGuided(sg){
   </div>`;
 }
 
+/* ════════════════════════════════════════════════════════════════════════
+   v6.1 — RUNNABLE CODE (codelab.js bridge)
+   ════════════════════════════════════════════════════════════════════════
+   codelab.js is a separate file, loaded lazily the first time a course needs
+   it. Everything here is the seam between the two: loading, state, evidence.
+   If the file cannot be loaded, code widgets degrade to a visible, explained
+   placeholder and the rest of the lesson carries on unaffected.
+
+   Override the location with  window.CODELAB_SRC = '/assets/codelab.js'
+   before this script runs; otherwise the candidates below are tried in order.
+   ════════════════════════════════════════════════════════════════════════ */
+
+let CODELAB_PHASE = 'idle';           // idle | loading | ready | failed
+let _codeLabWaiters = [];
+
+function codeLabReady(){ return CODELAB_PHASE==='ready' && !!window.CodeLab; }
+
+function ensureCodeLab(){
+  if(CODELAB_PHASE==='ready')  return Promise.resolve(true);
+  if(CODELAB_PHASE==='failed') return Promise.resolve(false);
+  return new Promise(resolve=>{
+    _codeLabWaiters.push(resolve);
+    if(CODELAB_PHASE==='loading') return;
+    CODELAB_PHASE='loading';
+
+    // Tried in order, so a served deployment and a file:// download both work.
+    const candidates = [window.CODELAB_SRC, 'codelab.js', '/codelab.js'].filter(Boolean);
+    (function attempt(i){
+      if(i>=candidates.length){ settleCodeLab('failed'); return; }
+      const s=document.createElement('script');
+      s.src=candidates[i]; s.async=true;
+      s.onload=()=>{
+        if(window.CodeLab){ configureCodeLab(); settleCodeLab('ready'); }
+        else attempt(i+1);                       // loaded something, but not us
+      };
+      s.onerror=()=>{ s.remove(); attempt(i+1); };
+      document.head.appendChild(s);
+    })(0);
+  });
+}
+function settleCodeLab(phase){
+  CODELAB_PHASE=phase;
+  const ok = phase==='ready';
+  _codeLabWaiters.splice(0).forEach(fn=>fn(ok));
+  if(ok) renderCurrentScreen();               // swap placeholders for real widgets
+}
+
+/* Re-render whatever is on screen. Used after a late codelab.js load and after
+   a predict-run commits, both of which change what should be displayed. */
+function renderCurrentScreen(){
+  if(state.screen==='exp') renderExp();
+  else if(state.screen==='review') renderReview();
+}
+
+/* State keys are "<experienceId>::<itemId>" so a widget's work lands in the
+   same answers map as every other interaction — which means it is exported,
+   imported and reset by the machinery that already exists. */
+function clSplitKey(key){ const i=String(key).indexOf('::'); return [key.slice(0,i), key.slice(i+2)]; }
+
+function configureCodeLab(){
+  window.CodeLab.configure({
+    esc, mdInline, smartMd,
+    toast,
+    rerender: renderCurrentScreen,
+
+    getState(key){
+      const [expId,id]=clSplitKey(key);
+      return (state.answers[expId]||{})[id] || null;
+    },
+    setState(key,val){
+      const [expId,id]=clSplitKey(key);
+      state.answers[expId]=state.answers[expId]||{};
+      state.answers[expId][id]=Object.assign({}, state.answers[expId][id], val);
+      saveState();
+    },
+
+    /* Evidence is recorded ONCE per challenge, not once per Check — otherwise a
+       learner who iterates (exactly what we want them to do) would bury their
+       own competency score under failed attempts. The commit point is the first
+       pass, or a solution reveal while still unsolved. */
+    onGraded(key, info){
+      const [expId,id]=clSplitKey(key);
+      const exp=findExperienceById(expId);
+      if(!exp) return;
+      const rec=(state.answers[expId]||{})[id]||{};
+
+      if(info.kind==='prediction'){
+        if(rec.graded) return;
+        rec.graded=true; rec.score=1;
+        state.answers[expId][id]=rec; saveState();
+        recordEvidence(exp.linkedCompetencies, 1, 'participation');
+        buildSidebar();
+        return;
+      }
+
+      const commit = info.passed || (info.solutionShown && !info.passed);
+      if(!commit || rec.graded) return;
+      rec.graded=true; rec.score=info.score;
+      state.answers[expId][id]=rec; saveState();
+      recordEvidence(exp.linkedCompetencies, info.score, 'code');
+      if(info.score<0.75 && LM.reviewOnMiss) queueMissed(id, {expId});
+      buildSidebar();
+      if(info.passed) toast(info.attempts===1 ? 'Solved first try' : 'Solved — nice persistence');
+    }
+  });
+}
+
+function findExperienceById(id){
+  for(const s of C.sections||[]) for(const e of s.learningExperiences||[])
+    if(e.experienceId===id) return e;
+  return null;
+}
+
+/** Does this course use any code widget at all? Decides whether to preload. */
+function courseUsesCodeLab(c){
+  return (c.sections||[]).some(s=>(s.learningExperiences||[]).some(e=>
+    (e.contentBlocks||[]).some(b=>b && (b.type==='code-playground' || (b.type==='code' && b.runnable))) ||
+    (e.interactionSequence||[]).some(i=>i && (i.interactionType==='code-challenge' || i.interactionType==='predict-run'))
+  ));
+}
+function preloadCodeLab(){ if(courseUsesCodeLab(C)) ensureCodeLab(); }
+
+/* Placeholder rendered while the file is in flight, or permanently if it never
+   arrives. Never a blank space — a missing widget must explain itself. */
+function codeLabPlaceholder(label){
+  if(CODELAB_PHASE==='failed'){
+    return `<div class="cb-loading is-error">
+      <b>This exercise could not load.</b><br>
+      The interactive code component (<code>codelab.js</code>) is missing or blocked.
+      The rest of the lesson is unaffected.</div>`;
+  }
+  ensureCodeLab();
+  return `<div class="cb-loading">Preparing ${esc(label||'the code exercise')}…</div>`;
+}
+
+/** Resolve an author's misconception id into the shape codelab.js expects. */
+function clMisconception(id){
+  const m = id ? findMisconception(id) : null;
+  return m ? {misconception:m.misconception, whyIncorrect:m.whyIncorrect||m.remediationStrategy||''} : null;
+}
+
+/* Copy the author's checker config, resolving misconception ids on each case. */
+function clCheck(ex){
+  const chk = Object.assign({mode:'none'}, ex.check||{});
+  if(Array.isArray(chk.cases)){
+    chk.cases = chk.cases.map(c=>Object.assign({}, c, {
+      misconception: clMisconception(c.linkedMisconceptionId)
+    }));
+  }
+  return chk;
+}
+
+/* ── Content block: code-playground (ungraded) ─────────────────────────── */
+function renderCodePlayground(b, exp){
+  if(!codeLabReady()) return codeLabPlaceholder('the playground');
+  const ex = b.codeExercise || b;
+  return CodeLab.renderPlayground({
+    stateKey: exp.experienceId+'::'+(b.blockId||('pg-'+(ex.language||'js'))),
+    language: ex.language || 'javascript',
+    prompt: b.caption || '',
+    starterCode: ex.starterCode || b.content || ''
+  });
+}
+
+/* ── Interaction: code-challenge and predict-run ───────────────────────── */
+function renderCodeInteraction(int, exp){
+  const ex = int.codeExercise || {};
+  const predict = int.interactionType==='predict-run';
+  if(!codeLabReady()) return codeLabPlaceholder(predict?'the prediction exercise':'the code challenge');
+
+  const cfg = {
+    stateKey: exp.experienceId+'::'+int.interactionId,
+    language: ex.language || 'javascript',
+    prompt: int.prompt || '',
+    starterCode: ex.starterCode || '',
+    sourceOverride: ex.code || null,
+    functionName: ex.functionName || '',
+    testSource: ex.testSource || '',
+    setupSql: ex.setupSql || '',
+    check: clCheck(ex),
+    hints: (int.feedback||{}).hints || [],
+    solution: ex.solution || '',
+    solutionNote: ex.solutionNote || '',
+    solutionAfter: ex.solutionAfter,
+    misconception: clMisconception(ex.linkedMisconceptionId),
+    explanation: ex.explanation || (int.feedback||{}).elaborativeFeedback || ''
+  };
+  return predict ? CodeLab.renderPredictRun(cfg) : CodeLab.renderChallenge(cfg);
+}
+
 // ── Interactions ──────────────────────────────────────────────────────────
 const INT_META = {
   'prediction':   {cls:'int-prediction', icon:'◎', label:'Prediction'},
@@ -2173,6 +2460,10 @@ const INT_META = {
 };
 function renderInteraction(int, exp){
   const expId=exp.experienceId;
+  // v6.1: code widgets render their own frame, prompt and controls.
+  if(int.interactionType==='code-challenge' || int.interactionType==='predict-run'){
+    return renderCodeInteraction(int, exp);
+  }
   const meta = INT_META[int.interactionType]||{cls:'',icon:'•',label:esc(int.interactionType)};
   const saved = state.answers[expId][int.interactionId];
   const revealed = has(state.revealed[expId], int.interactionId);
@@ -2307,9 +2598,10 @@ function submitText(expId,intId){
   const ta=document.getElementById('sa-'+intId);
   const exp=curExp(); const int=exp.interactionSequence.find(i=>i.interactionId===intId);
   if(int.required && (!ta||!ta.value.trim())){ toast('This response is required'); return; }
-  ansStore(expId,intId,{answer:ta?ta.value:'',confidence:readConfidence(intId)});
+  const conf=readConfidence(intId);
+  ansStore(expId,intId,{answer:ta?ta.value:'',confidence:conf});
   reveal(expId,intId);
-  recordEvidence(exp.linkedCompetencies, 1, 'participation');
+  recordEvidence(exp.linkedCompetencies, 1, 'participation', null, confFrac(conf, int.confidencePrompt));
   renderExp();
   toast(int.interactionType==='reflection'?'Reflection saved'
        :int.interactionType==='elaboration'?'Saved — putting it in your own words is the point'
@@ -2320,7 +2612,7 @@ function answerMC(expId,intId,choice){
   const confidence=readConfidence(intId);
   ansStore(expId,intId,{choice,confidence}); reveal(expId,intId);
   const correct = choice===int.correctIndex;
-  recordEvidence(exp.linkedCompetencies, correct?1:0, 'mc');
+  recordEvidence(exp.linkedCompetencies, correct?1:0, 'mc', null, confFrac(confidence, int.confidencePrompt));
   // ── v6: review scheduling from misses and miscalibration ──
   const cp=int.confidencePrompt||{}; const min=cp.scaleMin??1,max=cp.scaleMax??5,range=(max-min)||1;
   const frac = confidence!=null ? (confidence-min)/range : null;
@@ -2347,7 +2639,7 @@ function submitRanking(expId,intId){
   } else {
     score = order[0]===int.correctIndex ? 1 : 0.3;
   }
-  recordEvidence(exp.linkedCompetencies, score, 'ranking');
+  recordEvidence(exp.linkedCompetencies, score, 'ranking', null, confFrac(confidence, int.confidencePrompt));
   if(score<0.75 && LM.reviewOnMiss) queueMissed(intId, {expId});   // v6
   renderExp(); buildSidebar(); toast(score>=0.99?'Perfect order':'Order locked — see explanation');
 }
@@ -2997,7 +3289,9 @@ function fcTakeaways(){
   });
   return out;
 }
-const FC_FIX_KEYS = ['correction','correctUnderstanding','correctConception','correctBelief','resolution','remediation','remediationAction','whyIncorrect'];
+// Correction fields, in priority order. 'whyIncorrect' and 'remediationStrategy' are the two
+// the schema actually defines; the rest are tolerated aliases from hand-authored courses.
+const FC_FIX_KEYS = ['whyIncorrect','remediationStrategy','correction','correctUnderstanding','correctConception','correctBelief','resolution','remediation','remediationAction'];
 function fcMisconceptions(){
   const out=[];
   (C.competencies||[]).forEach(c=>{
@@ -3006,7 +3300,7 @@ function fcMisconceptions(){
       const key=FC_FIX_KEYS.find(k=>fcTxt(m[k]));
       if(!key) return;                                   // no correction authored → not a card
       out.push({
-        src:'misconceptions', ctx:fcTxt(c.name)||'Misconception',
+        src:'misconceptions', ctx:fcTxt(c.title)||'Misconception',
         frontLabel:'Why is this wrong?', frontHTML:`<div class="fc-q">“${mdInline(wrong)}”</div>`,
         backLabel:'Correction', backHTML:`<div class="fc-a">${mdInline(m[key])}</div>`
       });
@@ -3536,9 +3830,51 @@ function validateCourse(c){
     if(s.sectionSummary && s.sectionSummary.resolvesHookId && !hookIds.has(s.sectionSummary.resolvesHookId))
       warnings.push(`section ${s.sectionId}: sectionSummary.resolvesHookId "${s.sectionSummary.resolvesHookId}" matches no hookId in this section`);
     (s.learningExperiences||[]).forEach(e=>{
+      const BLOCK_TYPES=['text','code','callout','table','key-terms','image','video','audio','interactive','code-playground'];
+      const RUNNABLE=['js','jsx','javascript','node','py','python','python3','sql','sqlite'];
       (e.contentBlocks||[]).forEach(b=>{
         if(b && b.type==='key-terms' && !(b.terms||[]).length)
           warnings.push(`experience ${e.experienceId}: key-terms block ${b.blockId||'?'} has no terms`);
+        if(b && b.type && !BLOCK_TYPES.includes(b.type))
+          warnings.push(`experience ${e.experienceId}: block ${b.blockId||'?'} has unknown type "${b.type}" — it will render nothing`);
+        // v6.1
+        if(b && b.type==='code' && b.runnable && !RUNNABLE.includes(String(b.language||'').toLowerCase()))
+          warnings.push(`experience ${e.experienceId}: block ${b.blockId||'?'} is runnable:true but language "${b.language||''}" cannot be executed — it will render as a plain code block`);
+        if(b && b.type==='code-playground'){
+          const px=b.codeExercise||b;
+          if(!RUNNABLE.includes(String(px.language||'').toLowerCase()))
+            warnings.push(`experience ${e.experienceId}: code-playground ${b.blockId||'?'} has unrunnable language "${px.language||''}" — only JavaScript, Python and SQL execute`);
+        }
+      });
+      const INT_TYPES=['prediction','compare-responses','reflection','elaboration','multiple-choice','drag-drop','scenario-analysis','code-challenge','predict-run'];
+      (e.interactionSequence||[]).forEach(it=>{
+        if(it.interactionType && !INT_TYPES.includes(it.interactionType))
+          warnings.push(`interaction ${it.interactionId}: unknown interactionType "${it.interactionType}" — renders a text box with no submit control, so it can never be recorded`);
+        // ── v6.1: code widget authoring checks ──
+        if(it.interactionType==='code-challenge' || it.interactionType==='predict-run'){
+          const ex=it.codeExercise;
+          if(!ex){
+            warnings.push(`interaction ${it.interactionId}: ${it.interactionType} has no codeExercise block — nothing will run`);
+            return;
+          }
+          if(!RUNNABLE.includes(String(ex.language||'').toLowerCase()))
+            warnings.push(`interaction ${it.interactionId}: language "${ex.language||''}" cannot be executed — only JavaScript, Python and SQL run`);
+          if(it.interactionType==='predict-run' && !ex.code)
+            warnings.push(`interaction ${it.interactionId}: predict-run needs codeExercise.code (the program the learner predicts)`);
+          if(it.interactionType==='code-challenge'){
+            const chk=ex.check||{};
+            if(!chk.mode || chk.mode==='none')
+              warnings.push(`interaction ${it.interactionId}: code-challenge has no check.mode — it will always be marked correct`);
+            if(chk.mode==='cases' && !ex.functionName)
+              warnings.push(`interaction ${it.interactionId}: check.mode "cases" needs codeExercise.functionName`);
+            if(chk.mode==='cases' && !(chk.cases||[]).length)
+              warnings.push(`interaction ${it.interactionId}: check.mode "cases" has an empty cases[] — it will always be marked correct`);
+            if(chk.mode==='stdout' && chk.expectedOutput==null)
+              warnings.push(`interaction ${it.interactionId}: check.mode "stdout" needs check.expectedOutput`);
+            if(chk.mode==='tests' && !ex.testSource && !/describe\s*\(/.test(ex.starterCode||''))
+              warnings.push(`interaction ${it.interactionId}: check.mode "tests" has neither codeExercise.testSource nor a describe() block in starterCode — no tests will run`);
+          }
+        }
       });
       (e.workedExamples||[]).forEach(w=>{
         const fv=w.fadedVariant;
@@ -3565,6 +3901,8 @@ function loadCourse(obj){
   state=loadState();
   NOTES_KEY='course-notes:'+(C.courseMetadata?.courseId||'default');
   initNotes();
+  if(window.CodeLab) CodeLab.clear();               // v6.1: drop the previous course's widgets
+  preloadCodeLab();                                 // v6.1: fetch the runner while the learner reads
   buildSidebar(); renderGlossary(); goScreen('intro');
   if(warnings.length) showReport(`Loaded with ${warnings.length} warning${warnings.length>1?'s':''}`, warnings);
   else toast('Course loaded: '+(C.courseMetadata?.title||'untitled'));
@@ -3711,6 +4049,7 @@ function showEmptyState(){
 
 if (HAS_COURSE) {
   mergeKeyTerms();   // v6: key-terms blocks feed the glossary
+  preloadCodeLab();  // v6.1: start fetching codelab.js if this course uses it
   buildSidebar();
   logSessionDay();
   const initialScreen = hasStarted() ? 'home' : (state.screen||'intro');
