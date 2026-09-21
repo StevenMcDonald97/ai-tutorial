@@ -1110,9 +1110,7 @@ Keep it tight and structural. This outline will be expanded in a later step, so 
   const p2 =
 `You are an expert subject-matter expert and lecturer. Below is the approved ARCHITECTURE for an online course on "${d.topic}" (audience: ${aud}; level: ${d.difficulty}). Your task is to write the full teaching CONTENT for every section, staying faithful to the structure, IDs, competencies, and misconceptions already defined.
 
-=== APPROVED COURSE ARCHITECTURE (output of step 1) ===
-[[[ PASTE THE COMPLETE OUTPUT OF PROMPT 1 HERE ]]]
-=== END ARCHITECTURE ===
+Please use the architecture oyu just created 
 
 FOR EACH SECTION (in order), produce ALL of the following elements. Every element is required unless marked optional:
 
@@ -1140,13 +1138,7 @@ OUTPUT FORMAT: Organised Markdown, one block per section, headed by the section'
   const p3 =
 `You are a learning-engineering system that converts course material into a strict JSON object for an adaptive course engine. The engine is built on evidence-based learning science: spaced retrieval, confidence calibration, mastery-based progression with decay, elaborative feedback, interleaving, and transfer-focused assessment. Your job is to assemble ALL prior material into one complete, valid JSON object that maximises long-term learning and successful transfer for the topic "${d.topic}".
 
-=== COURSE ARCHITECTURE (step 1 output) ===
-[[[ PASTE PROMPT 1 OUTPUT HERE ]]]
-=== END ===
-
-=== COURSE CONTENT (step 2 output) ===
-[[[ PASTE PROMPT 2 OUTPUT HERE ]]]
-=== END ===
+Please use the architecture you just created
 
 TARGET SCHEMA (produce JSON that matches this structure exactly; keys and enum values are authoritative):
 ${SCHEMA}

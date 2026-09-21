@@ -40,6 +40,16 @@
     "courseImage": "/assets/philosophy-course.jpg"
   },
   {
+    "slug": "auth-security-fundamentals.course",
+    "courseId": "auth-security-fundamentals",
+    "title": "Auth & Security Fundamentals",
+    "description": "Build authentication you can defend. You will implement session- and token-based auth, enforce authorization at the object level, configure CORS without over-permissioning, and then **attack your own application** to find out which of your defences actually work. For senior developers who already build APIs.",
+    "duration": 300,
+    "durationLabel": "5h",
+    "difficulty": "intermediate",
+    "courseImage": ""
+  },
+  {
     "slug": "back-end-architecture-design.course",
     "courseId": "back-end-architecture-design",
     "title": "Back End Architecture Design for Front End Engineers",
@@ -58,6 +68,16 @@
     "durationLabel": "16h 30m",
     "difficulty": "advanced",
     "courseImage": "/assets/ux-course.jpg"
+  },
+  {
+    "slug": "data-modeling-api-design.course",
+    "courseId": "data-modeling-api-design",
+    "title": "Data Modeling & API Design: Shape at Rest, on the Wire, at the Edge",
+    "description": "An intermediate course for senior developers who already ship features but make storage and API decisions by habit. You will work one decision chain end to end: **the shape you choose at rest constrains the contract you can offer, and the contract constrains what the frontend can do without waterfalls or heroics.**",
+    "duration": 300,
+    "durationLabel": "5h",
+    "difficulty": "intermediate",
+    "courseImage": "PLACEHOLDER"
   },
   {
     "slug": "data-visualizations-course",
@@ -90,24 +110,14 @@
     "courseImage": "/assets/joy-course.jpg"
   },
   {
-    "slug": "timeguesser",
-    "courseId": "master-timeguesser",
-    "title": "Master TimeGuesser",
-    "description": "An intermediate course for daily web game enthusiasts who play TimeGuesser regularly but have plateaued on score. Learners move from reactive, intuition-driven guessing to systematic, evidence-based estimation — building clue-reading skills, structured scoring strategy, and a transferable daily-game thinking toolkit applicable to GeoGuessr, Wordle, and beyond.",
-    "duration": 120,
-    "durationLabel": "2h",
+    "slug": "performance-across-the-stack.course",
+    "courseId": "performance-across-the-stack",
+    "title": "Performance Across the Stack",
+    "description": "Diagnose slow page loads by **measuring before you guess**. Profile end to end, decide whether the bottleneck is backend (query plans, N+1, missing indexes) or frontend (bundle weight, render blocking, unnecessary re-renders), add a cache you can defend, read Core Web Vitals as diagnostics, and finish with a before/after report that survives scrutiny. Hands-on in JavaScript, Python and SQL.",
+    "duration": 300,
+    "durationLabel": "5h",
     "difficulty": "intermediate",
-    "courseImage": "PLACEHOLDER"
-  },
-  {
-    "slug": "fullstack-interview",
-    "courseId": "mastering-the-fullstack-interview",
-    "title": "Mastering the Fullstack Interview: Technology Depth",
-    "description": "An intermediate course that makes early-career software engineers technically conversant across the modern stack so they can answer the substantive questions an interview asks. It builds a shared map and vocabulary, drills the cross-cutting fundamentals every engineer is tested on (complexity, the request lifecycle, networking/HTTP, security), goes deep on high-value frontend and backend/data/infrastructure technologies via the durable concepts beneath them, and closes by helping learners judge which technologies are worth their time and build a personal mastery plan.",
-    "duration": 480,
-    "durationLabel": "8h",
-    "difficulty": "intermediate",
-    "courseImage": "https://assets.coursebuilder.io/courses/mastering-the-fullstack-interview/thumbnail.png"
+    "courseImage": ""
   },
   {
     "slug": "Practical-AI-For-Developers",
