@@ -110,6 +110,16 @@
     "courseImage": "/assets/joy-course.jpg"
   },
   {
+    "slug": "observability-debugging-in-production.course",
+    "courseId": "observability-debugging-in-production",
+    "title": "Observability & Debugging in Production",
+    "description": "A hands-on course for senior developers. Instrument a real-shaped app (**Brewline**, a coffee pre-order service) with structured logs, request correlation, RED metrics and end-to-end traces from browser to database. Then debug three seeded production bugs, an intermittent 500, a slow endpoint and a broken frontend state, using *only* the telemetry you built: no debugger, no local repro, no guessing from the code. Runnable JavaScript and SQL throughout.",
+    "duration": 480,
+    "durationLabel": "8h",
+    "difficulty": "intermediate",
+    "courseImage": ""
+  },
+  {
     "slug": "performance-across-the-stack.course",
     "courseId": "performance-across-the-stack",
     "title": "Performance Across the Stack",
@@ -176,6 +186,16 @@
     "description": "A short, hands-on tour of the v6.1 runnable-code widgets — playgrounds, graded challenges, predictions, and an interactive Jest tutorial.",
     "duration": 35,
     "durationLabel": "35m",
+    "difficulty": "intermediate",
+    "courseImage": ""
+  },
+  {
+    "slug": "testing-strategy-course",
+    "courseId": "testing-strategy",
+    "title": "Testing Strategy for Senior Developers",
+    "description": "Decide **what** to test, **at which layer**, and **what to leave alone**. Take an app from ad hoc tests to a deliberate pyramid: unit tests that catch planted bugs, integration tests against a real database, a consumer-driven **contract test**, one or two stable e2e flows, and a written rationale you can defend. Hands-on throughout, with runnable JavaScript, Python and SQL.",
+    "duration": 300,
+    "durationLabel": "5h",
     "difficulty": "intermediate",
     "courseImage": ""
   },
