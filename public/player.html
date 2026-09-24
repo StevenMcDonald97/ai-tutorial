@@ -2284,7 +2284,7 @@ function ensureCodeLab(){
     CODELAB_PHASE='loading';
 
     // Tried in order, so a served deployment and a file:// download both work.
-    const candidates = [window.CODELAB_SRC, 'codelab.js', '/codelab.js'].filter(Boolean);
+    const candidates = [window.CODELAB_SRC, 'codelab.js', '/codelab.js', '//codelab.js'].filter(Boolean);
     (function attempt(i){
       if(i>=candidates.length){ settleCodeLab('failed'); return; }
       const s=document.createElement('script');

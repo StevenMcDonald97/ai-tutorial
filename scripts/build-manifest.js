@@ -31,7 +31,7 @@ const OUT_PATH     = path.resolve(__dirname, '..', 'public', 'manifest.json');
 // that top-level path. Keep in sync with anything you add under public/.
 const RESERVED_SLUGS = new Set([
   'index', 'player', '404', 'manifest', 'assets', 'courses',
-  'favicon', 'robots', 'sitemap',
+  'favicon', 'robots', 'sitemap', 'codelab.js'
 ]);
 
 function slugFromFilename(file) {
