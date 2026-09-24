@@ -19,8 +19,10 @@
  *   - ASSETS   : the static-asset fetcher (provided automatically to Functions)
  *   - COURSES  : a KV namespace binding holding keys  course:<slug>
  *
- * Reserved top-level asset paths (index.html, manifest.json, /assets/*, etc.)
- * are served as real files BEFORE this Function runs, so they never reach here.
+ * Functions take priority over static assets on Pages, so public/_routes.json
+ * must exclude every real top-level file (codelab.js, manifest.json, /assets/*,
+ * ...) or this catch-all swallows it and answers 404.html. Anything that slips
+ * through is handed back to the asset server by passThroughToAsset().
  */
 
 const SITE_NAME       = 'Course Engine';
@@ -28,9 +30,6 @@ const DEFAULT_OG_IMAGE = '/assets/og-default.png'; // site-wide fallback preview
 
 export async function onRequestGet(context) {
   const { params, env, request } = context;
-   if (params.slug === "manifest.json") {
-    return next(); // pass through to static asset
-  }
   const slug = String(params.slug || '').trim();
 
   // ── 1 + 2. Validate the slug against the manifest ──────────────────────
@@ -45,7 +44,11 @@ export async function onRequestGet(context) {
 
   const entry = manifest.find((c) => c.slug === slug);
   if (!entry) {
-    return serve404(env, request);
+    // Not a course. It may still be a real top-level file (codelab.js,
+    // manifest.json, ...). _routes.json excludes the ones we know about so
+    // they never reach this Function, but fall through to the asset server
+    // anyway so a newly added root file works before _routes.json catches up.
+    return passThroughToAsset(env, request);
   }
 
   // ── 3. Read the course object from KV ──────────────────────────────────
@@ -95,6 +98,17 @@ async function readManifest(env, request) {
   const res = await env.ASSETS.fetch(new URL('/manifest.json', request.url));
   if (!res.ok) throw new Error('manifest fetch failed: ' + res.status);
   return res.json();
+}
+
+/**
+ * Serve the static asset at this path if one exists, else a real 404.
+ * Without this, every unknown top-level path — including /codelab.js — would
+ * get 404.html, which a <script> tag sees as a load failure.
+ */
+async function passThroughToAsset(env, request) {
+  const res = await env.ASSETS.fetch(request);
+  if (res.ok) return res;
+  return serve404(env, request);
 }
 
 async function serve404(env, request) {

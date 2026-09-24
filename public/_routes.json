@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "include": ["/*"],
+  "exclude": [
+    "/assets/*",
+    "/index.html",
+    "/404.html",
+    "/player.html",
+    "/player-old.html",
+    "/courseBuilder.html",
+    "/codelab.js",
+    "/codelab-test.html",
+    "/manifest.json",
+    "/exampleJsonV6.json",
+    "/CourseSchemaDocV6.md"
+  ]
+}
