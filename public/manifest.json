@@ -130,6 +130,16 @@
     "courseImage": ""
   },
   {
+    "slug": "pixel-to-production-FINAL",
+    "courseId": "pixel-to-production",
+    "title": "Pixel to Production: Senior Frontend Engineering from Runtime to Craft",
+    "description": "A 13-section course for working engineers moving into **senior frontend** roles. It runs from the JavaScript runtime and the browser pipeline, through framework internals, algorithms, system design, performance, accessibility, testing and delivery, to CSS architecture, motion, design systems, visual judgment, and a capstone with interview readiness. Every section pairs explanation with **runnable JavaScript**, predict-then-run snippets, graded code challenges, and real-world transfer tasks.",
+    "duration": 4800,
+    "durationLabel": "80h",
+    "difficulty": "intermediate",
+    "courseImage": ""
+  },
+  {
     "slug": "Practical-AI-For-Developers",
     "courseId": "practical-ai-for-developers",
     "title": "Practical AI for Developers",
