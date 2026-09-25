@@ -483,7 +483,7 @@ JavaScript exercises if offline use matters.**
 | `language` | Executed | all | See table above. |
 | `starterCode` | Executed | challenge, playground | What the editor opens with. Supports `[[edit]]` markers. |
 | `code` | Executed | `predict-run` | The read-only program the learner predicts. **Required** for `predict-run`. |
-| `functionName` | Executed | `check.mode: "cases"` | The function the checker calls. Must be a plain identifier; anything else is rejected at run time. |
+| `functionName` | Executed | `check.mode: "cases"` | The function the checker calls. Must be a plain identifier; anything else is rejected at run time. Called **synchronously, with no `await`** — see the warning under `codeExercise.check` below. |
 | `testSource` | Executed | `check.mode: "tests"` | Author-supplied tests, appended after the learner's code. Shown to the learner read-only (see `showTests`). |
 | `showTests` | Executed | `check.mode: "tests"` | Default `true`. Set `false` to hide author tests — rarely right, since the tests are the specification. |
 | `setupSql` | Executed | SQL only | Schema and seed rows, run before the learner's query. |
@@ -508,6 +508,15 @@ revealed costs 0.1 of the final score.
 
 **`cases`** is the workhorse and produces the clearest feedback: each case renders as a call
 signature with expected and actual values side by side.
+
+**`functionName` is invoked synchronously — the checker does not `await` its return value and
+does not drain pending promises.** If `functionName` is an `async` function, or otherwise returns
+a Promise, `expected` is compared against the *pending Promise itself*, which has no comparable
+value and always fails, regardless of what the function actually resolves to. This mode is only
+correct for functions whose return value is available the instant the call returns. If the logic
+being tested is asynchronous — awaits a timer, a `Promise.all`, a network/IO stand-in — use
+`check.mode: "tests"` instead, with an `async it()` that does
+`expect(await targetFn(...)).toEqual(expected)`.
 
 ```json
 "check": {
@@ -549,17 +558,32 @@ every test passes but there are too few, the learner is told exactly that rather
 Test exercises run against a **Jest-compatible subset**, not Jest. Available:
 
 - `describe`, `it` / `test`, `it.skip`
-- `beforeEach`, `afterEach`, `beforeAll`, `afterAll` — sync, promise, or `done` callback
+- `beforeEach`, `afterEach` — sync, promise, or `done` callback, run around every test
 - `expect(...)` with `toBe`, `toEqual`, `toStrictEqual`, `toBeTruthy`, `toBeFalsy`, `toBeNull`,
   `toBeUndefined`, `toBeDefined`, `toBeNaN`, `toBeGreaterThan(OrEqual)`, `toBeLessThan(OrEqual)`,
   `toBeCloseTo`, `toContain`, `toContainEqual`, `toHaveLength`, `toHaveProperty`, `toMatch`,
   `toBeInstanceOf`, `toThrow`, `toHaveBeenCalled(Times|With)`, `toHaveBeenLastCalledWith`
-- `.not`, and `.resolves` / `.rejects` for promises
+- `.not`
+- `.resolves` / `.rejects` for promises — but **only** chained with `toBe`, `toEqual`, `toContain`,
+  `toHaveLength`, `toMatch`, `toBeTruthy`, or `toBeFalsy`. Any other matcher chained after
+  `.resolves`/`.rejects` — including `toThrow` and `toBeInstanceOf`, both listed above — is not
+  implemented and throws `"... is not a function"` at run time, failing the whole test. To assert
+  on a rejection with any other matcher, write it out by hand instead of chaining:
+  ```js
+  let caught = null;
+  try { await mightReject(); } catch (e) { caught = e; }
+  expect(caught).toBeInstanceOf(Error);
+  expect(caught.message).toMatch('reason');
+  ```
+  `.not` cannot be combined with `.resolves`/`.rejects` at all.
 - `jest.fn()` with `mockReturnValue(Once)`, `mockImplementation(Once)`, `mockResolvedValue`,
   `mockRejectedValue`, `mockClear`, `mockReset`
 
 **Not available:** module mocking (`jest.mock`), snapshots, fake timers, the CLI, and `it.only`
-(accepted, but it does not filter). **Say so in the course.** A `callout` stating that these
+(accepted, but it does not filter). **`beforeAll` and `afterAll` are accepted and stored without
+error but are never executed** — the runner only ever invokes `beforeEach`/`afterEach` hooks, so
+anything written in a `beforeAll`/`afterAll` silently never runs. Use `beforeEach`/`afterEach`
+instead, even for one-time-looking setup. **Say so in the course.** A `callout` stating that these
 exercises use a compatible subset is an honest sentence that costs nothing.
 
 For Python, `check.mode: "tests"` uses the standard library's `unittest` — define

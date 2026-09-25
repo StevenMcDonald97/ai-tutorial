@@ -947,12 +947,21 @@ runnable:true — it will render correctly but cannot execute.
 
   C. Graded challenge — interactionSequence item, interactionType "code-challenge", with a
      codeExercise carrying a check. Pick the checker deliberately:
-       check.mode "cases"  — BEST DEFAULT. Needs codeExercise.functionName and check.cases[]
-                             ({args, expected}). args are SPREAD: [[1,2]] passes one array,
-                             [1,2] passes two. Clearest feedback of the three.
+       check.mode "cases"  — BEST DEFAULT, but ONLY for synchronous logic. Needs
+                             codeExercise.functionName and check.cases[] ({args, expected}).
+                             args are SPREAD: [[1,2]] passes one array, [1,2] passes two.
+                             Clearest feedback of the three. functionName is called SYNCHRONOUSLY
+                             with no await and no promise draining — if the target function is
+                             async, or returns a Promise, or its correctness depends on a timer/
+                             microtask resolving, "cases" mode compares against the pending
+                             Promise object and will ALWAYS fail, no matter what it resolves to.
+                             For anything involving async logic, use check.mode "tests" instead.
        check.mode "tests"  — a suite must run and fully pass. Set check.minimumTests above 1.
                              Put author tests in codeExercise.testSource (shown read-only) for
                              "fix the broken code"; leave testSource empty for "write the tests".
+                             REQUIRED for any exercise whose target function is async or whose
+                             correctness depends on awaiting a Promise — write an async it() that
+                             does expect(await fn(...)).toEqual(...).
        check.mode "stdout" — only when printing IS the skill. Set check.match ("trim" default,
                              or "normalize-whitespace" to forgive formatting). Fragile: it
                              fails on trailing spaces and teaches formatting, not thinking.
@@ -989,7 +998,18 @@ RULES THAT MATTER
 - If the course uses Python or SQL, add one sentence of course text saying the first run needs
   a network connection (those runtimes download once, then cache). JavaScript always works offline.
 - If the course uses check.mode "tests", state plainly in the course text that the environment
-  is a Jest-compatible subset, not Jest.`;
+  is a Jest-compatible subset, not Jest.
+- In check.mode "tests" testSource, chaining a matcher after .resolves/.rejects ONLY works for
+  toBe, toEqual, toContain, toHaveLength, toMatch, toBeTruthy, toBeFalsy. Do NOT write
+  .rejects.toThrow(...) or .resolves.toBeInstanceOf(...) or similar — they throw "is not a
+  function" and fail the whole test. To assert on a rejection with any other matcher, catch it
+  manually instead:
+    let caught = null;
+    try { await mightReject(); } catch (e) { caught = e; }
+    expect(caught).toBeInstanceOf(Error);
+    expect(caught.message).toMatch('reason');
+  Also: beforeAll/afterAll are accepted but never actually run by the grader — use
+  beforeEach/afterEach for all setup and teardown, even one-time-looking setup.`;
 
 function slugify(s) {
   return s.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').slice(0, 48) || 'course';
