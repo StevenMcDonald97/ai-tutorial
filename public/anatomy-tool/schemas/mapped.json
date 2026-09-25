@@ -1,0 +1,1356 @@
+{
+  "method": "Mesh-derived orthographic anatomy studies. Anchors are exact vertices; stages share camera and coordinates. Neutral pose only.",
+  "studies": {
+    "male-chest": {
+      "sex": "male",
+      "region": "chest",
+      "source": "Z-Anatomy / BodyParts3D male",
+      "anchors": [
+        {
+          "label": "Upper manubrium",
+          "sourceMesh": "Manubrium_of_sternum",
+          "vertexIndex": 833,
+          "point": [
+            0.035354770720005035,
+            4.56176233291626,
+            0.12236170470714569
+          ]
+        },
+        {
+          "label": "Lower sternum",
+          "sourceMesh": "Body_of_sternum",
+          "vertexIndex": 754,
+          "point": [
+            -0.033460669219493866,
+            4.0688676834106445,
+            0.3041001558303833
+          ]
+        },
+        {
+          "label": "Lateral clavicle",
+          "sourceMesh": "Claviclel",
+          "vertexIndex": 1,
+          "point": [
+            0.4629918932914734,
+            4.6107096672058105,
+            -0.10394991189241409
+          ]
+        },
+        {
+          "label": "10th costal cartilage",
+          "sourceMesh": "Costal_cartilage_of_tenth_ribl",
+          "vertexIndex": 723,
+          "point": [
+            0.2531052827835083,
+            3.642432928085327,
+            0.25083237886428833
+          ]
+        },
+        {
+          "label": "Iliac crest",
+          "sourceMesh": "Hip_bonel",
+          "vertexIndex": 1141,
+          "point": [
+            0.28794702887535095,
+            3.3858206272125244,
+            -0.0828404650092125
+          ]
+        }
+      ],
+      "views": {
+        "0": {
+          "images": [
+            "male-chest-0-1.png",
+            "male-chest-0-2.png",
+            "male-chest-0-3.png"
+          ],
+          "markers": [
+            {
+              "number": 1,
+              "x": 0.5122791301669616,
+              "y": 0.28652643974254327,
+              "hidden": false
+            },
+            {
+              "number": 2,
+              "x": 0.4883786935471245,
+              "y": 0.4385557085376346,
+              "hidden": true
+            },
+            {
+              "number": 3,
+              "x": 0.6608026875734786,
+              "y": 0.27812186796344984,
+              "hidden": false
+            },
+            {
+              "number": 4,
+              "x": 0.5879065230469079,
+              "y": 0.5768507046094158,
+              "hidden": false
+            },
+            {
+              "number": 5,
+              "x": 0.6000074838912282,
+              "y": 0.6697642912119683,
+              "hidden": false
+            }
+          ]
+        },
+        "45": {
+          "images": [
+            "male-chest-45-1.png",
+            "male-chest-45-2.png",
+            "male-chest-45-3.png"
+          ],
+          "markers": [
+            {
+              "number": 1,
+              "x": 0.47722147958178535,
+              "y": 0.28692884519957784,
+              "hidden": false
+            },
+            {
+              "number": 2,
+              "x": 0.4156887627803588,
+              "y": 0.44223247380944336,
+              "hidden": true
+            },
+            {
+              "number": 3,
+              "x": 0.6378226276995979,
+              "y": 0.26667658278071027,
+              "hidden": false
+            },
+            {
+              "number": 4,
+              "x": 0.49914742516845273,
+              "y": 0.5735142245854881,
+              "hidden": false
+            },
+            {
+              "number": 5,
+              "x": 0.5896497271097684,
+              "y": 0.6624953801422839,
+              "hidden": false
+            }
+          ]
+        },
+        "90": {
+          "images": [
+            "male-chest-90-1.png",
+            "male-chest-90-2.png",
+            "male-chest-90-3.png"
+          ],
+          "markers": [
+            {
+              "number": 1,
+              "x": 0.4555071767754929,
+              "y": 0.289507125407363,
+              "hidden": true
+            },
+            {
+              "number": 2,
+              "x": 0.39238720927579906,
+              "y": 0.4495882642765423,
+              "hidden": true
+            },
+            {
+              "number": 3,
+              "x": 0.5341079450569438,
+              "y": 0.26008707364276695,
+              "hidden": false
+            },
+            {
+              "number": 4,
+              "x": 0.4108877540427449,
+              "y": 0.5769622683779101,
+              "hidden": false
+            },
+            {
+              "number": 5,
+              "x": 0.5267763782202666,
+              "y": 0.6580331668217552,
+              "hidden": false
+            }
+          ]
+        },
+        "180": {
+          "images": [
+            "male-chest-180-1.png",
+            "male-chest-180-2.png",
+            "male-chest-180-3.png"
+          ],
+          "markers": [
+            {
+              "number": 1,
+              "x": 0.4877208698330384,
+              "y": 0.29476015080049245,
+              "hidden": true
+            },
+            {
+              "number": 2,
+              "x": 0.5116213064528755,
+              "y": 0.4584702152096809,
+              "hidden": true
+            },
+            {
+              "number": 3,
+              "x": 0.33919731242652135,
+              "y": 0.2718099519278634,
+              "hidden": false
+            },
+            {
+              "number": 4,
+              "x": 0.41209347695309206,
+              "y": 0.5933415548581092,
+              "hidden": true
+            },
+            {
+              "number": 5,
+              "x": 0.3999925161087719,
+              "y": 0.6648091333805227,
+              "hidden": false
+            }
+          ]
+        }
+      },
+      "sourceMeshes": [
+        "Hip_boner",
+        "Hip_bonel",
+        "Sacrum",
+        "Vertebra_L5",
+        "Vertebra_L3",
+        "Vertebra_L4",
+        "Vertebra_L2",
+        "Vertebra_L1",
+        "Vertebra_T5",
+        "Vertebra_T11",
+        "Vertebra_T1",
+        "Vertebra_T6",
+        "Vertebra_T3",
+        "Vertebra_T4",
+        "Vertebra_T12",
+        "Vertebra_T7",
+        "Vertebra_T8",
+        "Vertebra_T9",
+        "Vertebra_T10",
+        "Vertebra_T2",
+        "Coccyx",
+        "Costal_cartilage_of_sixth_ribl",
+        "Costal_cartilage_of_fifth_ribr",
+        "Costal_cartilage_of_ninth_ribr",
+        "Costal_cartilage_of_sixth_ribr",
+        "Costal_cartilage_of_second_ribl",
+        "Costal_cartilage_of_fourth_ribl",
+        "Costal_cartilage_of_fifth_ribl",
+        "Costal_cartilage_of_seventh_ribl",
+        "Costal_cartilage_of_ninth_ribl",
+        "Costal_cartilage_of_fourth_ribr",
+        "Costal_cartilage_of_second_ribr",
+        "Costal_cartilage_of_tenth_ribr",
+        "Costal_cartilage_of_first_ribr",
+        "Costal_cartilage_of_eighth_ribr",
+        "Costal_cartilage_of_third_ribr",
+        "Costal_cartilage_of_seventh_ribr",
+        "Costal_cartilage_of_third_ribl",
+        "Costal_cartilage_of_first_ribl",
+        "Costal_cartilage_of_tenth_ribl",
+        "Costal_cartilage_of_eighth_ribl",
+        "Fourth_ribl",
+        "First_ribl",
+        "Fifth_ribl",
+        "Fifth_ribr",
+        "First_ribr",
+        "Third_ribl",
+        "Third_ribr",
+        "Seventh_ribr",
+        "Fourth_ribr",
+        "Seventh_ribl",
+        "Second_ribl",
+        "Sixth_ribl",
+        "Second_ribr",
+        "Sixth_ribr",
+        "Eighth_ribl",
+        "Tenth_ribr",
+        "Ninth_ribl",
+        "Ninth_ribr",
+        "Eighth_ribr",
+        "Twelfth_ribl",
+        "Twelfth_ribr",
+        "Eleventh_ribl",
+        "Eleventh_ribr",
+        "Tenth_ribl",
+        "Manubrium_of_sternum",
+        "Body_of_sternum",
+        "Xiphoid_process",
+        "Scapular",
+        "Scapulal",
+        "Clavicler",
+        "Claviclel",
+        "Latissimus_dorsi_muscler",
+        "Rhomboid_minor_muscler",
+        "Rhomboid_minor_musclel",
+        "Transverse_part_of_trapezius_muscler",
+        "Ascending_part_of_trapezius_muscler",
+        "Ascending_part_of_trapezius_musclel",
+        "Transverse_part_of_trapezius_musclel",
+        "Descending_part_of_trapezius_muscler",
+        "Descending_part_of_trapezius_musclel",
+        "Latissimus_dorsi_musclel",
+        "Rhomboid_major_muscler",
+        "Rhomboid_major_musclel",
+        "Pectoralis_minor_musclel",
+        "Serratus_anterior_musclel",
+        "Clavicular_head_of_pectoralis_major_muscler",
+        "Sternocostal_head_of_pectoralis_major_muscler",
+        "(Abdominal_part_of_pectoralis_major_muscle)l",
+        "Clavicular_head_of_pectoralis_major_musclel",
+        "Sternocostal_head_of_pectoralis_major_musclel",
+        "(Abdominal_part_of_pectoralis_major_muscle)r",
+        "Pectoralis_minor_muscler",
+        "Serratus_anterior_muscler",
+        "External_abdominal_oblique_musclel",
+        "Rectus_abdominis_musclel",
+        "Rectus_abdominis_muscler",
+        "External_abdominal_oblique_muscler"
+      ]
+    },
+    "male-back": {
+      "sex": "male",
+      "region": "back",
+      "source": "Z-Anatomy / BodyParts3D male",
+      "anchors": [
+        {
+          "label": "Inferior scapular angle",
+          "sourceMesh": "Scapulal",
+          "vertexIndex": 3756,
+          "point": [
+            0.28049546480178833,
+            4.1128249168396,
+            -0.30330657958984375
+          ]
+        },
+        {
+          "label": "Lateral scapula",
+          "sourceMesh": "Scapulal",
+          "vertexIndex": 8048,
+          "point": [
+            0.5207262635231018,
+            4.586041450500488,
+            -0.1347723752260208
+          ]
+        },
+        {
+          "label": "Lateral clavicle",
+          "sourceMesh": "Claviclel",
+          "vertexIndex": 1,
+          "point": [
+            0.4629918932914734,
+            4.6107096672058105,
+            -0.10394991189241409
+          ]
+        },
+        {
+          "label": "Iliac crest",
+          "sourceMesh": "Hip_bonel",
+          "vertexIndex": 1141,
+          "point": [
+            0.28794702887535095,
+            3.3858206272125244,
+            -0.0828404650092125
+          ]
+        },
+        {
+          "label": "Sacrum",
+          "sourceMesh": "Sacrum",
+          "vertexIndex": 684,
+          "point": [
+            0.034266211092472076,
+            3.032618284225464,
+            -0.2850075364112854
+          ]
+        }
+      ],
+      "views": {
+        "0": {
+          "images": [
+            "male-back-0-1.png",
+            "male-back-0-2.png",
+            "male-back-0-3.png"
+          ],
+          "markers": [
+            {
+              "number": 1,
+              "x": 0.40258053465541516,
+              "y": 0.4248713206289617,
+              "hidden": false
+            },
+            {
+              "number": 2,
+              "x": 0.3191454656648004,
+              "y": 0.27872043772163757,
+              "hidden": false
+            },
+            {
+              "number": 3,
+              "x": 0.33919731242652135,
+              "y": 0.2718099519278634,
+              "hidden": false
+            },
+            {
+              "number": 4,
+              "x": 0.3999925161087719,
+              "y": 0.6648091333805227,
+              "hidden": false
+            },
+            {
+              "number": 5,
+              "x": 0.4880989397895429,
+              "y": 0.7714397289469795,
+              "hidden": false
+            }
+          ]
+        },
+        "45": {
+          "images": [
+            "male-back-45-1.png",
+            "male-back-45-2.png",
+            "male-back-45-3.png"
+          ],
+          "markers": [
+            {
+              "number": 1,
+              "x": 0.3580367208821623,
+              "y": 0.4340460407017413,
+              "hidden": false
+            },
+            {
+              "number": 2,
+              "x": 0.34042898700298024,
+              "y": 0.29176778255586694,
+              "hidden": true
+            },
+            {
+              "number": 3,
+              "x": 0.3621773723004022,
+              "y": 0.28325523711060296,
+              "hidden": true
+            },
+            {
+              "number": 4,
+              "x": 0.4103502728902316,
+              "y": 0.6720780444502071,
+              "hidden": false
+            },
+            {
+              "number": 5,
+              "x": 0.42300136664888716,
+              "y": 0.7748469492149788,
+              "hidden": false
+            }
+          ]
+        },
+        "90": {
+          "images": [
+            "male-back-90-1.png",
+            "male-back-90-2.png",
+            "male-back-90-3.png"
+          ],
+          "markers": [
+            {
+              "number": 1,
+              "x": 0.39665306722121096,
+              "y": 0.4434479403227927,
+              "hidden": false
+            },
+            {
+              "number": 2,
+              "x": 0.4551870397310662,
+              "y": 0.29960111926847954,
+              "hidden": true
+            },
+            {
+              "number": 3,
+              "x": 0.46589205494305624,
+              "y": 0.2898447462485462,
+              "hidden": true
+            },
+            {
+              "number": 4,
+              "x": 0.47322362177973337,
+              "y": 0.6765402577707359,
+              "hidden": true
+            },
+            {
+              "number": 5,
+              "x": 0.40300854677750403,
+              "y": 0.7815153931440644,
+              "hidden": false
+            }
+          ]
+        },
+        "180": {
+          "images": [
+            "male-back-180-1.png",
+            "male-back-180-2.png",
+            "male-back-180-3.png"
+          ],
+          "markers": [
+            {
+              "number": 1,
+              "x": 0.5974194653445849,
+              "y": 0.443996400171164,
+              "hidden": false
+            },
+            {
+              "number": 2,
+              "x": 0.6808545343351996,
+              "y": 0.2870133923998321,
+              "hidden": false
+            },
+            {
+              "number": 3,
+              "x": 0.6608026875734786,
+              "y": 0.27812186796344984,
+              "hidden": false
+            },
+            {
+              "number": 4,
+              "x": 0.6000074838912282,
+              "y": 0.6697642912119683,
+              "hidden": false
+            },
+            {
+              "number": 5,
+              "x": 0.5119010602104571,
+              "y": 0.7893886821274725,
+              "hidden": true
+            }
+          ]
+        }
+      },
+      "sourceMeshes": [
+        "Hip_boner",
+        "Hip_bonel",
+        "Sacrum",
+        "Vertebra_L5",
+        "Vertebra_L3",
+        "Vertebra_L4",
+        "Vertebra_L2",
+        "Vertebra_L1",
+        "Vertebra_T5",
+        "Vertebra_T11",
+        "Vertebra_T1",
+        "Vertebra_T6",
+        "Vertebra_T3",
+        "Vertebra_T4",
+        "Vertebra_T12",
+        "Vertebra_T7",
+        "Vertebra_T8",
+        "Vertebra_T9",
+        "Vertebra_T10",
+        "Vertebra_T2",
+        "Coccyx",
+        "Costal_cartilage_of_sixth_ribl",
+        "Costal_cartilage_of_fifth_ribr",
+        "Costal_cartilage_of_ninth_ribr",
+        "Costal_cartilage_of_sixth_ribr",
+        "Costal_cartilage_of_second_ribl",
+        "Costal_cartilage_of_fourth_ribl",
+        "Costal_cartilage_of_fifth_ribl",
+        "Costal_cartilage_of_seventh_ribl",
+        "Costal_cartilage_of_ninth_ribl",
+        "Costal_cartilage_of_fourth_ribr",
+        "Costal_cartilage_of_second_ribr",
+        "Costal_cartilage_of_tenth_ribr",
+        "Costal_cartilage_of_first_ribr",
+        "Costal_cartilage_of_eighth_ribr",
+        "Costal_cartilage_of_third_ribr",
+        "Costal_cartilage_of_seventh_ribr",
+        "Costal_cartilage_of_third_ribl",
+        "Costal_cartilage_of_first_ribl",
+        "Costal_cartilage_of_tenth_ribl",
+        "Costal_cartilage_of_eighth_ribl",
+        "Fourth_ribl",
+        "First_ribl",
+        "Fifth_ribl",
+        "Fifth_ribr",
+        "First_ribr",
+        "Third_ribl",
+        "Third_ribr",
+        "Seventh_ribr",
+        "Fourth_ribr",
+        "Seventh_ribl",
+        "Second_ribl",
+        "Sixth_ribl",
+        "Second_ribr",
+        "Sixth_ribr",
+        "Eighth_ribl",
+        "Tenth_ribr",
+        "Ninth_ribl",
+        "Ninth_ribr",
+        "Eighth_ribr",
+        "Twelfth_ribl",
+        "Twelfth_ribr",
+        "Eleventh_ribl",
+        "Eleventh_ribr",
+        "Tenth_ribl",
+        "Manubrium_of_sternum",
+        "Body_of_sternum",
+        "Xiphoid_process",
+        "Scapular",
+        "Scapulal",
+        "Clavicler",
+        "Claviclel",
+        "Latissimus_dorsi_muscler",
+        "Rhomboid_minor_muscler",
+        "Rhomboid_minor_musclel",
+        "Transverse_part_of_trapezius_muscler",
+        "Ascending_part_of_trapezius_muscler",
+        "Ascending_part_of_trapezius_musclel",
+        "Transverse_part_of_trapezius_musclel",
+        "Descending_part_of_trapezius_muscler",
+        "Descending_part_of_trapezius_musclel",
+        "Latissimus_dorsi_musclel",
+        "Rhomboid_major_muscler",
+        "Rhomboid_major_musclel",
+        "Pectoralis_minor_musclel",
+        "Serratus_anterior_musclel",
+        "Clavicular_head_of_pectoralis_major_muscler",
+        "Sternocostal_head_of_pectoralis_major_muscler",
+        "(Abdominal_part_of_pectoralis_major_muscle)l",
+        "Clavicular_head_of_pectoralis_major_musclel",
+        "Sternocostal_head_of_pectoralis_major_musclel",
+        "(Abdominal_part_of_pectoralis_major_muscle)r",
+        "Pectoralis_minor_muscler",
+        "Serratus_anterior_muscler",
+        "External_abdominal_oblique_musclel",
+        "Rectus_abdominis_musclel",
+        "Rectus_abdominis_muscler",
+        "External_abdominal_oblique_muscler"
+      ]
+    },
+    "male-pelvis": {
+      "sex": "male",
+      "region": "pelvis",
+      "source": "Z-Anatomy / BodyParts3D male",
+      "anchors": [
+        {
+          "label": "Iliac crest",
+          "sourceMesh": "Hip_bonel",
+          "vertexIndex": 1141,
+          "point": [
+            0.28794702887535095,
+            3.3858206272125244,
+            -0.0828404650092125
+          ]
+        },
+        {
+          "label": "Left hip bone: anterior extent",
+          "sourceMesh": "Hip_bonel",
+          "vertexIndex": 797,
+          "point": [
+            0.3538101315498352,
+            3.1853837966918945,
+            0.16820600628852844
+          ]
+        },
+        {
+          "label": "Right hip bone: anterior extent",
+          "sourceMesh": "Hip_boner",
+          "vertexIndex": 809,
+          "point": [
+            -0.35381007194519043,
+            3.1853837966918945,
+            0.16820602118968964
+          ]
+        },
+        {
+          "label": "Ischial lower extent",
+          "sourceMesh": "Hip_bonel",
+          "vertexIndex": 3,
+          "point": [
+            0.12969627976417542,
+            2.742018938064575,
+            -0.10300596803426743
+          ]
+        },
+        {
+          "label": "Sacrum",
+          "sourceMesh": "Sacrum",
+          "vertexIndex": 684,
+          "point": [
+            0.034266211092472076,
+            3.032618284225464,
+            -0.2850075364112854
+          ]
+        }
+      ],
+      "views": {
+        "0": {
+          "images": [
+            "male-pelvis-0-1.png",
+            "male-pelvis-0-2.png",
+            "male-pelvis-0-3.png"
+          ],
+          "markers": [
+            {
+              "number": 1,
+              "x": 0.674407905659827,
+              "y": 0.3669949608354155,
+              "hidden": false
+            },
+            {
+              "number": 2,
+              "x": 0.7143008352663185,
+              "y": 0.46488350530684247,
+              "hidden": false
+            },
+            {
+              "number": 3,
+              "x": 0.28569905642703625,
+              "y": 0.4648835044717212,
+              "hidden": false
+            },
+            {
+              "number": 4,
+              "x": 0.5785562719208596,
+              "y": 0.7277340742729632,
+              "hidden": false
+            },
+            {
+              "number": 5,
+              "x": 0.5207547888859925,
+              "y": 0.575613807662475,
+              "hidden": true
+            }
+          ]
+        },
+        "45": {
+          "images": [
+            "male-pelvis-45-1.png",
+            "male-pelvis-45-2.png",
+            "male-pelvis-45-3.png"
+          ],
+          "markers": [
+            {
+              "number": 1,
+              "x": 0.6229194645671815,
+              "y": 0.35559942128114835,
+              "hidden": false
+            },
+            {
+              "number": 2,
+              "x": 0.5436071325175201,
+              "y": 0.45499877571364183,
+              "hidden": false
+            },
+            {
+              "number": 3,
+              "x": 0.24053990707639122,
+              "y": 0.4830411413469067,
+              "hidden": false
+            },
+            {
+              "number": 4,
+              "x": 0.5637788248317502,
+              "y": 0.7222788576625803,
+              "hidden": false
+            },
+            {
+              "number": 5,
+              "x": 0.6008566012093571,
+              "y": 0.5709528602401691,
+              "hidden": true
+            }
+          ]
+        },
+        "90": {
+          "images": [
+            "male-pelvis-90-1.png",
+            "male-pelvis-90-2.png",
+            "male-pelvis-90-3.png"
+          ],
+          "markers": [
+            {
+              "number": 1,
+              "x": 0.49942647118576877,
+              "y": 0.35091032148062506,
+              "hidden": false
+            },
+            {
+              "number": 2,
+              "x": 0.34736896401159295,
+              "y": 0.4591772894336231,
+              "hidden": false
+            },
+            {
+              "number": 3,
+              "x": 0.3473689549860392,
+              "y": 0.49883518198944865,
+              "hidden": false
+            },
+            {
+              "number": 4,
+              "x": 0.5116406086920733,
+              "y": 0.7193882894983282,
+              "hidden": false
+            },
+            {
+              "number": 5,
+              "x": 0.621877986840191,
+              "y": 0.5624162065932335,
+              "hidden": false
+            }
+          ]
+        },
+        "180": {
+          "images": [
+            "male-pelvis-180-1.png",
+            "male-pelvis-180-2.png",
+            "male-pelvis-180-3.png"
+          ],
+          "markers": [
+            {
+              "number": 1,
+              "x": 0.32559209434017294,
+              "y": 0.36710109639161426,
+              "hidden": false
+            },
+            {
+              "number": 2,
+              "x": 0.28569916473368145,
+              "y": 0.4931289560947747,
+              "hidden": true
+            },
+            {
+              "number": 3,
+              "x": 0.7143009435729638,
+              "y": 0.4931289569298959,
+              "hidden": true
+            },
+            {
+              "number": 4,
+              "x": 0.4214437280791404,
+              "y": 0.7255798974515564,
+              "hidden": false
+            },
+            {
+              "number": 5,
+              "x": 0.4792452111140075,
+              "y": 0.5530594257365846,
+              "hidden": false
+            }
+          ]
+        }
+      },
+      "sourceMeshes": [
+        "Hip_boner",
+        "Hip_bonel",
+        "Sacrum",
+        "Vertebra_L5",
+        "Vertebra_L3",
+        "Vertebra_L4",
+        "Vertebra_L2",
+        "Vertebra_L1",
+        "Coccyx",
+        "Gluteus_medius_muscler",
+        "Gluteus_medius_musclel",
+        "Gluteus_maximus_musclel",
+        "Gluteus_minimus_musclel",
+        "Gluteus_maximus_muscler",
+        "Gluteus_minimus_muscler",
+        "Piriformis_musclel",
+        "Piriformis_muscler",
+        "Psoas_majorr",
+        "Psoas_majorl",
+        "Iliacus_musclel",
+        "Iliacus_muscler"
+      ]
+    },
+    "male-hand": {
+      "sex": "male",
+      "region": "hand",
+      "source": "Z-Anatomy / BodyParts3D male",
+      "anchors": [
+        {
+          "label": "Thumb metacarpal",
+          "sourceMesh": "First_metacarpal_bonel",
+          "vertexIndex": 248,
+          "point": [
+            0.874192476272583,
+            2.8932371139526367,
+            0.09219178557395935
+          ]
+        },
+        {
+          "label": "Index proximal phalanx base",
+          "sourceMesh": "Proximal_phalanx_of_second_finger_of_handl",
+          "vertexIndex": 112,
+          "point": [
+            0.9055675268173218,
+            2.6638877391815186,
+            0.12044408917427063
+          ]
+        },
+        {
+          "label": "Index middle phalanx base",
+          "sourceMesh": "Middle_phalanx_of_second_finger_of_handl",
+          "vertexIndex": 68,
+          "point": [
+            0.9315997958183289,
+            2.5651490688323975,
+            0.17151789367198944
+          ]
+        },
+        {
+          "label": "Index distal phalanx base",
+          "sourceMesh": "Distal_phalanx_of_second_finger_of_handl",
+          "vertexIndex": 55,
+          "point": [
+            0.9474270939826965,
+            2.5162720680236816,
+            0.2193734347820282
+          ]
+        },
+        {
+          "label": "Little-finger metacarpal",
+          "sourceMesh": "Fifth_metacarpal_bonel",
+          "vertexIndex": 201,
+          "point": [
+            0.7175396680831909,
+            2.690380096435547,
+            0.11494012922048569
+          ]
+        }
+      ],
+      "views": {
+        "0": {
+          "images": [
+            "male-hand-0-1.png",
+            "male-hand-0-2.png",
+            "male-hand-0-3.png"
+          ],
+          "markers": [
+            {
+              "number": 1,
+              "x": 0.5359279163132765,
+              "y": 0.4301327611739205,
+              "hidden": false
+            },
+            {
+              "number": 2,
+              "x": 0.5699402612079595,
+              "y": 0.6565831938680111,
+              "hidden": false
+            },
+            {
+              "number": 3,
+              "x": 0.5981607260767209,
+              "y": 0.7501708349759105,
+              "hidden": false
+            },
+            {
+              "number": 4,
+              "x": 0.615318420313734,
+              "y": 0.7942337628453636,
+              "hidden": false
+            },
+            {
+              "number": 5,
+              "x": 0.3661073344066225,
+              "y": 0.6306504331747544,
+              "hidden": true
+            }
+          ]
+        },
+        "45": {
+          "images": [
+            "male-hand-45-1.png",
+            "male-hand-45-2.png",
+            "male-hand-45-3.png"
+          ],
+          "markers": [
+            {
+              "number": 1,
+              "x": 0.553635029837861,
+              "y": 0.4267001204449593,
+              "hidden": false
+            },
+            {
+              "number": 2,
+              "x": 0.5560287530266963,
+              "y": 0.6517552331248058,
+              "hidden": true
+            },
+            {
+              "number": 3,
+              "x": 0.5368333121955113,
+              "y": 0.7449969757247036,
+              "hidden": false
+            },
+            {
+              "number": 4,
+              "x": 0.5122822521188967,
+              "y": 0.7893432657419309,
+              "hidden": false
+            },
+            {
+              "number": 5,
+              "x": 0.4161161386514556,
+              "y": 0.6389970614890919,
+              "hidden": true
+            }
+          ]
+        },
+        "90": {
+          "images": [
+            "male-hand-90-1.png",
+            "male-hand-90-2.png",
+            "male-hand-90-3.png"
+          ],
+          "markers": [
+            {
+              "number": 1,
+              "x": 0.5399234715998533,
+              "y": 0.4231143437510728,
+              "hidden": false
+            },
+            {
+              "number": 2,
+              "x": 0.5092963625613242,
+              "y": 0.6492515455476551,
+              "hidden": false
+            },
+            {
+              "number": 3,
+              "x": 0.4539294444687788,
+              "y": 0.7453510080673463,
+              "hidden": false
+            },
+            {
+              "number": 4,
+              "x": 0.4020513075065657,
+              "y": 0.7926265674634712,
+              "hidden": false
+            },
+            {
+              "number": 5,
+              "x": 0.515262969179781,
+              "y": 0.64162706459948,
+              "hidden": true
+            }
+          ]
+        },
+        "180": {
+          "images": [
+            "male-hand-180-1.png",
+            "male-hand-180-2.png",
+            "male-hand-180-3.png"
+          ],
+          "markers": [
+            {
+              "number": 1,
+              "x": 0.46407208368672354,
+              "y": 0.42274464089383074,
+              "hidden": false
+            },
+            {
+              "number": 2,
+              "x": 0.43005973879204057,
+              "y": 0.6548628363435257,
+              "hidden": false
+            },
+            {
+              "number": 3,
+              "x": 0.40183927392327906,
+              "y": 0.75869651653604,
+              "hidden": true
+            },
+            {
+              "number": 4,
+              "x": 0.3846815796862661,
+              "y": 0.8123598599110727,
+              "hidden": true
+            },
+            {
+              "number": 5,
+              "x": 0.6338926655933775,
+              "y": 0.6278259129711571,
+              "hidden": false
+            }
+          ]
+        }
+      },
+      "sourceMeshes": [
+        "Proximal_phalanx_of_second_finger_of_handl",
+        "Distal_phalanx_of_fifth_finger_of_handl",
+        "Fifth_metacarpal_bonel",
+        "Scaphoid_bonel",
+        "Distal_phalanx_of_fourth_finger_of_handl",
+        "Middle_phalanx_of_second_finger_of_handl",
+        "Trapezium_bonel",
+        "Third_metacarpal_bonel",
+        "Fourth_metacarpal_bonel",
+        "Middle_phalanx_of_third_finger_of_handl",
+        "Capitate_bonel",
+        "Middle_phalanx_of_fourth_finger_of_handl",
+        "Trapezoid_bonel",
+        "Lunate_bonel",
+        "Distal_phalanx_of_first_finger_of_handl",
+        "Hamate_bonel",
+        "Distal_phalanx_of_third_finger_of_handl",
+        "Proximal_phalanx_of_first_finger_of_handl",
+        "First_metacarpal_bonel",
+        "Pisiform_bonel",
+        "Proximal_phalanx_of_fifth_finger_of_handl",
+        "Second_metacarpal_bonel",
+        "Triquetrum_bonel",
+        "Proximal_phalanx_of_fourth_finger_of_handl",
+        "Distal_phalanx_of_second_finger_of_handl",
+        "Proximal_phalanx_of_third_finger_of_handl",
+        "Middle_phalanx_of_fifth_finger_of_handl",
+        "Extensor_pollicis_brevisl",
+        "Palmar_interossei_musclesl",
+        "Abductor_digiti_minimi_of_handl",
+        "Superficial_head_of_flexor_pollicis_brevisl",
+        "Flexor_digiti_minimi_of_handl",
+        "Oblique_head_of_adductor_pollicisl",
+        "Lumbrical_muscles_of_handl",
+        "Opponens_digiti_minimi_muscle_of_handl",
+        "Opponens_pollicis_musclel",
+        "Deep_head_of_flexor_pollicis_brevisl",
+        "Abductor_pollicis_brevisl",
+        "Transverse_head_of_adductor_pollicisl",
+        "Dorsal_interossei_muscles_of_handl",
+        "Superficial_transverse_metacarpal_ligamentl"
+      ]
+    },
+    "female-pelvis": {
+      "sex": "female",
+      "region": "pelvis",
+      "source": "HRA Visible Human Female",
+      "anchors": [
+        {
+          "label": "Left iliac crest",
+          "sourceMesh": "VH_F_ilium_compact_bone_L",
+          "vertexIndex": 6117,
+          "point": [
+            0.11102994531393051,
+            0.16400381922721863,
+            -0.09405180811882019
+          ]
+        },
+        {
+          "label": "Right iliac crest",
+          "sourceMesh": "VH_F_ilium_compact_bone_R",
+          "vertexIndex": 4753,
+          "point": [
+            -0.11880268156528473,
+            0.16465844213962555,
+            -0.09794256836175919
+          ]
+        },
+        {
+          "label": "Left pubis: medial extent",
+          "sourceMesh": "VH_F_pubis_compact_bone_L",
+          "vertexIndex": 2338,
+          "point": [
+            -0.01019351463764906,
+            -0.00016062735812738538,
+            -0.03799479082226753
+          ]
+        },
+        {
+          "label": "Left ischial lower extent",
+          "sourceMesh": "VH_F_ischium_compact_bone_L",
+          "vertexIndex": 1370,
+          "point": [
+            0.05042488873004913,
+            -0.04536851868033409,
+            -0.09139405190944672
+          ]
+        },
+        {
+          "label": "Sacrum",
+          "sourceMesh": "VH_F_sacrum",
+          "vertexIndex": 185,
+          "point": [
+            -0.01923709735274315,
+            0.06262529641389847,
+            -0.18245455622673035
+          ]
+        }
+      ],
+      "views": {
+        "0": {
+          "images": [
+            "female-pelvis-0-1.png",
+            "female-pelvis-0-2.png",
+            "female-pelvis-0-3.png"
+          ],
+          "markers": [
+            {
+              "number": 1,
+              "x": 0.8057771693148472,
+              "y": 0.2529366245989987,
+              "hidden": false
+            },
+            {
+              "number": 2,
+              "x": 0.21820727084349,
+              "y": 0.2523136377066821,
+              "hidden": false
+            },
+            {
+              "number": 3,
+              "x": 0.4958679235160401,
+              "y": 0.6267125389174676,
+              "hidden": true
+            },
+            {
+              "number": 4,
+              "x": 0.6508396070228053,
+              "y": 0.7459268589899227,
+              "hidden": false
+            },
+            {
+              "number": 5,
+              "x": 0.4727478946068387,
+              "y": 0.5128596364804382,
+              "hidden": true
+            }
+          ]
+        },
+        "45": {
+          "images": [
+            "female-pelvis-45-1.png",
+            "female-pelvis-45-2.png",
+            "female-pelvis-45-3.png"
+          ],
+          "markers": [
+            {
+              "number": 1,
+              "x": 0.7215851308905831,
+              "y": 0.23272463424267115,
+              "hidden": false
+            },
+            {
+              "number": 2,
+              "x": 0.3131439108383941,
+              "y": 0.2702753415510763,
+              "hidden": false
+            },
+            {
+              "number": 3,
+              "x": 0.40111041986579665,
+              "y": 0.6306610054747438,
+              "hidden": true
+            },
+            {
+              "number": 4,
+              "x": 0.6072232340633501,
+              "y": 0.7360361943360904,
+              "hidden": false
+            },
+            {
+              "number": 5,
+              "x": 0.6459059139275227,
+              "y": 0.5083120435391437,
+              "hidden": true
+            }
+          ]
+        },
+        "90": {
+          "images": [
+            "female-pelvis-90-1.png",
+            "female-pelvis-90-2.png",
+            "female-pelvis-90-3.png"
+          ],
+          "markers": [
+            {
+              "number": 1,
+              "x": 0.5075915333739096,
+              "y": 0.22394107918795353,
+              "hidden": false
+            },
+            {
+              "number": 2,
+              "x": 0.5175383091296489,
+              "y": 0.27676471074050857,
+              "hidden": true
+            },
+            {
+              "number": 3,
+              "x": 0.3642810886873409,
+              "y": 0.639652745238786,
+              "hidden": true
+            },
+            {
+              "number": 4,
+              "x": 0.5007969473862384,
+              "y": 0.7318961515146176,
+              "hidden": false
+            },
+            {
+              "number": 5,
+              "x": 0.7335942312313005,
+              "y": 0.4937671028974218,
+              "hidden": false
+            }
+          ]
+        },
+        "180": {
+          "images": [
+            "female-pelvis-180-1.png",
+            "female-pelvis-180-2.png",
+            "female-pelvis-180-3.png"
+          ],
+          "markers": [
+            {
+              "number": 1,
+              "x": 0.19422283068515275,
+              "y": 0.2515317577517738,
+              "hidden": false
+            },
+            {
+              "number": 2,
+              "x": 0.78179272915651,
+              "y": 0.2490680497814146,
+              "hidden": false
+            },
+            {
+              "number": 3,
+              "x": 0.5041320764839599,
+              "y": 0.651828281634202,
+              "hidden": false
+            },
+            {
+              "number": 4,
+              "x": 0.3491603929771947,
+              "y": 0.7457793782496344,
+              "hidden": false
+            },
+            {
+              "number": 5,
+              "x": 0.5272521053931613,
+              "y": 0.4696313748109721,
+              "hidden": false
+            }
+          ]
+        }
+      },
+      "sourceMeshes": [
+        "VH_F_sacrum",
+        "VH_F_coccyx",
+        "VH_F_pubis_compact_bone_R",
+        "VH_F_pubis_compact_bone_L",
+        "VH_F_ilium_compact_bone_R",
+        "VH_F_ilium_compact_bone_L",
+        "VH_F_ischium_compact_bone_R",
+        "VH_F_ischium_compact_bone_L"
+      ]
+    }
+  }
+}

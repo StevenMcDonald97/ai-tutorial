@@ -1,0 +1,40 @@
+{
+  "source": "https://lod.humanatlas.io/ref-organ/united-female/v1.10",
+  "donorMuscle": {
+    "from": "Visible Human Female lower extremity, Andreassen et al. 2023",
+    "muscles": 76,
+    "method": "per-group fit of an axis rotation, a uniform scale and a translation onto the hip, femur, patella, tibia and fibula this body models",
+    "groups": {
+      "left-hip": {
+        "scale": 1.0035,
+        "boneAgreementMillimetres": 36.1
+      },
+      "left-thigh": {
+        "scale": 0.9793,
+        "boneAgreementMillimetres": 33.8
+      },
+      "left-shank": {
+        "scale": 1.005,
+        "boneAgreementMillimetres": 27.5
+      },
+      "right-hip": {
+        "scale": 1.0084,
+        "boneAgreementMillimetres": 25.9
+      },
+      "right-thigh": {
+        "scale": 0.9917,
+        "boneAgreementMillimetres": 17.4
+      },
+      "right-shank": {
+        "scale": 0.9898,
+        "boneAgreementMillimetres": 27
+      }
+    }
+  },
+  "excludedSystem": "borrowed",
+  "translation": [
+    0.006095477878158034,
+    0.792612790744339,
+    -0.0067982234284331144
+  ]
+}
