@@ -74,12 +74,23 @@ export async function onRequestGet(context) {
   let html = await shellRes.text();
 
   // ── 5. Inject course JSON (script-safe) ────────────────────────────────
+  // IMPORTANT: the replacement is passed as a FUNCTION, not a string. When the
+  // second argument to String.replace() is a string, sequences like $$, $&,
+  // $`, $' inside it are treated as special replacement patterns rather than
+  // literal text. Course content routinely contains exactly those sequences
+  // (e.g. `'$' + amount.toFixed(2)` or `` `$${total}` `` in a code example),
+  // which silently spliced extra copies of this template into the page and
+  // produced a broken COURSE object. A function replacer inserts its return
+  // value verbatim, with no special-pattern interpretation.
   const courseJson = scriptSafeJson(course);
-  html = html.replace('"__INJECTED_COURSE__"', courseJson);
+  html = html.replace('"__INJECTED_COURSE__"', () => courseJson);
 
   // ── 5b. Inject Open Graph / Twitter meta tags ──────────────────────────
+  // Same fix applied here defensively: entry.title/entry.description are
+  // short, curated strings today, but there's no reason to leave this
+  // vulnerable to the same $-pattern footgun if that ever changes.
   const ogTags = buildOgTags(entry, request);
-  html = html.replace('<!--__OG_TAGS__-->', ogTags);
+  html = html.replace('<!--__OG_TAGS__-->', () => ogTags);
 
   // ── 6. Respond ─────────────────────────────────────────────────────────
   return new Response(html, {
